@@ -1,0 +1,45 @@
+{
+  "format": 1,
+  "restore": {
+    "C:\\Users\\darwin\\Desktop\\pludics\\unity-hawk\\simple-dll\\simple-dll.csproj": {}
+  },
+  "projects": {
+    "C:\\Users\\darwin\\Desktop\\pludics\\unity-hawk\\simple-dll\\simple-dll.csproj": {
+      "version": "1.0.0",
+      "restore": {
+        "projectUniqueName": "C:\\Users\\darwin\\Desktop\\pludics\\unity-hawk\\simple-dll\\simple-dll.csproj",
+        "projectName": "simple-dll",
+        "projectPath": "C:\\Users\\darwin\\Desktop\\pludics\\unity-hawk\\simple-dll\\simple-dll.csproj",
+        "packagesPath": "C:\\Users\\darwin\\.nuget\\packages\\",
+        "outputPath": "C:\\Users\\darwin\\Desktop\\pludics\\unity-hawk\\simple-dll\\obj\\",
+        "projectStyle": "PackageReference",
+        "configFilePaths": [
+          "C:\\Users\\darwin\\AppData\\Roaming\\NuGet\\NuGet.Config"
+        ],
+        "originalTargetFrameworks": [
+          "net4.6.2"
+        ],
+        "sources": {
+          "https://api.nuget.org/v3/index.json": {}
+        },
+        "frameworks": {
+          "net462": {
+            "targetAlias": "net4.6.2",
+            "projectReferences": {}
+          }
+        },
+        "warningProperties": {
+          "warnAsError": [
+            "NU1605"
+          ]
+        }
+      },
+      "frameworks": {
+        "net462": {
+          "targetAlias": "net4.6.2",
+          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\6.0.101\\RuntimeIdentifierGraph.json"
+        }
+      }
+    }
+  }
+}

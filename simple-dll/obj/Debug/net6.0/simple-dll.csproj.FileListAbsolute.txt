@@ -1,0 +1,12 @@
+C:\Users\darwin\Desktop\pludics\unity-hawk\simple-dll\obj\Debug\net6.0\simple-dll.csproj.AssemblyReference.cache
+C:\Users\darwin\Desktop\pludics\unity-hawk\simple-dll\obj\Debug\net6.0\simple-dll.GeneratedMSBuildEditorConfig.editorconfig
+C:\Users\darwin\Desktop\pludics\unity-hawk\simple-dll\obj\Debug\net6.0\simple-dll.AssemblyInfoInputs.cache
+C:\Users\darwin\Desktop\pludics\unity-hawk\simple-dll\obj\Debug\net6.0\simple-dll.AssemblyInfo.cs
+C:\Users\darwin\Desktop\pludics\unity-hawk\simple-dll\obj\Debug\net6.0\simple-dll.csproj.CoreCompileInputs.cache
+C:\Users\darwin\Desktop\pludics\unity-hawk\simple-dll\bin\Debug\net6.0\simple-dll.deps.json
+C:\Users\darwin\Desktop\pludics\unity-hawk\simple-dll\bin\Debug\net6.0\simple-dll.dll
+C:\Users\darwin\Desktop\pludics\unity-hawk\simple-dll\bin\Debug\net6.0\ref\simple-dll.dll
+C:\Users\darwin\Desktop\pludics\unity-hawk\simple-dll\bin\Debug\net6.0\simple-dll.pdb
+C:\Users\darwin\Desktop\pludics\unity-hawk\simple-dll\obj\Debug\net6.0\simple-dll.dll
+C:\Users\darwin\Desktop\pludics\unity-hawk\simple-dll\obj\Debug\net6.0\ref\simple-dll.dll
+C:\Users\darwin\Desktop\pludics\unity-hawk\simple-dll\obj\Debug\net6.0\simple-dll.pdb
