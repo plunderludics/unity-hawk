@@ -5,45 +5,87 @@ using UnityEngine;
 using BizHawk.Client.Common;
 using BizHawk.Emulation.Common;
 using BizHawk.Emulation.Cores.Nintendo.NES;
+using BizHawk.Emulation.Cores.Arcades.MAME;
 using System.IO;
 
 public class TestBizHawk : MonoBehaviour
 {
     IEmulator emulator;
     IController controller;
-    RomLoader romLoader;
-    // TODO: create config
+    IVideoProvider videoProvider;
+
+    RomLoader loader;
     Config config;
     FirmwareManager firmwareManager = new FirmwareManager();
-    //RomLoader loader;
 
+    string bizhawkDir = Path.Combine(Application.dataPath, "BizHawk");
+
+    public Renderer targetRenderer;
+    Texture2D targetTexture;
+
+    void Awake()
+    {
+        // [copied from MainForm.cs]
+        // Note: the gamedb directory MUST already have the gamedb.txt file, otherwise seems to hang :(
+        string gamedbPath = Path.Combine(bizhawkDir, "gamedb");
+        Database.InitializeDatabase(
+            bundledRoot:gamedbPath,
+            userRoot: gamedbPath,
+            silent: true);
+        BootGodDb.Initialize(gamedbPath);
+        MAMEMachineDB.Initialize(gamedbPath);
+    }
     void Start()
     {
-        var configPath = Path.Combine(Application.dataPath, "config.ini");
+        var configPath = Path.Combine(bizhawkDir, "config.ini");
         Debug.Log(configPath);
         config = ConfigService.Load<Config>(configPath);
-        romLoader = new RomLoader(config) {
-            // ChoosePlatform = ChoosePlatformForRom,
+        loader = new RomLoader(config) {
+            //ChoosePlatform = ChoosePlatformForRom,
         };
+
+        loader.OnLoadError += ShowLoadError;
+        loader.OnLoadSettings += CoreSettings;
+        loader.OnLoadSyncSettings += CoreSyncSettings;
 
         var romPath = Path.Combine(Application.dataPath, "mario.nes");
         var nextComm = CreateCoreComm();
 
-        // maybe not necessary?
-        IOpenAdvancedLibretro ioaRetro = null;
-        var result = romLoader.LoadRom(romPath, nextComm, ioaRetro?.CorePath);
+        bool loaded = loader.LoadRom(romPath, nextComm, null);
 
-        controller = new NullController();
-        emulator = result
-            ? romLoader.LoadedEmulator
-            : new NullEmulator();
+        if (loaded) {
+            Debug.Log($"Loaded {romPath}!");
+
+            controller = new NullController();
+            emulator = loader.LoadedEmulator;
+
+            videoProvider = emulator.AsVideoProvider();
+
+            Debug.Log($"{videoProvider.BufferWidth} x {videoProvider.BufferHeight}");
+            targetTexture = new Texture2D(videoProvider.BufferWidth, videoProvider.BufferHeight);
+            targetRenderer.material.mainTexture = targetTexture;
+
+        } else {
+            Debug.LogWarning($"Failed to load {romPath}.");
+        }
     }
 
     void Update()
     {
-        emulator.FrameAdvance(controller, true, true);
-        Debug.Log(emulator.Frame);
+        if (emulator != null) {
+            emulator.FrameAdvance(controller, true, true);
+            // Debug.Log(emulator.Frame);
+
+            int[] buffer = videoProvider.GetVideoBuffer();
+            // i guess this just happens to be the right pixel format already
+            targetTexture.SetPixelData(buffer, 0);
+            targetTexture.Apply();
+        }
     }
+
+    //
+    // The rest of the methods are copied / closely adapted from ones in MainForm.cs
+    //
 
     CoreComm CreateCoreComm() {
         var dialogParent = new UnityDialogParent();
@@ -64,5 +106,17 @@ public class TestBizHawk : MonoBehaviour
             s => Debug.Log($"notification: {s}"),
             cfp,
             prefs);
+    }
+
+    private void CoreSettings(object sender, RomLoader.SettingsLoadArgs e)
+    {
+        e.Settings = config.GetCoreSettings(e.Core, e.SettingsType);
+    }
+    private void CoreSyncSettings(object sender, RomLoader.SettingsLoadArgs e)
+    {
+        e.Settings = config.GetCoreSyncSettings(e.Core, e.SettingsType);
+    }
+    private void ShowLoadError(object sender, RomLoader.RomErrorArgs e) {
+        Debug.LogError(e.Message);
     }
 }
