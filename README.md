@@ -1,4 +1,7 @@
 # unity-hawk
 
 First build this fork of BizHawk: https://github.com/plunderludics/bizhawk/tree/unity-hawk
-then copy the contents of BizHawk/output/dlls into unity-hawk/Plugins, except for Newtonsoft.Json.dll (since it seems to be already imported into Unity by default)
+
+then copy BizHawk/output/dlls into Assets/BizHawk/dlls, and BizHawk/output/gamedb into Assets/BizHawk/gamedb
+
+(if the gamedb is missing it seems to cause the code to freeze)
