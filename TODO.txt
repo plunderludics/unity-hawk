@@ -1,0 +1,17 @@
+
+- controls
+  X keyboard input
+  - gamepad input?
+- fix weird colors
+- lua scripting
+- think about framerate (how to match target console framerate?)
+- see if Texture.SetPixelData is the most efficient way
+- emulator audio
+
+- test other cores
+ - N64 broken right now
+
+- nice unity component corresponding to a sample (rom + savestate + lua + config)
+- find a way of bundling emulator dependencies that works in build
+
+- make unitypackage
