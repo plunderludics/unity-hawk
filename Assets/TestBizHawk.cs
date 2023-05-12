@@ -7,6 +7,7 @@ using BizHawk.Emulation.Common;
 using BizHawk.Emulation.Cores.Nintendo.NES;
 using BizHawk.Emulation.Cores.Arcades.MAME;
 using System.IO;
+using System.Runtime.InteropServices;
 
 public class TestBizHawk : MonoBehaviour
 {
@@ -29,6 +30,7 @@ public class TestBizHawk : MonoBehaviour
     string romsDir = Path.Combine(Application.dataPath, "Roms");
 
     public string romFileName = "mario.nes";
+    public string currentCore = "nul";
 
     public Renderer targetRenderer;
     Texture2D targetTexture;
@@ -39,17 +41,32 @@ public class TestBizHawk : MonoBehaviour
 
     public int frame = 0;
 
+    private static bool initializedDbs = false;
+    private static bool initialized = false;
+
     void Awake()
     {
+        // this will look in subdirectory "dll" to load pinvoked stuff
+        if (!initialized) {
+            var dllDir = Path.Combine(Application.dataPath, "Plugins");
+            Debug.Log($"Setting dll directory to {dllDir}");
+
+            _ = SetDllDirectory(dllDir);
+            initialized = true;
+        }
         // [copied from MainForm.cs]
         // Note: the gamedb directory MUST already have the gamedb.txt file, otherwise seems to hang :(
         string gamedbPath = Path.Combine(bizhawkDir, "gamedb");
-        Database.InitializeDatabase(
-            bundledRoot: gamedbPath,
-            userRoot: gamedbPath,
-            silent: true);
-        BootGodDb.Initialize(gamedbPath);
-        MAMEMachineDB.Initialize(gamedbPath);
+        // database will fail if initialized multiple times
+        if (!initializedDbs) {
+            Database.InitializeDatabase(
+                bundledRoot: gamedbPath,
+                userRoot: gamedbPath,
+                silent: true);
+            BootGodDb.Initialize(gamedbPath);
+            MAMEMachineDB.Initialize(gamedbPath);
+            initializedDbs = true;
+        }
 
         // Check if there is an AudioSource attached
         if (!GetComponent<AudioSource>()) {
@@ -61,7 +78,7 @@ public class TestBizHawk : MonoBehaviour
 
         inputManager = new InputManager();
         inputProvider = new UnityInputProvider();
-        
+
         dialogParent = new UnityDialogParent();
     }
 
@@ -69,7 +86,6 @@ public class TestBizHawk : MonoBehaviour
     {
         // Load config
         var configPath = Path.Combine(bizhawkDir, "config.ini");
-        Debug.Log(configPath);
         config = ConfigService.Load<Config>(configPath);
 
         // Init controls
@@ -88,23 +104,23 @@ public class TestBizHawk : MonoBehaviour
 				() => {}
         );
 
-        loader = new RomLoader(config) {
-            //ChoosePlatform = ChoosePlatformForRom,
-        };
+        loader = new RomLoader(config);
 
         loader.OnLoadError += ShowLoadError;
         loader.OnLoadSettings += CoreSettings;
         loader.OnLoadSyncSettings += CoreSyncSettings;
 
         var romPath = Path.Combine(romsDir, romFileName);
+
         var nextComm = CreateCoreComm();
 
         bool loaded = loader.LoadRom(romPath, nextComm, null);
 
         if (loaded) {
-            Debug.Log($"Loaded {romPath}!");
 
             emulator = loader.LoadedEmulator;
+            currentCore = emulator.Attributes().CoreName;
+
 
             videoProvider = emulator.AsVideoProviderOrDefault();
             soundProvider = emulator.AsSoundProviderOrDefault();
@@ -121,7 +137,7 @@ public class TestBizHawk : MonoBehaviour
     }
 
     // [Not really sure what the framerate of this should be tbh - should check what BizHawk does]
-    void Update()
+    void FixedUpdate()
     {
         if (emulator != null) {
             // Input handling
@@ -156,21 +172,24 @@ public class TestBizHawk : MonoBehaviour
 
 
             // get audio samples for the emulated frame
-            short[] lastFrameAudioBuffer; 
+            short[] lastFrameAudioBuffer;
             int nSamples;
             soundProvider.GetSamplesSync(out lastFrameAudioBuffer, out nSamples);
-            // Debug.Log($"Got {nSamples} samples this frame.");
-            // [Seems to be 734 samples each frame for mario.nes]
-            // append them to running buffer
-            for (int i = 0; i < nSamples; i++) {
-                runningAudioBuffer[runningAudioBufferLength] = lastFrameAudioBuffer[i];
-                runningAudioBufferLength++;
-            }
+            // // Debug.Log($"Got {nSamples} samples this frame.");
+            // // [Seems to be 734 samples each frame for mario.nes]
+            // // append them to running buffer
+            // for (int i = 0; i < nSamples; i++) {
+            //     runningAudioBuffer[runningAudioBufferLength] = lastFrameAudioBuffer[i];
+            //     runningAudioBufferLength++;
+            // }
 
 
             frame++;
         }
     }
+
+	[DllImport("kernel32.dll", SetLastError = true)]
+    private static extern uint SetDllDirectory(string lpPathName);
 
     // [Heads up, will only get called if there is an AudioSource component attached]
     // [also doesn't work at all right now, idk why]
@@ -232,10 +251,12 @@ public class TestBizHawk : MonoBehaviour
     {
         e.Settings = config.GetCoreSettings(e.Core, e.SettingsType);
     }
+
     private void CoreSyncSettings(object sender, RomLoader.SettingsLoadArgs e)
     {
         e.Settings = config.GetCoreSyncSettings(e.Core, e.SettingsType);
     }
+
     private void ShowLoadError(object sender, RomLoader.RomErrorArgs e) {
         Debug.LogError(e.Message);
     }
