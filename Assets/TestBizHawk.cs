@@ -7,7 +7,6 @@ using BizHawk.Emulation.Common;
 using BizHawk.Emulation.Cores.Nintendo.NES;
 using BizHawk.Emulation.Cores.Arcades.MAME;
 using System.IO;
-using System.Runtime.InteropServices;
 
 public class TestBizHawk : MonoBehaviour
 {
@@ -26,9 +25,6 @@ public class TestBizHawk : MonoBehaviour
     Config config;
     FirmwareManager firmwareManager = new FirmwareManager();
 
-    string bizhawkDir = Path.Combine(Application.dataPath, "BizHawk");
-    string romsDir = Path.Combine(Application.dataPath, "Roms");
-
     public string romFileName = "mario.nes";
     public string currentCore = "nul";
 
@@ -44,35 +40,14 @@ public class TestBizHawk : MonoBehaviour
     private static bool initializedDbs = false;
     private static bool initialized = false;
 
-    void Awake()
+    void Start()
     {
-        // this will look in subdirectory "dll" to load pinvoked stuff
-        if (!initialized) {
-            var dllDir = Path.Combine(Application.dataPath, "Plugins");
-            Debug.Log($"Setting dll directory to {dllDir}");
-
-            _ = SetDllDirectory(dllDir);
-            initialized = true;
-        }
-        // [copied from MainForm.cs]
-        // Note: the gamedb directory MUST already have the gamedb.txt file, otherwise seems to hang :(
-        string gamedbPath = Path.Combine(bizhawkDir, "gamedb");
-        // database will fail if initialized multiple times
-        if (!initializedDbs) {
-            Database.InitializeDatabase(
-                bundledRoot: gamedbPath,
-                userRoot: gamedbPath,
-                silent: true);
-            BootGodDb.Initialize(gamedbPath);
-            MAMEMachineDB.Initialize(gamedbPath);
-            initializedDbs = true;
-        }
-
         // Check if there is an AudioSource attached
         if (!GetComponent<AudioSource>()) {
             Debug.LogWarning("No AudioSource component, will not play emulator audio");
         }
 
+        // Initialize stuff
         runningAudioBuffer = new short[RunningAudioBufferSize];
         runningAudioBufferLength = 0;
 
@@ -80,12 +55,10 @@ public class TestBizHawk : MonoBehaviour
         inputProvider = new UnityInputProvider();
 
         dialogParent = new UnityDialogParent();
-    }
 
-    void Start()
-    {
         // Load config
-        var configPath = Path.Combine(bizhawkDir, "config.ini");
+        var configPath = Path.Combine(UnityHawk.bizhawkDir, "config.ini");
+
         config = ConfigService.Load<Config>(configPath);
 
         // Init controls
@@ -110,7 +83,7 @@ public class TestBizHawk : MonoBehaviour
         loader.OnLoadSettings += CoreSettings;
         loader.OnLoadSyncSettings += CoreSyncSettings;
 
-        var romPath = Path.Combine(romsDir, romFileName);
+        var romPath = Path.Combine(UnityHawk.romsDir, romFileName);
 
         var nextComm = CreateCoreComm();
 
@@ -165,10 +138,10 @@ public class TestBizHawk : MonoBehaviour
 
             // copy the texture from the emulator to the target renderer
             // [any faster way to do this?]
-            int[] videoBuffer = videoProvider.GetVideoBuffer();
-            // [pixel format probably doesn't match, but close enough for now lol]
-            targetTexture.SetPixelData(videoBuffer, 0);
-            targetTexture.Apply();
+            // int[] videoBuffer = videoProvider.GetVideoBuffer();
+            // // [pixel format probably doesn't match, but close enough for now lol]
+            // targetTexture.SetPixelData(videoBuffer, 0);
+            // targetTexture.Apply();
 
 
             // get audio samples for the emulated frame
@@ -187,9 +160,6 @@ public class TestBizHawk : MonoBehaviour
             frame++;
         }
     }
-
-	[DllImport("kernel32.dll", SetLastError = true)]
-    private static extern uint SetDllDirectory(string lpPathName);
 
     // [Heads up, will only get called if there is an AudioSource component attached]
     // [also doesn't work at all right now, idk why]
