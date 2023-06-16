@@ -31,6 +31,10 @@ public class TestBizHawk : MonoBehaviour
     public Renderer targetRenderer;
     Texture2D targetTexture;
 
+    public TextureFormat textureFormat = TextureFormat.BGRA32;
+    public bool linearTexture; // [seems so make no difference visually]
+    public bool forceReinitTexture;
+
     static int RunningAudioBufferSize = 4096;
     short[] runningAudioBuffer;
     int runningAudioBufferLength;
@@ -59,7 +63,7 @@ public class TestBizHawk : MonoBehaviour
         config = ConfigService.Load<Config>(configPath);
 
         // Init controls
-        inputManager.ControllerInputCoalescer = new(); // seems to be necessary
+        inputManager.ControllerInputCoalescer = new(); // [seems to be necessary]
 
         // Set up movie session
         // [this is kind of stupid because we don't really need a movie session
@@ -93,9 +97,9 @@ public class TestBizHawk : MonoBehaviour
             videoProvider = emulator.AsVideoProviderOrDefault();
             soundProvider = emulator.AsSoundProviderOrDefault();
 
-            Debug.Log($"{videoProvider.BufferWidth} x {videoProvider.BufferHeight}");
-            targetTexture = new Texture2D(videoProvider.BufferWidth, videoProvider.BufferHeight);
-            targetRenderer.material.mainTexture = targetTexture;
+            Debug.Log($"virtual: {videoProvider.VirtualWidth} x {videoProvider.VirtualHeight} = {videoProvider.VirtualWidth * videoProvider.VirtualHeight}");
+            Debug.Log($"buffer: {videoProvider.BufferWidth} x {videoProvider.BufferHeight} = {videoProvider.BufferWidth * videoProvider.BufferHeight}");
+            InitTargetTexture();
 
             // [not sure what this does but seems important]
 		    inputManager.SyncControls(emulator, movieSession, config);
@@ -131,10 +135,18 @@ public class TestBizHawk : MonoBehaviour
             // [maybe not needed]
 			movieSession.HandleFrameBefore();
 
+            // Re-init the target texture if needed (if dimensions have changed, as happens on PSX)
+            if (forceReinitTexture || (targetTexture.width != videoProvider.BufferWidth || targetTexture.height != videoProvider.BufferHeight)) {
+                InitTargetTexture();
+                forceReinitTexture = false;
+            }
+
             // copy the texture from the emulator to the target renderer
             // [any faster way to do this?]
             int[] videoBuffer = videoProvider.GetVideoBuffer();
-            // [pixel format probably doesn't match, but close enough for now lol]
+            // Debug.Log($"Actual video buffer size: {videoBuffer.Length}");
+            // [note: for e.g. PSX, the videoBuffer array is much larger than the actual current pixel data (BufferWidth x BufferHeight)
+            //  can possibly optimize a lot by truncating the buffer before this call:]
             targetTexture.SetPixelData(videoBuffer, 0);
             targetTexture.Apply();
 
@@ -152,6 +164,12 @@ public class TestBizHawk : MonoBehaviour
 
             frame++;
         }
+    }
+
+    // Init/re-init the texture for rendering the screen - has to be done whenever the source dimensions change (which happens often on PSX for some reason)
+    void InitTargetTexture() {
+        targetTexture = new Texture2D(videoProvider.BufferWidth, videoProvider.BufferHeight, textureFormat, linearTexture);
+        targetRenderer.material.mainTexture = targetTexture;
     }
 
     // [Heads up, will only get called if there is an AudioSource component attached]
