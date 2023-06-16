@@ -8,8 +8,16 @@
 - see if Texture.SetPixelData is the most efficient way
 - emulator audio
 
+- better way of setting the dll directory, to avoid hacky loading currently in UnityHawk.cs
+
 - test other cores
- - N64 broken right now
+ - Mupen64
+  - Doesn't work due to some error with attaching the video plugin
+ - NES
+  X QuickNes
+  X NesHawk
+ - PS1 (Nymashock)
+  - graphics broken
 
 - nice unity component corresponding to a sample (rom + savestate + lua + config)
 - find a way of bundling emulator dependencies that works in build
