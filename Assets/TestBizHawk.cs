@@ -19,7 +19,7 @@ public class TestBizHawk : MonoBehaviour
 
     IDialogParent dialogParent;
 
-    MovieSession movieSession; // annoying that we need this at all
+    MovieSession movieSession; // [annoying that we need this at all]
 
     RomLoader loader;
     Config config;
@@ -36,9 +36,6 @@ public class TestBizHawk : MonoBehaviour
     int runningAudioBufferLength;
 
     public int frame = 0;
-
-    private static bool initializedDbs = false;
-    private static bool initialized = false;
 
     void Start()
     {
@@ -90,10 +87,8 @@ public class TestBizHawk : MonoBehaviour
         bool loaded = loader.LoadRom(romPath, nextComm, null);
 
         if (loaded) {
-
             emulator = loader.LoadedEmulator;
             currentCore = emulator.Attributes().CoreName;
-
 
             videoProvider = emulator.AsVideoProviderOrDefault();
             soundProvider = emulator.AsSoundProviderOrDefault();
@@ -110,7 +105,7 @@ public class TestBizHawk : MonoBehaviour
     }
 
     // [Not really sure what the framerate of this should be tbh - should check what BizHawk does]
-    void FixedUpdate()
+    void Update()
     {
         if (emulator != null) {
             // Input handling
@@ -138,11 +133,10 @@ public class TestBizHawk : MonoBehaviour
 
             // copy the texture from the emulator to the target renderer
             // [any faster way to do this?]
-            // int[] videoBuffer = videoProvider.GetVideoBuffer();
-            // // [pixel format probably doesn't match, but close enough for now lol]
-            // targetTexture.SetPixelData(videoBuffer, 0);
-            // targetTexture.Apply();
-
+            int[] videoBuffer = videoProvider.GetVideoBuffer();
+            // [pixel format probably doesn't match, but close enough for now lol]
+            targetTexture.SetPixelData(videoBuffer, 0);
+            targetTexture.Apply();
 
             // get audio samples for the emulated frame
             short[] lastFrameAudioBuffer;
@@ -155,7 +149,6 @@ public class TestBizHawk : MonoBehaviour
             //     runningAudioBuffer[runningAudioBufferLength] = lastFrameAudioBuffer[i];
             //     runningAudioBufferLength++;
             // }
-
 
             frame++;
         }
