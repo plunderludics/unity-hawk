@@ -35,12 +35,16 @@ public class UnityHawk : MonoBehaviour
 
         var libsToLoad = new List<string> {
             "libquicknes.dll",
-            "waterboxhost.dll"
+            "waterboxhost.dll",
+            "libzstd.dll",
+            "libbizabiadapter_msabi_sysv.dll"
             // TODO load any others we need [or do this in a better way]
         };
         foreach (string lib in libsToLoad) {
-            IntPtr e = LoadLibrary(lib);
-            Debug.Log($"{lib}: {e}");
+            int e = (int)LoadLibrary(lib);
+            if (e == 0) {
+                Debug.LogError($"Could not load: {lib}");
+            }
         }
 
         // [copied from MainForm.cs]
