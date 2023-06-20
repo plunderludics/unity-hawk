@@ -35,7 +35,8 @@ public class TestBizHawk : MonoBehaviour
     public bool linearTexture; // [seems so make no difference visually]
     public bool forceReinitTexture;
 
-    static int RunningAudioBufferSize = 4096;
+    static int AudioChunkSize = 734; // [Hard to explain right now but for timestretching, preserve audio chunks of this many samples (734 = 1 frame at 60fps at SR=44100)]
+    static int RunningAudioBufferSize = 8096;
     short[] runningAudioBuffer;
     int runningAudioBufferLength;
 
@@ -155,12 +156,12 @@ public class TestBizHawk : MonoBehaviour
             int nSamples;
             soundProvider.GetSamplesSync(out lastFrameAudioBuffer, out nSamples);
             // // Debug.Log($"Got {nSamples} samples this frame.");
-            // // [Seems to be 734 samples each frame for mario.nes]
+            // // [Seems to be ~734 samples each frame for mario.nes]
             // // append them to running buffer
-            // for (int i = 0; i < nSamples; i++) {
-            //     runningAudioBuffer[runningAudioBufferLength] = lastFrameAudioBuffer[i];
-            //     runningAudioBufferLength++;
-            // }
+            for (int i = 0; i < nSamples; i++) {
+                runningAudioBuffer[runningAudioBufferLength] = lastFrameAudioBuffer[i];
+                runningAudioBufferLength++;
+            }
 
             frame++;
         }
@@ -172,22 +173,58 @@ public class TestBizHawk : MonoBehaviour
         targetRenderer.material.mainTexture = targetTexture;
     }
 
-    // [Heads up, will only get called if there is an AudioSource component attached]
-    // [also doesn't work at all right now, idk why]
-    void OnAudioFilterRead(float[] data, int channels) {
-        // Ignore input (contents of `data`), just overwrite with emulator audio
-
+    // Send audio from the emulator to the AudioSource
+    // (will only run if there is an AudioSource component attached)
+    // [this method is a mess atm, needs to be cleaned up]
+    void OnAudioFilterRead(float[] out_buffer, int channels) {
         // Debug.Log($"n channels: {channels}");
-        // Debug.Log($"Unity buffer size: {data.Length}; Emulated audio buffer size: {runningAudioBufferLength}");
+        // Debug.Log($"Unity buffer size: {out_buffer.Length}; Emulated audio buffer size: {runningAudioBufferLength}");
 
-        // i have no idea how to deal with framerate mismatch between unity and the emulator right now
-        // for now, just stretch out the audio
-        for (int i = 0; i < data.Length; i++) {
-            short sample = runningAudioBuffer[i*(runningAudioBufferLength/data.Length)];
-            data[i] = sample/32767; // is this even right? probably a better way to do this
+        // Unity needs 2048 samples right now, and depending on the speed the emulator is running,
+        // we might have anywhere from 0 to like 10000 accumulated.
+        
+        // If the emulator isn't running at 'native' speed (e.g running at 0.5x or 2x), we need to do some kind of rudimentary timestretching
+        // to play the audio faster/slower without distorting too much
+
+        int method = 2;
+
+        for (int out_i = 0; out_i < out_buffer.Length; out_i++) {
+            if (method == 0) {
+                // Attempt to do pitch-neutral timestretching by preserving the sample rate of audio chunks of a certain length (AudioChunkSize)
+                // but playing those chunks either overlapping (if emulator is faster than native speed) or with gaps (if slower)
+                // [there may be better ways to do this]
+                // (it seems like EmuHawk does something similar to this maybe?)
+                // [currently sounds really bad i think there must be something wrong with the code below]
+                    
+                int n_chunks = runningAudioBuffer.Length/AudioChunkSize;
+                int chunk_sep = (out_buffer.Length - AudioChunkSize)/n_chunks;
+                
+                out_buffer[out_i] = 0f;
+
+                // Add contribution from each chunk
+                // [might be better to take the mean of all chunks here, idk.]
+                for (int chunk_i = 0; chunk_i < n_chunks; chunk_i++) {
+                    int chunk_start = chunk_i*chunk_sep; // in output space
+                    if (chunk_start <= out_i && out_i < chunk_start + AudioChunkSize) {
+                        // This chunk is contributing
+                        int src_i = (out_i - chunk_start) + (chunk_i*AudioChunkSize);
+                        short sample = runningAudioBuffer[src_i];
+                        out_buffer[out_i] += sample/32767f; // convert short (-32768 to 32767) to float (-1f to 1f)
+                    }
+                }
+            } else if (method == 1) {
+                // very naive, just truncate if necessary
+                // [sounds ok but distorted]
+                out_buffer[out_i] = runningAudioBuffer[out_i]/32767f;
+            } else {
+                // No pitch adjustment, just stretch the accumulated audio to fit unity's audio buffer
+                // [sounds ok but a little weird, and means the pitch changes if the sample rate changes]
+                out_buffer[out_i] = runningAudioBuffer[(out_i*runningAudioBufferLength)/out_buffer.Length]/32767f;
+            }
         }
 
-        // consume all accumulated samples (play them) and restart the buffer
+        // consume all accumulated samples (play them) and reset the buffer
+        // [instead should probably have some samples left over for the next unity chunk, todo think about this more]
         runningAudioBufferLength = 0;
     }
 
