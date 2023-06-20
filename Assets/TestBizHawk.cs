@@ -70,12 +70,12 @@ public class TestBizHawk : MonoBehaviour
         //  but InputManager expects a MovieSession as part of the input chain :/
         //  i guess the alternative would be to reimplement InputManager]
         movieSession = new MovieSession(
-				config.Movies,
-				config.PathEntries.MovieBackupsAbsolutePath(),
-				dialogParent,
-				null,
-				() => {},
-				() => {}
+                config.Movies,
+                config.PathEntries.MovieBackupsAbsolutePath(),
+                dialogParent,
+                null,
+                () => {},
+                () => {}
         );
 
         loader = new RomLoader(config);
@@ -102,7 +102,7 @@ public class TestBizHawk : MonoBehaviour
             InitTargetTexture();
 
             // [not sure what this does but seems important]
-		    inputManager.SyncControls(emulator, movieSession, config);
+            inputManager.SyncControls(emulator, movieSession, config);
         } else {
             Debug.LogWarning($"Failed to load {romPath}.");
         }
@@ -117,7 +117,7 @@ public class TestBizHawk : MonoBehaviour
             var finalHostController = inputManager.ControllerInputCoalescer;
             // InputManager.ActiveController.PrepareHapticsForHost(finalHostController);
             ProcessInput(finalHostController, inputProvider);
-			inputManager.ActiveController.LatchFromPhysical(finalHostController); //[idk what this does]
+            inputManager.ActiveController.LatchFromPhysical(finalHostController); //[idk what this does]
             // [there's a bunch more input chain processing stuff in MainForm.cs that we are leaving out for now]
 
             // [For later:]
@@ -127,13 +127,13 @@ public class TestBizHawk : MonoBehaviour
             // }
 
             // [gotta call this to make sure the input gets through]
-			movieSession.HandleFrameBefore();
+            movieSession.HandleFrameBefore();
 
             // Emulator step forward
             emulator.FrameAdvance(inputManager.ControllerOutput, true, true);
 
             // [maybe not needed]
-			movieSession.HandleFrameBefore();
+            movieSession.HandleFrameAfter();
 
             // Re-init the target texture if needed (if dimensions have changed, as happens on PSX)
             if (forceReinitTexture || (targetTexture.width != videoProvider.BufferWidth || targetTexture.height != videoProvider.BufferHeight)) {
