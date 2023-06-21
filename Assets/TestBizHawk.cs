@@ -35,10 +35,18 @@ public class TestBizHawk : MonoBehaviour
     public bool linearTexture; // [seems so make no difference visually]
     public bool forceReinitTexture;
 
-    static int AudioChunkSize = 734; // [Hard to explain right now but for timestretching, preserve audio chunks of this many samples (734 = 1 frame at 60fps at SR=44100)]
-    static int RunningAudioBufferSize = 8096;
-    short[] runningAudioBuffer;
-    int runningAudioBufferLength;
+    static int AudioChunkSize = 734; // [Hard to explain right now but for 'Accumulate' AudioStretchMethod, preserve audio chunks of this many samples (734 ~= 1 frame at 60fps at SR=44100)]
+    static int AudioBufferSize = 44100*10;
+    short[] audioBuffer; // circular buffer (queue) to store audio samples accumulated from the emulator
+    int audioBufferStart, audioBufferEnd;
+
+    public enum AudioStretchMethod {
+        Truncate,
+        PreserveSampleRate,
+        Stretch,
+        Overlap
+    }
+    public AudioStretchMethod audioStretchMethod = AudioStretchMethod.PreserveSampleRate;
 
     public int frame = 0;
 
@@ -50,8 +58,8 @@ public class TestBizHawk : MonoBehaviour
         }
 
         // Initialize stuff
-        runningAudioBuffer = new short[RunningAudioBufferSize];
-        runningAudioBufferLength = 0;
+        audioBuffer = new short[AudioBufferSize];
+        ClearAudioBuffer();
 
         inputManager = new InputManager();
         inputProvider = new UnityInputProvider();
@@ -155,12 +163,20 @@ public class TestBizHawk : MonoBehaviour
             short[] lastFrameAudioBuffer;
             int nSamples;
             soundProvider.GetSamplesSync(out lastFrameAudioBuffer, out nSamples);
-            // // Debug.Log($"Got {nSamples} samples this frame.");
-            // // [Seems to be ~734 samples each frame for mario.nes]
-            // // append them to running buffer
-            for (int i = 0; i < nSamples; i++) {
-                runningAudioBuffer[runningAudioBufferLength] = lastFrameAudioBuffer[i];
-                runningAudioBufferLength++;
+            Debug.Log($"Adding {nSamples} samples to the buffer.");
+            // [Seems to be ~734 samples each frame for mario.nes]
+            // append them to running buffer
+            lock (audioBuffer) {
+                for (int i = 0; i < nSamples; i++) {
+                    // Debug.Log($"Adding sample, audioBufferLength={AudioBufferLength()}");
+                    if (AudioBufferLength() == audioBuffer.Length - 1) {
+                        Debug.LogWarning("audio buffer full, dropping samples");
+                        break;
+                    }
+                    audioBuffer[audioBufferEnd] = lastFrameAudioBuffer[i];
+                    audioBufferEnd++;
+                    audioBufferEnd %= audioBuffer.Length;
+                }
             }
 
             frame++;
@@ -177,55 +193,83 @@ public class TestBizHawk : MonoBehaviour
     // (will only run if there is an AudioSource component attached)
     // [this method is a mess atm, needs to be cleaned up]
     void OnAudioFilterRead(float[] out_buffer, int channels) {
-        // Debug.Log($"n channels: {channels}");
-        // Debug.Log($"Unity buffer size: {out_buffer.Length}; Emulated audio buffer size: {runningAudioBufferLength}");
+        lock(audioBuffer) {
+            int n_samples = AudioBufferLength();
+            // Debug.Log($"n channels: {channels}");
+            Debug.Log($"Unity buffer size: {out_buffer.Length}; Emulated audio buffer size: {n_samples}");
 
-        // Unity needs 2048 samples right now, and depending on the speed the emulator is running,
-        // we might have anywhere from 0 to like 10000 accumulated.
-        
-        // If the emulator isn't running at 'native' speed (e.g running at 0.5x or 2x), we need to do some kind of rudimentary timestretching
-        // to play the audio faster/slower without distorting too much
+            // Currently this assumes the input is mono and the output is interleaved stereo
+            // which seems true for NES but almost certainly not always true
 
-        int method = 2;
+            // Unity needs 2048 samples right now, and depending on the speed the emulator is running,
+            // we might have anywhere from 0 to like 10000 accumulated.
+            
+            // If the emulator isn't running at 'native' speed (e.g running at 0.5x or 2x), we need to do some kind of rudimentary timestretching
+            // to play the audio faster/slower without distorting too much
 
-        for (int out_i = 0; out_i < out_buffer.Length; out_i++) {
-            if (method == 0) {
-                // Attempt to do pitch-neutral timestretching by preserving the sample rate of audio chunks of a certain length (AudioChunkSize)
+            if (audioStretchMethod == AudioStretchMethod.PreserveSampleRate) {
+                // Play back the samples at 1:1 sample rate, which means audio will lag behind if the emulator runs faster than 1x
+                for (int out_i = 0; out_i < out_buffer.Length; out_i+=2) {
+                    // Debug.Log($"attempting access audioBuffer[{audioBufferStart}]");
+                    if (AudioBufferLength() == 0) {
+                        Debug.LogWarning("Emulator audio buffer has no samples to consume");
+                        return;
+                    }
+                    out_buffer[out_i] = audioBuffer[audioBufferStart]/32767f;
+                    out_buffer[out_i+1] = out_buffer[out_i];
+                    audioBufferStart = (audioBufferStart+1)%audioBuffer.Length;
+                }
+                // leave remaining samples for next time
+            } else if (audioStretchMethod == AudioStretchMethod.Overlap) {
+                // experimental attempt to do pitch-neutral timestretching by preserving the sample rate of audio chunks of a certain length (AudioChunkSize)
                 // but playing those chunks either overlapping (if emulator is faster than native speed) or with gaps (if slower)
                 // [there may be better ways to do this]
                 // (it seems like EmuHawk does something similar to this maybe?)
                 // [currently sounds really bad i think there must be something wrong with the code below]
                     
-                int n_chunks = runningAudioBuffer.Length/AudioChunkSize;
+                int n_chunks = (n_samples-1)/AudioChunkSize + 1;
                 int chunk_sep = (out_buffer.Length - AudioChunkSize)/n_chunks;
                 
-                out_buffer[out_i] = 0f;
+                for (int out_i = 0; out_i < out_buffer.Length; out_i+=2 ) {
+                    out_buffer[out_i] = 0f;
 
-                // Add contribution from each chunk
-                // [might be better to take the mean of all chunks here, idk.]
-                for (int chunk_i = 0; chunk_i < n_chunks; chunk_i++) {
-                    int chunk_start = chunk_i*chunk_sep; // in output space
-                    if (chunk_start <= out_i && out_i < chunk_start + AudioChunkSize) {
-                        // This chunk is contributing
-                        int src_i = (out_i - chunk_start) + (chunk_i*AudioChunkSize);
-                        short sample = runningAudioBuffer[src_i];
-                        out_buffer[out_i] += sample/32767f; // convert short (-32768 to 32767) to float (-1f to 1f)
+                    // Add contribution from each chunk
+                    // [might be better to take the mean of all chunks here, idk.]
+                    for (int chunk_i = 0; chunk_i < n_chunks; chunk_i++) {
+                        int chunk_start = chunk_i*chunk_sep; // in output space
+                        if (chunk_start <= out_i && out_i < chunk_start + AudioChunkSize) {
+                            // This chunk is contributing
+                            int src_i = (out_i - chunk_start) + (chunk_i*AudioChunkSize);
+                            short sample = GetAudioBufferAt(src_i);
+                            out_buffer[out_i] += sample/32767f; // convert short (-32768 to 32767) to float (-1f to 1f)
+                        }
                     }
+                    out_buffer[out_i+1] = out_buffer[out_i];
                 }
-            } else if (method == 1) {
-                // very naive, just truncate if necessary
-                // [sounds ok but distorted]
-                out_buffer[out_i] = runningAudioBuffer[out_i]/32767f;
-            } else {
+                ClearAudioBuffer(); // all samples consumed
+            } else if (audioStretchMethod == AudioStretchMethod.Stretch) {
                 // No pitch adjustment, just stretch the accumulated audio to fit unity's audio buffer
-                // [sounds ok but a little weird, and means the pitch changes if the sample rate changes]
-                out_buffer[out_i] = runningAudioBuffer[(out_i*runningAudioBufferLength)/out_buffer.Length]/32767f;
+                // [sounds ok but a little weird, and means the pitch changes if the emulator framerate changes]
+                // [although in reality it doesn't actually sound like it's getting stretched, just distorted, i don't understand this]
+        
+                for (int out_i = 0; out_i < out_buffer.Length; out_i+=2) {
+                    int src_i = (out_i*n_samples)/out_buffer.Length;
+                    out_buffer[out_i] = GetAudioBufferAt(src_i)/32767f;
+                    out_buffer[out_i+1] = out_buffer[out_i];
+                }
+                ClearAudioBuffer(); // all samples consumed
+            } else if (audioStretchMethod == AudioStretchMethod.Truncate) {
+                // very naive, just truncate incoming samples if necessary
+                // [sounds ok but very distorted]
+                for (int out_i = 0; out_i < out_buffer.Length; out_i+=2) {
+                    out_buffer[out_i] = GetAudioBufferAt(out_i)/32767f;
+                    out_buffer[out_i+1] = out_buffer[out_i];
+                }
+                ClearAudioBuffer(); // throw away any remaining samples
+            } else {
+                Debug.LogWarning("Unhandled AudioStretchMode");
             }
         }
-
-        // consume all accumulated samples (play them) and reset the buffer
-        // [instead should probably have some samples left over for the next unity chunk, todo think about this more]
-        runningAudioBufferLength = 0;
     }
 
     // Based on MainForm:ProcessInput, but with a lot of stuff missing
@@ -277,5 +321,18 @@ public class TestBizHawk : MonoBehaviour
 
     private void ShowLoadError(object sender, RomLoader.RomErrorArgs e) {
         Debug.LogError(e.Message);
+    }
+
+    // helper methods for circular audio buffer
+    // [could also just make an external CircularBuffer class]
+    private int AudioBufferLength() {
+        return (audioBufferEnd-audioBufferStart+audioBuffer.Length)%audioBuffer.Length;
+    }
+    private void ClearAudioBuffer() {
+        audioBufferStart = 0;
+        audioBufferEnd = 0;
+    }
+    private short GetAudioBufferAt(int i) {
+        return audioBuffer[(audioBufferStart + i)%audioBuffer.Length];
     }
 }
