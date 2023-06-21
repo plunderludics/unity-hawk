@@ -38,6 +38,7 @@ public class TestBizHawk : MonoBehaviour
     static int AudioChunkSize = 734; // [Hard to explain right now but for 'Accumulate' AudioStretchMethod, preserve audio chunks of this many samples (734 ~= 1 frame at 60fps at SR=44100)]
     static int AudioBufferSize = 44100*10;
     short[] audioBuffer; // circular buffer (queue) to store audio samples accumulated from the emulator
+    static int ChannelCount = 2; // Seems to be always 2, for all BizHawk sound and for Unity audiosource
     int audioBufferStart, audioBufferEnd;
 
     public enum AudioStretchMethod {
@@ -163,11 +164,12 @@ public class TestBizHawk : MonoBehaviour
             short[] lastFrameAudioBuffer;
             int nSamples;
             soundProvider.GetSamplesSync(out lastFrameAudioBuffer, out nSamples);
+            // NOTE! there are actually 2*nSamples values in the buffer because it's stereo sound
             Debug.Log($"Adding {nSamples} samples to the buffer.");
             // [Seems to be ~734 samples each frame for mario.nes]
             // append them to running buffer
             lock (audioBuffer) {
-                for (int i = 0; i < nSamples; i++) {
+                for (int i = 0; i < nSamples*ChannelCount; i++) {
                     // Debug.Log($"Adding sample, audioBufferLength={AudioBufferLength()}");
                     if (AudioBufferLength() == audioBuffer.Length - 1) {
                         Debug.LogWarning("audio buffer full, dropping samples");
@@ -193,9 +195,13 @@ public class TestBizHawk : MonoBehaviour
     // (will only run if there is an AudioSource component attached)
     // [this method is a mess atm, needs to be cleaned up]
     void OnAudioFilterRead(float[] out_buffer, int channels) {
+        // Debug.Log($"n channels: {channels}");
+        if (channels != ChannelCount) {
+            Debug.LogError("AudioSource must be set to 2 channels");
+            return;
+        }
         lock(audioBuffer) {
             int n_samples = AudioBufferLength();
-            // Debug.Log($"n channels: {channels}");
             Debug.Log($"Unity buffer size: {out_buffer.Length}; Emulated audio buffer size: {n_samples}");
 
             // Currently this assumes the input is mono and the output is interleaved stereo
@@ -209,14 +215,13 @@ public class TestBizHawk : MonoBehaviour
 
             if (audioStretchMethod == AudioStretchMethod.PreserveSampleRate) {
                 // Play back the samples at 1:1 sample rate, which means audio will lag behind if the emulator runs faster than 1x
-                for (int out_i = 0; out_i < out_buffer.Length; out_i+=2) {
+                for (int out_i = 0; out_i < out_buffer.Length; out_i++) {
                     // Debug.Log($"attempting access audioBuffer[{audioBufferStart}]");
                     if (AudioBufferLength() == 0) {
                         Debug.LogWarning("Emulator audio buffer has no samples to consume");
                         return;
                     }
                     out_buffer[out_i] = audioBuffer[audioBufferStart]/32767f;
-                    out_buffer[out_i+1] = out_buffer[out_i];
                     audioBufferStart = (audioBufferStart+1)%audioBuffer.Length;
                 }
                 // leave remaining samples for next time
@@ -230,7 +235,7 @@ public class TestBizHawk : MonoBehaviour
                 int n_chunks = (n_samples-1)/AudioChunkSize + 1;
                 int chunk_sep = (out_buffer.Length - AudioChunkSize)/n_chunks;
                 
-                for (int out_i = 0; out_i < out_buffer.Length; out_i+=2 ) {
+                for (int out_i = 0; out_i < out_buffer.Length; out_i++ ) {
                     out_buffer[out_i] = 0f;
 
                     // Add contribution from each chunk
@@ -244,7 +249,6 @@ public class TestBizHawk : MonoBehaviour
                             out_buffer[out_i] += sample/32767f; // convert short (-32768 to 32767) to float (-1f to 1f)
                         }
                     }
-                    out_buffer[out_i+1] = out_buffer[out_i];
                 }
                 ClearAudioBuffer(); // all samples consumed
             } else if (audioStretchMethod == AudioStretchMethod.Stretch) {
@@ -252,18 +256,16 @@ public class TestBizHawk : MonoBehaviour
                 // [sounds ok but a little weird, and means the pitch changes if the emulator framerate changes]
                 // [although in reality it doesn't actually sound like it's getting stretched, just distorted, i don't understand this]
         
-                for (int out_i = 0; out_i < out_buffer.Length; out_i+=2) {
+                for (int out_i = 0; out_i < out_buffer.Length; out_i++) {
                     int src_i = (out_i*n_samples)/out_buffer.Length;
                     out_buffer[out_i] = GetAudioBufferAt(src_i)/32767f;
-                    out_buffer[out_i+1] = out_buffer[out_i];
                 }
                 ClearAudioBuffer(); // all samples consumed
             } else if (audioStretchMethod == AudioStretchMethod.Truncate) {
                 // very naive, just truncate incoming samples if necessary
                 // [sounds ok but very distorted]
-                for (int out_i = 0; out_i < out_buffer.Length; out_i+=2) {
+                for (int out_i = 0; out_i < out_buffer.Length; out_i++) {
                     out_buffer[out_i] = GetAudioBufferAt(out_i)/32767f;
-                    out_buffer[out_i+1] = out_buffer[out_i];
                 }
                 ClearAudioBuffer(); // throw away any remaining samples
             } else {
