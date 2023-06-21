@@ -8,11 +8,18 @@ using BizHawk.Emulation.Cores.Nintendo.NES;
 using BizHawk.Emulation.Cores.Arcades.MAME;
 using System.IO;
 
+// Audio stuff is a bit of a mess right now.
+// I don't understand why using BizHawk's SoundOutputProvider gives really distorted sound
+// because it should be the same thing that's happening inside BizHawk and it sounds perfect there
+// maybe some kind of runtime difference?
+// Currently the manual PreserveSampleRate option sounds perfect but it's basically worthless because it accumulates lag whenever the emulator runs faster than 1x.
+
 public class TestBizHawk : MonoBehaviour
 {
     IEmulator emulator;
     IVideoProvider videoProvider;
     ISoundProvider soundProvider;
+    ISoundProvider resampledSoundProvider;
 
     InputManager inputManager;
     UnityInputProvider inputProvider;
@@ -35,12 +42,14 @@ public class TestBizHawk : MonoBehaviour
     public bool linearTexture; // [seems so make no difference visually]
     public bool forceReinitTexture;
 
+    public bool useManualAudioHandling;
     static int AudioChunkSize = 734; // [Hard to explain right now but for 'Accumulate' AudioStretchMethod, preserve audio chunks of this many samples (734 ~= 1 frame at 60fps at SR=44100)]
     static int AudioBufferSize = 44100*10;
     short[] audioBuffer; // circular buffer (queue) to store audio samples accumulated from the emulator
     static int ChannelCount = 2; // Seems to be always 2, for all BizHawk sound and for Unity audiosource
     int audioBufferStart, audioBufferEnd;
-
+    public int maxSamplesDeficit = 1985; // Dunno what this means exactly, related to audio buffering, value for PSX and QuickNes seems to be 1985.
+    SoundOutputProvider bufferedSoundProvider;
     public enum AudioStretchMethod {
         Truncate,
         PreserveSampleRate,
@@ -111,6 +120,14 @@ public class TestBizHawk : MonoBehaviour
             Debug.Log($"buffer: {videoProvider.BufferWidth} x {videoProvider.BufferHeight} = {videoProvider.BufferWidth * videoProvider.BufferHeight}");
             InitTargetTexture();
 
+            // Turns out BizHawk provides this wonderful SyncToAsyncProvider to asynchronously provide audio, which is what we need for the way Unity handles sound
+            // It also does some resampling so the sound works ok when the emulator is running at speeds other than 1x
+            soundProvider.SetSyncMode(SyncSoundMode.Sync); // [we could also use Async directly if the emulator provides it]
+            // resampledSoundProvider = new SyncToAsyncProvider(() => emulator.VsyncRate(), soundProvider);
+            bufferedSoundProvider = new SoundOutputProvider(() => emulator.VsyncRate());
+            bufferedSoundProvider.BaseSoundProvider = soundProvider;
+            bufferedSoundProvider.MaxSamplesDeficit = maxSamplesDeficit;
+
             // [not sure what this does but seems important]
             inputManager.SyncControls(emulator, movieSession, config);
         } else {
@@ -160,12 +177,10 @@ public class TestBizHawk : MonoBehaviour
             targetTexture.SetPixelData(videoBuffer, 0);
             targetTexture.Apply();
 
-            // get audio samples for the emulated frame
             short[] lastFrameAudioBuffer;
             int nSamples;
             soundProvider.GetSamplesSync(out lastFrameAudioBuffer, out nSamples);
-            // NOTE! there are actually 2*nSamples values in the buffer because it's stereo sound
-            Debug.Log($"Adding {nSamples} samples to the buffer.");
+            // Debug.Log($"Adding {nSamples} samples to the buffer.");
             // [Seems to be ~734 samples each frame for mario.nes]
             // append them to running buffer
             lock (audioBuffer) {
@@ -191,10 +206,38 @@ public class TestBizHawk : MonoBehaviour
         targetRenderer.material.mainTexture = targetTexture;
     }
 
+    
+    void OnAudioFilterRead(float[] data, int channels) {
+        if (useManualAudioHandling) {
+            Old_OnAudioFilterRead(data, channels);
+        } else {
+            New_OnAudioFilterRead(data, channels);
+        }
+    }
+
     // Send audio from the emulator to the AudioSource
     // (will only run if there is an AudioSource component attached)
-    // [this method is a mess atm, needs to be cleaned up]
-    void OnAudioFilterRead(float[] out_buffer, int channels) {
+    // short[] short_buf = new short[2048];
+    void New_OnAudioFilterRead(float[] data, int channels) {
+        if (channels != ChannelCount) {
+            Debug.LogError("AudioSource must be set to 2 channels");
+            return;
+        }
+        // Just have to grab the samples from the SyncToAsyncProvider and convert it from short to float
+        short[] short_buf = new short[data.Length];
+        int sampleCount;
+        // resampledSoundProvider.GetSamplesAsync(short_buf);
+        bufferedSoundProvider.GetSamples(data.Length/channels, out short_buf, out sampleCount);
+        Debug.Log($"Requested {data.Length/channels}, got {sampleCount} samples from bufferedSoundProvider");
+        Debug.Log($"short_buf.Length = {short_buf.Length}");
+        for (int i = 0; i < short_buf.Length; i++) {
+            data[i] = short_buf[i]/32767f;
+        }
+    }
+
+    // Previous attempt before i realised BizHawk already does this stuff better than i can
+    // [should probably delete]
+    void Old_OnAudioFilterRead(float[] out_buffer, int channels) {
         // Debug.Log($"n channels: {channels}");
         if (channels != ChannelCount) {
             Debug.LogError("AudioSource must be set to 2 channels");
