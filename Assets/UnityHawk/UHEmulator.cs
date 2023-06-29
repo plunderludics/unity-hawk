@@ -42,22 +42,22 @@ public class UHEmulator : MonoBehaviour
 
     public bool useManualAudioHandling;
     static int AudioChunkSize = 734; // [Hard to explain right now but for 'Accumulate' AudioStretchMethod, preserve audio chunks of this many samples (734 ~= 1 frame at 60fps at SR=44100)]
-    static int AudioBufferSize = 44100*10;
+    static int AudioBufferSize = 44100*2;
     short[] audioBuffer; // circular buffer (queue) to store audio samples accumulated from the emulator
     static int ChannelCount = 2; // Seems to be always 2, for all BizHawk sound and for Unity audiosource
     int audioBufferStart, audioBufferEnd;
-    SoundOutputProvider bufferedSoundProvider;
+
+    private int audioSamplesNeeded; // track how many samples unity wants to consume
+    SoundOutputProvider bufferedSoundProvider; // BizHawk's internal resampling engine
     public enum AudioStretchMethod {
         Truncate,
         PreserveSampleRate,
         Stretch,
         Overlap
     }
-    public AudioStretchMethod audioStretchMethod = AudioStretchMethod.PreserveSampleRate;
+    public AudioStretchMethod audioStretchMethod = AudioStretchMethod.Truncate; // if using non-manual audio, this should probably be Truncate
 
     public int frame = 0;
-
-    JobHandle frameAdvanceJobHandle;
 
     ProfilerMarker s_FrameAdvanceMarker;
 
@@ -72,6 +72,7 @@ public class UHEmulator : MonoBehaviour
 
         // Initialize stuff
         audioBuffer = new short[AudioBufferSize];
+        audioSamplesNeeded = 0;
         ClearAudioBuffer();
 
         inputManager = new InputManager();
@@ -127,7 +128,7 @@ public class UHEmulator : MonoBehaviour
             soundProvider.SetSyncMode(SyncSoundMode.Sync); // [we could also use Async directly if the emulator provides it]
             bufferedSoundProvider = new SoundOutputProvider(() => emulator.VsyncRate(), standaloneMode: true); // [idk why but standalone mode seems to be less distorted]
             bufferedSoundProvider.BaseSoundProvider = soundProvider;
-            // bufferedSoundProvider.MaxSamplesDeficit = 1985;
+            // bufferedSoundProvider.LogDebug = true;
 
             // [not sure what this does but seems important]
             inputManager.SyncControls(emulator, movieSession, config);
@@ -185,15 +186,25 @@ public class UHEmulator : MonoBehaviour
             targetTexture.SetPixelData(videoBuffer, 0);
             targetTexture.Apply(/*updateMipmaps: false*/);
         }
+
         // get audio samples for the emulated frame
         // [maybe this should happen in FrameAdvance, idk]
         short[] lastFrameAudioBuffer;
         int nSamples;
-        soundProvider.GetSamplesSync(out lastFrameAudioBuffer, out nSamples);
-        // NOTE! there are actually 2*nSamples values in the buffer because it's stereo sound
-        // Debug.Log($"Adding {nSamples} samples to the buffer.");
-        // [Seems to be ~734 samples each frame for mario.nes]
-        // append them to running buffer
+        if (useManualAudioHandling) {
+            nSamples = 0;
+            soundProvider.GetSamplesSync(out lastFrameAudioBuffer, out nSamples);
+            // NOTE! there are actually 2*nSamples values in the buffer because it's stereo sound
+            // Debug.Log($"Adding {nSamples} samples to the buffer.");
+            // [Seems to be ~734 samples each frame for mario.nes]
+            // append them to running buffer
+        } else {
+            nSamples = audioSamplesNeeded;
+            lastFrameAudioBuffer = new short[audioSamplesNeeded*ChannelCount];
+            bufferedSoundProvider.GetSamples(lastFrameAudioBuffer);
+            audioSamplesNeeded = 0;
+        }
+
         lock (audioBuffer) {
             for (int i = 0; i < nSamples*ChannelCount; i++) {
                 // Debug.Log($"Adding sample, audioBufferLength={AudioBufferLength()}");
@@ -213,43 +224,19 @@ public class UHEmulator : MonoBehaviour
         targetTexture = new Texture2D(videoProvider.BufferWidth, videoProvider.BufferHeight, textureFormat, linearTexture);
         targetRenderer.material.mainTexture = targetTexture;
     }
-
     
     // Send audio from the emulator to the AudioSource
     // (will only run if there is an AudioSource component attached)
     void OnAudioFilterRead(float[] data, int channels) {
-        if (useManualAudioHandling) {
-            Old_OnAudioFilterRead(data, channels);
-        } else {
-            New_OnAudioFilterRead(data, channels);
-        }
-    }
-
-    // Use Bizhawk's internal resampling engine - idk why this doesn't sound as good as EmuHawk does
-    void New_OnAudioFilterRead(float[] data, int channels) {
         if (channels != ChannelCount) {
             Debug.LogError("AudioSource must be set to 2 channels");
             return;
         }
-        // Just have to grab the samples from the SyncToAsyncProvider and convert it from short to float
-        short[] short_buf = new short[data.Length];
-        int sampleCount = -1;
-        // bufferedSoundProvider.GetSamples(data.Length/channels, out short_buf, out sampleCount); // for non-standalone mode
-        bufferedSoundProvider.GetSamples(short_buf);
-        // Debug.Log($"Requested {data.Length/channels}, got {short_buf.Length/channels} samples from bufferedSoundProvider");
-        // Debug.Log($"short_buf.Length = {short_buf.Length}");
-        for (int i = 0; i < short_buf.Length; i++) {
-            data[i] = short_buf[i]/32767f;
-        }
-    }
+        // for non-manual audio - track how many samples we wanna request from bizhawk
+        audioSamplesNeeded += data.Length/channels;
 
-    // Manual audio handling - sounds bad but in a different way
-    void Old_OnAudioFilterRead(float[] out_buffer, int channels) {
-        // Debug.Log($"n channels: {channels}");
-        if (channels != ChannelCount) {
-            Debug.LogError("AudioSource must be set to 2 channels");
-            return;
-        }
+        // copy from the accumulated emulator audio buffer into unity's buffer
+        // this needs to happen in manual or non-manual mode
         lock(audioBuffer) {
             int n_samples = AudioBufferLength();
             // Debug.Log($"Unity buffer size: {out_buffer.Length}; Emulated audio buffer size: {n_samples}");

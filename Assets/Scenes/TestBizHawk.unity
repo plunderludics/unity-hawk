@@ -387,6 +387,7 @@ MonoBehaviour:
   linearTexture: 0
   forceReinitTexture: 0
   blitTexture: 1
+  useManualAudioHandling: 0
   audioStretchMethod: 2
   frame: 0
 --- !u!82 &963194230
@@ -663,6 +664,7 @@ MonoBehaviour:
   linearTexture: 0
   forceReinitTexture: 0
   blitTexture: 1
+  useManualAudioHandling: 0
   audioStretchMethod: 1
   frame: 0
 --- !u!4 &1998418028
