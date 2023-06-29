@@ -11,11 +11,11 @@ public interface IInputProvider {
 
 // Provide input from Unity
 // [currently pretty hacky]
-public class UnityInputProvider : IInputProvider {
+public class UHInputProvider : IInputProvider {
 
     Queue<InputEvent> _eventQueue;
 
-    public UnityInputProvider() {
+    public UHInputProvider() {
         _eventQueue = new();
     }
 

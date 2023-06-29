@@ -10,7 +10,7 @@ using BizHawk.Emulation.Cores.Nintendo.NES;
 using BizHawk.Emulation.Cores.Arcades.MAME;
 using System.IO;
 
-public class TestBizHawk : MonoBehaviour
+public class UHEmulator : MonoBehaviour
 {
     IEmulator emulator;
     IVideoProvider videoProvider;
@@ -72,7 +72,7 @@ public class TestBizHawk : MonoBehaviour
 
         inputManager = new InputManager();
 
-        dialogParent = new UnityDialogParent();
+        dialogParent = new UHDialogParent();
 
         // Load config
         var configPath = Path.Combine(UnityHawk.bizhawkDir, "config.ini");

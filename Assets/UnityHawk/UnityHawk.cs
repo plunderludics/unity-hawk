@@ -20,7 +20,7 @@ public class UnityHawk : MonoBehaviour
     public static readonly string bizhawkDir = Path.Combine(Application.dataPath, "BizHawk");
     public static readonly string romsDir = Path.Combine(Application.dataPath, "Roms");
 
-    UnityInputProvider inputProvider;
+    UHInputProvider inputProvider;
 
     public bool runParallel;
 
@@ -78,7 +78,7 @@ public class UnityHawk : MonoBehaviour
         MAMEMachineDB.Initialize(gamedbPath);
 
         
-        inputProvider = new UnityInputProvider();
+        inputProvider = new UHInputProvider();
     }
 
     void Update() {
@@ -86,7 +86,7 @@ public class UnityHawk : MonoBehaviour
         inputProvider.Update(); // (this should read in all the Unity input and store it in a queue)
 
         // Run FrameAdvance on all active emulators in parallel.
-        TestBizHawk[] instances = (TestBizHawk[])FindObjectsOfType(typeof(TestBizHawk)); // really shouldn't be doing this every frame
+        UHEmulator[] instances = (UHEmulator[])FindObjectsOfType(typeof(UHEmulator)); // [probably shouldn't be doing this every frame]
         
         if (runParallel) {
             Task.WaitAll(instances.Select(
@@ -95,12 +95,12 @@ public class UnityHawk : MonoBehaviour
                 )
             ).ToArray());
         } else {
-            foreach (TestBizHawk instance in instances) {
+            foreach (UHEmulator instance in instances) {
                 instance.FrameAdvance(inputProvider);
             };
         }
 
-        foreach (TestBizHawk instance in instances) {
+        foreach (UHEmulator instance in instances) {
             instance.AfterFrameAdvance();
         };
     }

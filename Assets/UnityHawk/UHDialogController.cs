@@ -2,7 +2,7 @@ using UnityEngine;
 using BizHawk.Client.Common;
 using System.Collections.Generic;
 
-class UnityDialogController : IDialogController {
+class UHDialogController : IDialogController {
     public void AddOnScreenMessage(string message) {
         Debug.Log($"dialog controller OSM: {message}");
     }
