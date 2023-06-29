@@ -11,11 +11,18 @@ using BizHawk.Emulation.Cores.Arcades.MAME;
 using System.IO;
 using System.Runtime.InteropServices;
 using System;
+using System.Linq;
+
+using System.Threading.Tasks;
 
 public class UnityHawk : MonoBehaviour
 {   
     public static readonly string bizhawkDir = Path.Combine(Application.dataPath, "BizHawk");
     public static readonly string romsDir = Path.Combine(Application.dataPath, "Roms");
+
+    UHInputProvider inputProvider;
+
+    public bool runParallel;
 
     
     [DllImport("kernel32.dll")]
@@ -69,5 +76,32 @@ public class UnityHawk : MonoBehaviour
         // this is only necessary for certain platforms so maybe should be in a 
         // 'InitializeMAMEMachineIfNeeded' method that clients can call, something like that
         MAMEMachineDB.Initialize(gamedbPath);
+
+        
+        inputProvider = new UHInputProvider();
+    }
+
+    void Update() {
+        // Input handling
+        inputProvider.Update(); // (this should read in all the Unity input and store it in a queue)
+
+        // Run FrameAdvance on all active emulators in parallel.
+        UHEmulator[] instances = (UHEmulator[])FindObjectsOfType(typeof(UHEmulator)); // [probably shouldn't be doing this every frame]
+        
+        if (runParallel) {
+            Task.WaitAll(instances.Select(
+                instance => Task.Run(
+                    () => instance.FrameAdvance(inputProvider)
+                )
+            ).ToArray());
+        } else {
+            foreach (UHEmulator instance in instances) {
+                instance.FrameAdvance(inputProvider);
+            };
+        }
+
+        foreach (UHEmulator instance in instances) {
+            instance.AfterFrameAdvance();
+        };
     }
 }

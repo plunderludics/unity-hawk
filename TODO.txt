@@ -2,11 +2,12 @@
 - controls
   X keyboard input
   - gamepad input?
-- fix weird colors
+X fix weird colors
 - lua scripting
 - think about framerate (how to match target console framerate?)
-- see if Texture.SetPixelData is the most efficient way
+
 - emulator audio
+ - some kind of resampling solution (use Bizhawk's SoundOutputProvider?)
 
 - better way of setting the dll directory, to avoid hacky loading currently in UnityHawk.cs
 
@@ -16,10 +17,13 @@
  - NES
   X QuickNes
   X NesHawk
- - PS1 (Nymashock)
-  - graphics broken
+ X PS1 (Nymashock)
+  X graphics broken
+  X can't run multiple in parallel
 
 - nice unity component corresponding to a sample (rom + savestate + lua + config)
 - find a way of bundling emulator dependencies that works in build
+
+- clean up source filenames -> probably should be UHInputProvider.cs, etc
 
 - make unitypackage

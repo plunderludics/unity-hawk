@@ -318,6 +318,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: bc8a3a6518ee615478a1c96c787cc1a3, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  runParallel: 0
 --- !u!4 &919211183
 Transform:
   m_ObjectHideFlags: 0
@@ -350,7 +351,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!4 &963194228
 Transform:
   m_ObjectHideFlags: 0
@@ -385,6 +386,8 @@ MonoBehaviour:
   textureFormat: 14
   linearTexture: 0
   forceReinitTexture: 0
+  blitTexture: 1
+  audioStretchMethod: 2
   frame: 0
 --- !u!82 &963194230
 AudioSource:
@@ -544,7 +547,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!82 &1998418026
 AudioSource:
   m_ObjectHideFlags: 0
@@ -659,6 +662,8 @@ MonoBehaviour:
   textureFormat: 14
   linearTexture: 0
   forceReinitTexture: 0
+  blitTexture: 1
+  audioStretchMethod: 1
   frame: 0
 --- !u!4 &1998418028
 Transform:

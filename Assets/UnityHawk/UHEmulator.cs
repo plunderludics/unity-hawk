@@ -1,6 +1,8 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using Unity.Jobs;
+using Unity.Profiling;
 
 using BizHawk.Client.Common;
 using BizHawk.Emulation.Common;
@@ -12,13 +14,12 @@ using System.IO;
 // I don't really get why using BizHawk's SoundOutputProvider gives crackly sound
 // Currently the manual PreserveSampleRate option sounds perfect but it's basically worthless because it accumulates lag whenever the emulator runs faster than 1x.]
 
-public class TestBizHawk : MonoBehaviour
+public class UHEmulator : MonoBehaviour
 {
     IEmulator emulator;
     IVideoProvider videoProvider;
     ISoundProvider soundProvider;
     InputManager inputManager;
-    UnityInputProvider inputProvider;
 
     IDialogParent dialogParent;
 
@@ -37,6 +38,7 @@ public class TestBizHawk : MonoBehaviour
     public TextureFormat textureFormat = TextureFormat.BGRA32;
     public bool linearTexture; // [seems so make no difference visually]
     public bool forceReinitTexture;
+    public bool blitTexture = true;
 
     public bool useManualAudioHandling;
     static int AudioChunkSize = 734; // [Hard to explain right now but for 'Accumulate' AudioStretchMethod, preserve audio chunks of this many samples (734 ~= 1 frame at 60fps at SR=44100)]
@@ -55,8 +57,14 @@ public class TestBizHawk : MonoBehaviour
 
     public int frame = 0;
 
+    JobHandle frameAdvanceJobHandle;
+
+    ProfilerMarker s_FrameAdvanceMarker;
+
     void Start()
     {
+        s_FrameAdvanceMarker = new ProfilerMarker($"FrameAdvance {GetInstanceID()}");
+
         // Check if there is an AudioSource attached
         if (!GetComponent<AudioSource>()) {
             Debug.LogWarning("No AudioSource component, will not play emulator audio");
@@ -67,9 +75,8 @@ public class TestBizHawk : MonoBehaviour
         ClearAudioBuffer();
 
         inputManager = new InputManager();
-        inputProvider = new UnityInputProvider();
 
-        dialogParent = new UnityDialogParent();
+        dialogParent = new UHDialogParent();
 
         // Load config
         var configPath = Path.Combine(UnityHawk.bizhawkDir, "config.ini");
@@ -130,11 +137,10 @@ public class TestBizHawk : MonoBehaviour
     }
 
     // [Not really sure what the framerate of this should be tbh - should check what BizHawk does]
-    void Update()
+    public void FrameAdvance(IInputProvider inputProvider)
     {
         if (emulator != null) {
-            // Input handling
-            inputProvider.Update(); // (this should read in all the Unity input and store it in a queue)
+            s_FrameAdvanceMarker.Begin();
             var finalHostController = inputManager.ControllerInputCoalescer;
             // InputManager.ActiveController.PrepareHapticsForHost(finalHostController);
             ProcessInput(finalHostController, inputProvider);
@@ -146,7 +152,7 @@ public class TestBizHawk : MonoBehaviour
             // {
             //     Tools.LuaConsole.ResumeScripts(false);
             // }
-
+            
             // [gotta call this to make sure the input gets through]
             movieSession.HandleFrameBefore();
 
@@ -156,12 +162,20 @@ public class TestBizHawk : MonoBehaviour
             // [maybe not needed]
             movieSession.HandleFrameAfter();
 
-            // Re-init the target texture if needed (if dimensions have changed, as happens on PSX)
-            if (forceReinitTexture || (targetTexture.width != videoProvider.BufferWidth || targetTexture.height != videoProvider.BufferHeight)) {
-                InitTargetTexture();
-                forceReinitTexture = false;
-            }
+            frame++;
+            s_FrameAdvanceMarker.End();
+        }
+    }
 
+    // [we do the texture blitting in a separate method because it has to run on the main thread (and FrameAdvance runs in parallel)]
+    public void AfterFrameAdvance() { 
+        // Re-init the target texture if needed (if dimensions have changed, as happens on PSX)
+        if (forceReinitTexture || (targetTexture.width != videoProvider.BufferWidth || targetTexture.height != videoProvider.BufferHeight)) {
+            InitTargetTexture();
+            forceReinitTexture = false;
+        }
+
+        if (blitTexture) {
             // copy the texture from the emulator to the target renderer
             // [any faster way to do this?]
             int[] videoBuffer = videoProvider.GetVideoBuffer();
@@ -169,28 +183,28 @@ public class TestBizHawk : MonoBehaviour
             // [note: for e.g. PSX, the videoBuffer array is much larger than the actual current pixel data (BufferWidth x BufferHeight)
             //  can possibly optimize a lot by truncating the buffer before this call:]
             targetTexture.SetPixelData(videoBuffer, 0);
-            targetTexture.Apply();
-
-            short[] lastFrameAudioBuffer;
-            int nSamples;
-            soundProvider.GetSamplesSync(out lastFrameAudioBuffer, out nSamples);
-            // Debug.Log($"Adding {nSamples} samples to the buffer.");
-            // [Seems to be ~734 samples each frame for mario.nes]
-            // append them to running buffer
-            lock (audioBuffer) {
-                for (int i = 0; i < nSamples*ChannelCount; i++) {
-                    // Debug.Log($"Adding sample, audioBufferLength={AudioBufferLength()}");
-                    if (AudioBufferLength() == audioBuffer.Length - 1) {
-                        // Debug.LogWarning("audio buffer full, dropping samples");
-                        break;
-                    }
-                    audioBuffer[audioBufferEnd] = lastFrameAudioBuffer[i];
-                    audioBufferEnd++;
-                    audioBufferEnd %= audioBuffer.Length;
+            targetTexture.Apply(/*updateMipmaps: false*/);
+        }
+        // get audio samples for the emulated frame
+        // [maybe this should happen in FrameAdvance, idk]
+        short[] lastFrameAudioBuffer;
+        int nSamples;
+        soundProvider.GetSamplesSync(out lastFrameAudioBuffer, out nSamples);
+        // NOTE! there are actually 2*nSamples values in the buffer because it's stereo sound
+        // Debug.Log($"Adding {nSamples} samples to the buffer.");
+        // [Seems to be ~734 samples each frame for mario.nes]
+        // append them to running buffer
+        lock (audioBuffer) {
+            for (int i = 0; i < nSamples*ChannelCount; i++) {
+                // Debug.Log($"Adding sample, audioBufferLength={AudioBufferLength()}");
+                if (AudioBufferLength() == audioBuffer.Length - 1) {
+                    // Debug.LogWarning("audio buffer full, dropping samples");
+                    break;
                 }
+                audioBuffer[audioBufferEnd] = lastFrameAudioBuffer[i];
+                audioBufferEnd++;
+                audioBufferEnd %= audioBuffer.Length;
             }
-
-            frame++;
         }
     }
 
