@@ -6,6 +6,8 @@ X fix weird colors
 - lua scripting
 - think about framerate (how to match target console framerate?)
 
+- update BizHawk (to 2.9.1?)
+
 X emulator audio
  X some kind of resampling solution (use Bizhawk's SoundOutputProvider?)
 
