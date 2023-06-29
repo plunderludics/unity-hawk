@@ -227,13 +227,13 @@ public class UHEmulator : MonoBehaviour
     
     // Send audio from the emulator to the AudioSource
     // (will only run if there is an AudioSource component attached)
-    void OnAudioFilterRead(float[] data, int channels) {
+    void OnAudioFilterRead(float[] out_buffer, int channels) {
         if (channels != ChannelCount) {
             Debug.LogError("AudioSource must be set to 2 channels");
             return;
         }
         // for non-manual audio - track how many samples we wanna request from bizhawk
-        audioSamplesNeeded += data.Length/channels;
+        audioSamplesNeeded += out_buffer.Length/channels;
 
         // copy from the accumulated emulator audio buffer into unity's buffer
         // this needs to happen in manual or non-manual mode
