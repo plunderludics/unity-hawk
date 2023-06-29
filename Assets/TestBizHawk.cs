@@ -181,7 +181,7 @@ public class TestBizHawk : MonoBehaviour
         int nSamples;
         soundProvider.GetSamplesSync(out lastFrameAudioBuffer, out nSamples);
         // NOTE! there are actually 2*nSamples values in the buffer because it's stereo sound
-        Debug.Log($"Adding {nSamples} samples to the buffer.");
+        // Debug.Log($"Adding {nSamples} samples to the buffer.");
         // [Seems to be ~734 samples each frame for mario.nes]
         // append them to running buffer
         lock (audioBuffer) {
@@ -215,7 +215,7 @@ public class TestBizHawk : MonoBehaviour
         }
         lock(audioBuffer) {
             int n_samples = AudioBufferLength();
-            Debug.Log($"Unity buffer size: {out_buffer.Length}; Emulated audio buffer size: {n_samples}");
+            // Debug.Log($"Unity buffer size: {out_buffer.Length}; Emulated audio buffer size: {n_samples}");
 
             // Currently this assumes the input is mono and the output is interleaved stereo
             // which seems true for NES but almost certainly not always true
