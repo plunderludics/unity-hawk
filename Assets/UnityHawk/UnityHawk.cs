@@ -41,19 +41,21 @@ public class UnityHawk : MonoBehaviour
         _ = SetDllDirectory(dllDir);
 
         var libsToLoad = new List<string> {
-            //QuickNes (NES)
+            // QuickNes (NES)
             "libquicknes.dll",
-            //Nymashock (PSX)
+            // Nymashock (PSX)
             "waterboxhost.dll",
             "libzstd.dll",
             "libbizabiadapter_msabi_sysv.dll",
-            //Mupen64 (N64)
+            // Mupen64 (N64)
             "mupen64plus.dll",
             "mupen64plus-audio-bkm.dll",
             "mupen64plus-input-bkm.dll",
-            // "mupen64plus-video-rice.dll",
+              // "mupen64plus-video-rice.dll",
             "mupen64plus-video-GLideN64.dll",
-            "libspeexdsp.dll"
+            "libspeexdsp.dll",
+            // Other
+            "lua54.dll"
 
             // TODO load any others we need [or find a way to avoid doing this]
         };

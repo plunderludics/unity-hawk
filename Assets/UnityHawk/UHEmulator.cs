@@ -9,6 +9,7 @@ using BizHawk.Emulation.Common;
 using BizHawk.Emulation.Cores.Nintendo.NES;
 using BizHawk.Emulation.Cores.Arcades.MAME;
 using System.IO;
+using BizHawk.Client.EmuHawk;
 
 // [Audio stuff is a bit of a mess right now.
 // I don't really get why using BizHawk's SoundOutputProvider gives crackly sound
@@ -70,6 +71,8 @@ public class UHEmulator : MonoBehaviour
             Debug.LogWarning("No AudioSource component, will not play emulator audio");
         }
 
+        // var ll = new BizHawk.Client.EmuHawk.LuaLibraries();
+
         // Initialize stuff
         audioBuffer = new short[AudioBufferSize];
         audioSamplesNeeded = 0;
@@ -111,6 +114,8 @@ public class UHEmulator : MonoBehaviour
         var nextComm = CreateCoreComm();
 
         bool loaded = loader.LoadRom(romPath, nextComm, null);
+        
+        // SoundConfig sc = new SoundConfig(null, config, (x) => new List<string>());
 
         if (loaded) {
             emulator = loader.LoadedEmulator;
@@ -132,6 +137,19 @@ public class UHEmulator : MonoBehaviour
 
             // [not sure what this does but seems important]
             inputManager.SyncControls(emulator, movieSession, config);
+
+            LuaFileList newScripts = new(null, onChanged: () => {});
+            LuaFunctionList registeredFuncList = new(onChanged: () => {});
+            var LuaImp = new LuaLibraries(
+                    newScripts,
+                    registeredFuncList,
+                    emulator.ServiceProvider,
+                    new FakeMainForm(),
+                    null,
+                    null,
+                    config,
+                    emulator,
+                    null);
         } else {
             Debug.LogWarning($"Failed to load {romPath}.");
         }
