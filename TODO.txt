@@ -3,7 +3,15 @@
   X keyboard input
   - gamepad input?
 X fix weird colors
+
 - lua scripting
+ X [basic implementation works now]
+ - more testing; test our existing samples
+ - more graceful handling of unsupported library functions, currently spits out opaque error and halts the lua script - not sure best way to handle this one
+ - support some of the stuff in UHMainFormApi - loading roms, pausing/unpausing, volume control, etc
+ - would be nice to support the graphics lib too for drawing debug info etc
+ - make it easier to add custom lua libraries from the Unity project (see LuaTestLibrary.cs)
+
 - think about framerate (how to match target console framerate?)
 
 - update BizHawk (to 2.9.1?)
