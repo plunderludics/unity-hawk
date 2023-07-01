@@ -13,6 +13,7 @@ X fix weird colors
  - make it easier to add custom lua libraries from the Unity project (see LuaTestLibrary.cs)
 
 - think about framerate (how to match target console framerate?)
+ - avoid locking threads to the same framerate as they currently are
 
 - update BizHawk (to 2.9.1?)
 
