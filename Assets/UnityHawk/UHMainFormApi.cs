@@ -4,7 +4,8 @@ using BizHawk.Client.Common;
 using BizHawk.Emulation.Common;
 using System.Drawing;
 
-public class FakeMainForm : IMainFormForApi
+// Nothing here is implemented right now, but some pieces could be
+public class UHMainFormApi : IMainFormForApi
 {
     public IMovieSession MovieSession {
         get {

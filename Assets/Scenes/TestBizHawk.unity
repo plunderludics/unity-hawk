@@ -382,6 +382,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   romFileName: mario.nes
   currentCore: nul
+  luaScripts:
+  - test.lua
   targetRenderer: {fileID: 841223670}
   textureFormat: 14
   linearTexture: 0
@@ -659,6 +661,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   romFileName: geotools\Cali's Geo Tools (USA).cue
   currentCore: nul
+  luaScripts: []
   targetRenderer: {fileID: 424169697}
   textureFormat: 14
   linearTexture: 0
