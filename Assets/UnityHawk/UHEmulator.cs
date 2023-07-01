@@ -4,12 +4,18 @@ using UnityEngine;
 using Unity.Jobs;
 using Unity.Profiling;
 
+using System;
 using BizHawk.Client.Common;
 using BizHawk.Emulation.Common;
 using BizHawk.Emulation.Cores.Nintendo.NES;
 using BizHawk.Emulation.Cores.Arcades.MAME;
 using System.IO;
 using BizHawk.Client.EmuHawk;
+using System.Linq;
+
+using System.Text;
+using BizHawk.Common.CollectionExtensions;
+using NLua;
 
 // [Audio stuff is a bit of a mess right now.
 // I don't really get why using BizHawk's SoundOutputProvider gives crackly sound
@@ -18,6 +24,7 @@ using BizHawk.Client.EmuHawk;
 public class UHEmulator : MonoBehaviour
 {
     IEmulator emulator;
+    IGameInfo game;
     IVideoProvider videoProvider;
     ISoundProvider soundProvider;
     InputManager inputManager;
@@ -30,8 +37,12 @@ public class UHEmulator : MonoBehaviour
     Config config;
     FirmwareManager firmwareManager = new FirmwareManager();
 
+    LuaLibraries lua;
+
     public string romFileName = "mario.nes";
     public string currentCore = "nul";
+
+    public List<string> luaScripts;
 
     public Renderer targetRenderer;
     Texture2D targetTexture;
@@ -70,8 +81,6 @@ public class UHEmulator : MonoBehaviour
         if (!GetComponent<AudioSource>()) {
             Debug.LogWarning("No AudioSource component, will not play emulator audio");
         }
-
-        // var ll = new BizHawk.Client.EmuHawk.LuaLibraries();
 
         // Initialize stuff
         audioBuffer = new short[AudioBufferSize];
@@ -119,6 +128,7 @@ public class UHEmulator : MonoBehaviour
 
         if (loaded) {
             emulator = loader.LoadedEmulator;
+            game = loader.Game;
             currentCore = emulator.Attributes().CoreName;
 
             videoProvider = emulator.AsVideoProviderOrDefault();
@@ -138,18 +148,8 @@ public class UHEmulator : MonoBehaviour
             // [not sure what this does but seems important]
             inputManager.SyncControls(emulator, movieSession, config);
 
-            LuaFileList newScripts = new(null, onChanged: () => {});
-            LuaFunctionList registeredFuncList = new(onChanged: () => {});
-            var LuaImp = new LuaLibraries(
-                    newScripts,
-                    registeredFuncList,
-                    emulator.ServiceProvider,
-                    new FakeMainForm(),
-                    null,
-                    null,
-                    config,
-                    emulator,
-                    null);
+            LuaSandbox.DefaultLogger = Debug.Log;
+            RestartLua();
         } else {
             Debug.LogWarning($"Failed to load {romPath}.");
         }
@@ -171,6 +171,11 @@ public class UHEmulator : MonoBehaviour
             // {
             //     Tools.LuaConsole.ResumeScripts(false);
             // }
+            LuaUpdateBefore();
+
+            lua.CallFrameBeforeEvent();
+
+            LuaUpdateAfter();
             
             // [gotta call this to make sure the input gets through]
             movieSession.HandleFrameBefore();
@@ -241,6 +246,220 @@ public class UHEmulator : MonoBehaviour
     void InitTargetTexture() {
         targetTexture = new Texture2D(videoProvider.BufferWidth, videoProvider.BufferHeight, textureFormat, linearTexture);
         targetRenderer.material.mainTexture = targetTexture;
+    }
+
+    // Restart (or init) all lua scripts
+    // [adapted from LuaConsole:Restart() in LuaConsole.cs]
+    void RestartLua()
+    {
+        List<LuaFile> runningScripts = new();
+
+        // Things we need to do with the existing lua instance before we can make a new one
+        if (lua is not null)
+        {
+            if (lua.IsRebootingCore)
+            {
+                // Even if the lua console is self-rebooting from client.reboot_core() we still want to re-inject dependencies
+                lua.Restart(emulator.ServiceProvider, config, emulator, game);
+                return;
+            }
+
+            runningScripts = lua.ScriptList.Where(lf => lf.Enabled).ToList();
+
+            // we don't use runningScripts here as the other scripts need to be stopped too
+            foreach (var file in lua.ScriptList)
+            {
+                DisableLuaScript(file);
+            }
+        }
+
+        lua?.Close();
+        LuaFileList newScripts = new(luaScripts.Select(
+            path => new LuaFile(Path.Combine(Application.dataPath, path))
+        ).ToArray(), onChanged: () => {});
+        Debug.Log(newScripts);
+        LuaFunctionList registeredFuncList = new(onChanged: () => {});
+        lua = new LuaLibraries(
+            newScripts,
+            registeredFuncList,
+            emulator.ServiceProvider,
+            new FakeMainForm(),
+            null, // DisplayManager
+            inputManager,
+            config,
+            emulator,
+            game);
+        // [this is a hack, this callback gets set in the LuaLibraries constructor so we have to reset it afterwards]
+        LuaLibraries._logToLuaConsoleCallback = LogLuaObject;
+
+        // [why does this use runningScripts from before? i don't get it]
+        foreach (var file in /*runningScripts*/newScripts)
+        {
+            try
+            {
+                Debug.Log("attempting to spawn sandbox thread");
+                LuaSandbox.Sandbox(file.Thread, () =>
+                {
+                    lua.SpawnAndSetFileThread(file.Path, file);
+                    LuaSandbox.CreateSandbox(file.Thread, Path.GetDirectoryName(file.Path));
+                    Debug.Log("created sandbox");
+                    file.State = LuaFile.RunState.Running;
+                }, () =>
+                {
+                    Debug.LogWarning("Could not spawn thread");
+                    file.State = LuaFile.RunState.Disabled;
+                });
+            }
+            catch (Exception ex)
+            {
+                dialogParent.DialogController.ShowMessageBox(ex.ToString());
+            }
+        }
+    }
+
+    void LuaUpdateBefore() {
+        ResumeLuaScripts(false);
+        if (!lua.IsUpdateSupressed)
+        {
+            lua.CallFrameBeforeEvent();
+        }
+    }
+
+    void LuaUpdateAfter() {
+        if (!lua.IsUpdateSupressed)
+        {
+            lua.CallFrameAfterEvent();
+            ResumeLuaScripts(true);
+        }
+    }
+
+    // [copied from ConsoleLuaLibrary.cs]
+    // Outputs the given lua object to unity debug log. Note: Can accept a LuaTable
+    private void LogLuaObject(/*string separator, string terminator, */params object[] outputs)
+    {
+        string separator = "\t";
+        string terminator = "\n";
+        static string SerializeTable(LuaTable lti)
+        {
+            var keyObjs = lti.Keys;
+            var valueObjs = lti.Values;
+            if (keyObjs.Count != valueObjs.Count)
+            {
+                throw new ArgumentException(message: "each value must be paired with one key, they differ in number", paramName: nameof(lti));
+            }
+
+            var values = new object[keyObjs.Count];
+            var kvpIndex = 0;
+            foreach (var valueObj in valueObjs)
+            {
+                values[kvpIndex++] = valueObj;
+            }
+
+            return string.Concat(keyObjs.Cast<object>()
+                .Select((kObj, i) => $"\"{kObj}\": \"{values[i]}\"\n")
+                .Order());
+        }
+
+        var sb = new StringBuilder();
+
+        void SerializeAndWrite(object output)
+            => sb.Append(output switch
+            {
+                null => "nil",
+                LuaTable table => SerializeTable(table),
+                _ => output.ToString()
+            });
+
+        if (outputs == null || outputs.Length == 0 || (outputs.Length == 1 && outputs[0] is null))
+        {
+            sb.Append($"(no return){terminator}");
+            return;
+        }
+
+        SerializeAndWrite(outputs[0]);
+        for (int outIndex = 1, indexAfterLast = outputs.Length; outIndex != indexAfterLast; outIndex++)
+        {
+            sb.Append(separator);
+            SerializeAndWrite(outputs[outIndex]);
+        }
+
+        if (!string.IsNullOrEmpty(terminator))
+        {
+            sb.Append(terminator);
+        }
+
+        Debug.Log(sb.ToString());
+    }
+
+    // [adapted from LuaConsole:ResumeScripts
+    //  - idg why this is called ResumeScripts - seems like it has gets run every frame]
+    public void ResumeLuaScripts(bool includeFrameWaiters)
+    {
+        if (!lua.ScriptList.Any()
+            || lua.IsUpdateSupressed
+           /* || (MainForm.IsTurboing && !Config.RunLuaDuringTurbo) */)
+        {
+            return;
+        }
+
+        foreach (var lf in lua.ScriptList.Where(static lf => lf.State is LuaFile.RunState.Running && lf.Thread is not null))
+        {
+            try
+            {
+                LuaSandbox.Sandbox(lf.Thread, () =>
+                {
+                    var prohibit = lf.FrameWaiting && !includeFrameWaiters;
+                    if (!prohibit)
+                    {
+                        var (waitForFrame, terminated) = lua.ResumeScript(lf);
+                        if (terminated)
+                        {
+                            lua.CallExitEvent(lf);
+                            lf.Stop();
+                            DetachRegisteredFunctions(lf);
+                            // UpdateDialog();
+                        }
+
+                        lf.FrameWaiting = waitForFrame;
+                    }
+                }, () =>
+                {
+                    lf.Stop();
+                    DetachRegisteredFunctions(lf);
+                    // LuaListView.Refresh();
+                });
+            }
+            catch (Exception ex)
+            {
+                dialogParent.DialogController.ShowMessageBox(ex.ToString());
+            }
+        }
+
+        // _messageCount = 0;
+    }
+
+    private void DetachRegisteredFunctions(LuaFile lf)
+    {
+        foreach (var nlf in lua.RegisteredFunctions
+            .Where(f => f.LuaFile == lf))
+        {
+            nlf.DetachFromScript();
+        }
+    }
+
+    // [this lua stuff should go into a different class, this one getting too big]
+    private void DisableLuaScript(LuaFile file)
+    {
+        if (file.IsSeparator) return;
+
+        file.State = LuaFile.RunState.Disabled;
+
+        if (file.Thread is not null)
+        {
+            lua.CallExitEvent(file);
+            lua.RegisteredFunctions.RemoveForFile(file, emulator);
+            file.Stop();
+        }
     }
     
     // Send audio from the emulator to the AudioSource
