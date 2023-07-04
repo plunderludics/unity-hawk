@@ -2,6 +2,7 @@
 - controls
   X keyboard input
   - gamepad input?
+  - make it easy to remap/configure controls (either in lua or in unity)
 X fix weird colors
 
 - lua scripting
@@ -11,6 +12,9 @@ X fix weird colors
  - support some of the stuff in UHMainFormApi - loading roms, pausing/unpausing, volume control, etc
  - would be nice to support the graphics lib too for drawing debug info etc
  - make it easier to add custom lua libraries from the Unity project (see LuaTestLibrary.cs)
+  - or at least a generic way to get information from lua scripts into unity (message passing or function calling interface)
+
+- have a nice interface for (unityhawk users) to interact with the bizhawk apis (e.g. for pausing, restarting, changing memory, etc)
 
 - think about framerate (how to match target console framerate?)
 
@@ -35,5 +39,6 @@ X emulator audio
 - find a way of bundling emulator dependencies that works in build
 
 X clean up source filenames -> probably should be UHInputProvider.cs, etc
+- make a UnityHawk namespace instead of using UH prefix
 
 - make unitypackage

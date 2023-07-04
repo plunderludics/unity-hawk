@@ -1,3 +1,6 @@
+#nullable enable
+
+
 using UnityEngine;
 using BizHawk.Client.Common;
 using System.Collections.Generic;
@@ -8,14 +11,15 @@ class UHDialogController : IDialogController {
     }
 
     public IReadOnlyList<string>? ShowFileMultiOpenDialog(
-    IDialogParent dialogParent,
-    string? filterStr,
-    ref int filterIndex,
-    string initDir,
-    bool discardCWDChange = false,
-    string? initFileName = null,
-    bool maySelectMultiple = false,
-    string? windowTitle = null) {
+        IDialogParent dialogParent,
+        string? filterStr,
+        ref int filterIndex,
+        string initDir,
+        bool discardCWDChange = false,
+        string? initFileName = null,
+        bool maySelectMultiple = false,
+        string? windowTitle = null)
+    {
         return new List<string>() {
             "test"
         };
@@ -28,7 +32,8 @@ class UHDialogController : IDialogController {
         string? filterStr,
         string initDir,
         string? initFileName,
-        bool muteOverwriteWarning) {
+        bool muteOverwriteWarning)
+    {
             return "hello";
     }
 
@@ -36,8 +41,9 @@ class UHDialogController : IDialogController {
         IDialogParent? owner,
         string text,
         string? caption = null,
-        EMsgBoxIcon? icon = null) {
-                Debug.Log($"DialogController: {text}");
+        EMsgBoxIcon? icon = null)
+    {
+        Debug.Log($"DialogController: {text}");
     }
 
     public bool ShowMessageBox2(
@@ -45,18 +51,20 @@ class UHDialogController : IDialogController {
         string text,
         string? caption = null,
         EMsgBoxIcon? icon = null,
-        bool useOKCancel = false) {
-            Debug.Log($"DialogController: {text}");
-            return true;
+        bool useOKCancel = false)
+    {
+        Debug.Log($"DialogController: {text}");
+        return true;
     }
 
     public bool? ShowMessageBox3(
         IDialogParent? owner,
         string text,
         string? caption = null,
-        EMsgBoxIcon? icon = null) {
-            Debug.Log($"DialogController: {text}");
-            return true;
+        EMsgBoxIcon? icon = null)
+    {
+        Debug.Log($"DialogController: {text}");
+        return true;
     }
 
     public void StartSound() {

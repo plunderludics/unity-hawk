@@ -7,7 +7,6 @@ using System.IO;
 
 using UnityEngine;
 
-using BizHawk.Client.EmuHawk;
 using BizHawk.Client.Common;
 using BizHawk.Emulation.Common;
 using BizHawk.Common.CollectionExtensions;
@@ -16,7 +15,7 @@ using NLua;
 
 // [mostly adapted from LuaConsole.cs]
 class UHLuaEngine {
-    LuaLibraries _lua; // the underlying BizHawk lua engine
+    UHLuaLibraries _lua;
     IEmulator _emulator;
 
     static UHLuaEngine() {
@@ -61,7 +60,7 @@ class UHLuaEngine {
         ).ToArray(), onChanged: () => {});
         Debug.Log(newScripts);
         LuaFunctionList registeredFuncList = new(onChanged: () => {});
-        _lua = new LuaLibraries(
+        _lua = new UHLuaLibraries(
             newScripts,
             registeredFuncList,
             emulator.ServiceProvider,
@@ -70,9 +69,8 @@ class UHLuaEngine {
             inputManager,
             config,
             emulator,
-            game);
-        // [this is a hack, this callback gets set in the LuaLibraries constructor so we have to reset it afterwards]
-        LuaLibraries._logToLuaConsoleCallback = LogLuaObject;
+            game,
+            LogLuaObject);
 
         // [why does this use runningScripts from before? i don't get it]
         foreach (var file in /*runningScripts*/newScripts)
