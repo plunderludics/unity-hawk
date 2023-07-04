@@ -175,6 +175,8 @@ public class UHEmulator : MonoBehaviour
 
             luaEngine.UpdateAfter();
 
+            // TODO: throttle
+
             frame++;
             s_FrameAdvanceMarker.End();
         }
@@ -248,13 +250,10 @@ public class UHEmulator : MonoBehaviour
         audioSamplesNeeded += out_buffer.Length/channels;
 
         // copy from the accumulated emulator audio buffer into unity's buffer
-        // this needs to happen in manual or non-manual mode
+        // this needs to happen in both manual and non-manual mode
         lock(audioBuffer) {
             int n_samples = AudioBufferLength();
             // Debug.Log($"Unity buffer size: {out_buffer.Length}; Emulated audio buffer size: {n_samples}");
-
-            // Currently this assumes the input is mono and the output is interleaved stereo
-            // which seems true for NES but almost certainly not always true
 
             // Unity needs 2048 samples right now, and depending on the speed the emulator is running,
             // we might have anywhere from 0 to like 10000 accumulated.
