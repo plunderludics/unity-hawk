@@ -5,6 +5,7 @@ using Unity.Jobs;
 using Unity.Profiling;
 
 using System;
+using System.Linq;
 using BizHawk.Client.Common;
 using BizHawk.Emulation.Common;
 using BizHawk.Emulation.Cores.Nintendo.NES;
@@ -143,7 +144,8 @@ public class UHEmulator : MonoBehaviour
             // [not sure what this does but seems important]
             inputManager.SyncControls(emulator, movieSession, config);
 
-            luaEngine.Restart(config, inputManager, emulator, game, luaScripts);
+            var luaScriptPaths = luaScripts.Select(path => Path.Join(UnityHawk.bizhawkDir, path)).ToList();
+            luaEngine.Restart(config, inputManager, emulator, game,luaScriptPaths);
         } else {
             Debug.LogWarning($"Failed to load {romPath}.");
         }

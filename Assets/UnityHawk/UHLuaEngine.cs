@@ -55,9 +55,7 @@ class UHLuaEngine {
         }
 
         _lua?.Close();
-        LuaFileList newScripts = new(luaScriptPaths.Select(
-            path => new LuaFile(Path.Combine(Application.dataPath, path))
-        ).ToArray(), onChanged: () => {});
+        LuaFileList newScripts = new(luaScriptPaths.Select(path => new LuaFile(path)).ToArray(), onChanged: () => {});
         Debug.Log(newScripts);
         LuaFunctionList registeredFuncList = new(onChanged: () => {});
         _lua = new UHLuaLibraries(

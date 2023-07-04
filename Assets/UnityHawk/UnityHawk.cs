@@ -17,8 +17,11 @@ using System.Threading.Tasks;
 
 public class UnityHawk : MonoBehaviour
 {   
-    public static readonly string bizhawkDir = Path.Combine(Application.dataPath, "BizHawk");
-    public static readonly string romsDir = Path.Combine(Application.dataPath, "Roms");
+    public static readonly string bizhawkDirName = "BizHawk";
+    public static readonly string romsDirName = "Roms";
+
+    public static readonly string bizhawkDir = Path.Combine(Application.dataPath, bizhawkDirName);
+    public static readonly string romsDir = Path.Combine(bizhawkDir, romsDirName);
 
     UHInputProvider inputProvider;
 
