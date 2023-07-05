@@ -22,11 +22,6 @@ public class UnityHawk : MonoBehaviour
 
     public static readonly string bizhawkDir = Path.Combine(Application.dataPath, bizhawkDirName);
     public static readonly string romsDir = Path.Combine(bizhawkDir, romsDirName);
-
-    UHInputProvider inputProvider;
-
-    public bool runParallel;
-
     
     [DllImport("kernel32.dll")]
     private static extern IntPtr LoadLibrary(string lpLibFileName);
@@ -36,6 +31,8 @@ public class UnityHawk : MonoBehaviour
 
     void Awake()
     {
+        // Initialize some global stuff that every BizHawk instance will use
+
         // [huge hack - preload all the dlls for cores that have to load them at runtime
         //  i don't know why, but just calling SetDllDirectory before bizhawk loads doesn't work.
         //  but there must be a better way than this]
@@ -81,32 +78,5 @@ public class UnityHawk : MonoBehaviour
         // this is only necessary for certain platforms so maybe should be in a 
         // 'InitializeMAMEMachineIfNeeded' method that clients can call, something like that
         MAMEMachineDB.Initialize(gamedbPath);
-
-        
-        inputProvider = new UHInputProvider();
-    }
-
-    void Update() {
-        // Input handling
-        inputProvider.Update(); // (this should read in all the Unity input and store it in a queue)
-
-        // Run FrameAdvance on all active emulators in parallel.
-        UHEmulator[] instances = (UHEmulator[])FindObjectsOfType(typeof(UHEmulator)); // [probably shouldn't be doing this every frame]
-        
-        if (runParallel) {
-            Task.WaitAll(instances.Select(
-                instance => Task.Run(
-                    () => instance.FrameAdvance(inputProvider)
-                )
-            ).ToArray());
-        } else {
-            foreach (UHEmulator instance in instances) {
-                instance.FrameAdvance(inputProvider);
-            };
-        }
-
-        foreach (UHEmulator instance in instances) {
-            instance.AfterFrameAdvance();
-        };
     }
 }

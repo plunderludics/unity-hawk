@@ -56,7 +56,6 @@ class UHLuaEngine {
 
         _lua?.Close();
         LuaFileList newScripts = new(luaScriptPaths.Select(path => new LuaFile(path)).ToArray(), onChanged: () => {});
-        Debug.Log(newScripts);
         LuaFunctionList registeredFuncList = new(onChanged: () => {});
         _lua = new UHLuaLibraries(
             newScripts,
@@ -75,12 +74,12 @@ class UHLuaEngine {
         {
             try
             {
-                Debug.Log("attempting to spawn sandbox thread");
+                // Debug.Log("attempting to spawn sandbox thread");
                 LuaSandbox.Sandbox(file.Thread, () =>
                 {
                     _lua.SpawnAndSetFileThread(file.Path, file);
                     LuaSandbox.CreateSandbox(file.Thread, Path.GetDirectoryName(file.Path));
-                    Debug.Log("created sandbox");
+                    // Debug.Log("created sandbox");
                     file.State = LuaFile.RunState.Running;
                 }, () =>
                 {

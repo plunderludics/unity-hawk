@@ -11,11 +11,8 @@ using BizHawk.Emulation.Common;
 using BizHawk.Emulation.Cores.Nintendo.NES;
 using BizHawk.Emulation.Cores.Arcades.MAME;
 using System.IO;
-// using BizHawk.Client.EmuHawk;
-
-// [Audio stuff is a bit of a mess right now.
-// I don't really get why using BizHawk's SoundOutputProvider gives crackly sound
-// Currently the manual PreserveSampleRate option sounds perfect but it's basically worthless because it accumulates lag whenever the emulator runs faster than 1x.]
+using System.Threading.Tasks;
+using System.Threading;
 
 public class UHEmulator : MonoBehaviour
 {
@@ -24,6 +21,8 @@ public class UHEmulator : MonoBehaviour
     IVideoProvider videoProvider;
     ISoundProvider soundProvider;
     InputManager inputManager;
+
+    UHInputProvider inputProvider;
 
     IDialogParent dialogParent;
 
@@ -69,8 +68,45 @@ public class UHEmulator : MonoBehaviour
 
     UHLuaEngine luaEngine;
 
-    void Start()
+    bool _stopRunningEmulatorTask = false;
+
+    void OnEnable()
     {
+        _stopRunningEmulatorTask = false;
+        bool loaded = InitEmulator();
+        if (loaded) {
+            // start emulator looping in a new thread unrelated to the unity framerate
+            // [maybe should have a param to set if it should run in a separate thread or not? kind of annoying to support both though]
+            Task.Run(EmulatorLoop);
+        }
+    }
+
+    void Update() {
+        // Debug.Log("Update");
+        // replenish the input queue with new input from unity
+        inputProvider.Update();
+        // get the texture from bizhawk and blit to the unity texture
+        // [for efficiency we could have a flag to check if the texture has changed since last Update (it won't have if the emulator is running slower than unity)]
+        UpdateTexture();
+    }
+    
+    void OnDisable() {
+        // In the editor, gotta kill the task or it will keep running in edit mode
+        _stopRunningEmulatorTask = true;
+    }
+    void OnApplicationPause() {
+        // TODO would be good to pause the emulator here
+    }
+
+    // This will run asynchronously so that it's not bound by unity update framerate
+    void EmulatorLoop() {
+        // Debug.Log("EmulatorLoop");
+        while (!_stopRunningEmulatorTask) {
+            FrameAdvance();
+        }
+    }
+
+    bool InitEmulator() {
         s_FrameAdvanceMarker = new ProfilerMarker($"FrameAdvance {GetInstanceID()}");
 
         // Check if there is an AudioSource attached
@@ -82,6 +118,8 @@ public class UHEmulator : MonoBehaviour
         audioBuffer = new short[AudioBufferSize];
         audioSamplesNeeded = 0;
         ClearAudioBuffer();
+
+        inputProvider = new UHInputProvider();
 
         inputManager = new InputManager();
 
@@ -100,12 +138,12 @@ public class UHEmulator : MonoBehaviour
         //  but InputManager expects a MovieSession as part of the input chain :/
         //  i guess the alternative would be to reimplement InputManager]
         movieSession = new MovieSession(
-                config.Movies,
-                config.PathEntries.MovieBackupsAbsolutePath(),
-                dialogParent,
-                null,
-                () => {},
-                () => {}
+            config.Movies,
+            config.PathEntries.MovieBackupsAbsolutePath(),
+            dialogParent,
+            null,
+            () => {},
+            () => {}
         );
 
         luaEngine = new UHLuaEngine();
@@ -145,15 +183,16 @@ public class UHEmulator : MonoBehaviour
             inputManager.SyncControls(emulator, movieSession, config);
 
             var luaScriptPaths = luaScripts.Select(path => Path.Join(UnityHawk.bizhawkDir, path)).ToList();
-            luaEngine.Restart(config, inputManager, emulator, game,luaScriptPaths);
+            luaEngine.Restart(config, inputManager, emulator, game, luaScriptPaths);
         } else {
             Debug.LogWarning($"Failed to load {romPath}.");
         }
+        return loaded;
     }
 
-    // [Not really sure what the framerate of this should be tbh - should check what BizHawk does]
-    public void FrameAdvance(IInputProvider inputProvider)
+    void FrameAdvance()
     {
+        // Debug.Log("FrameAdvance");
         if (emulator != null) {
             s_FrameAdvanceMarker.Begin();
             var finalHostController = inputManager.ControllerInputCoalescer;
@@ -175,15 +214,17 @@ public class UHEmulator : MonoBehaviour
 
             luaEngine.UpdateAfter();
 
-            // TODO: throttle
+            // TODO: throttle fps
+
+            // Store audio from the last emulated frame so it can be played back on the unity audio thread
+            StoreLastFrameAudio();
 
             frame++;
             s_FrameAdvanceMarker.End();
         }
     }
 
-    // [we do the texture blitting in a separate method because it has to run on the main thread (and FrameAdvance runs in parallel)]
-    public void AfterFrameAdvance() { 
+    void UpdateTexture() { 
         // Re-init the target texture if needed (if dimensions have changed, as happens on PSX)
         if (forceReinitTexture || (targetTexture.width != videoProvider.BufferWidth || targetTexture.height != videoProvider.BufferHeight)) {
             InitTargetTexture();
@@ -200,9 +241,16 @@ public class UHEmulator : MonoBehaviour
             targetTexture.SetPixelData(videoBuffer, 0);
             targetTexture.Apply(/*updateMipmaps: false*/);
         }
+    }
 
+    // Init/re-init the texture for rendering the screen - has to be done whenever the source dimensions change (which happens often on PSX for some reason)
+    void InitTargetTexture() {
+        targetTexture = new Texture2D(videoProvider.BufferWidth, videoProvider.BufferHeight, textureFormat, linearTexture);
+        targetRenderer.material.mainTexture = targetTexture;
+    }
+
+    void StoreLastFrameAudio() {
         // get audio samples for the emulated frame
-        // [maybe this should happen in FrameAdvance, idk]
         short[] lastFrameAudioBuffer;
         int nSamples;
         if (useManualAudioHandling) {
@@ -221,7 +269,6 @@ public class UHEmulator : MonoBehaviour
 
         lock (audioBuffer) {
             for (int i = 0; i < nSamples*ChannelCount; i++) {
-                // Debug.Log($"Adding sample, audioBufferLength={AudioBufferLength()}");
                 if (AudioBufferLength() == audioBuffer.Length - 1) {
                     // Debug.LogWarning("audio buffer full, dropping samples");
                     break;
@@ -231,12 +278,6 @@ public class UHEmulator : MonoBehaviour
                 audioBufferEnd %= audioBuffer.Length;
             }
         }
-    }
-
-    // Init/re-init the texture for rendering the screen - has to be done whenever the source dimensions change (which happens often on PSX for some reason)
-    void InitTargetTexture() {
-        targetTexture = new Texture2D(videoProvider.BufferWidth, videoProvider.BufferHeight, textureFormat, linearTexture);
-        targetRenderer.material.mainTexture = targetTexture;
     }
 
     // Send audio from the emulator to the AudioSource
@@ -251,7 +292,7 @@ public class UHEmulator : MonoBehaviour
 
         // copy from the accumulated emulator audio buffer into unity's buffer
         // this needs to happen in both manual and non-manual mode
-        lock(audioBuffer) {
+        lock (audioBuffer) {
             int n_samples = AudioBufferLength();
             // Debug.Log($"Unity buffer size: {out_buffer.Length}; Emulated audio buffer size: {n_samples}");
 
@@ -264,7 +305,6 @@ public class UHEmulator : MonoBehaviour
             if (audioStretchMethod == AudioStretchMethod.PreserveSampleRate) {
                 // Play back the samples at 1:1 sample rate, which means audio will lag behind if the emulator runs faster than 1x
                 for (int out_i = 0; out_i < out_buffer.Length; out_i++) {
-                    // Debug.Log($"attempting access audioBuffer[{audioBufferStart}]");
                     if (AudioBufferLength() == 0) {
                         Debug.LogWarning("Emulator audio buffer has no samples to consume");
                         return;
