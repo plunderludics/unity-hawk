@@ -21,6 +21,7 @@ public class UHEmulator : MonoBehaviour
     public string configFileName = "config.ini"; // Relative to BizHawk/
     public List<string> luaScripts; // Relative to BizHawk/
     public Renderer targetRenderer;
+    public float frameRateMultiplier = 1f; // Speed up or slow down emulation
 
     // [Make these public for debugging texture stuff]
     private TextureFormat textureFormat = TextureFormat.BGRA32;
@@ -36,8 +37,9 @@ public class UHEmulator : MonoBehaviour
     [Header("Debug")]
     // [These should really be readonly in the inspector]
     public int frame = 0;
+    public float uncappedFps;
+    public float emulatorDefaultFps;
     public string currentCore = "nul";
-    public float fps;
 
     IEmulator emulator;
     IGameInfo game;
@@ -102,14 +104,24 @@ public class UHEmulator : MonoBehaviour
     void EmulatorLoop() {
         // Debug.Log("EmulatorLoop");
         while (!_stopRunningEmulatorTask) {
+            emulatorDefaultFps = (float)emulator.VsyncRate(); // Idk if this can change at runtime but checking every frame just in case
             System.Diagnostics.Stopwatch sw = new();
             sw.Start();
+            s_FrameAdvanceMarker.Begin();
 
             FrameAdvance();
 
+            s_FrameAdvanceMarker.End();
             sw.Stop();
             TimeSpan ts = sw.Elapsed;
-            fps = (float)(1f/ts.TotalSeconds);
+            uncappedFps = (float)(1f/ts.TotalSeconds);
+
+            // Very naive throttle but it works fine - just sleep a bit if above target fps on this frame
+            // (Throttle.cs in BizHawk seems a lot more sophisticated)
+            float targetFps = emulatorDefaultFps*frameRateMultiplier;
+            if (uncappedFps > targetFps) {
+                Thread.Sleep((int)(1000*(1f/targetFps - 1f/uncappedFps)));
+            }
         }
     }
 
@@ -199,7 +211,6 @@ public class UHEmulator : MonoBehaviour
     {
         // Debug.Log("FrameAdvance");
         if (emulator != null) {
-            s_FrameAdvanceMarker.Begin();
             var finalHostController = inputManager.ControllerInputCoalescer;
             // InputManager.ActiveController.PrepareHapticsForHost(finalHostController);
             ProcessInput(finalHostController, inputProvider);
@@ -219,13 +230,10 @@ public class UHEmulator : MonoBehaviour
 
             luaEngine.UpdateAfter();
 
-            // TODO: throttle fps
-
             // Store audio from the last emulated frame so it can be played back on the unity audio thread
             StoreLastFrameAudio();
 
             frame++;
-            s_FrameAdvanceMarker.End();
         }
     }
 
