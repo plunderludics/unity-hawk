@@ -8,14 +8,14 @@ using BizHawk.Client.Common;
 using UnityEngine;
 using System;
 
-public class LuaTestLibrary : LuaLibraryBase {
+public sealed class LuaTestLibrary : LuaLibraryBase {
     public LuaTestLibrary(ILuaLibraries luaLibsImpl, ApiContainer apiContainer, Action<string> logOutputCallback)
     : base(luaLibsImpl, apiContainer, logOutputCallback) {}
 
     public override string Name => "unityhawktest";
 
     [LuaMethodExample("unityhawktest.sayhello( );")]
-    [LuaMethod("gettestvalue", "says hello")]
+    [LuaMethod("sayhello", "says hello")]
     public void SayHello() {
         Debug.Log("hello unity from lua");
     }

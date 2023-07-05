@@ -51,17 +51,19 @@ public class UHLuaLibraries : ILuaLibraries
         _displayManager = displayManager;
         _inputManager = inputManager;
         _mainForm = mainForm;
-        
+
+        // [do this here since we don't support ConsoleLuaLibrary]
+        _logToLuaConsoleCallback = logToConsole;
+
         LuaWait = new AutoResetEvent(false);
         PathEntries = config.PathEntries;
         RegisteredFunctions = registeredFuncList;
         ScriptList = scriptList;
         Docs.Clear();
         _apiContainer = UHApiManager.RestartLua(serviceProvider, LogToLuaConsole, _mainForm, _displayManager, _inputManager, _mainForm.MovieSession, config, emulator, game);
-
         // Register lua libraries
-        foreach (var lib in BizHawk.Client.Common.ReflectionCache.Types
-            // [TODO: should be possible to also concat our own custom LuaLibraryBase implementations here]
+        foreach (var lib in BizHawk.Client.Common.ReflectionCache.Types.Concat(
+                Assembly.GetCallingAssembly().GetTypesWithoutLoadErrors().ToArray()) // Add any custom LuaLibraryBase implementations within unity-side code
             .Where(t => typeof(LuaLibraryBase).IsAssignableFrom(t) && t.IsSealed && ServiceInjector.IsAvailable(serviceProvider, t)))
         {
             if (VersionInfo.DeveloperBuild
@@ -76,9 +78,6 @@ public class UHLuaLibraries : ILuaLibraries
                 {
                     clientLib.MainForm = _mainForm;
                 }
-
-                // [do this here since we don't support ConsoleLuaLibrary]
-                _logToLuaConsoleCallback = logToConsole;
 
                 // [these APIs are not supported in UnityHawk]
                 // else if (instance is ConsoleLuaLibrary consoleLib)

@@ -9,8 +9,7 @@
  - more graceful handling of unsupported library functions, currently spits out opaque error and halts the lua script - not sure best way to handle this one
  - support some of the stuff in UHMainFormApi - loading roms, pausing/unpausing, volume control, etc
  - would be nice to support the graphics lib too for drawing debug info etc
- - make it easier to add custom lua libraries from the Unity project (see LuaTestLibrary.cs)
-  - or at least a generic way to get information from lua scripts into unity (message passing or function calling interface)
+ X make it easier to add custom lua libraries from the Unity project (see LuaTestLibrary.cs)
 
 - have a nice interface (for unityhawk users) to interact with the bizhawk apis (e.g. for pausing, restarting, changing memory, etc)
 
