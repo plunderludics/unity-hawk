@@ -15,8 +15,9 @@ using System.Linq;
 
 using System.Threading.Tasks;
 
-public class UnityHawk : MonoBehaviour
-{   
+// [if at some point we need some user-configurable global bizhawk settings we could make this back into a MonoBehaviour]
+public static class UnityHawk
+{
     public static readonly string bizhawkDirName = "BizHawk";
     public static readonly string bizhawkDir = Path.Combine(Application.dataPath, bizhawkDirName);
     
@@ -26,8 +27,11 @@ public class UnityHawk : MonoBehaviour
     [DllImport("kernel32.dll", SetLastError = true)]
     private static extern uint SetDllDirectory(string lpPathName);
 
-    void Awake()
+    private static bool _initialized = false;
+
+    public static void InitIfNeeded()
     {
+        if (_initialized) return;
         // Initialize some global stuff that every BizHawk instance will use
 
         // [huge hack - preload all the dlls for cores that have to load them at runtime
@@ -75,5 +79,7 @@ public class UnityHawk : MonoBehaviour
         // this is only necessary for certain platforms so maybe should be in a 
         // 'InitializeMAMEMachineIfNeeded' method that clients can call, something like that
         MAMEMachineDB.Initialize(gamedbPath);
+
+        _initialized = true;
     }
 }

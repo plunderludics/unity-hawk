@@ -43,6 +43,9 @@ public class UHEmulator : MonoBehaviour
     public float emulatorDefaultFps;
     public string currentCore = "nul";
 
+    // If other scripts want to grab the texture
+    public Texture2D Texture => targetTexture;
+
     IEmulator emulator;
     IGameInfo game;
     IVideoProvider videoProvider;
@@ -130,6 +133,7 @@ public class UHEmulator : MonoBehaviour
     bool InitEmulator() {
         s_FrameAdvanceMarker = new ProfilerMarker($"FrameAdvance {GetInstanceID()}");
 
+
         // Check if there is an AudioSource attached
         if (!GetComponent<AudioSource>()) {
             Debug.LogWarning("No AudioSource component, will not play emulator audio");
@@ -139,6 +143,8 @@ public class UHEmulator : MonoBehaviour
         audioBuffer = new short[AudioBufferSize];
         audioSamplesNeeded = 0;
         ClearAudioBuffer();
+
+        UnityHawk.InitIfNeeded();
 
         inputProvider = new UHInputProvider();
         inputManager = new InputManager();
@@ -243,7 +249,7 @@ public class UHEmulator : MonoBehaviour
         }
     }
 
-    void UpdateTexture() { 
+    void UpdateTexture() {
         // Re-init the target texture if needed (if dimensions have changed, as happens on PSX)
         if (forceReinitTexture || (targetTexture.width != videoProvider.BufferWidth || targetTexture.height != videoProvider.BufferHeight)) {
             InitTargetTexture();
@@ -265,7 +271,7 @@ public class UHEmulator : MonoBehaviour
     // Init/re-init the texture for rendering the screen - has to be done whenever the source dimensions change (which happens often on PSX for some reason)
     void InitTargetTexture() {
         targetTexture = new Texture2D(videoProvider.BufferWidth, videoProvider.BufferHeight, textureFormat, linearTexture);
-        targetRenderer.material.mainTexture = targetTexture;
+        if (targetRenderer) targetRenderer.material.mainTexture = targetTexture;
     }
 
     void StoreLastFrameAudio() {
