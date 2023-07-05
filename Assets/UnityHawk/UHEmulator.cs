@@ -17,10 +17,11 @@ using System.Threading;
 public class UHEmulator : MonoBehaviour
 {
     [Header("Params")]
-    public string romFileName = "mario.nes"; // Relative to BizHawk/Roms/
-    public string configFileName = "config.ini"; // Relative to BizHawk/
-    public string saveStateFileName = ""; // Relative to BizHawk/ Leave empty to boot clean
-    public List<string> luaScripts; // Relative to BizHawk/
+    // All pathnames are loaded relative to /Assets/BizHawk/, unless the pathname is absolute [sort of abusing Path.Combine behavior here]
+    public string romFileName = "mario.nes";
+    public string configFileName = "config.ini";
+    public string saveStateFileName = ""; // Leave empty to boot clean
+    public List<string> luaScripts;
     public Renderer targetRenderer;
     public float frameRateMultiplier = 1f; // Speed up or slow down emulation
 
@@ -172,7 +173,7 @@ public class UHEmulator : MonoBehaviour
         loader.OnLoadSettings += CoreSettings;
         loader.OnLoadSyncSettings += CoreSyncSettings;
 
-        var romPath = Path.Combine(UnityHawk.romsDir, romFileName);
+        var romPath = Path.Combine(UnityHawk.bizhawkDir, romFileName);
 
         var nextComm = CreateCoreComm();
 
@@ -184,7 +185,7 @@ public class UHEmulator : MonoBehaviour
             currentCore = emulator.Attributes().CoreName;
 
             if (!String.IsNullOrEmpty(saveStateFileName)) {
-                LoadState(Path.Join(UnityHawk.bizhawkDir, saveStateFileName));
+                LoadState(Path.Combine(UnityHawk.bizhawkDir, saveStateFileName));
             }
 
             videoProvider = emulator.AsVideoProviderOrDefault();
@@ -204,7 +205,7 @@ public class UHEmulator : MonoBehaviour
             // [not sure what this does but seems important]
             inputManager.SyncControls(emulator, movieSession, config);
 
-            var luaScriptPaths = luaScripts.Select(path => Path.Join(UnityHawk.bizhawkDir, path)).ToList();
+            var luaScriptPaths = luaScripts.Select(path => Path.Combine(UnityHawk.bizhawkDir, path)).ToList();
             luaEngine.Restart(config, inputManager, emulator, game, luaScriptPaths);
         } else {
             Debug.LogWarning($"Failed to load {romPath}.");
@@ -386,6 +387,9 @@ public class UHEmulator : MonoBehaviour
             Debug.LogWarning($"Could not load state: {path}");
             return false;
         }
+
+        // [MainForm:LoadState also has a bunch of other stuff that might be important, but this seems to work for now]
+
         return true;
     }
 

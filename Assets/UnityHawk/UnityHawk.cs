@@ -18,10 +18,7 @@ using System.Threading.Tasks;
 public class UnityHawk : MonoBehaviour
 {   
     public static readonly string bizhawkDirName = "BizHawk";
-    public static readonly string romsDirName = "Roms";
-
     public static readonly string bizhawkDir = Path.Combine(Application.dataPath, bizhawkDirName);
-    public static readonly string romsDir = Path.Combine(bizhawkDir, romsDirName);
     
     [DllImport("kernel32.dll")]
     private static extern IntPtr LoadLibrary(string lpLibFileName);
