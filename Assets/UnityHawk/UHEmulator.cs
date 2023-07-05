@@ -16,53 +16,52 @@ using System.Threading;
 
 public class UHEmulator : MonoBehaviour
 {
+    [Header("Params")]
+    public string romFileName = "mario.nes"; // Relative to BizHawk/Roms/
+    public string configFileName = "config.ini"; // Relative to BizHawk/
+    public List<string> luaScripts; // Relative to BizHawk/
+    public Renderer targetRenderer;
+
+    // [Make these public for debugging texture stuff]
+    private TextureFormat textureFormat = TextureFormat.BGRA32;
+    private bool linearTexture; // [seems so make no difference visually]
+    private bool forceReinitTexture;
+    private bool blitTexture = true;
+
+    // [Make these public for debugging audio stuff]
+    private bool useManualAudioHandling = false;
+    public enum AudioStretchMethod {Truncate, PreserveSampleRate, Stretch, Overlap}
+    private AudioStretchMethod audioStretchMethod = AudioStretchMethod.Truncate; // if using non-manual audio, this should probably be Truncate
+
+    [Header("Debug")]
+    // [These should really be readonly in the inspector]
+    public int frame = 0;
+    public string currentCore = "nul";
+    public float fps;
+
     IEmulator emulator;
     IGameInfo game;
     IVideoProvider videoProvider;
     ISoundProvider soundProvider;
     InputManager inputManager;
-
-    UHInputProvider inputProvider;
-
     IDialogParent dialogParent;
-
     MovieSession movieSession; // [annoying that we need this at all]
-
     RomLoader loader;
     Config config;
     FirmwareManager firmwareManager = new FirmwareManager();
 
-    public string romFileName = "mario.nes";
-    public string currentCore = "nul";
+    UHInputProvider inputProvider;
 
-    public List<string> luaScripts;
-
-    public Renderer targetRenderer;
     Texture2D targetTexture;
 
-    public TextureFormat textureFormat = TextureFormat.BGRA32;
-    public bool linearTexture; // [seems so make no difference visually]
-    public bool forceReinitTexture;
-    public bool blitTexture = true;
-
-    public bool useManualAudioHandling;
     static int AudioChunkSize = 734; // [Hard to explain right now but for 'Accumulate' AudioStretchMethod, preserve audio chunks of this many samples (734 ~= 1 frame at 60fps at SR=44100)]
     static int AudioBufferSize = 44100*2;
-    short[] audioBuffer; // circular buffer (queue) to store audio samples accumulated from the emulator
-    static int ChannelCount = 2; // Seems to be always 2, for all BizHawk sound and for Unity audiosource
-    int audioBufferStart, audioBufferEnd;
 
+    short[] audioBuffer; // circular buffer (queue) to store audio samples accumulated from the emulator
+    int audioBufferStart, audioBufferEnd;
+    static int ChannelCount = 2; // Seems to be always 2, for all BizHawk sound and for Unity audiosource
     private int audioSamplesNeeded; // track how many samples unity wants to consume
     SoundOutputProvider bufferedSoundProvider; // BizHawk's internal resampling engine
-    public enum AudioStretchMethod {
-        Truncate,
-        PreserveSampleRate,
-        Stretch,
-        Overlap
-    }
-    public AudioStretchMethod audioStretchMethod = AudioStretchMethod.Truncate; // if using non-manual audio, this should probably be Truncate
-
-    public int frame = 0;
 
     ProfilerMarker s_FrameAdvanceMarker;
 
@@ -94,6 +93,7 @@ public class UHEmulator : MonoBehaviour
         // In the editor, gotta kill the task or it will keep running in edit mode
         _stopRunningEmulatorTask = true;
     }
+
     void OnApplicationPause() {
         // TODO would be good to pause the emulator here
     }
@@ -102,7 +102,14 @@ public class UHEmulator : MonoBehaviour
     void EmulatorLoop() {
         // Debug.Log("EmulatorLoop");
         while (!_stopRunningEmulatorTask) {
+            System.Diagnostics.Stopwatch sw = new();
+            sw.Start();
+
             FrameAdvance();
+
+            sw.Stop();
+            TimeSpan ts = sw.Elapsed;
+            fps = (float)(1f/ts.TotalSeconds);
         }
     }
 
@@ -120,13 +127,11 @@ public class UHEmulator : MonoBehaviour
         ClearAudioBuffer();
 
         inputProvider = new UHInputProvider();
-
         inputManager = new InputManager();
-
         dialogParent = new UHDialogParent();
 
         // Load config
-        var configPath = Path.Combine(UnityHawk.bizhawkDir, "config.ini");
+        var configPath = Path.Combine(UnityHawk.bizhawkDir, configFileName);
 
         config = ConfigService.Load<Config>(configPath);
 
