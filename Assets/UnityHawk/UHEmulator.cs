@@ -19,6 +19,7 @@ public class UHEmulator : MonoBehaviour
     [Header("Params")]
     public string romFileName = "mario.nes"; // Relative to BizHawk/Roms/
     public string configFileName = "config.ini"; // Relative to BizHawk/
+    public string saveStateFileName = ""; // Relative to BizHawk/ Leave empty to boot clean
     public List<string> luaScripts; // Relative to BizHawk/
     public Renderer targetRenderer;
     public float frameRateMultiplier = 1f; // Speed up or slow down emulation
@@ -181,6 +182,10 @@ public class UHEmulator : MonoBehaviour
             emulator = loader.LoadedEmulator;
             game = loader.Game;
             currentCore = emulator.Attributes().CoreName;
+
+            if (!String.IsNullOrEmpty(saveStateFileName)) {
+                LoadState(Path.Join(UnityHawk.bizhawkDir, saveStateFileName));
+            }
 
             videoProvider = emulator.AsVideoProviderOrDefault();
             soundProvider = emulator.AsSoundProviderOrDefault();
@@ -373,6 +378,15 @@ public class UHEmulator : MonoBehaviour
                 Debug.LogWarning("Unhandled AudioStretchMode");
             }
         }
+    }
+
+    bool LoadState(string path) {
+        if (!new SavestateFile(emulator, movieSession, null/*QuickBmpFile*/, movieSession.UserBag).Load(path, dialogParent))
+        {
+            Debug.LogWarning($"Could not load state: {path}");
+            return false;
+        }
+        return true;
     }
 
     // Based on MainForm:ProcessInput, but with a lot of stuff missing
