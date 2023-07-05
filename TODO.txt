@@ -3,10 +3,8 @@
   X keyboard input
   - gamepad input?
   - make it easy to remap/configure controls (either in lua or in unity)
-X fix weird colors
 
 - lua scripting
- X [basic implementation works now]
  - more testing; test our existing samples
  - more graceful handling of unsupported library functions, currently spits out opaque error and halts the lua script - not sure best way to handle this one
  - support some of the stuff in UHMainFormApi - loading roms, pausing/unpausing, volume control, etc
@@ -14,10 +12,7 @@ X fix weird colors
  - make it easier to add custom lua libraries from the Unity project (see LuaTestLibrary.cs)
   - or at least a generic way to get information from lua scripts into unity (message passing or function calling interface)
 
-- have a nice interface for (unityhawk users) to interact with the bizhawk apis (e.g. for pausing, restarting, changing memory, etc)
-
-- think about framerate (how to match target console framerate?)
- - avoid locking threads to the same framerate (currently that's what happens)
+- have a nice interface (for unityhawk users) to interact with the bizhawk apis (e.g. for pausing, restarting, changing memory, etc)
 
 - update BizHawk (to 2.9.1?)
 
@@ -27,20 +22,19 @@ X emulator audio
 
 - better way of setting the dll directory, to avoid hacky loading currently in UnityHawk.cs
 
-- test other cores
+- test more cores
  - Mupen64
   - Doesn't work due to some error with attaching the video plugin
- - NES
+ X NES
   X QuickNes
   X NesHawk
  X PS1 (Nymashock)
   X graphics broken
   X can't run multiple in parallel
 
-- nice unity component corresponding to a sample (rom + savestate + lua + config)
-- find a way of bundling emulator dependencies that works in build
+- nice unity component corresponding to a sample (rom + savestate + lua + config) [?]
 
-X clean up source filenames -> probably should be UHInputProvider.cs, etc
 - make a UnityHawk namespace instead of using UH prefix
 
-- make unitypackage
+- make a unity package
+- think a bit about usability
