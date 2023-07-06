@@ -11,8 +11,13 @@
  - would be nice to support the graphics lib too for drawing debug info etc
  X make it easier to add custom lua libraries from the Unity project (see LuaTestLibrary.cs)
 
+- make the NewtonSoft.JSON dll a dependency from unity instead of importing the file from bizhawk [same for any other 3rd party dlls if possible]
+
 - build script
  - if any needed files (roms etc) are specified by absolute path, they should be copied into the build
+ - avoid having duplicates of every dll (need to separate the runtime ones vs the other ones)
+
+- don't copy unused dlls (slimDX, DirectX, EmuHawk, what else)
 
 - have a nice interface (for unityhawk users) to interact with the bizhawk apis (e.g. for pausing, restarting, changing memory, etc)
 
