@@ -11,6 +11,9 @@
  - would be nice to support the graphics lib too for drawing debug info etc
  X make it easier to add custom lua libraries from the Unity project (see LuaTestLibrary.cs)
 
+- build script
+ - if any needed files (roms etc) are specified by absolute path, they should be copied into the build
+
 - have a nice interface (for unityhawk users) to interact with the bizhawk apis (e.g. for pausing, restarting, changing memory, etc)
 
 - update BizHawk (to 2.9.1?)

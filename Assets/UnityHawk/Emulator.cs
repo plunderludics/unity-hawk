@@ -33,6 +33,7 @@ public class Emulator : MonoBehaviour
     private bool linearTexture; // [seems so make no difference visually]
     private bool forceReinitTexture;
     private bool blitTexture = true;
+    private bool doTextureCorrection = true;
 
     // [Make these public for debugging audio stuff]
     private bool useManualAudioHandling = false;
@@ -46,8 +47,9 @@ public class Emulator : MonoBehaviour
     public float emulatorDefaultFps;
     public string currentCore = "nul";
 
-    // If other scripts want to grab the texture
+    // Interface for other scripts to use
     public RenderTexture Texture => _renderTexture;
+    public bool IsRunning => _bizHawk?.IsLoaded ?? false;
 
     private BizHawkInstance _bizHawk;
     InputProvider inputProvider;
@@ -67,8 +69,12 @@ public class Emulator : MonoBehaviour
 
     bool _stopEmulatorTask = false;
 
+    static string textureCorrectionShaderName = "UnityHawk/TextureCorrection";
+    Material _textureCorrectionMat;
+
     void OnEnable()
     {
+        _textureCorrectionMat = new Material(Shader.Find(textureCorrectionShaderName));
         // Initialize stuff
         inputProvider = new InputProvider();
 
@@ -182,11 +188,15 @@ public class Emulator : MonoBehaviour
             // Debug.Log($"Number of pixels: {nPixels}");
 
             // Write the pixel data from the emulator directly into the bufferTexture
-            // (seems to work as long as the texture format is BGRA32 - only problem is it's flipped horizontally)
+            // (seems to basically work as long as the texture format is BGRA32)
+            //  with two minor problems: it's flipped vertically & alpha channel is set to 0
             _bufferTexture.SetPixelData(videoBuffer, 0);
             _bufferTexture.Apply(/*updateMipmaps: false*/);
-            // This bit is annoying but in order to just flip the image we have to Blit into a separate RenderTexture
-            Graphics.Blit(_bufferTexture, _renderTexture, scale: new Vector2(1f,-1f), offset: Vector2.zero);
+
+            if (doTextureCorrection) {
+                // Correct issues with the texture by applying a shader and blitting to a separate render texture:
+                Graphics.Blit(_bufferTexture, _renderTexture, _textureCorrectionMat, 0);
+            }
         }
     }
 
