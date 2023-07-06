@@ -1,6 +1,4 @@
-// [This doesn't work, was too hopeful]
-// [because LuaLibraries does some reflection stuff to load all the subclasses of LuaLibraryBase
-//  but only from within the BizHawk.Client.Common assembly - would need to modify that code to include custom libraries too i guess]
+// Example of how to define custom functions that can be called from lua
 
 using NLua;
 using BizHawk.Client.Common;

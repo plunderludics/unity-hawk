@@ -1,3 +1,7 @@
+// This is the main user-facing component (ie MonoBehaviour)
+// acts as a bridge between Unity and BizHawkInstance, handling input,
+// graphics, audio, multi-threading, and framerate throttling.
+
 using System;
 using System.Linq;
 using System.Collections;
@@ -8,11 +12,6 @@ using System.Threading;
 
 using UnityEngine;
 using Unity.Profiling;
-
-using BizHawk.Client.Common;
-using BizHawk.Emulation.Common;
-using BizHawk.Emulation.Cores.Nintendo.NES;
-using BizHawk.Emulation.Cores.Arcades.MAME;
 
 namespace UnityHawk {
 
@@ -33,7 +32,7 @@ public class Emulator : MonoBehaviour
     private RenderTextureFormat renderTextureFormat = RenderTextureFormat.BGRA32;
     private bool linearTexture; // [seems so make no difference visually]
     private bool forceReinitTexture;
-    public bool blitTexture = true;
+    private bool blitTexture = true;
 
     // [Make these public for debugging audio stuff]
     private bool useManualAudioHandling = false;
@@ -50,17 +49,7 @@ public class Emulator : MonoBehaviour
     // If other scripts want to grab the texture
     public RenderTexture Texture => _renderTexture;
 
-    IEmulator emulator;
-    IGameInfo game;
-    IVideoProvider videoProvider;
-    ISoundProvider soundProvider;
-    InputManager inputManager;
-    IDialogParent dialogParent;
-    MovieSession movieSession; // [annoying that we need this at all]
-    RomLoader loader;
-    Config config;
-    FirmwareManager firmwareManager = new FirmwareManager();
-
+    private BizHawkInstance _bizHawk;
     InputProvider inputProvider;
 
     Texture2D _bufferTexture;
@@ -73,16 +62,22 @@ public class Emulator : MonoBehaviour
     int audioBufferStart, audioBufferEnd;
     static int ChannelCount = 2; // Seems to be always 2, for all BizHawk sound and for Unity audiosource
     private int audioSamplesNeeded; // track how many samples unity wants to consume
-    SoundOutputProvider bufferedSoundProvider; // BizHawk's internal resampling engine
 
     ProfilerMarker s_FrameAdvanceMarker;
-
-    LuaEngine luaEngine;
 
     bool _stopEmulatorTask = false;
 
     void OnEnable()
     {
+        // Initialize stuff
+        inputProvider = new InputProvider();
+
+        audioBuffer = new short[AudioBufferSize];
+        audioSamplesNeeded = 0;
+        ClearAudioBuffer();
+
+        _bizHawk = new BizHawkInstance();
+
         s_FrameAdvanceMarker = new ProfilerMarker($"FrameAdvance {GetInstanceID()}");
 
         if (!targetRenderer) {
@@ -100,8 +95,26 @@ public class Emulator : MonoBehaviour
         }
 
         _stopEmulatorTask = false;
-        bool loaded = InitEmulator();
+
+        var configPath = Path.Combine(UnityHawk.bizhawkDir, configFileName);
+        var romPath = Path.Combine(UnityHawk.bizhawkDir, romFileName);
+        var luaScriptPaths = luaScripts.Select(path => Path.Combine(UnityHawk.bizhawkDir, path)).ToList();
+
+        string saveStateFullPath = null;
+        if (!String.IsNullOrEmpty(saveStateFileName)) {
+            saveStateFullPath = Path.Combine(UnityHawk.bizhawkDir, saveStateFileName);
+        }
+        // Load the emulator + rom
+        bool loaded = _bizHawk.InitEmulator(
+            configPath,
+            romPath,
+            luaScriptPaths,
+            saveStateFullPath
+        );
         if (loaded) {
+            currentCore = _bizHawk.CurrentCoreName;
+            InitTextures();
+
             // start emulator looping in a new thread unrelated to the unity framerate
             // [maybe should have a param to set if it should run in a separate thread or not? kind of annoying to support both though]
             Task.Run(EmulatorLoop);
@@ -109,7 +122,7 @@ public class Emulator : MonoBehaviour
     }
 
     void Update() {
-        if (emulator != null) {
+        if (_bizHawk.IsLoaded) {
             // replenish the input queue with new input from unity
             inputProvider.Update();
             // get the texture from bizhawk and blit to the unity texture
@@ -126,14 +139,14 @@ public class Emulator : MonoBehaviour
     // This will run asynchronously so that it's not bound by unity update framerate
     void EmulatorLoop() {
         while (!_stopEmulatorTask) {
-            if (emulator == null) continue;
+            if (!_bizHawk.IsLoaded) continue;
 
-            emulatorDefaultFps = (float)emulator.VsyncRate(); // Idk if this can change at runtime but checking every frame just in case
+            emulatorDefaultFps = (float)_bizHawk.DefaultFrameRate; // Idk if this can change at runtime but checking every frame just in case
             System.Diagnostics.Stopwatch sw = new();
             sw.Start();
             s_FrameAdvanceMarker.Begin();
 
-            FrameAdvance();
+            _bizHawk.FrameAdvance(inputProvider);
 
             // Store audio from the last emulated frame so it can be played back on the unity audio thread
             StoreLastFrameAudio();
@@ -154,124 +167,16 @@ public class Emulator : MonoBehaviour
         }
     }
 
-    bool InitEmulator() {
-        // Initialize stuff
-        audioBuffer = new short[AudioBufferSize];
-        audioSamplesNeeded = 0;
-        ClearAudioBuffer();
-
-        UnityHawk.InitIfNeeded();
-
-        inputProvider = new InputProvider();
-        inputManager = new InputManager();
-        dialogParent = new DialogParent();
-
-        // Load config
-        var configPath = Path.Combine(UnityHawk.bizhawkDir, configFileName);
-
-        config = ConfigService.Load<Config>(configPath);
-
-        // Init controls
-        inputManager.ControllerInputCoalescer = new(); // [seems to be necessary]
-
-        // Set up movie session
-        // [this is kind of stupid because we don't really need a movie session
-        //  but InputManager expects a MovieSession as part of the input chain :/
-        //  i guess the alternative would be to reimplement InputManager]
-        movieSession = new MovieSession(
-            config.Movies,
-            config.PathEntries.MovieBackupsAbsolutePath(),
-            dialogParent,
-            null,
-            () => {},
-            () => {}
-        );
-
-        luaEngine = new LuaEngine();
-
-        loader = new RomLoader(config);
-
-        loader.OnLoadError += ShowLoadError;
-        loader.OnLoadSettings += CoreSettings;
-        loader.OnLoadSyncSettings += CoreSyncSettings;
-
-        var romPath = Path.Combine(UnityHawk.bizhawkDir, romFileName);
-
-        var nextComm = CreateCoreComm();
-
-        bool loaded = loader.LoadRom(romPath, nextComm, null);
-        
-        if (loaded) {
-            emulator = loader.LoadedEmulator;
-            game = loader.Game;
-            currentCore = emulator.Attributes().CoreName;
-
-            videoProvider = emulator.AsVideoProviderOrDefault();
-            soundProvider = emulator.AsSoundProviderOrDefault();
-
-            Debug.Log($"virtual: {videoProvider.VirtualWidth} x {videoProvider.VirtualHeight} = {videoProvider.VirtualWidth * videoProvider.VirtualHeight}");
-            Debug.Log($"buffer: {videoProvider.BufferWidth} x {videoProvider.BufferHeight} = {videoProvider.BufferWidth * videoProvider.BufferHeight}");
-            InitTextures();
-
-            // Turns out BizHawk provides this wonderful SyncToAsyncProvider to asynchronously provide audio, which is what we need for the way Unity handles sound
-            // It also does some resampling so the sound works ok when the emulator is running at speeds other than 1x
-            soundProvider.SetSyncMode(SyncSoundMode.Sync); // [we could also use Async directly if the emulator provides it]
-            bufferedSoundProvider = new SoundOutputProvider(() => emulator.VsyncRate(), standaloneMode: true); // [idk why but standalone mode seems to be less distorted]
-            bufferedSoundProvider.BaseSoundProvider = soundProvider;
-            // bufferedSoundProvider.LogDebug = true;
-
-            // [not sure what this does but seems important]
-            inputManager.SyncControls(emulator, movieSession, config);
-
-            if (!String.IsNullOrEmpty(saveStateFileName)) {
-                bool loadedState = LoadState(Path.Combine(UnityHawk.bizhawkDir, saveStateFileName));
-                if (!loadedState) {
-                    Debug.LogWarning($"Failed to load state: {saveStateFileName}");
-                }
-            }
-
-            var luaScriptPaths = luaScripts.Select(path => Path.Combine(UnityHawk.bizhawkDir, path)).ToList();
-            luaEngine.Restart(config, inputManager, emulator, game, luaScriptPaths);
-        } else {
-            Debug.LogWarning($"Failed to load {romPath}.");
-        }
-        return loaded;
-    }
-
-    void FrameAdvance()
-    {
-        if (emulator != null) {
-            var finalHostController = inputManager.ControllerInputCoalescer;
-            // InputManager.ActiveController.PrepareHapticsForHost(finalHostController);
-            ProcessInput(finalHostController, inputProvider);
-            inputManager.ActiveController.LatchFromPhysical(finalHostController); //[idk what this does]
-            // [there's a bunch more input chain processing stuff in MainForm.cs that we are leaving out for now]
-
-            luaEngine.UpdateBefore();
-            
-            // [gotta call this to make sure the input gets through]
-            movieSession.HandleFrameBefore();
-
-            // Emulator step forward
-            emulator.FrameAdvance(inputManager.ControllerOutput, true, true);
-
-            // [maybe not needed]
-            movieSession.HandleFrameAfter();
-
-            luaEngine.UpdateAfter();
-        }
-    }
-
     void UpdateTexture() {
         // Re-init the target texture if needed (if dimensions have changed, as happens on PSX)
-        if (forceReinitTexture || !_bufferTexture || !_renderTexture || (_bufferTexture.width != videoProvider.BufferWidth || _bufferTexture.height != videoProvider.BufferHeight)) {
+        if (forceReinitTexture || !_bufferTexture || !_renderTexture || (_bufferTexture.width != _bizHawk.VideoBufferWidth || _bufferTexture.height != _bizHawk.VideoBufferHeight)) {
             InitTextures();
             forceReinitTexture = false;
         }
 
         if (blitTexture) {
             // Copy the texture from the emulator into a Unity texture
-            int[] videoBuffer = videoProvider.GetVideoBuffer();
+            int[] videoBuffer = _bizHawk.GetVideoBuffer();
             int nPixels = _bufferTexture.width * _bufferTexture.height;
             // Debug.Log($"Actual video buffer size: {videoBuffer.Length}");
             // Debug.Log($"Number of pixels: {nPixels}");
@@ -287,8 +192,8 @@ public class Emulator : MonoBehaviour
 
     // Init/re-init the textures for rendering the screen - has to be done whenever the source dimensions change (which happens often on PSX for some reason)
     void InitTextures() {
-        _bufferTexture = new     Texture2D(videoProvider.BufferWidth, videoProvider.BufferHeight, textureFormat, linearTexture);
-        _renderTexture = new RenderTexture(videoProvider.BufferWidth, videoProvider.BufferHeight, depth:0, format:renderTextureFormat);
+        _bufferTexture = new     Texture2D(_bizHawk.VideoBufferWidth, _bizHawk.VideoBufferHeight, textureFormat, linearTexture);
+        _renderTexture = new RenderTexture(_bizHawk.VideoBufferWidth, _bizHawk.VideoBufferHeight, depth:0, format:renderTextureFormat);
         if (targetRenderer) targetRenderer.material.mainTexture = _renderTexture;
     }
 
@@ -298,7 +203,7 @@ public class Emulator : MonoBehaviour
         int nSamples;
         if (useManualAudioHandling) {
             nSamples = 0;
-            soundProvider.GetSamplesSync(out lastFrameAudioBuffer, out nSamples);
+            _bizHawk.GetSamplesSync(out lastFrameAudioBuffer, out nSamples);
             // NOTE! there are actually 2*nSamples values in the buffer because it's stereo sound
             // Debug.Log($"Adding {nSamples} samples to the buffer.");
             // [Seems to be ~734 samples each frame for mario.nes]
@@ -306,7 +211,7 @@ public class Emulator : MonoBehaviour
         } else {
             nSamples = audioSamplesNeeded;
             lastFrameAudioBuffer = new short[audioSamplesNeeded*ChannelCount];
-            bufferedSoundProvider.GetSamples(lastFrameAudioBuffer);
+            _bizHawk.GetSamples(lastFrameAudioBuffer);
             audioSamplesNeeded = 0;
         }
 
@@ -403,69 +308,6 @@ public class Emulator : MonoBehaviour
                 Debug.LogWarning("Unhandled AudioStretchMode");
             }
         }
-    }
-
-    bool LoadState(string path) {
-        if (!new SavestateFile(emulator, movieSession, null/*QuickBmpFile*/, movieSession.UserBag).Load(path, dialogParent))
-        {
-            Debug.LogWarning($"Could not load state: {path}");
-            return false;
-        }
-
-        // [MainForm:LoadState also has a bunch of other stuff that might be important, but this seems to work for now]
-
-        return true;
-    }
-
-    // Based on MainForm:ProcessInput, but with a lot of stuff missing
-    void ProcessInput(
-        ControllerInputCoalescer finalHostController,
-        IInputProvider inputProvider // [not in BizHawk, this is our abstraction of BizHawk's Input class]
-    ) {
-        // loop through all available events
-        InputEvent ie;
-        while ((ie = inputProvider.DequeueEvent()) != null)
-        {
-            // Debug.Log(ie);
-            finalHostController.Receive(ie);
-        }
-    }
-
-    //
-    // The rest of the methods are copied / closely adapted from ones in MainForm.cs
-    //
-    CoreComm CreateCoreComm() {
-        var cfp = new CoreFileProvider(
-            dialogParent,
-            firmwareManager,
-            config.PathEntries,
-            config.FirmwareUserSpecifications);
-
-        var prefs = CoreComm.CorePreferencesFlags.None;
-
-        if (config.SkipWaterboxIntegrityChecks)
-            prefs = CoreComm.CorePreferencesFlags.WaterboxMemoryConsistencyCheck;
-
-        // can't pass self as IDialogParent :(
-        return new CoreComm(
-            s => Debug.Log($"message: {s}"),
-            s => Debug.Log($"notification: {s}"),
-            cfp,
-            prefs);
-    }
-
-    private void CoreSettings(object sender, RomLoader.SettingsLoadArgs e)
-    {
-        e.Settings = config.GetCoreSettings(e.Core, e.SettingsType);
-    }
-
-    private void CoreSyncSettings(object sender, RomLoader.SettingsLoadArgs e)
-    {
-        e.Settings = config.GetCoreSyncSettings(e.Core, e.SettingsType);
-    }
-
-    private void ShowLoadError(object sender, RomLoader.RomErrorArgs e) {
-        Debug.LogError(e.Message);
     }
 
     // helper methods for circular audio buffer
