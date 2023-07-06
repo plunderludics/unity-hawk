@@ -9,11 +9,11 @@ using BizHawk.Client.Common;
 using BizHawk.Emulation.Common;
 
 // [copied from ApiManager.cs in BizHawk.Client.EmuHawk - to avoid dependency on the EmuHawk assembly - this is annoying]
-public static class UHApiManager
+public static class ApiManager
 {
     private static readonly IReadOnlyList<(Type ImplType, Type InterfaceType, ConstructorInfo Ctor, Type[] CtorTypes)> _apiTypes;
 
-    static UHApiManager()
+    static ApiManager()
     {
         var list = new List<(Type, Type, ConstructorInfo, Type[])>();
         foreach (var implType in BizHawk.Client.Common.ReflectionCache.Types // .Concat(EmuHawk.ReflectionCache.Types)

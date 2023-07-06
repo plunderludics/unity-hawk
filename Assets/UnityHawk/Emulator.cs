@@ -1,20 +1,23 @@
-using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
-using Unity.Jobs;
-using Unity.Profiling;
-
 using System;
 using System.Linq;
-using BizHawk.Client.Common;
-using BizHawk.Emulation.Common;
-using BizHawk.Emulation.Cores.Nintendo.NES;
-using BizHawk.Emulation.Cores.Arcades.MAME;
+using System.Collections;
+using System.Collections.Generic;
 using System.IO;
 using System.Threading.Tasks;
 using System.Threading;
 
-public class UHEmulator : MonoBehaviour
+using UnityEngine;
+using Unity.Profiling;
+
+using BizHawk.Client.Common;
+using BizHawk.Emulation.Common;
+using BizHawk.Emulation.Cores.Nintendo.NES;
+using BizHawk.Emulation.Cores.Arcades.MAME;
+
+namespace UnityHawk {
+
+// [is Emulator the right name for this? i guess so?]
+public class Emulator : MonoBehaviour
 {
     [Header("Params")]
     // All pathnames are loaded relative to ./Assets/BizHawk/, unless the pathname is absolute [sort of abusing Path.Combine behavior here]
@@ -58,7 +61,7 @@ public class UHEmulator : MonoBehaviour
     Config config;
     FirmwareManager firmwareManager = new FirmwareManager();
 
-    UHInputProvider inputProvider;
+    InputProvider inputProvider;
 
     Texture2D _bufferTexture;
     RenderTexture _renderTexture; // We have to maintain a separate rendertexture just for the purpose of flipping the image we get from the emulator
@@ -74,9 +77,9 @@ public class UHEmulator : MonoBehaviour
 
     ProfilerMarker s_FrameAdvanceMarker;
 
-    UHLuaEngine luaEngine;
+    LuaEngine luaEngine;
 
-    bool _stopRunningEmulatorTask = false;
+    bool _stopEmulatorTask = false;
 
     void OnEnable()
     {
@@ -96,7 +99,7 @@ public class UHEmulator : MonoBehaviour
             Debug.LogWarning("No AudioSource component, will not play emulator audio");
         }
 
-        _stopRunningEmulatorTask = false;
+        _stopEmulatorTask = false;
         bool loaded = InitEmulator();
         if (loaded) {
             // start emulator looping in a new thread unrelated to the unity framerate
@@ -117,16 +120,12 @@ public class UHEmulator : MonoBehaviour
     
     void OnDisable() {
         // In the editor, gotta kill the task or it will keep running in edit mode
-        _stopRunningEmulatorTask = true;
-    }
-
-    void OnApplicationPause() {
-        // TODO would be good to pause the emulator here
+        _stopEmulatorTask = true;
     }
 
     // This will run asynchronously so that it's not bound by unity update framerate
     void EmulatorLoop() {
-        while (!_stopRunningEmulatorTask) {
+        while (!_stopEmulatorTask) {
             if (emulator == null) continue;
 
             emulatorDefaultFps = (float)emulator.VsyncRate(); // Idk if this can change at runtime but checking every frame just in case
@@ -163,9 +162,9 @@ public class UHEmulator : MonoBehaviour
 
         UnityHawk.InitIfNeeded();
 
-        inputProvider = new UHInputProvider();
+        inputProvider = new InputProvider();
         inputManager = new InputManager();
-        dialogParent = new UHDialogParent();
+        dialogParent = new DialogParent();
 
         // Load config
         var configPath = Path.Combine(UnityHawk.bizhawkDir, configFileName);
@@ -188,7 +187,7 @@ public class UHEmulator : MonoBehaviour
             () => {}
         );
 
-        luaEngine = new UHLuaEngine();
+        luaEngine = new LuaEngine();
 
         loader = new RomLoader(config);
 
@@ -481,4 +480,5 @@ public class UHEmulator : MonoBehaviour
     private short GetAudioBufferAt(int i) {
         return audioBuffer[(audioBufferStart + i)%audioBuffer.Length];
     }
+}
 }

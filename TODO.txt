@@ -31,6 +31,8 @@ X emulator audio
   X graphics broken
   X can't run multiple in parallel
 
+- pause emulator thread when editor is paused [https://docs.unity3d.com/ScriptReference/EditorApplication-pauseStateChanged.html]
+
 - nice unity component corresponding to a sample (rom + savestate + lua + config) [?]
 
 - make a UnityHawk namespace instead of using UH prefix

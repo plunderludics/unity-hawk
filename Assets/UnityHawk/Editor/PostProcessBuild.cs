@@ -4,7 +4,9 @@ using UnityEngine;
 
 using System.IO;
 
-public static class UHPostProcessBuild
+
+namespace UnityHawk {
+public static class PostProcessBuild
 {
     [PostProcessBuild(1000)]
     public static void OnPostProcessBuild(BuildTarget target, string pathToBuiltProject)
@@ -21,4 +23,5 @@ public static class UHPostProcessBuild
         // [one way to do this would be leave the file structure as is, disable the runtime dlls from being exported to the standalone by Unity,
         //  and then just manually copy them into dataDir in this script]
     }
+}
 }

@@ -4,8 +4,10 @@ using BizHawk.Client.Common;
 using BizHawk.Emulation.Common;
 using System.Drawing;
 
+
+namespace UnityHawk {
 // Nothing here is implemented right now, but some pieces could be
-public class UHMainFormApi : IMainFormForApi
+public class MainFormApi : IMainFormForApi
 {
     public IMovieSession MovieSession {
         get {
@@ -188,4 +190,5 @@ public class UHMainFormApi : IMainFormForApi
     {
         throw new System.NotImplementedException();
     }
+}
 }

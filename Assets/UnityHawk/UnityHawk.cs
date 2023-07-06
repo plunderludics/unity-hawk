@@ -1,4 +1,4 @@
-// global manager thing does one-time initialization of all the stuff BizHawk expects (db, etc)
+// global manager thing that does one-time initialization of all the stuff BizHawk expects (db, etc)
 
 using System.Collections;
 using System.Collections.Generic;
@@ -15,6 +15,7 @@ using System.Linq;
 
 using System.Threading.Tasks;
 
+namespace UnityHawk {
 // [if at some point we need some user-configurable global bizhawk settings we could make this back into a MonoBehaviour]
 public static class UnityHawk
 {
@@ -82,4 +83,5 @@ public static class UnityHawk
 
         _initialized = true;
     }
+}
 }

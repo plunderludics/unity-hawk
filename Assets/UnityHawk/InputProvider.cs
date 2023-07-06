@@ -4,6 +4,7 @@ using UnityEngine;
 
 using BizHawk.Client.Common;
 
+namespace UnityHawk {
 // This is our abstraction of the main functionality of the Input singleton class in BizHawk
 public interface IInputProvider {
     public InputEvent DequeueEvent();
@@ -11,11 +12,11 @@ public interface IInputProvider {
 
 // Provide input from Unity
 // [currently pretty hacky]
-public class UHInputProvider : IInputProvider {
+public class InputProvider : IInputProvider {
 
     Queue<InputEvent> _eventQueue;
 
-    public UHInputProvider() {
+    public InputProvider() {
         _eventQueue = new();
     }
 
@@ -77,4 +78,6 @@ public class UHInputProvider : IInputProvider {
             return key;
         }
     }
+}
+
 }

@@ -13,12 +13,13 @@ using BizHawk.Common.CollectionExtensions;
 
 using NLua;
 
+namespace UnityHawk {
 // [mostly adapted from LuaConsole.cs]
-class UHLuaEngine {
-    UHLuaLibraries _lua;
+class LuaEngine {
+    LuaLibraries _lua;
     IEmulator _emulator;
 
-    static UHLuaEngine() {
+    static LuaEngine() {
         // don't love static constructors but this has to get called somewhere
         LuaSandbox.DefaultLogger = Debug.Log;
     }
@@ -57,11 +58,11 @@ class UHLuaEngine {
         _lua?.Close();
         LuaFileList newScripts = new(luaScriptPaths.Select(path => new LuaFile(path)).ToArray(), onChanged: () => {});
         LuaFunctionList registeredFuncList = new(onChanged: () => {});
-        _lua = new UHLuaLibraries(
+        _lua = new LuaLibraries(
             newScripts,
             registeredFuncList,
             emulator.ServiceProvider,
-            new UHMainFormApi(),
+            new MainFormApi(),
             null, // DisplayManager
             inputManager,
             config,
@@ -236,4 +237,5 @@ class UHLuaEngine {
         }
     }
     
+}
 }

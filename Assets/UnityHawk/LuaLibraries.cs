@@ -14,9 +14,11 @@ using BizHawk.Emulation.Common;
 using BizHawk.Client.Common;
 
 // [adapted very closely (ie copy-pasted) from LuaLibraries.cs in BizHawk.Client.EmuHawk - mainly because having to import the EmuHawk assembly causes problems]
-public class UHLuaLibraries : ILuaLibraries
+
+namespace UnityHawk {
+public class LuaLibraries : ILuaLibraries
 {
-    public UHLuaLibraries(
+    public LuaLibraries(
         LuaFileList scriptList,
         LuaFunctionList registeredFuncList,
         IEmulatorServiceProvider serviceProvider,
@@ -60,7 +62,7 @@ public class UHLuaLibraries : ILuaLibraries
         RegisteredFunctions = registeredFuncList;
         ScriptList = scriptList;
         Docs.Clear();
-        _apiContainer = UHApiManager.RestartLua(serviceProvider, LogToLuaConsole, _mainForm, _displayManager, _inputManager, _mainForm.MovieSession, config, emulator, game);
+        _apiContainer = ApiManager.RestartLua(serviceProvider, LogToLuaConsole, _mainForm, _displayManager, _inputManager, _mainForm.MovieSession, config, emulator, game);
         // Register lua libraries
         foreach (var lib in BizHawk.Client.Common.ReflectionCache.Types.Concat(
                 Assembly.GetCallingAssembly().GetTypesWithoutLoadErrors().ToArray()) // Add any custom LuaLibraryBase implementations within unity-side code
@@ -109,7 +111,7 @@ public class UHLuaLibraries : ILuaLibraries
             }
         }
 
-        _lua.RegisterFunction("print", this, typeof(UHLuaLibraries).GetMethod(nameof(Print)));
+        _lua.RegisterFunction("print", this, typeof(LuaLibraries).GetMethod(nameof(Print)));
         if (OSTailoredCode.IsUnixHost)
         {
             // add %exe%/Lua to library resolution pathset (LUA_PATH)
@@ -173,7 +175,7 @@ public class UHLuaLibraries : ILuaLibraries
         IEmulator emulator,
         IGameInfo game)
     {
-        _apiContainer = UHApiManager.RestartLua(newServiceProvider, LogToLuaConsole, _mainForm, _displayManager, _inputManager, _mainForm.MovieSession, config, emulator, game);
+        _apiContainer = ApiManager.RestartLua(newServiceProvider, LogToLuaConsole, _mainForm, _displayManager, _inputManager, _mainForm.MovieSession, config, emulator, game);
         PathEntries = config.PathEntries;
         foreach (var lib in Libraries.Values)
         {
@@ -366,4 +368,5 @@ public class UHLuaLibraries : ILuaLibraries
     {
         _currThread.Yield();
     }
+}
 }
