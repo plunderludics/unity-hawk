@@ -17,7 +17,7 @@ using System.Threading;
 public class UHEmulator : MonoBehaviour
 {
     [Header("Params")]
-    // All pathnames are loaded relative to /Assets/BizHawk/, unless the pathname is absolute [sort of abusing Path.Combine behavior here]
+    // All pathnames are loaded relative to ./Assets/BizHawk/, unless the pathname is absolute [sort of abusing Path.Combine behavior here]
     public string romFileName = "mario.nes";
     public string configFileName = "config.ini";
     public string saveStateFileName = ""; // Leave empty to boot clean
@@ -27,9 +27,10 @@ public class UHEmulator : MonoBehaviour
 
     // [Make these public for debugging texture stuff]
     private TextureFormat textureFormat = TextureFormat.BGRA32;
+    private RenderTextureFormat renderTextureFormat = RenderTextureFormat.BGRA32;
     private bool linearTexture; // [seems so make no difference visually]
     private bool forceReinitTexture;
-    private bool blitTexture = true;
+    public bool blitTexture = true;
 
     // [Make these public for debugging audio stuff]
     private bool useManualAudioHandling = false;
@@ -44,7 +45,7 @@ public class UHEmulator : MonoBehaviour
     public string currentCore = "nul";
 
     // If other scripts want to grab the texture
-    public Texture2D Texture => targetTexture;
+    public RenderTexture Texture => _renderTexture;
 
     IEmulator emulator;
     IGameInfo game;
@@ -59,7 +60,8 @@ public class UHEmulator : MonoBehaviour
 
     UHInputProvider inputProvider;
 
-    Texture2D targetTexture;
+    Texture2D _bufferTexture;
+    RenderTexture _renderTexture; // We have to maintain a separate rendertexture just for the purpose of flipping the image we get from the emulator
 
     static int AudioChunkSize = 734; // [Hard to explain right now but for 'Accumulate' AudioStretchMethod, preserve audio chunks of this many samples (734 ~= 1 frame at 60fps at SR=44100)]
     static int AudioBufferSize = 44100*2;
@@ -78,6 +80,22 @@ public class UHEmulator : MonoBehaviour
 
     void OnEnable()
     {
+        s_FrameAdvanceMarker = new ProfilerMarker($"FrameAdvance {GetInstanceID()}");
+
+        if (!targetRenderer) {
+            // Default to the attached Renderer component, if there is one
+            targetRenderer = GetComponent<Renderer>();
+            if (!targetRenderer) {
+                Debug.LogWarning("No Renderer present, will not display emulator graphics");
+            }
+        }
+
+        // Check if there is an AudioSource attached
+        // [would be nice if we could specify a targetAudioSource on a different object but Unity makes that inconvenient]
+        if (!GetComponent<AudioSource>()) {
+            Debug.LogWarning("No AudioSource component, will not play emulator audio");
+        }
+
         _stopRunningEmulatorTask = false;
         bool loaded = InitEmulator();
         if (loaded) {
@@ -88,12 +106,13 @@ public class UHEmulator : MonoBehaviour
     }
 
     void Update() {
-        // Debug.Log("Update");
-        // replenish the input queue with new input from unity
-        inputProvider.Update();
-        // get the texture from bizhawk and blit to the unity texture
-        // [for efficiency we could have a flag to check if the texture has changed since last Update (it won't have if the emulator is running slower than unity)]
-        UpdateTexture();
+        if (emulator != null) {
+            // replenish the input queue with new input from unity
+            inputProvider.Update();
+            // get the texture from bizhawk and blit to the unity texture
+            // [for efficiency we could have a flag to check if the texture has changed since last Update (it won't have if the emulator is running slower than unity)]
+            UpdateTexture();
+        }
     }
     
     void OnDisable() {
@@ -107,14 +126,18 @@ public class UHEmulator : MonoBehaviour
 
     // This will run asynchronously so that it's not bound by unity update framerate
     void EmulatorLoop() {
-        // Debug.Log("EmulatorLoop");
         while (!_stopRunningEmulatorTask) {
+            if (emulator == null) continue;
+
             emulatorDefaultFps = (float)emulator.VsyncRate(); // Idk if this can change at runtime but checking every frame just in case
             System.Diagnostics.Stopwatch sw = new();
             sw.Start();
             s_FrameAdvanceMarker.Begin();
 
             FrameAdvance();
+
+            // Store audio from the last emulated frame so it can be played back on the unity audio thread
+            StoreLastFrameAudio();
 
             s_FrameAdvanceMarker.End();
             sw.Stop();
@@ -127,18 +150,12 @@ public class UHEmulator : MonoBehaviour
             if (uncappedFps > targetFps) {
                 Thread.Sleep((int)(1000*(1f/targetFps - 1f/uncappedFps)));
             }
+            
+            frame++;
         }
     }
 
     bool InitEmulator() {
-        s_FrameAdvanceMarker = new ProfilerMarker($"FrameAdvance {GetInstanceID()}");
-
-
-        // Check if there is an AudioSource attached
-        if (!GetComponent<AudioSource>()) {
-            Debug.LogWarning("No AudioSource component, will not play emulator audio");
-        }
-
         // Initialize stuff
         audioBuffer = new short[AudioBufferSize];
         audioSamplesNeeded = 0;
@@ -190,16 +207,12 @@ public class UHEmulator : MonoBehaviour
             game = loader.Game;
             currentCore = emulator.Attributes().CoreName;
 
-            if (!String.IsNullOrEmpty(saveStateFileName)) {
-                LoadState(Path.Combine(UnityHawk.bizhawkDir, saveStateFileName));
-            }
-
             videoProvider = emulator.AsVideoProviderOrDefault();
             soundProvider = emulator.AsSoundProviderOrDefault();
 
             Debug.Log($"virtual: {videoProvider.VirtualWidth} x {videoProvider.VirtualHeight} = {videoProvider.VirtualWidth * videoProvider.VirtualHeight}");
             Debug.Log($"buffer: {videoProvider.BufferWidth} x {videoProvider.BufferHeight} = {videoProvider.BufferWidth * videoProvider.BufferHeight}");
-            InitTargetTexture();
+            InitTextures();
 
             // Turns out BizHawk provides this wonderful SyncToAsyncProvider to asynchronously provide audio, which is what we need for the way Unity handles sound
             // It also does some resampling so the sound works ok when the emulator is running at speeds other than 1x
@@ -211,6 +224,13 @@ public class UHEmulator : MonoBehaviour
             // [not sure what this does but seems important]
             inputManager.SyncControls(emulator, movieSession, config);
 
+            if (!String.IsNullOrEmpty(saveStateFileName)) {
+                bool loadedState = LoadState(Path.Combine(UnityHawk.bizhawkDir, saveStateFileName));
+                if (!loadedState) {
+                    Debug.LogWarning($"Failed to load state: {saveStateFileName}");
+                }
+            }
+
             var luaScriptPaths = luaScripts.Select(path => Path.Combine(UnityHawk.bizhawkDir, path)).ToList();
             luaEngine.Restart(config, inputManager, emulator, game, luaScriptPaths);
         } else {
@@ -221,7 +241,6 @@ public class UHEmulator : MonoBehaviour
 
     void FrameAdvance()
     {
-        // Debug.Log("FrameAdvance");
         if (emulator != null) {
             var finalHostController = inputManager.ControllerInputCoalescer;
             // InputManager.ActiveController.PrepareHapticsForHost(finalHostController);
@@ -241,37 +260,37 @@ public class UHEmulator : MonoBehaviour
             movieSession.HandleFrameAfter();
 
             luaEngine.UpdateAfter();
-
-            // Store audio from the last emulated frame so it can be played back on the unity audio thread
-            StoreLastFrameAudio();
-
-            frame++;
         }
     }
 
     void UpdateTexture() {
         // Re-init the target texture if needed (if dimensions have changed, as happens on PSX)
-        if (forceReinitTexture || (targetTexture.width != videoProvider.BufferWidth || targetTexture.height != videoProvider.BufferHeight)) {
-            InitTargetTexture();
+        if (forceReinitTexture || !_bufferTexture || !_renderTexture || (_bufferTexture.width != videoProvider.BufferWidth || _bufferTexture.height != videoProvider.BufferHeight)) {
+            InitTextures();
             forceReinitTexture = false;
         }
 
         if (blitTexture) {
-            // copy the texture from the emulator to the target renderer
-            // [any faster way to do this?]
+            // Copy the texture from the emulator into a Unity texture
             int[] videoBuffer = videoProvider.GetVideoBuffer();
+            int nPixels = _bufferTexture.width * _bufferTexture.height;
             // Debug.Log($"Actual video buffer size: {videoBuffer.Length}");
-            // [note: for e.g. PSX, the videoBuffer array is much larger than the actual current pixel data (BufferWidth x BufferHeight)
-            //  can possibly optimize a lot by truncating the buffer before this call:]
-            targetTexture.SetPixelData(videoBuffer, 0);
-            targetTexture.Apply(/*updateMipmaps: false*/);
+            // Debug.Log($"Number of pixels: {nPixels}");
+
+            // Write the pixel data from the emulator directly into the bufferTexture
+            // (seems to work as long as the texture format is BGRA32 - only problem is it's flipped horizontally)
+            _bufferTexture.SetPixelData(videoBuffer, 0);
+            _bufferTexture.Apply(/*updateMipmaps: false*/);
+            // This bit is annoying but in order to just flip the image we have to Blit into a separate RenderTexture
+            Graphics.Blit(_bufferTexture, _renderTexture, scale: new Vector2(1f,-1f), offset: Vector2.zero);
         }
     }
 
-    // Init/re-init the texture for rendering the screen - has to be done whenever the source dimensions change (which happens often on PSX for some reason)
-    void InitTargetTexture() {
-        targetTexture = new Texture2D(videoProvider.BufferWidth, videoProvider.BufferHeight, textureFormat, linearTexture);
-        if (targetRenderer) targetRenderer.material.mainTexture = targetTexture;
+    // Init/re-init the textures for rendering the screen - has to be done whenever the source dimensions change (which happens often on PSX for some reason)
+    void InitTextures() {
+        _bufferTexture = new     Texture2D(videoProvider.BufferWidth, videoProvider.BufferHeight, textureFormat, linearTexture);
+        _renderTexture = new RenderTexture(videoProvider.BufferWidth, videoProvider.BufferHeight, depth:0, format:renderTextureFormat);
+        if (targetRenderer) targetRenderer.material.mainTexture = _renderTexture;
     }
 
     void StoreLastFrameAudio() {

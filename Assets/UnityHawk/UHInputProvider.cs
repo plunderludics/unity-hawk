@@ -23,6 +23,7 @@ public class UHInputProvider : IInputProvider {
         // Grab Unity input, convert to InputEvents, and add to the queue.
         
         // Big hack to check all keys
+        // [not efficient - this GetValues call is currently contributing like 50% of the runtime each frame lol]
         foreach(KeyCode k in System.Enum.GetValues(typeof(KeyCode)))
         {
             bool e = false;
