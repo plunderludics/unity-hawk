@@ -5,6 +5,7 @@
   - make it easy to remap/configure controls (either in lua or in unity)
 
 - lua scripting
+ - doesn't work with multiple threads rn :/
  - more testing; test our existing samples
  - more graceful handling of unsupported library functions, currently spits out opaque error and halts the lua script - not sure best way to handle this one
  - support some of the stuff in UHMainFormApi - loading roms, pausing/unpausing, volume control, etc
