@@ -20,12 +20,13 @@ public class Emulator : MonoBehaviour
 {
     [Header("Params")]
     // All pathnames are loaded relative to ./Assets/BizHawk/, unless the pathname is absolute [sort of abusing Path.Combine behavior here]
-    public string romFileName = "mario.nes";
+    public string romFileName = "Roms/mario.nes";
     public string configFileName = "config.ini";
     public string saveStateFileName = ""; // Leave empty to boot clean
     public List<string> luaScripts;
     public Renderer targetRenderer;
     public float frameRateMultiplier = 1f; // Speed up or slow down emulation
+    public bool disableMultithreadingForDebug = false; // Run everything on the main unity thread - not really recommended but useful for debugging sometimes
 
     // [Make these public for debugging texture stuff]
     private TextureFormat textureFormat = TextureFormat.BGRA32;
@@ -123,11 +124,18 @@ public class Emulator : MonoBehaviour
 
             // start emulator looping in a new thread unrelated to the unity framerate
             // [maybe should have a param to set if it should run in a separate thread or not? kind of annoying to support both though]
-            Task.Run(EmulatorLoop);
+            if (!disableMultithreadingForDebug) {
+                Task.Run(EmulatorLoop);
+            }
         }
     }
 
     void Update() {
+        if (disableMultithreadingForDebug) {
+            // For debug, run the FrameAdvance in the main update thread
+            EmulatorStep();
+        }
+
         if (_bizHawk.IsLoaded) {
             // replenish the input queue with new input from unity
             inputProvider.Update();
@@ -142,35 +150,40 @@ public class Emulator : MonoBehaviour
         _stopEmulatorTask = true;
     }
 
-    // This will run asynchronously so that it's not bound by unity update framerate
     void EmulatorLoop() {
         while (!_stopEmulatorTask) {
-            if (!_bizHawk.IsLoaded) continue;
-
-            emulatorDefaultFps = (float)_bizHawk.DefaultFrameRate; // Idk if this can change at runtime but checking every frame just in case
-            System.Diagnostics.Stopwatch sw = new();
-            sw.Start();
-            s_FrameAdvanceMarker.Begin();
-
-            _bizHawk.FrameAdvance(inputProvider);
-
-            // Store audio from the last emulated frame so it can be played back on the unity audio thread
-            StoreLastFrameAudio();
-
-            s_FrameAdvanceMarker.End();
-            sw.Stop();
-            TimeSpan ts = sw.Elapsed;
-            uncappedFps = (float)(1f/ts.TotalSeconds);
-
-            // Very naive throttle but it works fine - just sleep a bit if above target fps on this frame
-            // (Throttle.cs in BizHawk seems a lot more sophisticated)
-            float targetFps = emulatorDefaultFps*frameRateMultiplier;
-            if (uncappedFps > targetFps) {
-                Thread.Sleep((int)(1000*(1f/targetFps - 1f/uncappedFps)));
-            }
-            
-            frame++;
+            EmulatorStep();
         }
+    }
+
+    // This will run asynchronously so that it's not bound by unity update framerate
+    // (unless disableMultithreadingForDebug is set)
+    void EmulatorStep() {
+        if (!_bizHawk.IsLoaded) return;
+
+        emulatorDefaultFps = (float)_bizHawk.DefaultFrameRate; // Idk if this can change at runtime but checking every frame just in case
+        System.Diagnostics.Stopwatch sw = new();
+        sw.Start();
+        s_FrameAdvanceMarker.Begin();
+
+        _bizHawk.FrameAdvance(inputProvider);
+
+        // Store audio from the last emulated frame so it can be played back on the unity audio thread
+        StoreLastFrameAudio();
+
+        s_FrameAdvanceMarker.End();
+        sw.Stop();
+        TimeSpan ts = sw.Elapsed;
+        uncappedFps = (float)(1f/ts.TotalSeconds);
+
+        // Very naive throttle but it works fine - just sleep a bit if above target fps on this frame
+        // (Throttle.cs in BizHawk seems a lot more sophisticated)
+        float targetFps = emulatorDefaultFps*frameRateMultiplier;
+        if (uncappedFps > targetFps) {
+            Thread.Sleep((int)(1000*(1f/targetFps - 1f/uncappedFps)));
+        }
+        
+        frame++;
     }
 
     void UpdateTexture() {
