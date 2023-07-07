@@ -5,6 +5,7 @@ using UnityEngine.SceneManagement;
 using UnityEditor.Build;
 using UnityEditor.Build.Reporting;
 
+using System;
 using System.IO;
 
 namespace UnityHawk {
@@ -38,7 +39,11 @@ class BuildProcessing : UnityEditor.Build.IPostprocessBuildWithReport, IPreproce
         foreach (var gameObject in gameObjects) {
             var emulators = gameObject.GetComponentsInChildren<Emulator>(includeInactive: true);
             foreach (Emulator emulator in emulators) {
-                Debug.Log(emulator.romFileName);
+                foreach ((var getter, var setter) in new (Func<string>, Action<string>)[] {
+                    (() => emulator.romFileName, fn => emulator.romFileName = fn)
+                }) {
+                    Debug.Log(getter());
+                }
                 // emulator.romFileName = "wa"; // [cool, this change seems to not persist after the build is done, so no need to clean up afterwards]
                 // TODO: if the filename is an absolute path,
                 // then copy it to somewhere within the build directory, and change romFileName to point to that
@@ -50,7 +55,6 @@ class BuildProcessing : UnityEditor.Build.IPostprocessBuildWithReport, IPreproce
         }
 
     }
-    
 
     public void OnPostprocessBuild(BuildReport report)
     {
@@ -59,8 +63,10 @@ class BuildProcessing : UnityEditor.Build.IPostprocessBuildWithReport, IPreproce
         // Just copy over the whole Packages/org.plunderludics.UnityHawk/BizHawk/ directory into the build (with the same path relative to the exe)
 
         // [kinda sucks but don't know a better way]
-        var targetDir = Path.Combine(Path.GetDirectoryName(exePath), UnityHawk.bizhawkDirName);
-        FileUtil.ReplaceDirectory(UnityHawk.bizhawkDir, targetDir);
+        var targetDir = Path.Combine(Path.GetDirectoryName(exePath), UnityHawk.bizhawkDir);
+        Debug.Log($"from: {Path.GetFullPath(UnityHawk.bizhawkDir)} to {Path.GetFullPath(targetDir)}");
+        Directory.CreateDirectory(targetDir);
+        FileUtil.ReplaceDirectory(Path.GetFullPath(UnityHawk.bizhawkDir), Path.GetFullPath(targetDir)); // [only works with full paths for some reason]
 
         // TODO: we should separate the dlls needed by Unity (i.e. BizHawk.Client.Common, etc)
         // and the ones loaded at runtime within BizHawk (like waterboxhost.dll, etc)
