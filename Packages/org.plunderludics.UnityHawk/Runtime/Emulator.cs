@@ -19,7 +19,7 @@ namespace UnityHawk {
 public class Emulator : MonoBehaviour
 {
     [Header("Params")]
-    // All pathnames are loaded relative to ./Assets/, unless the pathname is absolute [sort of abusing Path.Combine behavior here]
+    // All pathnames are loaded relative to ./Assets/, unless the pathname is absolute (see GetAbsolutePath
     public string romFileName = "Roms/mario.nes";
     public string configFileName = ""; // Leave empty for default config.ini
     public string saveStateFileName = ""; // Leave empty to boot clean
@@ -72,6 +72,16 @@ public class Emulator : MonoBehaviour
 
     static readonly string textureCorrectionShaderName = "TextureCorrection";
     Material _textureCorrectionMat;
+    
+    // Returns the path that will be loaded for a filename param (rom, lua, config, savestate)
+    public static string GetAbsolutePath(string path) {
+        if (path == Path.GetFullPath(path)) {
+            // Already an absolute path, don't change it [Path.Combine below will do this anyway but just to be explicit]
+            return path;
+        } else {
+            return Path.Combine(Application.dataPath, path); // Load relative to Assets/ (in Editor), or xxx_Data/ (in build)
+        }
+    }
 
     void OnEnable()
     {
@@ -105,19 +115,19 @@ public class Emulator : MonoBehaviour
 
         // Process filename args
         string configPath;
-        if (!String.IsNullOrEmpty(configFileName)) {
+        if (String.IsNullOrEmpty(configFileName)) {
             configPath = UnityHawk.defaultConfigPath;
         } else {
-            configPath = Path.Combine(Application.dataPath, configFileName);
+            configPath = GetAbsolutePath(configFileName);
         }
 
-        string romPath = Path.Combine(Application.dataPath, romFileName);
+        string romPath = GetAbsolutePath(romFileName);
 
-        var luaScriptPaths = luaScripts.Select(path => Path.Combine(Application.dataPath, path)).ToList();
+        var luaScriptPaths = luaScripts.Select(path => GetAbsolutePath(path)).ToList();
 
         string saveStateFullPath = null;
         if (!String.IsNullOrEmpty(saveStateFileName)) {
-            saveStateFullPath = Path.Combine(Application.dataPath, saveStateFileName);
+            saveStateFullPath = GetAbsolutePath(saveStateFileName);
         }
 
         // Load the emulator + rom

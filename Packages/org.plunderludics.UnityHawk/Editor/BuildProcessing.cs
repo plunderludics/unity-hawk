@@ -7,6 +7,7 @@ using UnityEditor.Build.Reporting;
 
 using System;
 using System.IO;
+using System.Collections.Generic;
 
 namespace UnityHawk {
 
@@ -18,20 +19,29 @@ namespace UnityHawk {
 //  - copy the BizHawk directory (which contains gamedb, etc) into the build
 //  - locate any custom file dependencies from UnityHawk.Emulator components (ie roms, config, lua, savestates)
 //     and copy those into the build too (as well as temporarily updating the reference in the Emulator component)
-class BuildProcessing : UnityEditor.Build.IPostprocessBuildWithReport, IPreprocessBuildWithReport, IProcessSceneWithReport
+
+public class BuildProcessing : IPostprocessBuildWithReport, IPreprocessBuildWithReport, IProcessSceneWithReport
 {
     public int callbackOrder => 0;
     public void OnPreprocessBuild(BuildReport report) {
         
     }
+
+    // This seems to only get run about 40% of the time, annoying :/
     public void OnProcessScene(Scene scene, BuildReport report) {
+        Debug.Log("OnProcessScene");
         if (report == null) {
             // This means the callback is being called during script compilation within the editor,
             // not a build, so no need to do anything
             return;
         }
-        Debug.Log("OnProcessScene");
-        string outputPath = report.summary.outputPath;
+        ProcessScene(scene, report.summary.outputPath);
+    }
+
+    public static void ProcessScene(Scene scene, string exePath) {
+        // Need to create the build dir in advance so we can copy files in there before the build actually happens
+        string newDataDir = Path.Combine(Path.GetDirectoryName(exePath), Path.GetFileNameWithoutExtension(exePath)+"_Data");
+        Directory.CreateDirectory (newDataDir);
 
         // look through all Emulator components in the scene and
         // locate (external) file dependencies, copy them into the build, and (temporarily) update the path references
@@ -39,21 +49,40 @@ class BuildProcessing : UnityEditor.Build.IPostprocessBuildWithReport, IPreproce
         foreach (var gameObject in gameObjects) {
             var emulators = gameObject.GetComponentsInChildren<Emulator>(includeInactive: true);
             foreach (Emulator emulator in emulators) {
-                foreach ((var getter, var setter) in new (Func<string>, Action<string>)[] {
-                    (() => emulator.romFileName, fn => emulator.romFileName = fn)
-                }) {
-                    Debug.Log(getter());
+                // define abstract getters and setters just to avoid duplicating code for each field
+                var accessors = new List<(Func<string>, Action<string>)> {
+                    (() => emulator.romFileName, fn => emulator.romFileName = fn),
+                    (() => emulator.configFileName, fn => emulator.configFileName = fn),
+                    (() => emulator.saveStateFileName, fn => emulator.saveStateFileName = fn),
+                };
+                for (int i = 0; i < emulator.luaScripts.Count; i++) {
+                    int j = i;
+                    Debug.Log(emulator.luaScripts[j]);
+                    accessors.Add((() => emulator.luaScripts[j], fn => emulator.luaScripts[j] = fn));
+                }
+                foreach ((var getter, var setter) in accessors) {
+                    string path = getter();
+                    if (!string.IsNullOrEmpty(path)) {
+                        // Get the path that Emulator will actually look for the file
+                        string origFilePath = Emulator.GetAbsolutePath(path);
+                        // Use a hash of the abs path for the new file, so that files won't conflict
+                        // but also if a file is used multiple times it won't be duplicated in the build
+                        // also need to preserve the file extension since bizhawk uses that to determine the platform
+                        string newFileName = origFilePath.GetHashCode().ToString("x") + Path.GetExtension(path);
+                        // Set the emulator to point to the new file [don't worry, this change doesn't persist in the scene, only affects the build]
+                        setter(newFileName);
+                        // And copy into the right location in the build (xxx_Data/<hash>)
+                        string newFilePath = Path.Combine(newDataDir, newFileName);
+                        Debug.Log($"copy from: {origFilePath} to {newFilePath}");
+                        File.Copy(origFilePath, newFilePath, overwrite: true);
+                    }
                 }
                 // emulator.romFileName = "wa"; // [cool, this change seems to not persist after the build is done, so no need to clean up afterwards]
                 // TODO: if the filename is an absolute path,
                 // then copy it to somewhere within the build directory, and change romFileName to point to that
 
-                // maybe just use a hash of the filename (abs path) so that files won't conflict
-                // but if e.g. multiple Emulators point to the same rom
-                // then we only need one rom file in the build
             }
         }
-
     }
 
     public void OnPostprocessBuild(BuildReport report)
