@@ -5,7 +5,7 @@
   - make it easy to remap/configure controls (either in lua or in unity)
 
 - lua scripting
- - doesn't work with multiple threads rn :/
+ X doesn't work with multiple threads rn :/ [commented out the check in LuaSandbox.cs in BizHawk - probably not the best solution]
  - more testing; test our existing samples
  - more graceful handling of unsupported library functions, currently spits out opaque error and halts the lua script - not sure best way to handle this one
  - support some of the stuff in UHMainFormApi - loading roms, pausing/unpausing, volume control, etc
@@ -44,7 +44,7 @@ X emulator audio
 
 - nice unity component corresponding to a sample (rom + savestate + lua + config) [?]
 
-- make a UnityHawk namespace instead of using UH prefix
+X make a UnityHawk namespace instead of using UH prefix
 
 - make a unity package
 - think a bit about usability

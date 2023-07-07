@@ -4,5 +4,8 @@
 EditorBuildSettings:
   m_ObjectHideFlags: 0
   serializedVersion: 2
-  m_Scenes: []
+  m_Scenes:
+  - enabled: 1
+    path: Assets/Scenes/TestBizHawk.unity
+    guid: 7c32a8135356ff94781243f7221884fa
   m_configObjects: {}

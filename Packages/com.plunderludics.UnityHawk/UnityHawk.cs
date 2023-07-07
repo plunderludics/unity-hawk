@@ -24,6 +24,7 @@ public static class UnityHawk
     public static readonly string bizhawkDir = Path.Combine("Packages", packageName, bizhawkDirName);
     // [^ seems insane but somehow Unity makes this work whether the package is in the Library/PackageCache/ dir or the Packages/ dir
     //  maybe not the best idea to rely on this dark behaviour though..]
+    public static readonly string defaultConfigPath = Path.Combine(bizhawkDir, "config.ini");
     
     [DllImport("kernel32.dll")]
     private static extern IntPtr LoadLibrary(string lpLibFileName);

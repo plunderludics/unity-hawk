@@ -19,9 +19,9 @@ namespace UnityHawk {
 public class Emulator : MonoBehaviour
 {
     [Header("Params")]
-    // All pathnames are loaded relative to ./Assets/BizHawk/, unless the pathname is absolute [sort of abusing Path.Combine behavior here]
+    // All pathnames are loaded relative to ./Assets/, unless the pathname is absolute [sort of abusing Path.Combine behavior here]
     public string romFileName = "Roms/mario.nes";
-    public string configFileName = "config.ini";
+    public string configFileName = ""; // Leave empty for default config.ini
     public string saveStateFileName = ""; // Leave empty to boot clean
     public List<string> luaScripts;
     public Renderer targetRenderer;
@@ -103,14 +103,23 @@ public class Emulator : MonoBehaviour
 
         _stopEmulatorTask = false;
 
-        var configPath = Path.Combine(UnityHawk.bizhawkDir, configFileName);
-        var romPath = Path.Combine(UnityHawk.bizhawkDir, romFileName);
-        var luaScriptPaths = luaScripts.Select(path => Path.Combine(UnityHawk.bizhawkDir, path)).ToList();
+        // Process filename args
+        string configPath;
+        if (!String.IsNullOrEmpty(configFileName)) {
+            configPath = UnityHawk.defaultConfigPath;
+        } else {
+            configPath = Path.Combine(Application.dataPath, configFileName);
+        }
+
+        string romPath = Path.Combine(Application.dataPath, romFileName);
+
+        var luaScriptPaths = luaScripts.Select(path => Path.Combine(Application.dataPath, path)).ToList();
 
         string saveStateFullPath = null;
         if (!String.IsNullOrEmpty(saveStateFileName)) {
-            saveStateFullPath = Path.Combine(UnityHawk.bizhawkDir, saveStateFileName);
+            saveStateFullPath = Path.Combine(Application.dataPath, saveStateFileName);
         }
+
         // Load the emulator + rom
         bool loaded = _bizHawk.InitEmulator(
             configPath,
