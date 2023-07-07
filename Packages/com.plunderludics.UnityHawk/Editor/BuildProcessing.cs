@@ -7,7 +7,6 @@ using UnityEditor.Build.Reporting;
 
 using System.IO;
 
-
 namespace UnityHawk {
 
 // NOTE if this seems to not be working -
@@ -18,7 +17,7 @@ namespace UnityHawk {
 //  - copy the BizHawk directory (which contains gamedb, etc) into the build
 //  - locate any custom file dependencies from UnityHawk.Emulator components (ie roms, config, lua, savestates)
 //     and copy those into the build too (as well as temporarily updating the reference in the Emulator component)
-class BuildProcessing : IPostprocessBuildWithReport, IPreprocessBuildWithReport, IProcessSceneWithReport
+class BuildProcessing : UnityEditor.Build.IPostprocessBuildWithReport, IPreprocessBuildWithReport, IProcessSceneWithReport
 {
     public int callbackOrder => 0;
     public void OnPreprocessBuild(BuildReport report) {
@@ -40,7 +39,7 @@ class BuildProcessing : IPostprocessBuildWithReport, IPreprocessBuildWithReport,
             var emulators = gameObject.GetComponentsInChildren<Emulator>(includeInactive: true);
             foreach (Emulator emulator in emulators) {
                 Debug.Log(emulator.romFileName);
-                emulator.romFileName = "wa"; // [cool, this change seems to not persist after the build is done, so no need to clean up afterwards]
+                // emulator.romFileName = "wa"; // [cool, this change seems to not persist after the build is done, so no need to clean up afterwards]
                 // TODO: if the filename is an absolute path,
                 // then copy it to somewhere within the build directory, and change romFileName to point to that
 
@@ -56,11 +55,12 @@ class BuildProcessing : IPostprocessBuildWithReport, IPreprocessBuildWithReport,
     public void OnPostprocessBuild(BuildReport report)
     {
         string exePath = report.summary.outputPath;
-        // Copy the BizHawk dir directly into the unity-hawk_Data folder
+        // Gotta make sure all the bizhawk stuff gets into the build
+        // Just copy over the whole Packages/org.plunderludics.UnityHawk/BizHawk/ directory into the build (with the same path relative to the exe)
+
         // [kinda sucks but don't know a better way]
-        var dataDir = Path.Join(Path.GetDirectoryName(exePath), Path.GetFileNameWithoutExtension(exePath)+"_Data");
-        var buildBizhawkDir = Path.Join(dataDir, UnityHawk.bizhawkDirName);
-        FileUtil.ReplaceDirectory(UnityHawk.bizhawkDir, buildBizhawkDir);
+        var targetDir = Path.Combine(Path.GetDirectoryName(exePath), UnityHawk.bizhawkDirName);
+        FileUtil.ReplaceDirectory(UnityHawk.bizhawkDir, targetDir);
 
         // TODO: we should separate the dlls needed by Unity (i.e. BizHawk.Client.Common, etc)
         // and the ones loaded at runtime within BizHawk (like waterboxhost.dll, etc)

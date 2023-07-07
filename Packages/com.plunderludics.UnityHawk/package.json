@@ -1,22 +1,20 @@
 {
-    "name": "org.plunderludics.unityhawk",
-    "version": "0.0.1",
-    "displayName": "UnityHawk",
-    "description": "Run eumlated games within Unity via BizHawk",
-    "unity": "2022.1",
-    "unityRelease": "23f1",
-    "documentationUrl": "https://example.com/",
-    "changelogUrl": "https://example.com/changelog.html",
-    "licensesUrl": "https://example.com/licensing.html",
-    "dependencies": {
-    },
-    "keywords": [
-      "plunderludics",
-      "emulation",
-      "bizhawk"
-    ],
-    "author": {
-      "name": "plunderludics group",
-      "url": "https://plunderludics.github.io"
-    }
+  "name": "org.plunderludics.unityhawk",
+  "version": "0.0.1",
+  "displayName": "UnityHawk",
+  "description": "Run emulated games within Unity via BizHawk",
+  "unity": "2022.1",
+  "unityRelease": "23f1",
+  "documentationUrl": "https://example.com/",
+  "changelogUrl": "https://example.com/changelog.html",
+  "licensesUrl": "https://example.com/licensing.html",
+  "keywords": [
+    "plunderludics",
+    "emulation",
+    "bizhawk"
+  ],
+  "author": {
+    "name": "plunderludics group",
+    "url": "https://plunderludics.github.io"
   }
+}

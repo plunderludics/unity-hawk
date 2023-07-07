@@ -1,0 +1,16 @@
+{
+    "name": "UnityHawk.Editor",
+    "rootNamespace": "",
+    "references": [
+        "GUID:abba43e239f8a2b4498e486350d7b68d"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}

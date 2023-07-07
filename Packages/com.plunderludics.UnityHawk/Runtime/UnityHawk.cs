@@ -44,7 +44,14 @@ public static class UnityHawk
         //  but there must be a better way than this]
 
         var dllDir = Path.Combine(bizhawkDir, "dll");
-        _ = SetDllDirectory(dllDir);
+
+        // [even more hacky - temporarily copy the dlls into a temp dir
+        //  because loading from within Packages/ doesn't work for some reason]
+        string tmpDllDir = Path.Combine(Path.GetTempPath(), "bizhawk-dlls");
+        Debug.Log(Path.GetFullPath(tmpDllDir));
+        Directory.CreateDirectory(tmpDllDir);
+
+        _ = SetDllDirectory(tmpDllDir);
 
         var libsToLoad = new List<string> {
             // QuickNes (NES)
@@ -66,6 +73,12 @@ public static class UnityHawk
             // TODO load any others we need [or find a way to avoid doing this]
         };
         foreach (string lib in libsToLoad) {
+            // Copy dll into the tmp dir
+            string origDll = Path.Combine(dllDir, lib);
+            string tmpDll = Path.Combine(tmpDllDir, lib);
+            File.Copy(origDll, tmpDll, overwrite: true);
+
+            // Load
             int e = (int)LoadLibrary(lib);
             if (e == 0) {
                 Debug.LogError($"Could not load: {lib}");

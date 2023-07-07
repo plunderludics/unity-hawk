@@ -3,7 +3,7 @@
 First build this fork of BizHawk: https://github.com/plunderludics/bizhawk/tree/unity-hawk
 
 then copy these directories from `BizHawk/output` into `Packages/org.plunderludics.UnityHawk/BizHawk/` in this Unity project:
- - `dlls`
+ - `dll`
  - `gamedb`
  - `Firmware`
 
