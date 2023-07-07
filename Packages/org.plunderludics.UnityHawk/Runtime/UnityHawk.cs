@@ -8,6 +8,7 @@ using BizHawk.Client.Common;
 using BizHawk.Emulation.Common;
 using BizHawk.Emulation.Cores.Nintendo.NES;
 using BizHawk.Emulation.Cores.Arcades.MAME;
+using BizHawk.Common.PathExtensions;
 using System.IO;
 using System.Runtime.InteropServices;
 using System;
@@ -26,6 +27,8 @@ public static class UnityHawk
     //  maybe not the best idea to rely on this dark behaviour though..]
     public static readonly string defaultConfigPath = Path.Combine(bizhawkDir, "config.ini");
     
+    public static readonly string dllDir = Path.Combine(bizhawkDir, "dll");
+
     [DllImport("kernel32.dll")]
     private static extern IntPtr LoadLibrary(string lpLibFileName);
 
@@ -39,11 +42,15 @@ public static class UnityHawk
         if (_initialized) return;
         // Initialize some global stuff that every BizHawk instance will use
 
-        // [huge hack - preload all the dlls for cores that have to load them at runtime
-        //  i don't know why, but just calling SetDllDirectory before bizhawk loads doesn't work.
-        //  but there must be a better way than this]
+        // override all the path variables in bizhawk since the way bizhawk determines them is
+        // inconsistent between running in editor and running build
+        PathUtils.DllDirectoryPath = UnityHawk.dllDir;
+        PathUtils.ExeDirectoryPath = UnityHawk.bizhawkDir;
+        PathUtils.DataDirectoryPath = UnityHawk.bizhawkDir;
 
-        var dllDir = Path.Combine(bizhawkDir, "dll");
+        //  huge hack - preload all the dlls for cores that have to load them at runtime
+        //  i don't know why, but just calling SetDllDirectory before bizhawk loads doesn't work.
+        //  but there must be a better way than this
 
         _ = SetDllDirectory(dllDir);
 
