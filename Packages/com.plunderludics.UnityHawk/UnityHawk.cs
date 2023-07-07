@@ -20,7 +20,10 @@ namespace UnityHawk {
 public static class UnityHawk
 {
     public static readonly string bizhawkDirName = "BizHawk";
-    public static readonly string bizhawkDir = Path.Combine(Application.dataPath, bizhawkDirName);
+    public static readonly string packageName = "org.plunderludics.UnityHawk";
+    public static readonly string bizhawkDir = Path.Combine("Packages", packageName, bizhawkDirName);
+    // [^ seems insane but somehow Unity makes this work whether the package is in the Library/PackageCache/ dir or the Packages/ dir
+    //  maybe not the best idea to rely on this dark behaviour though..]
     
     [DllImport("kernel32.dll")]
     private static extern IntPtr LoadLibrary(string lpLibFileName);
