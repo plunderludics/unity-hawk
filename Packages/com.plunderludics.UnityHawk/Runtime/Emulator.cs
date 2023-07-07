@@ -70,12 +70,12 @@ public class Emulator : MonoBehaviour
 
     bool _stopEmulatorTask = false;
 
-    static string textureCorrectionShaderName = "UnityHawk/TextureCorrection";
+    static readonly string textureCorrectionShaderName = "TextureCorrection";
     Material _textureCorrectionMat;
 
     void OnEnable()
     {
-        _textureCorrectionMat = new Material(Shader.Find(textureCorrectionShaderName));
+        _textureCorrectionMat = new Material(Resources.Load<Shader>(textureCorrectionShaderName));
         // Initialize stuff
         inputProvider = new InputProvider();
 
