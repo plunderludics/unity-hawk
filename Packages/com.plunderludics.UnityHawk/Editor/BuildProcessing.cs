@@ -41,12 +41,12 @@ class BuildProcessing : IPostprocessBuildWithReport, IPreprocessBuildWithReport,
             foreach (Emulator emulator in emulators) {
                 Debug.Log(emulator.romFileName);
                 emulator.romFileName = "wa"; // [cool, this change seems to not persist after the build is done, so no need to clean up afterwards]
-                // TODO: if the file is not within the BizHawk/ dir,
+                // TODO: if the filename is an absolute path,
                 // then copy it to somewhere within the build directory, and change romFileName to point to that
 
                 // maybe just use a hash of the filename (abs path) so that files won't conflict
                 // but if e.g. multiple Emulators point to the same rom
-                // then we only put one rom file in the build
+                // then we only need one rom file in the build
             }
         }
 
