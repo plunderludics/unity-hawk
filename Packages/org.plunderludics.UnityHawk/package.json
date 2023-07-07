@@ -5,6 +5,9 @@
   "description": "Run emulated games within Unity via BizHawk",
   "unity": "2022.1",
   "unityRelease": "23f1",
+  "dependencies": {
+    "com.unity.nuget.newtonsoft-json": "3.0.2"
+  },
   "documentationUrl": "https://example.com/",
   "changelogUrl": "https://example.com/changelog.html",
   "licensesUrl": "https://example.com/licensing.html",

@@ -7,11 +7,20 @@
       "dependencies": {},
       "url": "https://packages.unity.com"
     },
+    "com.unity.nuget.newtonsoft-json": {
+      "version": "3.0.2",
+      "depth": 1,
+      "source": "registry",
+      "dependencies": {},
+      "url": "https://packages.unity.com"
+    },
     "org.plunderludics.unityhawk": {
-      "version": "file:com.plunderludics.UnityHawk",
+      "version": "file:org.plunderludics.UnityHawk",
       "depth": 0,
       "source": "embedded",
-      "dependencies": {}
+      "dependencies": {
+        "com.unity.nuget.newtonsoft-json": "3.0.2"
+      }
     },
     "com.unity.modules.audio": {
       "version": "1.0.0",
