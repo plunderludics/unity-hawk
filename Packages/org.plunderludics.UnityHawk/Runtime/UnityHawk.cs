@@ -20,11 +20,22 @@ namespace UnityHawk {
 // [if at some point we need some user-configurable global bizhawk settings we could make this back into a MonoBehaviour]
 public static class UnityHawk
 {
-    public static readonly string bizhawkDirName = "BizHawk";
     public static readonly string packageName = "org.plunderludics.UnityHawk";
-    public static readonly string bizhawkDir = Path.Combine("Packages", packageName, bizhawkDirName);
+    public static readonly string bizhawkDirRelative = Path.Combine(packageName, "BizHawk");
+    public static readonly string bizhawkDirForEditor = Path.Combine("Packages", bizhawkDirRelative);
     // [^ seems insane but somehow Unity makes this work whether the package is in the Library/PackageCache/ dir or the Packages/ dir
     //  maybe not the best idea to rely on this dark behaviour though..]
+
+    // In the build put the bizhawk stuff inside "xx_Data/com.plunderludics.UnityHawk/BizHawk"
+    public static readonly string bizhawkDirForBuild = Path.Combine(Application.dataPath, bizhawkDirRelative);
+    
+    public static readonly string bizhawkDir =
+#if UNITY_EDITOR
+        bizhawkDirForEditor;
+#else
+        bizhawkDirForBuild;
+#endif
+
     public static readonly string defaultConfigPath = Path.Combine(bizhawkDir, "config.ini");
     
     public static readonly string dllDir = Path.Combine(bizhawkDir, "dll");
@@ -35,6 +46,9 @@ public static class UnityHawk
     [DllImport("kernel32.dll", SetLastError = true)]
     private static extern uint SetDllDirectory(string lpPathName);
 
+    [DllImport("kernel32.dll")]
+    private static extern uint GetLastError();
+
     private static bool _initialized = false;
 
     public static void InitIfNeeded()
@@ -44,15 +58,17 @@ public static class UnityHawk
 
         // override all the path variables in bizhawk since the way bizhawk determines them is
         // inconsistent between running in editor and running build
-        PathUtils.DllDirectoryPath = UnityHawk.dllDir;
-        PathUtils.ExeDirectoryPath = UnityHawk.bizhawkDir;
-        PathUtils.DataDirectoryPath = UnityHawk.bizhawkDir;
+        PathUtils.DllDirectoryPath = dllDir;
+        PathUtils.ExeDirectoryPath = bizhawkDir;
+        PathUtils.DataDirectoryPath = bizhawkDir;
 
         //  huge hack - preload all the dlls for cores that have to load them at runtime
         //  i don't know why, but just calling SetDllDirectory before bizhawk loads doesn't work.
         //  but there must be a better way than this
 
-        _ = SetDllDirectory(dllDir);
+        string dllDirFullPath = Path.GetFullPath(dllDir);
+        Debug.Log($"Loading dlls from: {dllDirFullPath}");
+        _ = SetDllDirectory(dllDirFullPath); // have a feeling this might not work in build
 
         var libsToLoad = new List<string> {
             // QuickNes (NES)
@@ -76,7 +92,7 @@ public static class UnityHawk
         foreach (string lib in libsToLoad) {
             int e = (int)LoadLibrary(lib);
             if (e == 0) {
-                Debug.LogError($"Could not load: {lib}");
+                Debug.LogError($"Could not load: {lib}, last error: {GetLastError()}");
             }
         }
 

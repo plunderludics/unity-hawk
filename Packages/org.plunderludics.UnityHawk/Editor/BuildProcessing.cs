@@ -44,7 +44,7 @@ public class BuildProcessing : IPostprocessBuildWithReport, IPreprocessBuildWith
 
     public static void ProcessScene(Scene scene, string exePath) {
         // Need to create the build dir in advance so we can copy files in there before the build actually happens
-        string streamingAssetsBuildDir = Path.Combine(Path.GetDirectoryName(exePath), Path.GetFileNameWithoutExtension(exePath)+"_Data", "StreamingAssets");
+        string streamingAssetsBuildDir = Path.Combine(GetBuildDataDir(exePath), "StreamingAssets");
         Directory.CreateDirectory (streamingAssetsBuildDir);
 
         // look through all Emulator components in the scene and
@@ -115,10 +115,6 @@ public class BuildProcessing : IPostprocessBuildWithReport, IPreprocessBuildWith
                         }
                     }
                 }
-                // emulator.romFileName = "wa"; // [cool, this change seems to not persist after the build is done, so no need to clean up afterwards]
-                // TODO: if the filename is an absolute path,
-                // then copy it to somewhere within the build directory, and change romFileName to point to that
-
             }
         }
     }
@@ -127,10 +123,10 @@ public class BuildProcessing : IPostprocessBuildWithReport, IPreprocessBuildWith
     {
         string exePath = report.summary.outputPath;
         // Gotta make sure all the bizhawk stuff gets into the build
-        // Just copy over the whole Packages/org.plunderludics.UnityHawk/BizHawk/ directory into the build (with the same path relative to the exe)
+        // Copy over the whole Packages/org.plunderludics.UnityHawk/BizHawk/ directory into xxx_Data/org.plunderludics.UnityHawk/BizHawk/
 
         // [kinda sucks but don't know a better way]
-        var targetDir = Path.Combine(Path.GetDirectoryName(exePath), UnityHawk.bizhawkDir);
+        var targetDir = Path.Combine(GetBuildDataDir(exePath), UnityHawk.bizhawkDirRelative);
         Debug.Log($"from: {Path.GetFullPath(UnityHawk.bizhawkDir)} to {Path.GetFullPath(targetDir)}");
         Directory.CreateDirectory(targetDir);
         FileUtil.ReplaceDirectory(Path.GetFullPath(UnityHawk.bizhawkDir), Path.GetFullPath(targetDir)); // [only works with full paths for some reason]
@@ -140,6 +136,10 @@ public class BuildProcessing : IPostprocessBuildWithReport, IPreprocessBuildWith
         // currently we end up with two copies of every dll in the build which is stupid
         // [one way to do this would be leave the file structure as is, disable the runtime dlls from being exported to the standalone by Unity,
         //  and then just manually copy them into dataDir in this script]
+    }
+
+    static string GetBuildDataDir(string exePath) {
+        return Path.Combine(Path.GetDirectoryName(exePath), Path.GetFileNameWithoutExtension(exePath)+"_Data");
     }
 
     // [https://stackoverflow.com/a/74401631]
