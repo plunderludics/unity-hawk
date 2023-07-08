@@ -197,13 +197,13 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 4897e5590ac16ef44a72b3285925e81f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  romFileName: F:/pludics/roms/Command & Conquer/Command & Conquer (USA) (Disc 1)
-    (GDI).cue
-  configFileName: 
-  saveStateFileName: F:/pludics/samples/commandconquer/moreguys.State
-  luaScripts:
-  - F:/pludics/samples/commandconquer/commandconquer.lua
+  useAttachedRenderer: 0
   targetRenderer: {fileID: 547617502}
+  romFileName: F:\pludics\roms\Jeopardy! (USA)\Jeopardy! (USA).cue
+  configFileName: 
+  saveStateFileName: F:\pludics\samples\jeopardy-draw\draw.State
+  luaScripts:
+  - F:\pludics\samples\jeopardy-draw\jeopardy-draw.lua
   frameRateMultiplier: 1
   disableMultithreadingForDebug: 0
   frame: 0
@@ -630,12 +630,13 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 4897e5590ac16ef44a72b3285925e81f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  useAttachedRenderer: 0
+  targetRenderer: {fileID: 734294839}
   romFileName: Roms/mario.nes
   configFileName: 
   saveStateFileName: 
   luaScripts:
   - test.lua
-  targetRenderer: {fileID: 734294839}
   frameRateMultiplier: 1
   disableMultithreadingForDebug: 0
   frame: 0

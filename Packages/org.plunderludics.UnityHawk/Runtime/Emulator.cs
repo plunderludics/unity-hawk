@@ -26,6 +26,8 @@ namespace UnityHawk {
 // [is Emulator the right name for this? i guess so?]
 public class Emulator : MonoBehaviour
 {
+    public bool useAttachedRenderer = true;
+    [HideIf("useAttachedRenderer")]
     public Renderer targetRenderer;
 
     [Header("Files")]
@@ -117,11 +119,11 @@ public class Emulator : MonoBehaviour
 
         s_FrameAdvanceMarker = new ProfilerMarker($"FrameAdvance {GetInstanceID()}");
 
-        if (!targetRenderer) {
+        if (useAttachedRenderer) {
             // Default to the attached Renderer component, if there is one
             targetRenderer = GetComponent<Renderer>();
             if (!targetRenderer) {
-                Debug.LogWarning("No Renderer present, will not display emulator graphics");
+                Debug.LogWarning("No Renderer attached, will not display emulator graphics");
             }
         }
 
