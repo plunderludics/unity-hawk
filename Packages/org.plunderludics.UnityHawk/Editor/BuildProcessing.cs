@@ -13,14 +13,16 @@ using CueSharp;
 
 namespace UnityHawk {
 
-// NOTE if this seems to not be working -
-// Make sure every scene is actually added to the list of 'Scenes in Build'
-// otherwise this won't work.
-
 // This does two main things:
 //  - copy the BizHawk directory (which contains gamedb, etc) into the build
 //  - locate any custom file dependencies from UnityHawk.Emulator components (ie roms, config, lua, savestates)
 //     and copy those into the build too (as well as temporarily updating the reference in the Emulator component)
+//     (this second part is only necessary if you don't put your dependencies in StreamingAssets/
+//      and it's kind of flaky so using StreamingAssets should probably be the recommended method)
+
+// NOTE if this seems to not be working -
+// Make sure every scene is actually added to the list of 'Scenes in Build'
+// otherwise this won't work.
 
 public class BuildProcessing : IPostprocessBuildWithReport, IPreprocessBuildWithReport, IProcessSceneWithReport
 {
@@ -42,8 +44,8 @@ public class BuildProcessing : IPostprocessBuildWithReport, IPreprocessBuildWith
 
     public static void ProcessScene(Scene scene, string exePath) {
         // Need to create the build dir in advance so we can copy files in there before the build actually happens
-        string newDataDir = Path.Combine(Path.GetDirectoryName(exePath), Path.GetFileNameWithoutExtension(exePath)+"_Data");
-        Directory.CreateDirectory (newDataDir);
+        string streamingAssetsBuildDir = Path.Combine(Path.GetDirectoryName(exePath), Path.GetFileNameWithoutExtension(exePath)+"_Data", "StreamingAssets");
+        Directory.CreateDirectory (streamingAssetsBuildDir);
 
         // look through all Emulator components in the scene and
         // locate (external) file dependencies, copy them into the build, and (temporarily) update the path references
@@ -64,21 +66,27 @@ public class BuildProcessing : IPostprocessBuildWithReport, IPreprocessBuildWith
                 }
                 foreach ((var getter, var setter) in accessors) {
                     string path = getter();
-                    // TODO ignore anything within StreamingAssets/ since those get copied over already by Unity
-                    // and that could be a nice way to bypass this flaky copy procedure if needed
 
                     if (!string.IsNullOrEmpty(path)) {
                         // Get the path that Emulator will actually look for the file
                         string origFilePath = Emulator.GetAbsolutePath(path);
-                        string ext = Path.GetExtension(path);
+
+                        // ignore anything within StreamingAssets/ since those get copied over already by Unity
+                        Debug.Log($"Check isSubPath {origFilePath}, {Application.streamingAssetsPath}");
+                        if (IsSubPath(Application.streamingAssetsPath, origFilePath)) {
+                            Debug.Log($"Skipping copy for: {origFilePath}");
+                            continue;
+                        }
+
                         // Use a hash of the abs path for the new file, so that files won't conflict
                         // but also if a file is used multiple times it won't be duplicated in the build
                         // also need to preserve the file extension since bizhawk uses that to determine the platform
+                        string ext = Path.GetExtension(path);
                         string newFileName = origFilePath.GetHashCode().ToString("x") + ext;
                         // Set the emulator to point to the new file [don't worry, this change doesn't persist in the scene, only affects the build]
                         setter(newFileName);
-                        // And copy into the right location in the build (xxx_Data/<hash>)
-                        string newFilePath = Path.Combine(newDataDir, newFileName);
+                        // And copy into the right location in the build (xxx_Data/StreamingAssets/<hash>)
+                        string newFilePath = Path.Combine(streamingAssetsBuildDir, newFileName);
                         Debug.Log($"copy from: {origFilePath} to {newFilePath}");
                         File.Copy(origFilePath, newFilePath, overwrite: true);
 
@@ -100,7 +108,7 @@ public class BuildProcessing : IPostprocessBuildWithReport, IPreprocessBuildWith
                                 }
                                 // bin file pathname is relative to the directory of the cue file
                                 string binPath = Path.Combine(cueFileParentDir, binFileName);
-                                newFilePath = Path.Combine(newDataDir, binFileName); 
+                                newFilePath = Path.Combine(streamingAssetsBuildDir, binFileName); 
                                 Debug.Log($"copy from: {binPath} to {newFilePath}");
                                 File.Copy(binPath, newFilePath, overwrite: true);
                             }
@@ -132,6 +140,25 @@ public class BuildProcessing : IPostprocessBuildWithReport, IPreprocessBuildWith
         // currently we end up with two copies of every dll in the build which is stupid
         // [one way to do this would be leave the file structure as is, disable the runtime dlls from being exported to the standalone by Unity,
         //  and then just manually copy them into dataDir in this script]
+    }
+
+    // [https://stackoverflow.com/a/74401631]
+    public static bool IsSubPath(string parent, string child)
+    {
+        try
+        {
+            parent = Path.GetFullPath(parent);
+            if (!parent.EndsWith(Path.DirectorySeparatorChar.ToString()))
+                parent = parent + Path.DirectorySeparatorChar;
+            child = Path.GetFullPath(child);
+            if (child.Length <= parent.Length)
+                return false;
+            return child.StartsWith(parent);
+        }
+        catch
+        {
+            return false;
+        }
     }
 }
 }

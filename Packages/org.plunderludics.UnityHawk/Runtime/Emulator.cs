@@ -19,7 +19,7 @@ namespace UnityHawk {
 public class Emulator : MonoBehaviour
 {
     [Header("Params")]
-    // All pathnames are loaded relative to ./Assets/, unless the pathname is absolute (see GetAbsolutePath
+    // All pathnames are loaded relative to ./StreamingAssets/, unless the pathname is absolute (see GetAbsolutePath)
     public string romFileName = "Roms/mario.nes";
     public string configFileName = ""; // Leave empty for default config.ini
     public string saveStateFileName = ""; // Leave empty to boot clean
@@ -79,7 +79,7 @@ public class Emulator : MonoBehaviour
             // Already an absolute path, don't change it [Path.Combine below will do this anyway but just to be explicit]
             return path;
         } else {
-            return Path.Combine(Application.dataPath, path); // Load relative to Assets/ (in Editor), or xxx_Data/ (in build)
+            return Path.Combine(Application.streamingAssetsPath, path); // Load relative to StreamingAssets/
         }
     }
 

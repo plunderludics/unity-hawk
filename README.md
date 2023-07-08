@@ -7,4 +7,8 @@ then copy these directories from `BizHawk/output` into `Packages/org.plunderludi
  - `gamedb`
  - `Firmware`
 
-(if the gamedb is missing it seems to cause the code to freeze)
+## Usage:
+Add a UnityHawk.Emulator component to an object with a Renderer attached.
+Put the rom, savestate, config & lua files you want to use into `Assets/StreamingAssets/`
+Set the filenames on the Emulator component (relative to the StreamingAssets dir)
+(You can also use an absolute path if you want to reference files outside of the Unity project - UnityHawk will attempt to copy the necessary files into the build at build time)
