@@ -9,6 +9,8 @@ using System;
 using System.IO;
 using System.Collections.Generic;
 
+using CueSharp;
+
 namespace UnityHawk {
 
 // NOTE if this seems to not be working -
@@ -62,19 +64,47 @@ public class BuildProcessing : IPostprocessBuildWithReport, IPreprocessBuildWith
                 }
                 foreach ((var getter, var setter) in accessors) {
                     string path = getter();
+                    // TODO ignore anything within StreamingAssets/ since those get copied over already by Unity
+                    // and that could be a nice way to bypass this flaky copy procedure if needed
+
                     if (!string.IsNullOrEmpty(path)) {
                         // Get the path that Emulator will actually look for the file
                         string origFilePath = Emulator.GetAbsolutePath(path);
+                        string ext = Path.GetExtension(path);
                         // Use a hash of the abs path for the new file, so that files won't conflict
                         // but also if a file is used multiple times it won't be duplicated in the build
                         // also need to preserve the file extension since bizhawk uses that to determine the platform
-                        string newFileName = origFilePath.GetHashCode().ToString("x") + Path.GetExtension(path);
+                        string newFileName = origFilePath.GetHashCode().ToString("x") + ext;
                         // Set the emulator to point to the new file [don't worry, this change doesn't persist in the scene, only affects the build]
                         setter(newFileName);
                         // And copy into the right location in the build (xxx_Data/<hash>)
                         string newFilePath = Path.Combine(newDataDir, newFileName);
                         Debug.Log($"copy from: {origFilePath} to {newFilePath}");
                         File.Copy(origFilePath, newFilePath, overwrite: true);
+
+                        if (ext == ".cue") {
+                            // This is annoying, but some roms (e.g. for PSX) are .cue files, and those point to other file dependencies
+                            // so we need to copy those files over as well (without renaming)
+                            // [if there are other special cases we have to handle like this we should probably rethink this whole approach tbh - too much work]
+                            // [definitely at least need an alternative in case this has issues (one way would be to just use StreamingAssets)]
+                            
+                            // this also has a minor bug that if separate .bin files hae the same name they'll get clobbered
+                            // probably has a ton of edge cases that will break too
+                            var cueSheet = new CueSheet(origFilePath);
+                            // Copy all the .bin files that are referenced
+                            string cueFileParentDir = Path.GetDirectoryName(origFilePath);
+                            foreach (Track t in cueSheet.Tracks) {
+                                string binFileName = t.DataFile.Filename;
+                                if (binFileName != Path.GetFileName(binFileName)) {
+                                    throw new ArgumentException("UnityHawk build script doesn't support .cue files that reference files in a different directory. Consider putting your rom files in StreamingAssets instead");
+                                }
+                                // bin file pathname is relative to the directory of the cue file
+                                string binPath = Path.Combine(cueFileParentDir, binFileName);
+                                newFilePath = Path.Combine(newDataDir, binFileName); 
+                                Debug.Log($"copy from: {binPath} to {newFilePath}");
+                                File.Copy(binPath, newFilePath, overwrite: true);
+                            }
+                        }
                     }
                 }
                 // emulator.romFileName = "wa"; // [cool, this change seems to not persist after the build is done, so no need to clean up afterwards]
