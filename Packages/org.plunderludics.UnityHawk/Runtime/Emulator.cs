@@ -10,23 +10,39 @@ using System.IO;
 using System.Threading.Tasks;
 using System.Threading;
 
+#if UNITY_EDITOR
+using UnityEditor;
+#endif
+
+using NaughtyAttributes;
+
 using UnityEngine;
 using Unity.Profiling;
+
+using BizHawk.Client.Common; // Only for the PlunderludicSample logic [should maybe be in a different namespace, idk]
 
 namespace UnityHawk {
 
 // [is Emulator the right name for this? i guess so?]
 public class Emulator : MonoBehaviour
 {
-    [Header("Params")]
+    public Renderer targetRenderer;
+
+    [Header("Files")]
     // All pathnames are loaded relative to ./StreamingAssets/, unless the pathname is absolute (see GetAbsolutePath)
     public string romFileName = "Roms/mario.nes";
     public string configFileName = ""; // Leave empty for default config.ini
     public string saveStateFileName = ""; // Leave empty to boot clean
     public List<string> luaScripts;
-    public Renderer targetRenderer;
+
+    [Header("Params")]
     public float frameRateMultiplier = 1f; // Speed up or slow down emulation
-    public bool disableMultithreadingForDebug = false; // Run everything on the main unity thread - not really recommended but useful for debugging sometimes
+
+    [Foldout("Debug")] public bool disableMultithreadingForDebug = false; // Run everything on the main unity thread - not really recommended but useful for debugging sometimes
+    [Foldout("Debug"), ReadOnly] public int frame = 0;
+    [Foldout("Debug"), ReadOnly] public float uncappedFps;
+    [Foldout("Debug"), ReadOnly] public float emulatorDefaultFps;
+    [Foldout("Debug"), ReadOnly] public string currentCore = "nul";
 
     // [Make these public for debugging texture stuff]
     private TextureFormat textureFormat = TextureFormat.BGRA32;
@@ -40,13 +56,6 @@ public class Emulator : MonoBehaviour
     private bool useManualAudioHandling = false;
     public enum AudioStretchMethod {Truncate, PreserveSampleRate, Stretch, Overlap}
     private AudioStretchMethod audioStretchMethod = AudioStretchMethod.Truncate; // if using non-manual audio, this should probably be Truncate
-
-    [Header("Debug")]
-    // [These should really be readonly in the inspector]
-    public int frame = 0;
-    public float uncappedFps;
-    public float emulatorDefaultFps;
-    public string currentCore = "nul";
 
     // Interface for other scripts to use
     public RenderTexture Texture => _renderTexture;
@@ -72,7 +81,18 @@ public class Emulator : MonoBehaviour
 
     static readonly string textureCorrectionShaderName = "TextureCorrection";
     Material _textureCorrectionMat;
-    
+
+#if UNITY_EDITOR
+    // Set filename fields based on sample directory
+    [Button(enabledMode: EButtonEnableMode.Editor)]
+    private void LoadSample() {
+        string path = EditorUtility.OpenFilePanel("Sample", "", "");
+        if (!String.IsNullOrEmpty(path)) {
+            SetFromSample(path);
+        }
+    }
+#endif
+
     // Returns the path that will be loaded for a filename param (rom, lua, config, savestate)
     public static string GetAbsolutePath(string path) {
         if (path == Path.GetFullPath(path)) {
@@ -147,6 +167,16 @@ public class Emulator : MonoBehaviour
                 Task.Run(EmulatorLoop);
             }
         }
+    }
+
+    // For editor convenience: Set filename fields by reading a sample directory
+    public void SetFromSample(string samplePath) {
+        // Read the sample dir to get the necessary filenames (rom, config, etc)
+        PlunderludicSample s = PlunderludicSample.LoadFromDir(samplePath);
+        romFileName = s.romPath;
+        configFileName = s.configPath;
+        saveStateFileName = s.saveStatePath;
+        luaScripts = s.luaScriptPaths.ToList();
     }
 
     void Update() {
