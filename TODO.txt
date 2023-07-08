@@ -42,9 +42,9 @@ X emulator audio
 
 - pause emulator thread when editor is paused [https://docs.unity3d.com/ScriptReference/EditorApplication-pauseStateChanged.html]
 
-- nice unity component corresponding to a sample (rom + savestate + lua + config) [?]
-
 X make a UnityHawk namespace instead of using UH prefix
 
-- make a unity package
+X make a unity package
 - think a bit about usability
+
+bug: checking disableMultithreadingForDebug while playing causes unity to freeze
