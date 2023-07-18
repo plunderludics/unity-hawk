@@ -2,90 +2,52 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using System;
+using System.IO;
 using System.Diagnostics;
 using Debug = UnityEngine.Debug;
 
-// using ZetaIpc.Runtime.Client;
-// using Cloudtoid.Interprocess;
-using H.Pipes;
-using H.Formatters;
-using H.Pipes.Args;
+using SharedMemory;
 
 public class TestIPC : MonoBehaviour
 {
     public Renderer targetRenderer;
     // IpcClient ipcClient;
     Texture2D _bufferTexture;
-    RenderTexture _renderTexture;
-    public int videoBufferWidth, videoBufferHeight;
-    
+    RenderTexture _renderTexture;    
     private TextureFormat textureFormat = TextureFormat.BGRA32;
     private RenderTextureFormat renderTextureFormat = RenderTextureFormat.BGRA32;
 
     private Stopwatch stopwatch = new Stopwatch();
-    PipeClient<int[]> client;
+    SharedArray<int> sharedTextureBuffer; // single-element array
 
-    int[] latestTexBuf;
+    int[] localTextureBuffer;
 
     public Material _textureCorrectionMat;
 
     Process bizhawk;
 
-    async void Start() {
+    public bool showBizhawkGui = false;
+
+    void Start() {
         Debug.Log($"Attempting to start new process {UnityHawk.UnityHawk.emuhawkExePath}");
-        bizhawk = Process.Start(
-            UnityHawk.UnityHawk.emuhawkExePath,
-            "--headless \"F:/pludics/roms/Creative Camp (USA)/Creative Camp (USA).cue\"");
+        string args = "";
+        if (!showBizhawkGui) args += "--headless ";
+        string rompath = "\"F:/pludics/roms/Creative Camp (USA)/Creative Camp (USA).cue\"";
+        args += rompath;
         
-        latestTexBuf = null;
-
-        Debug.Log("Start");
-        _bufferTexture = new Texture2D(videoBufferWidth, videoBufferHeight, textureFormat, false);
-        _renderTexture = new RenderTexture(videoBufferWidth, videoBufferHeight, depth:0, format:renderTextureFormat);
-
-        if (targetRenderer) targetRenderer.material.mainTexture = _renderTexture;
-
-        client = new("bizhawk-pipe");
-        client.MessageReceived += HandleBizHawkMessage;
-        client.Disconnected += (o, args) => Debug.Log("Disconnected from server");
-        client.Connected += (o, args) => Debug.Log("Connected to server");
-        // client.ExceptionOccurred += (o, args) => OnExceptionOccurred(args.Exception);
-
-        await client.ConnectAsync();
-
-        RequestTexture();
-
-        // await Task.Delay(Timeout.InfiniteTimeSpan);
-    }
-    
-    void RequestTexture() {
-        stopwatch.Start();
-
-        // request new texture
-        client.WriteAsync(null);
+        bizhawk = Process.Start(UnityHawk.UnityHawk.emuhawkExePath, args);
+        
+        AttemptOpenSharedTextureBuffer();
     }
 
-    void HandleBizHawkMessage(object sender, ConnectionMessageEventArgs<int[]> args) {
-        Debug.Log("HandleBizHawkMessage");
+    void AttemptOpenSharedTextureBuffer() {
         try {
-            Debug.Log($"Server {args.Connection.PipeName} says: {args.Message}");
-            // Debug.Log($"Took {Time.time - _sendTime} seconds");
-            // Debug.Log("Hi");
-            stopwatch.Stop();
-            Debug.Log($"Roundtrip - {stopwatch.Elapsed.TotalMilliseconds} ms");
-            stopwatch.Reset();
-
-            // string id = args.Message.id;
-            latestTexBuf = args.Message;
-
-            // Debug.Log($"width {width}; height: {height}");
-            Debug.Log($"Sizeof buf: {latestTexBuf.Length}; buf[100]: {latestTexBuf[100]}");
-
-        } catch (Exception e) {
-            Debug.LogError(e);
+            sharedTextureBuffer = new (name: "unityhawk-texbuf");
+            Debug.Log("Connected to shared texture buffer");
+        } catch (FileNotFoundException) {
+            // Debug.LogError(e);
         }
     }
-
     // Start is called before the first frame update
     // void Start()
     // {
@@ -100,17 +62,50 @@ public class TestIPC : MonoBehaviour
 
     // // Update is called once per frame
     void Update(){
-        if (latestTexBuf != null) {
-            _bufferTexture.SetPixelData(latestTexBuf, 0);
-            _bufferTexture.Apply(/*updateMipmaps: false*/);
-
-            // Correct issues with the texture by applying a shader and blitting to a separate render texture:
-            Graphics.Blit(_bufferTexture, _renderTexture, _textureCorrectionMat, 0);
+        if (sharedTextureBuffer != null) {
+            // int width;
+            // int height;
+            // sharedTextureBuffer.Read(out width, 0);
+            // sharedTextureBuffer.Read(out height, 1);
+            // if current local texbuf is smaller than width*height, make it bigger
+            // if (localTextureBuffer.Length < width*height) {
+               // Debug.Log($"Enlarging texture buffer from {localTextureBuffer.Length} to {width*height}");
+                // localTextureBuffer = new int[width*height];
+            // }
             
-            latestTexBuf = null;
+            int[] localTextureBuffer = new int[sharedTextureBuffer.Length];
+            sharedTextureBuffer.CopyTo(localTextureBuffer, 0);
 
-            RequestTexture();
+            int width = localTextureBuffer[sharedTextureBuffer.Length - 2];
+            int height = localTextureBuffer[sharedTextureBuffer.Length - 1];
+
+            // Debug.Log($"{width}, {height}");
+            // resize textures if necessary
+            if ((width != 0 && height != 0)
+            && (_bufferTexture == null
+            || _renderTexture == null
+            ||  _bufferTexture.width != width
+            ||  _bufferTexture.height != height)) {
+                InitTextures(width, height);
+            }
+
+            if (_bufferTexture) {
+                _bufferTexture.SetPixelData(localTextureBuffer, 0);
+                _bufferTexture.Apply(/*updateMipmaps: false*/);
+
+                // Correct issues with the texture by applying a shader and blitting to a separate render texture:
+                Graphics.Blit(_bufferTexture, _renderTexture, _textureCorrectionMat, 0);
+            }
+        } else {
+            AttemptOpenSharedTextureBuffer();
         }
+    }
+
+    // Init/re-init the textures for rendering the screen - has to be done whenever the source dimensions change (which happens often on PSX for some reason)
+    void InitTextures(int width, int height) {
+        _bufferTexture = new     Texture2D(width, height, textureFormat, false);
+        _renderTexture = new RenderTexture(width, height, depth:0, format:renderTextureFormat);
+        if (targetRenderer) targetRenderer.material.mainTexture = _renderTexture;
     }
 
     void OnDisable() {

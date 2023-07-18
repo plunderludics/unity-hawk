@@ -228,7 +228,7 @@ GameObject:
   - component: {fileID: 1667357824}
   - component: {fileID: 1667357823}
   m_Layer: 0
-  m_Name: GameObject
+  m_Name: TestIPC
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -250,6 +250,7 @@ MonoBehaviour:
   videoBufferWidth: 350
   videoBufferHeight: 240
   _textureCorrectionMat: {fileID: 2100000, guid: dede2724b186d7840ae6e8d6e14704ee, type: 2}
+  showBizhawkGui: 1
 --- !u!4 &1667357824
 Transform:
   m_ObjectHideFlags: 0
