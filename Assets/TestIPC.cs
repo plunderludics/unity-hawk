@@ -32,7 +32,10 @@ public class TestIPC : MonoBehaviour
     Process bizhawk;
 
     async void Start() {
-        bizhawk = Process.Start("F:/pludics/BizHawk-src/output/EmuHawk.exe", "\"F:/pludics/roms/Creative Camp (USA)/Creative Camp (USA).cue\"");
+        Debug.Log($"Attempting to start new process {UnityHawk.UnityHawk.emuhawkExePath}");
+        bizhawk = Process.Start(
+            UnityHawk.UnityHawk.emuhawkExePath,
+            "--headless \"F:/pludics/roms/Creative Camp (USA)/Creative Camp (USA).cue\"");
         
         latestTexBuf = null;
 
@@ -96,7 +99,7 @@ public class TestIPC : MonoBehaviour
     // }
 
     // // Update is called once per frame
-    async void Update(){
+    void Update(){
         if (latestTexBuf != null) {
             _bufferTexture.SetPixelData(latestTexBuf, 0);
             _bufferTexture.Apply(/*updateMipmaps: false*/);
@@ -110,7 +113,7 @@ public class TestIPC : MonoBehaviour
         }
     }
 
-    async void OnDisable() {
+    void OnDisable() {
         bizhawk.Kill();
     }
 }
