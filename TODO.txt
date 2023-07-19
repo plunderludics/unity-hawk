@@ -1,50 +1,21 @@
+soon:
+ X headless mode for bizhawk
+ X put bizhawk in packages dir
+ X switch to mmap solution
+ - hack bizhawk to get input queue over ipc
+ - cleanup code (provide args and everything to bizhawk via cli)
+ - update build scripts, test build
+ - remove old code
+ - bizhawk send audio over ipc
+ 
+later:
+ - generic message passing (or rpc) interface (e.g. for calling api functions from unityhawk)
+  - with the aim being to facilitate comms between bizhawk instances i guess
+ - custom lua libs, etc
+ - have a nice interface (for unityhawk users) to interact with the bizhawk apis (e.g. for pausing, restarting, changing memory, etc)
+ 
+ - update BizHawk (to 2.9.1?)
 
-- controls
-  X keyboard input
-  - gamepad input?
-  - make it easy to remap/configure controls (either in lua or in unity)
-
-- lua scripting
- X doesn't work with multiple threads rn :/ [commented out the check in LuaSandbox.cs in BizHawk - probably not the best solution]
- - more testing; test our existing samples
- - more graceful handling of unsupported library functions, currently spits out opaque error and halts the lua script - not sure best way to handle this one
- - support some of the stuff in UHMainFormApi - loading roms, pausing/unpausing, volume control, etc
- - would be nice to support the graphics lib too for drawing debug info etc
- X make it easier to add custom lua libraries from the Unity project (see LuaTestLibrary.cs)
-
-X make the NewtonSoft.JSON dll a dependency from unity instead of importing the file from bizhawk [same for any other 3rd party dlls if possible]
-
-- build script
- X if any needed files (roms etc) are specified by absolute path, they should be copied into the build
- - avoid having duplicates of every dll (need to separate the runtime ones vs the other ones)
-
-- don't copy unused dlls (slimDX, DirectX, EmuHawk, what else)
-
-- have a nice interface (for unityhawk users) to interact with the bizhawk apis (e.g. for pausing, restarting, changing memory, etc)
-
-- update BizHawk (to 2.9.1?)
-
-X emulator audio
- X some kind of resampling solution (use Bizhawk's SoundOutputProvider?)
- - clean up code, it's a mess
-
-- better way of setting the dll directory, to avoid hacky loading currently in UnityHawk.cs
-
-- test more cores
- - Mupen64
-  - Doesn't work due to some error with attaching the video plugin
- X NES
-  X QuickNes
-  X NesHawk
- X PS1 (Nymashock)
-  X graphics broken
-  X can't run multiple in parallel
-
-- pause emulator thread when editor is paused [https://docs.unity3d.com/ScriptReference/EditorApplication-pauseStateChanged.html]
-
-X make a UnityHawk namespace instead of using UH prefix
-
-X make a unity package
-- think a bit about usability
-
-bug: checking disableMultithreadingForDebug while playing causes unity to freeze
+minor:
+ - notify unity (maybe crash) if/when emuhawk is closed
+ - pause bizhawk when unity editor is paused [https://docs.unity3d.com/ScriptReference/EditorApplication-pauseStateChanged.html]
