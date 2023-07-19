@@ -28,13 +28,20 @@ public class TestIPC : MonoBehaviour
 
     public bool showBizhawkGui = false;
 
+    public string rompath = "F:/pludics/roms/Creative Camp (USA)/Creative Camp (USA).cue";
+
+    private string _sharedTextureMemoryName;
+
     void Start() {
-        Debug.Log($"Attempting to start new process {UnityHawk.UnityHawk.emuhawkExePath}");
         string args = "";
         if (!showBizhawkGui) args += "--headless ";
-        string rompath = "\"F:/pludics/roms/Creative Camp (USA)/Creative Camp (USA).cue\"";
-        args += rompath;
         
+        _sharedTextureMemoryName = "unityhawk-texbuf-" + GetInstanceID();
+        args += $"--share-texture={_sharedTextureMemoryName} ";
+
+        args += '"' + rompath + '"';
+
+        Debug.Log($"Attempting to start new process {UnityHawk.UnityHawk.emuhawkExePath} with args '{args}'");
         bizhawk = Process.Start(UnityHawk.UnityHawk.emuhawkExePath, args);
         
         AttemptOpenSharedTextureBuffer();
@@ -42,7 +49,7 @@ public class TestIPC : MonoBehaviour
 
     void AttemptOpenSharedTextureBuffer() {
         try {
-            sharedTextureBuffer = new (name: "unityhawk-texbuf");
+            sharedTextureBuffer = new (name: _sharedTextureMemoryName);
             Debug.Log("Connected to shared texture buffer");
         } catch (FileNotFoundException) {
             // Debug.LogError(e);

@@ -2,11 +2,14 @@ soon:
  X headless mode for bizhawk
  X put bizhawk in packages dir
  X switch to mmap solution
+ - test multiple cores simultaneously
  - hack bizhawk to get input queue over ipc
+   - [hmm - can avoid this for now just by doing AcceptBackgroundInput in bizhawk config]
  - cleanup code (provide args and everything to bizhawk via cli)
  - update build scripts, test build
  - remove old code
  - bizhawk send audio over ipc
+ - include bizhawk files in git / package release
  
 later:
  - generic message passing (or rpc) interface (e.g. for calling api functions from unityhawk)
