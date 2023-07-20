@@ -129,14 +129,14 @@ public class Emulator : MonoBehaviour
         args += $"--share-texture={_sharedTextureMemoryName} ";
 
         if (saveStateFullPath != null) {
-            args += $"--load-state={saveStateFullPath} ";
+            args += $"--load-state=\"{saveStateFullPath}\" ";
         }
 
         if (luaScriptFullPath != null) {
-            args += $"--lua={luaScriptFullPath} ";
+            args += $"--lua=\"{luaScriptFullPath}\" ";
         }
 
-        args += $"--config={configPath} ";
+        args += $"--config=\"{configPath}\" ";
 
         args += '"' + romPath + '"';
 
@@ -164,7 +164,7 @@ public class Emulator : MonoBehaviour
     }
 
     void Update() {
-        if (sharedTextureBuffer != null) {
+        if (sharedTextureBuffer != null && sharedTextureBuffer.Length > 0) {
             // Get the texture buffer and dimensions from BizHawk via the shared memory file
             // protocol has to match MainForm.cs in BizHawk
             // TODO should probably put this protocol in some shared schema file or something idk
@@ -191,6 +191,10 @@ public class Emulator : MonoBehaviour
                 Graphics.Blit(_bufferTexture, _renderTexture, _textureCorrectionMat, 0);
             }
         } else {
+            if (sharedTextureBuffer != null) {
+                // i don't get why but this happens sometimes
+                Debug.LogWarning($"shared buffer length was 0 or less: {sharedTextureBuffer.Length}");
+            }
             AttemptOpenSharedTextureBuffer();
         }
     }
