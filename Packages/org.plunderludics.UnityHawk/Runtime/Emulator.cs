@@ -33,7 +33,7 @@ public class Emulator : MonoBehaviour
     public Renderer targetRenderer;
 
     [Header("Files")]
-    // All pathnames are loaded relative to ./StreamingAssets/, unless the pathname is absolute (see GetAbsolutePath)
+    // All pathnames are loaded relative to ./StreamingAssets/, unless the pathname is absolute (see GetAssetPath)
     public string romFileName = "Roms/mario.nes";
     public string configFileName = ""; // Leave empty for default config.ini
     public string saveStateFileName = ""; // Leave empty to boot clean
@@ -78,7 +78,8 @@ public class Emulator : MonoBehaviour
 #endif
 
     // Returns the path that will be loaded for a filename param (rom, lua, config, savestate)
-    public static string GetAbsolutePath(string path) {
+    // [probably should go in Paths.cs]
+    public static string GetAssetPath(string path) {
         if (path == Path.GetFullPath(path)) {
             // Already an absolute path, don't change it [Path.Combine below will do this anyway but just to be explicit]
             return path;
@@ -104,21 +105,21 @@ public class Emulator : MonoBehaviour
         // Process filename args
         string configPath;
         if (String.IsNullOrEmpty(configFileName)) {
-            configPath = Paths.defaultConfigPath;
+            configPath = Path.GetFullPath(Paths.defaultConfigPath);
         } else {
-            configPath = GetAbsolutePath(configFileName);
+            configPath = GetAssetPath(configFileName);
         }
 
-        string romPath = GetAbsolutePath(romFileName);
+        string romPath = GetAssetPath(romFileName);
 
         string luaScriptFullPath = null;
         if (!string.IsNullOrEmpty(luaScriptFileName)) {
-            luaScriptFullPath = GetAbsolutePath(luaScriptFileName);
+            luaScriptFullPath = GetAssetPath(luaScriptFileName);
         }
 
         string saveStateFullPath = null;
         if (!String.IsNullOrEmpty(saveStateFileName)) {
-            saveStateFullPath = GetAbsolutePath(saveStateFileName);
+            saveStateFullPath = GetAssetPath(saveStateFileName);
         }
 
         // start emuhawk.exe w args
@@ -140,8 +141,9 @@ public class Emulator : MonoBehaviour
 
         args += '"' + romPath + '"';
 
-        Debug.Log($"{Paths.emuhawkExePath} {args}");
-        emuhawk = Process.Start(Paths.emuhawkExePath, args);
+        string exePath = Path.GetFullPath(Paths.emuhawkExePath);
+        Debug.Log($"{exePath} {args}");
+        emuhawk = Process.Start(exePath, args);
 
         AttemptOpenSharedTextureBuffer();
     }

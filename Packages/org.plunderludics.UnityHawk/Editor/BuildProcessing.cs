@@ -68,7 +68,7 @@ public class BuildProcessing : IPostprocessBuildWithReport, IPreprocessBuildWith
 
                     if (!string.IsNullOrEmpty(path)) {
                         // Get the path that Emulator will actually look for the file
-                        string origFilePath = Emulator.GetAbsolutePath(path);
+                        string origFilePath = Emulator.GetAssetPath(path);
 
                         // ignore anything within StreamingAssets/ since those get copied over already by Unity
                         Debug.Log($"Check isSubPath {origFilePath}, {Application.streamingAssetsPath}");
