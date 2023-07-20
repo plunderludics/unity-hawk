@@ -197,11 +197,17 @@ public class Emulator : MonoBehaviour
             }
             AttemptOpenSharedTextureBuffer();
         }
+
+        if (emuhawk != null && emuhawk.HasExited) {
+            Debug.LogWarning("EmuHawk process was killed by user or OS");
+        }
     }
     
     void OnDisable() {
-        // Kill the emuhawk process
-        emuhawk.Kill();
+        if (emuhawk != null && !emuhawk.HasExited) {
+            // Kill the emuhawk process
+            emuhawk.Kill();
+        }
     }
 
     // Init/re-init the textures for rendering the screen - has to be done whenever the source dimensions change (which happens often on PSX for some reason)

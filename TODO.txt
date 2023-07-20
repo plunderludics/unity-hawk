@@ -2,23 +2,24 @@ soon:
  X headless mode for bizhawk
  X put bizhawk in packages dir
  X switch to mmap solution
- - test multiple cores simultaneously
- - hack bizhawk to get input queue over ipc
-   - [hmm - can avoid this for now just by doing AcceptBackgroundInput in bizhawk config]
- - cleanup code (provide args and everything to bizhawk via cli)
+ X test multiple cores simultaneously
+ X cleanup code (provide args and everything to bizhawk via cli)
  - update build scripts, test build
- - remove old code
- - bizhawk send audio over ipc
+ X remove old code
  - include bizhawk files in git / package release
  
 later:
+ - pass input from unity to bizhawk over ipc
+   - [avoiding this for now just by doing AcceptBackgroundInput in bizhawk config]
+ - bizhawk send audio over ipc
+   - [avoiding  just by having bizhawk play its own audio via directx]
  - generic message passing (or rpc) interface (e.g. for calling api functions from unityhawk)
   - with the aim being to facilitate comms between bizhawk instances i guess
  - custom lua libs, etc
  - have a nice interface (for unityhawk users) to interact with the bizhawk apis (e.g. for pausing, restarting, changing memory, etc)
- 
+
  - update BizHawk (to 2.9.1?)
 
 minor:
- - notify unity (maybe crash) if/when emuhawk is closed
+ X notify unity (maybe crash) if/when emuhawk is closed
  - pause bizhawk when unity editor is paused [https://docs.unity3d.com/ScriptReference/EditorApplication-pauseStateChanged.html]
