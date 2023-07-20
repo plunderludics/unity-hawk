@@ -126,10 +126,10 @@ public class BuildProcessing : IPostprocessBuildWithReport, IPreprocessBuildWith
         // Copy over the whole Packages/org.plunderludics.UnityHawk/BizHawk/ directory into xxx_Data/org.plunderludics.UnityHawk/BizHawk/
 
         // [kinda sucks but don't know a better way]
-        var targetDir = Path.Combine(GetBuildDataDir(exePath), UnityHawk.bizhawkDirRelative);
-        Debug.Log($"from: {Path.GetFullPath(UnityHawk.bizhawkDir)} to {Path.GetFullPath(targetDir)}");
+        var targetDir = Path.Combine(GetBuildDataDir(exePath), Paths.bizhawkDirRelative);
+        Debug.Log($"from: {Path.GetFullPath(Paths.bizhawkDir)} to {Path.GetFullPath(targetDir)}");
         Directory.CreateDirectory(targetDir);
-        FileUtil.ReplaceDirectory(Path.GetFullPath(UnityHawk.bizhawkDir), Path.GetFullPath(targetDir)); // [only works with full paths for some reason]
+        FileUtil.ReplaceDirectory(Path.GetFullPath(Paths.bizhawkDir), Path.GetFullPath(targetDir)); // [only works with full paths for some reason]
 
         // TODO: we should separate the dlls needed by Unity (i.e. BizHawk.Client.Common, etc)
         // and the ones loaded at runtime within BizHawk (like waterboxhost.dll, etc)

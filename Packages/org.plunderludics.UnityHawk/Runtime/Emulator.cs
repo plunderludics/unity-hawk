@@ -104,7 +104,7 @@ public class Emulator : MonoBehaviour
         // Process filename args
         string configPath;
         if (String.IsNullOrEmpty(configFileName)) {
-            configPath = UnityHawk.defaultConfigPath;
+            configPath = Paths.defaultConfigPath;
         } else {
             configPath = GetAbsolutePath(configFileName);
         }
@@ -140,8 +140,8 @@ public class Emulator : MonoBehaviour
 
         args += '"' + romPath + '"';
 
-        Debug.Log($"{UnityHawk.emuhawkExePath} {args}");
-        emuhawk = Process.Start(UnityHawk.emuhawkExePath, args);
+        Debug.Log($"{Paths.emuhawkExePath} {args}");
+        emuhawk = Process.Start(Paths.emuhawkExePath, args);
 
         AttemptOpenSharedTextureBuffer();
     }
