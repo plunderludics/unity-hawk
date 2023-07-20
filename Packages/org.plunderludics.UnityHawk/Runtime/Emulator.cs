@@ -21,7 +21,7 @@ using Unity.Profiling;
 
 using SharedMemory;
 
-using BizHawk.Client.Common; // Only for the PlunderludicSample logic [should maybe be in a different namespace, idk]
+using BizHawk.Plunderludics;
 
 namespace UnityHawk {
 
@@ -149,7 +149,7 @@ public class Emulator : MonoBehaviour
     // For editor convenience: Set filename fields by reading a sample directory
     public void SetFromSample(string samplePath) {
         // Read the sample dir to get the necessary filenames (rom, config, etc)
-        PlunderludicSample s = PlunderludicSample.LoadFromDir(samplePath);
+        Sample s = Sample.LoadFromDir(samplePath);
         romFileName = s.romPath;
         configFileName = s.configPath;
         saveStateFileName = s.saveStatePath;
@@ -199,7 +199,7 @@ public class Emulator : MonoBehaviour
         }
 
         if (emuhawk != null && emuhawk.HasExited) {
-            Debug.LogWarning("EmuHawk process was killed by user or OS");
+            Debug.LogWarning("EmuHawk process was unexpectedly killed");
         }
     }
     

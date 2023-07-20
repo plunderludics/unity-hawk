@@ -4,7 +4,7 @@ soon:
  X switch to mmap solution
  X test multiple cores simultaneously
  X cleanup code (provide args and everything to bizhawk via cli)
- - update build scripts, test build
+ X update build scripts, test build
  X remove old code
  - include bizhawk files in git / package release
  
@@ -20,6 +20,8 @@ later:
 
  - update BizHawk (to 2.9.1?)
 
+ - move PlunderludicSample out of Bizhawk.Client.Common and into its own dll so that it can be shared more easily between the two projects without dependency complications
+ - ideally put the protocol / schema for the texture buffer format (and input/audio in the future) somewhere shared as well
 minor:
  X notify unity (maybe crash) if/when emuhawk is closed
  - pause bizhawk when unity editor is paused [https://docs.unity3d.com/ScriptReference/EditorApplication-pauseStateChanged.html]
