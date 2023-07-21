@@ -223,6 +223,7 @@ public class Emulator : MonoBehaviour
     }
     
     void OnDisable() {
+        _bizHawkLogWriter.Close();
         if (emuhawk != null && !emuhawk.HasExited) {
             // Kill the emuhawk process
             emuhawk.Kill();
