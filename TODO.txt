@@ -7,21 +7,22 @@ soon:
  X update build scripts, test build
  X remove old code
  - include bizhawk files in git / package release
- - fix lua not working
+ X fix lua not working
  
 later:
+ - option for running bizhawk in edit mode
+ - fix flaky build script by making a custom build pipeline
  - pass input from unity to bizhawk over ipc
    - [avoiding this for now just by doing AcceptBackgroundInput in bizhawk config]
  - bizhawk send audio over ipc
-   - [avoiding  just by having bizhawk play its own audio via directx]
- - generic message passing (or rpc) interface (e.g. for calling api functions from unityhawk)
+   - [currently bizhawk is just playing its own audio via directx]
+ - generic message passing (or rpc) interface (e.g. for calling api functions from unityhawk, or unity functions from lua)
   - with the aim being to facilitate comms between bizhawk instances i guess
  - custom lua libs, etc
  - have a nice interface (for unityhawk users) to interact with the bizhawk apis (e.g. for pausing, restarting, changing memory, etc)
 
  - update BizHawk (to 2.9.1?)
 
- - move PlunderludicSample out of Bizhawk.Client.Common and into its own dll so that it can be shared more easily between the two projects without dependency complications
  - ideally put the protocol / schema for the texture buffer format (and input/audio in the future) somewhere shared as well
 minor:
  X notify unity (maybe crash) if/when emuhawk is closed

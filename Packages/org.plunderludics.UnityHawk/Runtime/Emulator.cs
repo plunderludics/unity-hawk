@@ -25,7 +25,6 @@ using BizHawk.Plunderludics;
 
 namespace UnityHawk {
 
-// [is Emulator the right name for this? i guess so?]
 public class Emulator : MonoBehaviour
 {
     public bool useAttachedRenderer = true;
@@ -41,6 +40,11 @@ public class Emulator : MonoBehaviour
     
     [Header("Debug")]
     public bool showBizhawkGui = false;
+    public bool writeBizhawkLogs = true;
+    [ShowIf("writeBizhawkLogs")]
+    [ReadOnly, SerializeField] string bizhawkLogLocation;
+
+    private static string bizhawkLogDirectory = "BizHawkLogs";
 
     // [Make these public for debugging texture stuff]
     private TextureFormat textureFormat = TextureFormat.BGRA32;
@@ -149,8 +153,10 @@ public class Emulator : MonoBehaviour
         emuhawk.StartInfo.FileName = exePath;
         emuhawk.StartInfo.UseShellExecute = false;
         // Redirect bizhawk output + error into a log file
-        string logFileName = $"BizHawk-{GetInstanceID()}.log";
-        _bizHawkLogWriter = new(logFileName);
+        string logFileName = $"{this.name}-{GetInstanceID()}.log";
+        Directory.CreateDirectory (bizhawkLogDirectory);
+        bizhawkLogLocation = Path.Combine(bizhawkLogDirectory, logFileName);
+        _bizHawkLogWriter = new(bizhawkLogLocation);
 
         emuhawk.StartInfo.RedirectStandardOutput = true;
         emuhawk.StartInfo.RedirectStandardError = true;
