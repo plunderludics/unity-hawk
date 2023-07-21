@@ -66,6 +66,8 @@ public class Emulator : MonoBehaviour
     static readonly string textureCorrectionShaderName = "TextureCorrection";
     Material _textureCorrectionMat;
 
+    StreamWriter _bizHawkLogWriter;
+
 #if UNITY_EDITOR
     // Set filename fields based on sample directory
     [Button(enabledMode: EButtonEnableMode.Editor)]
@@ -123,27 +125,42 @@ public class Emulator : MonoBehaviour
         }
 
         // start emuhawk.exe w args
-        string args = "";
-        if (!showBizhawkGui) args += "--headless ";
+        string exePath = Path.GetFullPath(Paths.emuhawkExePath);
+        emuhawk = new Process();
+        var args = emuhawk.StartInfo.ArgumentList;
+
+        if (!showBizhawkGui) args.Add("--headless");
         
         _sharedTextureMemoryName = "unityhawk-texbuf-" + GetInstanceID();
-        args += $"--share-texture={_sharedTextureMemoryName} ";
+        args.Add($"--share-texture={_sharedTextureMemoryName}");
 
         if (saveStateFullPath != null) {
-            args += $"--load-state=\"{saveStateFullPath}\" ";
+            args.Add($"--load-state={saveStateFullPath}");
         }
 
         if (luaScriptFullPath != null) {
-            args += $"--lua=\"{luaScriptFullPath}\" ";
+            args.Add($"--lua={luaScriptFullPath}");
         }
 
-        args += $"--config=\"{configPath}\" ";
+        args.Add($"--config={configPath}");
 
-        args += '"' + romPath + '"';
+        args.Add(romPath);
 
-        string exePath = Path.GetFullPath(Paths.emuhawkExePath);
-        Debug.Log($"{exePath} {args}");
-        emuhawk = Process.Start(exePath, args);
+        emuhawk.StartInfo.FileName = exePath;
+        emuhawk.StartInfo.UseShellExecute = false;
+        // Redirect bizhawk output + error into a log file
+        string logFileName = $"BizHawk-{GetInstanceID()}.log";
+        _bizHawkLogWriter = new(logFileName);
+
+        emuhawk.StartInfo.RedirectStandardOutput = true;
+        emuhawk.StartInfo.RedirectStandardError = true;
+        emuhawk.OutputDataReceived += new DataReceivedEventHandler((sender, e) => LogBizHawk(sender, e, false));
+        emuhawk.ErrorDataReceived += new DataReceivedEventHandler((sender, e) => LogBizHawk(sender, e, true));
+
+        Debug.Log($"{exePath} {string.Join(' ', args)}");
+        emuhawk.Start();
+        emuhawk.BeginOutputReadLine();
+        emuhawk.BeginErrorReadLine();
 
         AttemptOpenSharedTextureBuffer();
     }
@@ -226,6 +243,17 @@ public class Emulator : MonoBehaviour
             Debug.Log("Connected to shared texture buffer");
         } catch (FileNotFoundException) {
             // Debug.LogError(e);
+        }
+    }
+
+    void LogBizHawk(object sender, DataReceivedEventArgs e, bool isError) {
+        string msg = e.Data;
+        if (!string.IsNullOrEmpty(msg)) {
+            // Log to file
+            _bizHawkLogWriter.WriteLine(msg);
+            if (isError) {
+                Debug.LogWarning(msg);
+            }
         }
     }
 }
