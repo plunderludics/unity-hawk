@@ -7,7 +7,7 @@ namespace UnityHawk {
 public static class Paths
 {
     public static readonly string packageName = "org.plunderludics.UnityHawk";
-    public static readonly string bizhawkDirRelative = Path.Combine(packageName, "BizHawk");
+    public static readonly string bizhawkDirRelative = Path.Combine(packageName, "BizHawk~");
     private static readonly string _bizhawkDirForEditor = Path.Combine("Packages", bizhawkDirRelative);
     // [^ seems insane but somehow Unity makes this work whether the package is in the Library/PackageCache/ dir or the Packages/ dir
     //  maybe not the best idea to rely on this dark behaviour though..]

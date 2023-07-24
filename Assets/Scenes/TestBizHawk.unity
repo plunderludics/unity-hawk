@@ -219,7 +219,12 @@ MonoBehaviour:
   configFileName: 
   saveStateFileName: F:\pludics\samples\command conquer\moreguys.State
   luaScriptFileName: F:\pludics\samples\command conquer\commandconquer.lua
+  runInEditMode: 1
   showBizhawkGui: 0
+  writeBizhawkLogs: 1
+  bizhawkLogLocation: BizHawkLogs\commandconquer-16222.log
+  _initialized: 1
+  _isRunning: 1
 --- !u!1 &547617501
 GameObject:
   m_ObjectHideFlags: 0
@@ -437,7 +442,12 @@ MonoBehaviour:
   configFileName: 
   saveStateFileName: 
   luaScriptFileName: 
+  runInEditMode: 1
   showBizhawkGui: 0
+  writeBizhawkLogs: 1
+  bizhawkLogLocation: BizHawkLogs\NES-16246.log
+  _initialized: 1
+  _isRunning: 1
 --- !u!1 &1880775611
 GameObject:
   m_ObjectHideFlags: 0

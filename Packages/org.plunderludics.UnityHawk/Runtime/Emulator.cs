@@ -73,6 +73,8 @@ public class Emulator : MonoBehaviour
     static readonly string textureCorrectionShaderName = "TextureCorrection";
     Material _textureCorrectionMat;
 
+    Material _renderMaterial; // just used for rendering in edit mode
+
     StreamWriter _bizHawkLogWriter;
 
 #if UNITY_EDITOR
@@ -99,6 +101,84 @@ public class Emulator : MonoBehaviour
 
     void OnEnable()
     {
+        _initialized = false;
+        if (runInEditMode || Application.isPlaying) {
+            Initialize();
+        }
+    }
+
+    // For editor convenience: Set filename fields by reading a sample directory
+    public void SetFromSample(string samplePath) {
+        // Read the sample dir to get the necessary filenames (rom, config, etc)
+        Sample s = Sample.LoadFromDir(samplePath);
+        romFileName = s.romPath;
+        configFileName = s.configPath;
+        saveStateFileName = s.saveStatePath;
+        var luaScripts = s.luaScriptPaths.ToList();
+        if (luaScripts != null && luaScripts.Count > 0) {
+            luaScriptFileName = luaScripts[0];
+            if (luaScripts.Count > 1) {
+                Debug.LogWarning($"Currently only support one lua script, loading {luaScripts[0]}");
+                // because bizhawk only supports passing a single lua script from the command line
+            }
+        }
+    }
+
+    void Update() {
+        if (!Application.isPlaying && !runInEditMode) {
+            if (_isRunning) {
+                Deactivate();
+            }
+            return;
+        } else if (!_initialized) {
+            Initialize();
+        }
+        if (sharedTextureBuffer != null && sharedTextureBuffer.Length > 0) {
+            // Get the texture buffer and dimensions from BizHawk via the shared memory file
+            // protocol has to match MainForm.cs in BizHawk
+            // TODO should probably put this protocol in some shared schema file or something idk
+            int[] localTextureBuffer = new int[sharedTextureBuffer.Length];
+            sharedTextureBuffer.CopyTo(localTextureBuffer, 0);
+            int width = localTextureBuffer[sharedTextureBuffer.Length - 2];
+            int height = localTextureBuffer[sharedTextureBuffer.Length - 1];
+
+            // Debug.Log($"{width}, {height}");
+            // resize textures if necessary
+            if ((width != 0 && height != 0)
+            && (_bufferTexture == null
+            || _renderTexture == null
+            ||  _bufferTexture.width != width
+            ||  _bufferTexture.height != height)) {
+                InitTextures(width, height);
+            }
+
+            if (_bufferTexture) {
+                _bufferTexture.SetPixelData(localTextureBuffer, 0);
+                _bufferTexture.Apply(/*updateMipmaps: false*/);
+
+                // Correct issues with the texture by applying a shader and blitting to a separate render texture:
+                Graphics.Blit(_bufferTexture, _renderTexture, _textureCorrectionMat, 0);
+            }
+        } else {
+            if (sharedTextureBuffer != null) {
+                // i don't get why but this happens sometimes
+                Debug.LogWarning($"shared buffer length was 0 or less: {sharedTextureBuffer.Length}");
+            }
+            AttemptOpenSharedTextureBuffer();
+        }
+
+        if (emuhawk != null && emuhawk.HasExited) {
+            Debug.LogWarning("EmuHawk process was unexpectedly killed");
+        }
+    }
+
+    void OnDisable() {
+        if (_initialized) {
+            Deactivate();
+        }
+    }
+
+    void Initialize() {
         _isRunning = false;
 
         _textureCorrectionMat = new Material(Resources.Load<Shader>(textureCorrectionShaderName));
@@ -176,72 +256,7 @@ public class Emulator : MonoBehaviour
         _initialized = true;
     }
 
-    // For editor convenience: Set filename fields by reading a sample directory
-    public void SetFromSample(string samplePath) {
-        // Read the sample dir to get the necessary filenames (rom, config, etc)
-        Sample s = Sample.LoadFromDir(samplePath);
-        romFileName = s.romPath;
-        configFileName = s.configPath;
-        saveStateFileName = s.saveStatePath;
-        var luaScripts = s.luaScriptPaths.ToList();
-        if (luaScripts != null && luaScripts.Count > 0) {
-            luaScriptFileName = luaScripts[0];
-            if (luaScripts.Count > 1) {
-                Debug.LogWarning($"Currently only support one lua script, loading {luaScripts[0]}");
-                // because bizhawk only supports passing a single lua script from the command line
-            }
-        }
-    }
-
-    void Update() {
-        if (!Application.isPlaying && !runInEditMode) {
-            if (_isRunning) {
-                OnDisable();
-            }
-            return;
-        } else if (!_initialized) {
-            OnEnable();
-        }
-        if (sharedTextureBuffer != null && sharedTextureBuffer.Length > 0) {
-            // Get the texture buffer and dimensions from BizHawk via the shared memory file
-            // protocol has to match MainForm.cs in BizHawk
-            // TODO should probably put this protocol in some shared schema file or something idk
-            int[] localTextureBuffer = new int[sharedTextureBuffer.Length];
-            sharedTextureBuffer.CopyTo(localTextureBuffer, 0);
-            int width = localTextureBuffer[sharedTextureBuffer.Length - 2];
-            int height = localTextureBuffer[sharedTextureBuffer.Length - 1];
-
-            // Debug.Log($"{width}, {height}");
-            // resize textures if necessary
-            if ((width != 0 && height != 0)
-            && (_bufferTexture == null
-            || _renderTexture == null
-            ||  _bufferTexture.width != width
-            ||  _bufferTexture.height != height)) {
-                InitTextures(width, height);
-            }
-
-            if (_bufferTexture) {
-                _bufferTexture.SetPixelData(localTextureBuffer, 0);
-                _bufferTexture.Apply(/*updateMipmaps: false*/);
-
-                // Correct issues with the texture by applying a shader and blitting to a separate render texture:
-                Graphics.Blit(_bufferTexture, _renderTexture, _textureCorrectionMat, 0);
-            }
-        } else {
-            if (sharedTextureBuffer != null) {
-                // i don't get why but this happens sometimes
-                Debug.LogWarning($"shared buffer length was 0 or less: {sharedTextureBuffer.Length}");
-            }
-            AttemptOpenSharedTextureBuffer();
-        }
-
-        if (emuhawk != null && emuhawk.HasExited) {
-            Debug.LogWarning("EmuHawk process was unexpectedly killed");
-        }
-    }
-    
-    void OnDisable() {
+    void Deactivate() {
         _initialized = false;
         _bizHawkLogWriter.Close();
         if (emuhawk != null && !emuhawk.HasExited) {
@@ -258,11 +273,20 @@ public class Emulator : MonoBehaviour
         _bufferTexture = new     Texture2D(width, height, textureFormat, false);
         _renderTexture = new RenderTexture(width, height, depth:0, format:renderTextureFormat);
         if (targetRenderer) {
-            if (Application.isPlaying) {
+            if (!Application.isPlaying) {
+                // running in edit mode, manually make a clone of the renderer material
+                // to avoid unity's default cloning behavior that spits out an error message
+                // (probably still leaks materials into the scene but idk if it matters)
+                if (_renderMaterial == null) {
+                    _renderMaterial = Instantiate(targetRenderer.sharedMaterial);
+                    _renderMaterial.name = targetRenderer.sharedMaterial.name;
+                }
+                _renderMaterial.mainTexture = _renderTexture;
+
+                targetRenderer.material = _renderMaterial;
+            } else  {
+                // play mode, just let unity clone the material the default way
                 targetRenderer.material.mainTexture = _renderTexture;
-            } else {
-                // to avoid leaking materials in edit mode
-                targetRenderer.sharedMaterial.mainTexture = _renderTexture;
             }
         }
     }
