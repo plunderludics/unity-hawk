@@ -10,7 +10,8 @@ soon:
  X fix lua not working
  
 later:
- - option for running bizhawk in edit mode
+ X option for running bizhawk in edit mode
+   - it's a bit janky still, fix it
  - fix flaky build script by making a custom build pipeline
  - pass input from unity to bizhawk over ipc
    - [avoiding this for now just by doing AcceptBackgroundInput in bizhawk config]
@@ -23,7 +24,9 @@ later:
 
  - update BizHawk (to 2.9.1?)
 
- - ideally put the protocol / schema for the texture buffer format (and input/audio in the future) somewhere shared as well
+ - mac / linux support?? may be possible if the unsupported dependencies on mac os are input / grahpics / audio related
+
+ - ideally put the protocol / schema for the texture buffer format (and input/audio in the future) somewhere shared
 minor:
  X notify unity (maybe crash) if/when emuhawk is closed
  - pause bizhawk when unity editor is paused [https://docs.unity3d.com/ScriptReference/EditorApplication-pauseStateChanged.html]

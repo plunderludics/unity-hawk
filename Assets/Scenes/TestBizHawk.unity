@@ -214,8 +214,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   useAttachedRenderer: 0
   targetRenderer: {fileID: 547617502}
-  romFileName: F:\pludics\samples\../roms/Command & Conquer/Command & Conquer (USA)
-    (Disc 1) (GDI).cue
+  romFileName: F:\pludics\roms\Command & Conquer\Command & Conquer (USA) (Disc 1)
+    (GDI).cue
   configFileName: 
   saveStateFileName: F:\pludics\samples\command conquer\moreguys.State
   luaScriptFileName: F:\pludics\samples\command conquer\commandconquer.lua

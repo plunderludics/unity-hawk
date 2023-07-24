@@ -25,6 +25,7 @@ using BizHawk.Plunderludics;
 
 namespace UnityHawk {
 
+[ExecuteInEditMode]
 public class Emulator : MonoBehaviour
 {
     public bool useAttachedRenderer = true;
@@ -39,10 +40,14 @@ public class Emulator : MonoBehaviour
     public string luaScriptFileName;
     
     [Header("Debug")]
+    public bool runInEditMode = false;
     public bool showBizhawkGui = false;
     public bool writeBizhawkLogs = true;
     [ShowIf("writeBizhawkLogs")]
     [ReadOnly, SerializeField] string bizhawkLogLocation;
+
+    [ReadOnly, SerializeField] bool _initialized;
+    [ReadOnly, SerializeField] bool _isRunning;
 
     private static string bizhawkLogDirectory = "BizHawkLogs";
 
@@ -53,8 +58,6 @@ public class Emulator : MonoBehaviour
     private bool forceReinitTexture;
     private bool blitTexture = true;
     private bool doTextureCorrection = true;
-
-    private bool _isRunning;
 
     // Interface for other scripts to use
     public RenderTexture Texture => _renderTexture;
@@ -169,6 +172,8 @@ public class Emulator : MonoBehaviour
         emuhawk.BeginErrorReadLine();
 
         AttemptOpenSharedTextureBuffer();
+
+        _initialized = true;
     }
 
     // For editor convenience: Set filename fields by reading a sample directory
@@ -189,6 +194,14 @@ public class Emulator : MonoBehaviour
     }
 
     void Update() {
+        if (!Application.isPlaying && !runInEditMode) {
+            if (_isRunning) {
+                OnDisable();
+            }
+            return;
+        } else if (!_initialized) {
+            OnEnable();
+        }
         if (sharedTextureBuffer != null && sharedTextureBuffer.Length > 0) {
             // Get the texture buffer and dimensions from BizHawk via the shared memory file
             // protocol has to match MainForm.cs in BizHawk
@@ -229,18 +242,29 @@ public class Emulator : MonoBehaviour
     }
     
     void OnDisable() {
+        _initialized = false;
         _bizHawkLogWriter.Close();
         if (emuhawk != null && !emuhawk.HasExited) {
             // Kill the emuhawk process
             emuhawk.Kill();
         }
+        _isRunning = false;
+        if (sharedTextureBuffer != null) sharedTextureBuffer.Close();
+        sharedTextureBuffer = null;
     }
 
     // Init/re-init the textures for rendering the screen - has to be done whenever the source dimensions change (which happens often on PSX for some reason)
     void InitTextures(int width, int height) {
         _bufferTexture = new     Texture2D(width, height, textureFormat, false);
         _renderTexture = new RenderTexture(width, height, depth:0, format:renderTextureFormat);
-        if (targetRenderer) targetRenderer.material.mainTexture = _renderTexture;
+        if (targetRenderer) {
+            if (Application.isPlaying) {
+                targetRenderer.material.mainTexture = _renderTexture;
+            } else {
+                // to avoid leaking materials in edit mode
+                targetRenderer.sharedMaterial.mainTexture = _renderTexture;
+            }
+        }
     }
 
     void AttemptOpenSharedTextureBuffer() {
