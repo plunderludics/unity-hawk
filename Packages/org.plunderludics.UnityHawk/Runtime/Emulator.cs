@@ -28,6 +28,8 @@ namespace UnityHawk {
 [ExecuteInEditMode]
 public class Emulator : MonoBehaviour
 {
+    static readonly bool _targetMac = false; // not really supported yet
+
     public bool useAttachedRenderer = true;
     [HideIf("useAttachedRenderer")]
     public Renderer targetRenderer;
@@ -214,7 +216,19 @@ public class Emulator : MonoBehaviour
         // start emuhawk.exe w args
         string exePath = Path.GetFullPath(Paths.emuhawkExePath);
         emuhawk = new Process();
+        emuhawk.StartInfo.UseShellExecute = false;
         var args = emuhawk.StartInfo.ArgumentList;
+        if (_targetMac) {
+            // Doesn't really work yet, need to make some more changes in the bizhawk executable
+            emuhawk.StartInfo.EnvironmentVariables["LD_LIBRARY_PATH"] = Paths.dllDir;
+            emuhawk.StartInfo.EnvironmentVariables["MONO_PATH"] = Paths.dllDir;
+            emuhawk.StartInfo.FileName = "/Library/Frameworks/Mono.framework/Versions/Current/Commands/mono";
+            args.Add(exePath);
+        } else {
+            // Windows
+            emuhawk.StartInfo.FileName = exePath;
+            emuhawk.StartInfo.UseShellExecute = false;
+        }
 
         if (!showBizhawkGui) args.Add("--headless");
         
@@ -233,18 +247,19 @@ public class Emulator : MonoBehaviour
 
         args.Add(romPath);
 
-        emuhawk.StartInfo.FileName = exePath;
-        emuhawk.StartInfo.UseShellExecute = false;
-        // Redirect bizhawk output + error into a log file
-        string logFileName = $"{this.name}-{GetInstanceID()}.log";
-        Directory.CreateDirectory (bizhawkLogDirectory);
-        bizhawkLogLocation = Path.Combine(bizhawkLogDirectory, logFileName);
-        _bizHawkLogWriter = new(bizhawkLogLocation);
+        if (writeBizhawkLogs) {
+            // Redirect bizhawk output + error into a log file
+            string logFileName = $"{this.name}-{GetInstanceID()}.log";
+            Directory.CreateDirectory (bizhawkLogDirectory);
+            bizhawkLogLocation = Path.Combine(bizhawkLogDirectory, logFileName);
+            if (_bizHawkLogWriter != null) _bizHawkLogWriter.Dispose();
+            _bizHawkLogWriter = new(bizhawkLogLocation);
 
-        emuhawk.StartInfo.RedirectStandardOutput = true;
-        emuhawk.StartInfo.RedirectStandardError = true;
-        emuhawk.OutputDataReceived += new DataReceivedEventHandler((sender, e) => LogBizHawk(sender, e, false));
-        emuhawk.ErrorDataReceived += new DataReceivedEventHandler((sender, e) => LogBizHawk(sender, e, true));
+            emuhawk.StartInfo.RedirectStandardOutput = true;
+            emuhawk.StartInfo.RedirectStandardError = true;
+            emuhawk.OutputDataReceived += new DataReceivedEventHandler((sender, e) => LogBizHawk(sender, e, false));
+            emuhawk.ErrorDataReceived += new DataReceivedEventHandler((sender, e) => LogBizHawk(sender, e, true));
+        }
 
         Debug.Log($"{exePath} {string.Join(' ', args)}");
         emuhawk.Start();
@@ -306,6 +321,7 @@ public class Emulator : MonoBehaviour
         if (!string.IsNullOrEmpty(msg)) {
             // Log to file
             _bizHawkLogWriter.WriteLine(msg);
+            _bizHawkLogWriter.Flush();
             if (isError) {
                 Debug.LogWarning(msg);
             }
