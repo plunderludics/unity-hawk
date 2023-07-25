@@ -10,6 +10,7 @@ soon:
  X fix lua not working
  
 later:
+ - fix annoying exception 'cannot open file that already exists' when re-opening the shared memory buffer
  X option for running bizhawk in edit mode
    - it's a bit janky still, fix it
  - fix flaky build script by making a custom build pipeline

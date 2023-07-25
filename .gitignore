@@ -1,3 +1,6 @@
+# Ignore bizhawk logs
+/BizHawkLogs/
+
 # Ignore the dlls - these should be copied from BizHawk/output/dlls
 /Assets/Plugins/
 
