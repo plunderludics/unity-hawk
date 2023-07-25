@@ -15,7 +15,7 @@ later:
  - fix flaky build script by making a custom build pipeline
  - pass input from unity to bizhawk over ipc
    - [avoiding this for now just by doing AcceptBackgroundInput in bizhawk config]
- - bizhawk send audio over ipc
+ - pass audio from bizhawk to unity over ipc
    - [currently bizhawk is just playing its own audio via directx]
  - generic message passing (or rpc) interface (e.g. for calling api functions from unityhawk, or unity functions from lua)
   - with the aim being to facilitate comms between bizhawk instances i guess
