@@ -3,9 +3,10 @@
 UnityHawk lets you run emulated games within a Unity project, using [BizHawk](https://tasvideos.org/BizHawk).
 
 ## Installation
-Add this line under `dependencies` in your `manifest.json`:
+Add these two lines under `dependencies` in your `manifest.json`:
 ```
-"org.plunderludics.unity-hawk": "https://github.com/plunderludics/unity-hawk.git?path=/Packages/org.plunderludics.UnityHawk"
+"org.plunderludics.unity-hawk": "https://github.com/plunderludics/unity-hawk.git?path=/Packages/org.plunderludics.UnityHawk#upm"
+"com.dbrizov.naughtyattributes": "https://github.com/dbrizov/NaughtyAttributes.git#upm"
 ```
 
 ## Usage
