@@ -46,7 +46,7 @@ public class Emulator : MonoBehaviour
     public string luaScriptFileName;
     
     [Header("Debug")]
-    public bool runInEditMode = false;
+    public new bool runInEditMode = false;
     public bool showBizhawkGui = false;
     public bool writeBizhawkLogs = true;
     [ShowIf("writeBizhawkLogs")]
@@ -60,10 +60,6 @@ public class Emulator : MonoBehaviour
     // [Make these public for debugging texture stuff]
     private TextureFormat textureFormat = TextureFormat.BGRA32;
     private RenderTextureFormat renderTextureFormat = RenderTextureFormat.BGRA32;
-    private bool linearTexture; // [seems so make no difference visually]
-    private bool forceReinitTexture;
-    private bool blitTexture = true;
-    private bool doTextureCorrection = true;
 
     // Interface for other scripts to use
     public RenderTexture Texture => _renderTexture;
