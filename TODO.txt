@@ -6,7 +6,7 @@ soon:
  X cleanup code (provide args and everything to bizhawk via cli)
  X update build scripts, test build
  X remove old code
- - include bizhawk files in git / package release
+ X include bizhawk files in git / package release
  X fix lua not working
  
 later:
@@ -14,8 +14,7 @@ later:
  X option for running bizhawk in edit mode
    - it's a bit janky still, fix it
  - fix flaky build script by making a custom build pipeline
- - pass input from unity to bizhawk over ipc
-   - [avoiding this for now just by doing AcceptBackgroundInput in bizhawk config]
+ X pass input from unity to bizhawk over ipc
  - pass audio from bizhawk to unity over ipc
    - [currently bizhawk is just playing its own audio via directx]
  - generic message passing (or rpc) interface (e.g. for calling api functions from unityhawk, or unity functions from lua)
