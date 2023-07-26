@@ -153,7 +153,7 @@ public class Emulator : MonoBehaviour
 
         if (passInputFromUnity) {
             inputProvider.Update();
-            if (sharedInputBuffer != null) {
+            if (sharedInputBuffer != null && sharedInputBuffer.NodeCount > 0) {
                 WriteInputToBuffer();
             } else {
                 AttemptOpenSharedInputBuffer();
