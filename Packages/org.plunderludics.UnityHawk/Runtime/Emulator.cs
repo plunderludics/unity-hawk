@@ -8,6 +8,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 using System.Diagnostics;
+using System.Runtime.InteropServices;
 using Debug = UnityEngine.Debug;
 
 #if UNITY_EDITOR
@@ -33,6 +34,9 @@ public class Emulator : MonoBehaviour
     public bool useAttachedRenderer = true;
     [HideIf("useAttachedRenderer")]
     public Renderer targetRenderer;
+
+    [Tooltip("If false, BizHawk will get input directly from the OS")]
+    public bool passInputFromUnity = true;
 
     [Header("Files")]
     // All pathnames are loaded relative to ./StreamingAssets/, unless the pathname is absolute (see GetAssetPath)
@@ -65,9 +69,14 @@ public class Emulator : MonoBehaviour
     public RenderTexture Texture => _renderTexture;
     public bool IsRunning => _isRunning;
 
-    SharedArray<int> sharedTextureBuffer;
     Process emuhawk;
+
     private string _sharedTextureMemoryName;
+    SharedArray<int> sharedTextureBuffer;
+
+    private IInputProvider inputProvider; // this is fixed for now but could be configurable in the future
+    private string _sharedInputMemoryName;
+    CircularBuffer sharedInputBuffer;
 
     Texture2D _bufferTexture;
     RenderTexture _renderTexture; // We have to maintain a separate rendertexture just for the purpose of flipping the image we get from the emulator
@@ -135,38 +144,24 @@ public class Emulator : MonoBehaviour
         } else if (!_initialized) {
             Initialize();
         }
+
         if (sharedTextureBuffer != null && sharedTextureBuffer.Length > 0) {
-            // Get the texture buffer and dimensions from BizHawk via the shared memory file
-            // protocol has to match MainForm.cs in BizHawk
-            // TODO should probably put this protocol in some shared schema file or something idk
-            int[] localTextureBuffer = new int[sharedTextureBuffer.Length];
-            sharedTextureBuffer.CopyTo(localTextureBuffer, 0);
-            int width = localTextureBuffer[sharedTextureBuffer.Length - 2];
-            int height = localTextureBuffer[sharedTextureBuffer.Length - 1];
-
-            // Debug.Log($"{width}, {height}");
-            // resize textures if necessary
-            if ((width != 0 && height != 0)
-            && (_bufferTexture == null
-            || _renderTexture == null
-            ||  _bufferTexture.width != width
-            ||  _bufferTexture.height != height)) {
-                InitTextures(width, height);
-            }
-
-            if (_bufferTexture) {
-                _bufferTexture.SetPixelData(localTextureBuffer, 0);
-                _bufferTexture.Apply(/*updateMipmaps: false*/);
-
-                // Correct issues with the texture by applying a shader and blitting to a separate render texture:
-                Graphics.Blit(_bufferTexture, _renderTexture, _textureCorrectionMat, 0);
-            }
+            UpdateTextureFromBuffer();
         } else {
             if (sharedTextureBuffer != null) {
                 // i don't get why but this happens sometimes
                 Debug.LogWarning($"shared buffer length was 0 or less: {sharedTextureBuffer.Length}");
             }
             AttemptOpenSharedTextureBuffer();
+        }
+
+        if (passInputFromUnity) {
+            inputProvider.Update();
+            if (sharedInputBuffer != null) {
+                WriteInputToBuffer();
+            } else {
+                AttemptOpenSharedInputBuffer();
+            }
         }
 
         if (emuhawk != null && emuhawk.HasExited) {
@@ -231,9 +226,18 @@ public class Emulator : MonoBehaviour
         }
 
         if (!showBizhawkGui) args.Add("--headless");
-        
-        _sharedTextureMemoryName = "unityhawk-texbuf-" + GetInstanceID();
-        args.Add($"--share-texture={_sharedTextureMemoryName}");
+
+        _sharedTextureMemoryName = "unityhawk-texture-" + GetInstanceID();
+        args.Add($"--write-texture-to-shared-buffer={_sharedTextureMemoryName}");
+
+        if (passInputFromUnity) {
+            _sharedInputMemoryName = "unityhawk-input-" + GetInstanceID();
+            args.Add($"--read-input-from-shared-buffer={_sharedInputMemoryName}");
+
+            // for now use a fixed implementation of IInputProvider but
+            // in principle could be configurable - easy to add input events programmatically, etc
+            inputProvider = new InputProvider();
+        }
 
         if (saveStateFullPath != null) {
             args.Add($"--load-state={saveStateFullPath}");
@@ -267,8 +271,66 @@ public class Emulator : MonoBehaviour
         emuhawk.BeginErrorReadLine();
 
         AttemptOpenSharedTextureBuffer();
+        if (passInputFromUnity) {
+            AttemptOpenSharedInputBuffer();
+        }
 
         _initialized = true;
+    }
+
+    void WriteInputToBuffer() {
+        // Get input from inputProvider, serialize and write to the shared memory
+        InputEvent? ie;
+        while ((ie = inputProvider.DequeueEvent()).HasValue) {
+            // Convert Unity InputEvent to BizHawk InputEvent
+            // [for now only supporting keys, no gamepad]
+            BizHawk.UnityHawk.InputEvent bie = ConvertInput.ToBizHawk(ie.Value);
+            byte[] serialized = Serialize(bie);
+            // Debug.Log($"Writing buffer: {ByteArrayToString(serialized)}");
+            int amount = sharedInputBuffer.Write(serialized, timeout: 0);
+            if (amount <= 0) {
+                Debug.LogWarning("Failed to write key event to shared buffer");
+            }
+        }
+    }
+
+    private byte [] Serialize(object obj)
+    {
+        int len = Marshal.SizeOf(obj);
+        byte [] arr = new byte[len];
+        IntPtr ptr = Marshal.AllocHGlobal(len);
+        Marshal.StructureToPtr(obj, ptr, true);
+        Marshal.Copy(ptr, arr, 0, len);
+        Marshal.FreeHGlobal(ptr);
+        return arr;
+    }
+
+    void UpdateTextureFromBuffer() {
+        // Get the texture buffer and dimensions from BizHawk via the shared memory file
+        // protocol has to match MainForm.cs in BizHawk
+        // TODO should probably put this protocol in some shared schema file or something idk
+        int[] localTextureBuffer = new int[sharedTextureBuffer.Length];
+        sharedTextureBuffer.CopyTo(localTextureBuffer, 0);
+        int width = localTextureBuffer[sharedTextureBuffer.Length - 2];
+        int height = localTextureBuffer[sharedTextureBuffer.Length - 1];
+
+        // Debug.Log($"{width}, {height}");
+        // resize textures if necessary
+        if ((width != 0 && height != 0)
+        && (_bufferTexture == null
+        || _renderTexture == null
+        ||  _bufferTexture.width != width
+        ||  _bufferTexture.height != height)) {
+            InitTextures(width, height);
+        }
+
+        if (_bufferTexture) {
+            _bufferTexture.SetPixelData(localTextureBuffer, 0);
+            _bufferTexture.Apply(/*updateMipmaps: false*/);
+
+            // Correct issues with the texture by applying a shader and blitting to a separate render texture:
+            Graphics.Blit(_bufferTexture, _renderTexture, _textureCorrectionMat, 0);
+        }
     }
 
     void Deactivate() {
@@ -311,8 +373,17 @@ public class Emulator : MonoBehaviour
     void AttemptOpenSharedTextureBuffer() {
         try {
             sharedTextureBuffer = new (name: _sharedTextureMemoryName);
-            _isRunning = true; // if we're able to connect to the shared buffer, assume the rom is running ok
+            _isRunning = true; // if we're able to connect to the texture buffer, assume the rom is running ok
             Debug.Log("Connected to shared texture buffer");
+        } catch (FileNotFoundException) {
+            // Debug.LogError(e);
+        }
+    }
+    
+    void AttemptOpenSharedInputBuffer() {
+        try {
+            sharedInputBuffer = new (name: _sharedInputMemoryName);
+            Debug.Log("Connected to shared input buffer");
         } catch (FileNotFoundException) {
             // Debug.LogError(e);
         }
