@@ -44,6 +44,8 @@ public class Emulator : MonoBehaviour
     public string configFileName = ""; // Leave empty for default config.ini
     public string saveStateFileName = ""; // Leave empty to boot clean
     public string luaScriptFileName;
+
+    private const string firmwareDirName = "Firmware"; // Firmware loaded from StreamingAssets/Firmware
     
     [Header("Debug")]
     public new bool runInEditMode = false;
@@ -220,6 +222,8 @@ public class Emulator : MonoBehaviour
             emuhawk.StartInfo.FileName = exePath;
             emuhawk.StartInfo.UseShellExecute = false;
         }
+
+        args.Add($"--firmware={GetAssetPath(firmwareDirName)}"); // could make this configurable but idk if that's really useful
 
         if (!showBizhawkGui) args.Add("--headless");
 
