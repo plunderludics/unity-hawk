@@ -44,9 +44,11 @@ public class Emulator : MonoBehaviour
     public string configFileName = ""; // Leave empty for default config.ini
     public string saveStateFileName = ""; // Leave empty to boot clean
     public string luaScriptFileName;
+
+    private const string firmwareDirName = "Firmware"; // Firmware loaded from StreamingAssets/Firmware
     
     [Header("Debug")]
-    public bool runInEditMode = false;
+    public new bool runInEditMode = false;
     public bool showBizhawkGui = false;
     public bool writeBizhawkLogs = true;
     [ShowIf("writeBizhawkLogs")]
@@ -60,10 +62,6 @@ public class Emulator : MonoBehaviour
     // [Make these public for debugging texture stuff]
     private TextureFormat textureFormat = TextureFormat.BGRA32;
     private RenderTextureFormat renderTextureFormat = RenderTextureFormat.BGRA32;
-    private bool linearTexture; // [seems so make no difference visually]
-    private bool forceReinitTexture;
-    private bool blitTexture = true;
-    private bool doTextureCorrection = true;
 
     // Interface for other scripts to use
     public RenderTexture Texture => _renderTexture;
@@ -157,7 +155,7 @@ public class Emulator : MonoBehaviour
 
         if (passInputFromUnity) {
             inputProvider.Update();
-            if (sharedInputBuffer != null) {
+            if (sharedInputBuffer != null && sharedInputBuffer.NodeCount > 0) {
                 WriteInputToBuffer();
             } else {
                 AttemptOpenSharedInputBuffer();
@@ -224,6 +222,8 @@ public class Emulator : MonoBehaviour
             emuhawk.StartInfo.FileName = exePath;
             emuhawk.StartInfo.UseShellExecute = false;
         }
+
+        args.Add($"--firmware={GetAssetPath(firmwareDirName)}"); // could make this configurable but idk if that's really useful
 
         if (!showBizhawkGui) args.Add("--headless");
 
