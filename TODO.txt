@@ -8,7 +8,7 @@ soon:
  X remove old code
  X include bizhawk files in git / package release
  X fix lua not working
- 
+
 later:
  - fix annoying exception 'cannot open file that already exists' when re-opening the shared memory buffer
  X option for running bizhawk in edit mode
