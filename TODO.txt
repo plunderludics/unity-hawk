@@ -1,32 +1,20 @@
-soon:
- X headless mode for bizhawk
- X put bizhawk in packages dir
- X switch to mmap solution
- X test multiple cores simultaneously
- X cleanup code (provide args and everything to bizhawk via cli)
- X update build scripts, test build
- X remove old code
- X include bizhawk files in git / package release
- X fix lua not working
-
-later:
- - fix annoying exception 'cannot open file that already exists' when re-opening the shared memory buffer
+ - fix annoying exception 'cannot open file that already exists' when re-opening the shared memory buffer sometimes
  X option for running bizhawk in edit mode
    - it's a bit janky still, fix it
  - fix flaky build script by making a custom build pipeline
- X pass input from unity to bizhawk over ipc
- - pass audio from bizhawk to unity over ipc
-   - [currently bizhawk is just playing its own audio via directx]
+ - pass audio from bizhawk to unity over ipc [currently bizhawk is just playing its own audio via directx]
  - generic message passing (or rpc) interface (e.g. for calling api functions from unityhawk, or unity functions from lua)
-  - with the aim being to facilitate comms between bizhawk instances i guess
+  - with the aim being to facilitate communication between bizhawk instances i guess
  - custom lua libs, etc
- - have a nice interface (for unityhawk users) to interact with the bizhawk apis (e.g. for pausing, restarting, changing memory, etc)
+ - have a nice interface (for unityhawk users) to interact with the bizhawk apis (e.g. for loading state, reading/writing memory, etc)
 
  - update BizHawk (to 2.9.1?)
 
  - mac / linux support?? may be possible if the unsupported dependencies on mac os are input / grahpics / audio related
+  - [have made some progress on this but current blocker is the SharedMemory library seeming to not work on mac]
 
- - ideally put the protocol / schema for the texture buffer format (and input/audio in the future) somewhere shared
 minor:
+ - ideally put the protocol / schema for the texture buffer format (and input/audio in the future) somewhere shared
  X notify unity (maybe crash) if/when emuhawk is closed
  - pause bizhawk when unity editor is paused [https://docs.unity3d.com/ScriptReference/EditorApplication-pauseStateChanged.html]
+ 
