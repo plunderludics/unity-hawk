@@ -22,7 +22,14 @@ public static class Paths
         _bizhawkDirForBuild;
 #endif
 
-    public static readonly string emuhawkExePath = Path.Combine(bizhawkDir, "EmuHawk.exe");
+    private static readonly string _emuhawkExeName = 
+#if UNITY_EDITOR_OSX || UNITY_STANDALONE_OSX
+        "EmuHawk-Headless.exe";
+#else
+        "EmuHawk.exe";
+#endif
+
+    public static readonly string emuhawkExePath = Path.Combine(bizhawkDir, _emuhawkExeName);
 
     public static readonly string defaultConfigPath = Path.Combine(bizhawkDir, "config.ini");
 

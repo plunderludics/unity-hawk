@@ -22,14 +22,19 @@ using Unity.Profiling;
 
 using SharedMemory;
 
-using BizHawk.Plunderludics;
+using Plunderludics;
 
 namespace UnityHawk {
 
 [ExecuteInEditMode]
 public class Emulator : MonoBehaviour
 {
-    static readonly bool _targetMac = false; // not really supported yet
+    static readonly bool _targetMac = 
+#if UNITY_EDITOR_OSX || UNITY_STANDALONE_OSX
+        true;
+#else
+        false;
+#endif
 
     public bool useAttachedRenderer = true;
     [HideIf("useAttachedRenderer")]
@@ -214,6 +219,9 @@ public class Emulator : MonoBehaviour
             emuhawk.StartInfo.EnvironmentVariables["LD_LIBRARY_PATH"] = Paths.dllDir;
             emuhawk.StartInfo.EnvironmentVariables["MONO_PATH"] = Paths.dllDir;
             emuhawk.StartInfo.FileName = "/Library/Frameworks/Mono.framework/Versions/Current/Commands/mono";
+            if (showBizhawkGui) {
+                Debug.LogWarning("'Show Bizhawk Gui' is not supported on Mac'");
+            }
             args.Add(exePath);
         } else {
             // Windows
@@ -367,12 +375,13 @@ public class Emulator : MonoBehaviour
     }
 
     void AttemptOpenSharedTextureBuffer() {
+        Debug.Log("AttemptOpenSharedTextureBuffer");
         try {
             sharedTextureBuffer = new (name: _sharedTextureMemoryName);
             _isRunning = true; // if we're able to connect to the texture buffer, assume the rom is running ok
             Debug.Log("Connected to shared texture buffer");
-        } catch (FileNotFoundException) {
-            // Debug.LogError(e);
+        } catch (FileNotFoundException e) {
+            Debug.LogError(e);
         }
     }
     
