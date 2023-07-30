@@ -8,6 +8,7 @@
   - with the aim being to facilitate communication between bizhawk instances i guess
  - custom lua libs, etc
  - have a nice interface (for unityhawk users) to interact with the bizhawk apis (e.g. for loading state, reading/writing memory, etc)
+ - more modular setup for input; example of custom input provider
 
  - update BizHawk (to 2.9.1?)
 

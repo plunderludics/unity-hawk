@@ -53,10 +53,11 @@ public class Emulator : MonoBehaviour
     public string luaScriptFileName;
 
     private const string firmwareDirName = "Firmware"; // Firmware loaded from StreamingAssets/Firmware
-    
-    [Header("Debug")]
+
+    [Header("Development")]
     public new bool runInEditMode = false;
     public bool showBizhawkGui = false;
+    [Header("Debug")]
     public bool writeBizhawkLogs = true;
     [ShowIf("writeBizhawkLogs")]
     [ReadOnly, SerializeField] string bizhawkLogLocation;
@@ -95,10 +96,10 @@ public class Emulator : MonoBehaviour
     static int AudioBufferSize = (int)(2*44100*1); // Size of local audio buffer, 1 sec should be plenty
     [ShowIf("captureEmulatorAudio")]
     [Tooltip("Higher value means more audio latency. Lower value may cause crackles and pops")]
-    public int audioBufferSurplus = (int)(2*44100*0.025);
+    public int audioBufferSurplus = (int)(2*44100*0.05);
     // ^ This is the actual 'buffer' part - samples that are retained after passing audio to unity.
     // Smaller surplus -> less latency but more clicks & pops (when bizhawk fails to provide audio in time)
-    // 25ms seems to be an ok compromise (but probably depends on host machine, users can configure if needed)
+    // 50ms seems to be an ok compromise (but probably depends on host machine, users can configure if needed)
     short[] _audioBuffer; // circular buffer (queue) to locally store audio samples accumulated from the emulator
     int _audioBufferStart, _audioBufferEnd;
     int _audioSamplesNeeded; // track how many samples unity wants to consume

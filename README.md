@@ -4,6 +4,8 @@ UnityHawk lets you run emulated games within a Unity project, using [BizHawk](ht
 
 Made as a tool for the development of [plunderludics](https://plunderludics.github.io/wiki/).
 
+Under development, may have bugs - issues, feature requests and contributions are welcome.
+
 ## Installation
 Add these two lines under `dependencies` in your `manifest.json`:
 ```
@@ -18,6 +20,12 @@ Add these two lines under `dependencies` in your `manifest.json`:
 - Set the filenames on the Emulator component (relative to the `StreamingAssets/` directory)
   - (You can also use an absolute path if you want to reference files outside of the Unity project - UnityHawk will attempt to copy the necessary files into the build at build time but relying on this is not recommended)
 - The live emulator graphics can be grabbed in code via the `Emulator.Texture` property.
+
+## Features
+- Enable 'Send Input To Bizhawk' to send keyboard input from Unity to Bizhawk (gamepad input not supported yet). If this isn't enabled Bizhawk will get input directly from the operating system.
+- Enable 'Capture Emulator Audio' to route emulator audio to an AudioSource, allowing you to use unity's positional audio system or add audio effects
+ - (unfortunately this creates some latency and sometimes distorted audio, especially when multiple emulators are running concurrently, this should probably be considered experimental for now)
+- Enable 'Show Bizhawk Gui' to show the native Bizhawk window; useful for doing plunderludics development (finding save states, tweaking config & scripts, etc) without having to leave Unity
 
 ## Building and releasing
  - Any files within StreamingAssets (e.g. roms, firmware) will get copied into the build so be careful about distribution legality :)
