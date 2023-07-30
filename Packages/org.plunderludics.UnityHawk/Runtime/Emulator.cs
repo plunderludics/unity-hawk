@@ -211,6 +211,7 @@ public class Emulator : MonoBehaviour
 
         if (emuhawk != null && emuhawk.HasExited) {
             Debug.LogWarning("EmuHawk process was unexpectedly killed");
+            Deactivate();
         }
     }
 
@@ -298,11 +299,19 @@ public class Emulator : MonoBehaviour
             // for now use a fixed implementation of IInputProvider but
             // in principle could be configurable - easy to add input events programmatically, etc
             inputProvider = new InputProvider();
+
+            if (runInEditMode) {
+                Debug.LogWarning("passInputFromUnity and runInEditMode are both enabled but input passing will not work in edit mode");
+            }
         }
 
         if (captureEmulatorAudio) {
             _audioRpcBufferName = "unityhawk-audio-" + GetInstanceID();
             args.Add($"--share-audio-over-rpc-buffer={_audioRpcBufferName}");
+
+            if (runInEditMode) {
+                Debug.LogWarning("captureEmulatorAudio and runInEditMode are both enabled but emulator audio cannot be captured in edit mode");
+            }
         }
 
         if (saveStateFullPath != null) {
@@ -383,7 +392,7 @@ public class Emulator : MonoBehaviour
     void CaptureBizhawkAudio() {
         s_BizhawkRpcGetSamples.Begin();
 
-        RpcResponse response = _audioRpcBuffer.RemoteRequest(new byte[] {});
+        RpcResponse response = _audioRpcBuffer.RemoteRequest(new byte[] {}, timeoutMs: 500);
         s_BizhawkRpcGetSamples.End();
         if (!response.Success) {
             // This happens sometimes, especially when audioCaptureFramerate is high, i have no idea why
@@ -454,8 +463,22 @@ public class Emulator : MonoBehaviour
             emuhawk.Kill();
         }
         _isRunning = false;
-        if (_sharedTextureBuffer != null) _sharedTextureBuffer.Close();
-        _sharedTextureBuffer = null;
+        if (_sharedTextureBuffer != null) {
+            _sharedTextureBuffer.Close();
+            _sharedTextureBuffer = null;
+        }
+        if (_sharedInputBuffer != null) {
+            _sharedInputBuffer.Close();
+            _sharedInputBuffer = null;
+        }
+        if (_audioRpcBuffer != null) {
+            _audioRpcBuffer.Dispose();
+            _audioRpcBuffer = null;
+        }
+        if (_samplesNeededRpcBuffer != null) {
+            _samplesNeededRpcBuffer.Dispose();
+            _samplesNeededRpcBuffer = null;
+        }
     }
 
     // Init/re-init the textures for rendering the screen - has to be done whenever the source dimensions change (which happens often on PSX for some reason)
