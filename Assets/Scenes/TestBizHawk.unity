@@ -265,7 +265,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!4 &406814205
 Transform:
   m_ObjectHideFlags: 0
@@ -303,7 +303,6 @@ MonoBehaviour:
   configFileName: 
   saveStateFileName: F:\pludics\samples\command conquer\moreguys.State
   luaScriptFileName: F:\pludics\samples\command conquer\commandconquer.lua
-  runInEditMode: 0
   showBizhawkGui: 0
   writeBizhawkLogs: 1
   bizhawkLogLocation: BizHawkLogs\commandconquer-16240.log
@@ -626,13 +625,12 @@ MonoBehaviour:
   configFileName: 
   saveStateFileName: 
   luaScriptFileName: 
-  runInEditMode: 0
   showBizhawkGui: 0
   writeBizhawkLogs: 1
   bizhawkLogLocation: BizHawkLogs\NES-16262.log
   _initialized: 0
   _isRunning: 0
-  audioBufferSurplus: 2048
+  audioBufferSurplus: 4096
 --- !u!82 &1198180411
 AudioSource:
   m_ObjectHideFlags: 0
@@ -642,7 +640,7 @@ AudioSource:
   m_GameObject: {fileID: 1198180406}
   m_Enabled: 1
   serializedVersion: 4
-  OutputAudioMixerGroup: {fileID: 0}
+  OutputAudioMixerGroup: {fileID: 24300002, guid: a2ded482b514f374984d5fa59ab624b5, type: 2}
   m_audioClip: {fileID: 0}
   m_PlayOnAwake: 1
   m_Volume: 1

@@ -22,6 +22,8 @@
   - i think it would make a lot more sense to do resampling on the unity side instead of bizhawk side, that would simplify the rpc stuff too
    - maybe just copy the code from SoundOutputProvider.cs, rather than have a depedency on a bunch of bizhawk dlls
 
+ - documentation! at least a guide to the params on the Emulator component
+
 minor:
  - ideally put the protocol / schema for the texture buffer format (and input/audio in the future) somewhere shared
  X notify unity (maybe crash) if/when emuhawk is closed
