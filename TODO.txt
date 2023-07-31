@@ -2,10 +2,9 @@
  X option for running bizhawk in edit mode
    - it's a bit janky still, fix it
  - fix flaky build script by making a custom build pipeline
- X pass audio from bizhawk to unity over ipc [currently bizhawk is just playing its own audio via directx]
-   - working and audio is pretty clean but there is some latency (maybe 20ms) and the implementation is not great (see below)
  - generic message passing (or rpc) interface (e.g. for calling api functions from unityhawk, or unity functions from lua)
   - with the aim being to facilitate communication between bizhawk instances i guess
+ - pass modifier keys with input (would be useful for e.g. shift-tab to turbo)
  - custom lua libs, etc
  - have a nice interface (for unityhawk users) to interact with the bizhawk apis (e.g. for loading state, reading/writing memory, etc)
  - more modular setup for input; example of custom input provider
@@ -18,13 +17,18 @@
  - cleanup code
   - move nasty audio stuff into another class
   - probably separate all the de/serialization, shared buffer & rpc stuff into separate files too
- - improve audio implementation
+
+ - improve ipc audio
+  - currently either crackly audio or high-latency, especially with multiple simultaneous emulators
   - two separate rpc channels seems unnecessary and probably increases latency
   - i think it would make a lot more sense to do resampling on the unity side instead of bizhawk side, that would simplify the rpc stuff too
    - maybe just copy the code from SoundOutputProvider.cs, rather than have a depedency on a bunch of bizhawk dlls
 
  - documentation! at least a guide to the params on the Emulator component
 
+ - find a way to reduce build size by including savestates but not roms (possible for samples that never need to load from disk)
+
+ - bug: during 'run in edit mode', hitting undo seems to restart the emulator
 minor:
  - ideally put the protocol / schema for the texture buffer format (and input/audio in the future) somewhere shared
  X notify unity (maybe crash) if/when emuhawk is closed
