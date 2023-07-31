@@ -73,7 +73,7 @@ public class Emulator : MonoBehaviour
 
     // Interface for other scripts to use
     public RenderTexture Texture => _renderTexture;
-    public bool IsRunning => _isRunning;
+    public bool IsRunning => _isRunning; // is the emuhawk process running (best guess, might be wrong)
 
     Process emuhawk;
 
@@ -345,6 +345,7 @@ public class Emulator : MonoBehaviour
         emuhawk.Start();
         emuhawk.BeginOutputReadLine();
         emuhawk.BeginErrorReadLine();
+        _isRunning = true;
 
         AttemptOpenSharedTextureBuffer();
         if (passInputFromUnity) {
@@ -509,7 +510,6 @@ public class Emulator : MonoBehaviour
         // Debug.Log("AttemptOpenSharedTextureBuffer");
         try {
             _sharedTextureBuffer = new (name: _sharedTextureBufferName);
-            _isRunning = true; // if we're able to connect to the texture buffer, assume the rom is running ok
             Debug.Log("Connected to shared texture buffer");
         } catch (FileNotFoundException) {
             // Debug.LogError(e);
