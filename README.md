@@ -13,6 +13,11 @@ Add these two lines under `dependencies` in your `manifest.json`:
 "com.dbrizov.naughtyattributes": "https://github.com/dbrizov/NaughtyAttributes.git#upm"
 ```
 
+Or, install using [openupm-cli](https://github.com/openupm/openupm-cli):
+```
+openupm add org.plunderludics.unityhawk
+```
+
 ## Usage
 - Add an `Emulator` component to an object with an attached `Renderer`.
 - Put the rom, savestate, config & lua files you want to use into `Assets/StreamingAssets/`
