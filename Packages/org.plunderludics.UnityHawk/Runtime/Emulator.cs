@@ -22,21 +22,28 @@ using Unity.Profiling;
 
 using SharedMemory;
 
-using BizHawk.Plunderludics;
+using Plunderludics;
 
 namespace UnityHawk {
 
 [ExecuteInEditMode]
 public class Emulator : MonoBehaviour
 {
-    static readonly bool _targetMac = false; // not really supported yet
+    static readonly bool _targetMac = 
+#if UNITY_EDITOR_OSX || UNITY_STANDALONE_OSX
+        true;
+#else
+        false;
+#endif
 
     public bool useAttachedRenderer = true;
     [HideIf("useAttachedRenderer")]
     public Renderer targetRenderer;
 
-    [Tooltip("If false, BizHawk will get input directly from the OS")]
+    [Tooltip("If true, Unity will pass keyboard input to the emulator. If false, BizHawk will get input directly from the OS")]
     public bool passInputFromUnity = true;
+    [Tooltip("If true, audio will be played via an attached AudioSource (may induce some latency). If false, BizHawk will play audio directly to the OS")]
+    public bool captureEmulatorAudio = true;
 
     [Header("Files")]
     // All pathnames are loaded relative to ./StreamingAssets/, unless the pathname is absolute (see GetAssetPath)
@@ -46,10 +53,11 @@ public class Emulator : MonoBehaviour
     public string luaScriptFileName;
 
     private const string firmwareDirName = "Firmware"; // Firmware loaded from StreamingAssets/Firmware
-    
-    [Header("Debug")]
+
+    [Header("Development")]
     public new bool runInEditMode = false;
     public bool showBizhawkGui = false;
+    [Header("Debug")]
     public bool writeBizhawkLogs = true;
     [ShowIf("writeBizhawkLogs")]
     [ReadOnly, SerializeField] string bizhawkLogLocation;
@@ -65,19 +73,36 @@ public class Emulator : MonoBehaviour
 
     // Interface for other scripts to use
     public RenderTexture Texture => _renderTexture;
-    public bool IsRunning => _isRunning;
+    public bool IsRunning => _isRunning; // is the emuhawk process running (best guess, might be wrong)
 
     Process emuhawk;
 
-    private string _sharedTextureMemoryName;
-    SharedArray<int> sharedTextureBuffer;
+    private string _audioRpcBufferName;
+    // Audio needs two rpc buffers, one for Bizhawk to request 'samples needed' value from Unity,
+    // one for Unity to request the audio buffer from Bizhawk
+    RpcBuffer _audioRpcBuffer;
+    RpcBuffer _samplesNeededRpcBuffer;
+
+    private string _sharedTextureBufferName;
+    SharedArray<int> _sharedTextureBuffer;
 
     private IInputProvider inputProvider; // this is fixed for now but could be configurable in the future
-    private string _sharedInputMemoryName;
-    CircularBuffer sharedInputBuffer;
+    private string _sharedInputBufferName;
+    CircularBuffer _sharedInputBuffer;
 
     Texture2D _bufferTexture;
     RenderTexture _renderTexture; // We have to maintain a separate rendertexture just for the purpose of flipping the image we get from the emulator
+
+    static int AudioBufferSize = (int)(2*44100*1); // Size of local audio buffer, 1 sec should be plenty
+    [ShowIf("captureEmulatorAudio")]
+    [Tooltip("Higher value means more audio latency. Lower value may cause crackles and pops")]
+    public int audioBufferSurplus = (int)(2*44100*0.05);
+    // ^ This is the actual 'buffer' part - samples that are retained after passing audio to unity.
+    // Smaller surplus -> less latency but more clicks & pops (when bizhawk fails to provide audio in time)
+    // 50ms seems to be an ok compromise (but probably depends on host machine, users can configure if needed)
+    short[] _audioBuffer; // circular buffer (queue) to locally store audio samples accumulated from the emulator
+    int _audioBufferStart, _audioBufferEnd;
+    int _audioSamplesNeeded; // track how many samples unity wants to consume
 
     static readonly string textureCorrectionShaderName = "TextureCorrection";
     Material _textureCorrectionMat;
@@ -85,6 +110,10 @@ public class Emulator : MonoBehaviour
     Material _renderMaterial; // just used for rendering in edit mode
 
     StreamWriter _bizHawkLogWriter;
+
+    // Track how many times we skip audio, log a warning if it's too much
+    float _audioSkipCounter;
+    float _acceptableSkipsPerSecond = 1f;
 
 #if UNITY_EDITOR
     // Set filename fields based on sample directory
@@ -143,27 +172,47 @@ public class Emulator : MonoBehaviour
             Initialize();
         }
 
-        if (sharedTextureBuffer != null && sharedTextureBuffer.Length > 0) {
+        if (_sharedTextureBuffer != null && _sharedTextureBuffer.Length > 0) {
             UpdateTextureFromBuffer();
         } else {
-            if (sharedTextureBuffer != null) {
+            if (_sharedTextureBuffer != null) {
                 // i don't get why but this happens sometimes
-                Debug.LogWarning($"shared buffer length was 0 or less: {sharedTextureBuffer.Length}");
+                Debug.LogWarning($"shared buffer length was 0 or less: {_sharedTextureBuffer.Length}");
             }
             AttemptOpenSharedTextureBuffer();
         }
 
         if (passInputFromUnity) {
             inputProvider.Update();
-            if (sharedInputBuffer != null && sharedInputBuffer.NodeCount > 0) {
+            if (_sharedInputBuffer != null && _sharedInputBuffer.NodeCount > 0) {
                 WriteInputToBuffer();
             } else {
                 AttemptOpenSharedInputBuffer();
             }
         }
 
+        if (captureEmulatorAudio) {
+            if (_audioRpcBuffer != null && _samplesNeededRpcBuffer != null) {
+                // request audio buffer over rpc
+                // Don't want to do this every frame so only do it if more samples are needed
+                if (AudioBufferCount() < audioBufferSurplus) {
+                    CaptureBizhawkAudio();
+                }
+                _audioSkipCounter += _acceptableSkipsPerSecond*Time.deltaTime;
+                if (_audioSkipCounter < 0f) {
+                    if (Time.realtimeSinceStartup > 5f) { // ignore the first few seconds while bizhawk is starting up
+                        Debug.LogWarning("Suffering frequent audio drops (consider increasing audioBufferSurplus value)");
+                    }
+                    _audioSkipCounter = 0f;
+                }
+            } else {
+                AttemptOpenAudioRpcBuffers();
+            }
+        }
+
         if (emuhawk != null && emuhawk.HasExited) {
             Debug.LogWarning("EmuHawk process was unexpectedly killed");
+            Deactivate();
         }
     }
 
@@ -176,6 +225,8 @@ public class Emulator : MonoBehaviour
     void Initialize() {
         _isRunning = false;
 
+        _audioSkipCounter = 0f;
+
         _textureCorrectionMat = new Material(Resources.Load<Shader>(textureCorrectionShaderName));
 
         if (useAttachedRenderer) {
@@ -185,6 +236,15 @@ public class Emulator : MonoBehaviour
                 Debug.LogWarning("No Renderer attached, will not display emulator graphics");
             }
         }
+
+        if (captureEmulatorAudio && GetComponent<AudioSource>() == null) {
+            Debug.LogWarning("captureEmulatorAudio is enabled but no AudioSource is attached, will not play audio");
+        }
+
+        // Init audio buffer
+        _audioBuffer = new short[AudioBufferSize];
+        _audioSamplesNeeded = 0;
+        AudioBufferClear();
 
         // Process filename args
         string configPath;
@@ -216,6 +276,9 @@ public class Emulator : MonoBehaviour
             emuhawk.StartInfo.EnvironmentVariables["LD_LIBRARY_PATH"] = Paths.dllDir;
             emuhawk.StartInfo.EnvironmentVariables["MONO_PATH"] = Paths.dllDir;
             emuhawk.StartInfo.FileName = "/Library/Frameworks/Mono.framework/Versions/Current/Commands/mono";
+            if (showBizhawkGui) {
+                Debug.LogWarning("'Show Bizhawk Gui' is not supported on Mac'");
+            }
             args.Add(exePath);
         } else {
             // Windows
@@ -227,16 +290,29 @@ public class Emulator : MonoBehaviour
 
         if (!showBizhawkGui) args.Add("--headless");
 
-        _sharedTextureMemoryName = "unityhawk-texture-" + GetInstanceID();
-        args.Add($"--write-texture-to-shared-buffer={_sharedTextureMemoryName}");
+        _sharedTextureBufferName = "unityhawk-texture-" + GetInstanceID();
+        args.Add($"--write-texture-to-shared-buffer={_sharedTextureBufferName}");
 
         if (passInputFromUnity) {
-            _sharedInputMemoryName = "unityhawk-input-" + GetInstanceID();
-            args.Add($"--read-input-from-shared-buffer={_sharedInputMemoryName}");
+            _sharedInputBufferName = "unityhawk-input-" + GetInstanceID();
+            args.Add($"--read-input-from-shared-buffer={_sharedInputBufferName}");
 
             // for now use a fixed implementation of IInputProvider but
             // in principle could be configurable - easy to add input events programmatically, etc
             inputProvider = new InputProvider();
+
+            if (runInEditMode) {
+                Debug.LogWarning("passInputFromUnity and runInEditMode are both enabled but input passing will not work in edit mode");
+            }
+        }
+
+        if (captureEmulatorAudio) {
+            _audioRpcBufferName = "unityhawk-audio-" + GetInstanceID();
+            args.Add($"--share-audio-over-rpc-buffer={_audioRpcBufferName}");
+
+            if (runInEditMode) {
+                Debug.LogWarning("captureEmulatorAudio and runInEditMode are both enabled but emulator audio cannot be captured in edit mode");
+            }
         }
 
         if (saveStateFullPath != null) {
@@ -269,10 +345,14 @@ public class Emulator : MonoBehaviour
         emuhawk.Start();
         emuhawk.BeginOutputReadLine();
         emuhawk.BeginErrorReadLine();
+        _isRunning = true;
 
         AttemptOpenSharedTextureBuffer();
         if (passInputFromUnity) {
             AttemptOpenSharedInputBuffer();
+        }
+        if (captureEmulatorAudio) {
+            AttemptOpenAudioRpcBuffers();
         }
 
         _initialized = true;
@@ -287,7 +367,7 @@ public class Emulator : MonoBehaviour
             BizHawk.UnityHawk.InputEvent bie = ConvertInput.ToBizHawk(ie.Value);
             byte[] serialized = Serialize(bie);
             // Debug.Log($"Writing buffer: {ByteArrayToString(serialized)}");
-            int amount = sharedInputBuffer.Write(serialized, timeout: 0);
+            int amount = _sharedInputBuffer.Write(serialized, timeout: 0);
             if (amount <= 0) {
                 Debug.LogWarning("Failed to write key event to shared buffer");
             }
@@ -305,14 +385,56 @@ public class Emulator : MonoBehaviour
         return arr;
     }
 
+    // Request audio samples (since last call) from Bizhawk, and store them into a buffer
+    // to be played back in OnAudioFilterRead
+    // [this really shouldn't be running every Unity frame, totally unnecessary]
+    static readonly ProfilerMarker s_BizhawkRpcGetSamples = new ProfilerMarker("s_BizhawkRpcGetSamples");
+    static readonly ProfilerMarker s_ReceivedBizhawkAudio = new ProfilerMarker("ReceivedBizhawkAudio");
+
+    void CaptureBizhawkAudio() {
+        s_BizhawkRpcGetSamples.Begin();
+
+        RpcResponse response = _audioRpcBuffer.RemoteRequest(new byte[] {}, timeoutMs: 500);
+        s_BizhawkRpcGetSamples.End();
+        if (!response.Success) {
+            // This happens sometimes, especially when audioCaptureFramerate is high, i have no idea why
+            Debug.LogWarning("Rpc call to get audio from BizHawk failed for some reason");
+            return;
+        }
+
+        // convert bytes into short
+        byte[] bytes = response.Data;
+        if (bytes == null || bytes.Length == 0) {
+            // This is fine, sometimes bizhawk just doesn't have any samples ready
+            return;
+        }
+        s_ReceivedBizhawkAudio.Begin();
+        short[] samples = new short[bytes.Length/2];
+        Buffer.BlockCopy(bytes, 0, samples, 0, bytes.Length);
+        // Debug.Log($"Got audio over rpc: {samples.Length} samples");
+        // Debug.Log($"first = {samples[0]}; last = {samples[samples.Length-1]}");
+
+        // Append samples to running audio buffer to be played back later
+        lock (_audioBuffer) { // (lock since OnAudioFilterRead reads from the buffer in a different thread)
+            // [Doing an Array.Copy here instead would probably be way faster but not a big deal]
+            for (int i = 0; i < samples.Length; i++) {
+                if (AudioBufferCount() == _audioBuffer.Length - 1) {
+                    Debug.LogWarning("local audio buffer full, dropping samples");
+                }
+                AudioBufferEnqueue(samples[i]);
+            }
+        }
+        s_ReceivedBizhawkAudio.End();
+    }
+
     void UpdateTextureFromBuffer() {
         // Get the texture buffer and dimensions from BizHawk via the shared memory file
         // protocol has to match MainForm.cs in BizHawk
         // TODO should probably put this protocol in some shared schema file or something idk
-        int[] localTextureBuffer = new int[sharedTextureBuffer.Length];
-        sharedTextureBuffer.CopyTo(localTextureBuffer, 0);
-        int width = localTextureBuffer[sharedTextureBuffer.Length - 2];
-        int height = localTextureBuffer[sharedTextureBuffer.Length - 1];
+        int[] localTextureBuffer = new int[_sharedTextureBuffer.Length];
+        _sharedTextureBuffer.CopyTo(localTextureBuffer, 0);
+        int width = localTextureBuffer[_sharedTextureBuffer.Length - 2];
+        int height = localTextureBuffer[_sharedTextureBuffer.Length - 1];
 
         // Debug.Log($"{width}, {height}");
         // resize textures if necessary
@@ -343,8 +465,22 @@ public class Emulator : MonoBehaviour
             emuhawk.Kill();
         }
         _isRunning = false;
-        if (sharedTextureBuffer != null) sharedTextureBuffer.Close();
-        sharedTextureBuffer = null;
+        if (_sharedTextureBuffer != null) {
+            _sharedTextureBuffer.Close();
+            _sharedTextureBuffer = null;
+        }
+        if (_sharedInputBuffer != null) {
+            _sharedInputBuffer.Close();
+            _sharedInputBuffer = null;
+        }
+        if (_audioRpcBuffer != null) {
+            _audioRpcBuffer.Dispose();
+            _audioRpcBuffer = null;
+        }
+        if (_samplesNeededRpcBuffer != null) {
+            _samplesNeededRpcBuffer.Dispose();
+            _samplesNeededRpcBuffer = null;
+        }
     }
 
     // Init/re-init the textures for rendering the screen - has to be done whenever the source dimensions change (which happens often on PSX for some reason)
@@ -371,9 +507,9 @@ public class Emulator : MonoBehaviour
     }
 
     void AttemptOpenSharedTextureBuffer() {
+        // Debug.Log("AttemptOpenSharedTextureBuffer");
         try {
-            sharedTextureBuffer = new (name: _sharedTextureMemoryName);
-            _isRunning = true; // if we're able to connect to the texture buffer, assume the rom is running ok
+            _sharedTextureBuffer = new (name: _sharedTextureBufferName);
             Debug.Log("Connected to shared texture buffer");
         } catch (FileNotFoundException) {
             // Debug.LogError(e);
@@ -382,8 +518,32 @@ public class Emulator : MonoBehaviour
     
     void AttemptOpenSharedInputBuffer() {
         try {
-            sharedInputBuffer = new (name: _sharedInputMemoryName);
+            _sharedInputBuffer = new (name: _sharedInputBufferName);
             Debug.Log("Connected to shared input buffer");
+        } catch (FileNotFoundException) {
+            // Debug.LogError(e);
+        }
+    }
+
+    void AttemptOpenAudioRpcBuffers() {
+        try {
+            _audioRpcBuffer = new (name: _audioRpcBufferName);
+            _samplesNeededRpcBuffer = new (
+                name: _audioRpcBufferName+"-samples-needed", // [suffix must match UnityHawkSound.cs in BizHawk]
+                (msgId, payload) => {
+                    // This method should get called once after each emulated frame by bizhawk
+                    // Returns int _audioSamplesNeeded as a 4 byte array
+                    int nSamples = _audioSamplesNeeded;
+
+                    // Debug.Log($"GetSamplesNeeded() RPC call: Returning {nSamples}");
+
+                    _audioSamplesNeeded = 0; // Reset audio sample counter each frame
+
+                    byte[] data = BitConverter.GetBytes(nSamples);
+                    return data;
+                }
+            );
+            Debug.Log("Connected to both audio and samplesNeeded rpc buffers");
         } catch (FileNotFoundException) {
             // Debug.LogError(e);
         }
@@ -399,6 +559,62 @@ public class Emulator : MonoBehaviour
                 Debug.LogWarning(msg);
             }
         }
+    }
+
+    // Send audio from the emulator to the AudioSource
+    // (this method gets called by Unity if there is an AudioSource component attached)
+    void OnAudioFilterRead(float[] out_buffer, int channels) {
+        if (!captureEmulatorAudio) return;
+        if (_audioRpcBuffer == null) return;
+        if (channels != 2) {
+            Debug.LogError("AudioSource must be set to 2 channels");
+            return;
+        }
+
+        // track how many samples we wanna request from bizhawk next time
+        _audioSamplesNeeded += out_buffer.Length;
+
+        // copy from the local running audio buffer into unity's buffer, convert short to float
+        lock (_audioBuffer) { // (lock since the buffer gets filled in a different thread)
+            for (int out_i = 0; out_i < out_buffer.Length; out_i++) {
+                if (AudioBufferCount() > 0) {
+                    out_buffer[out_i] = AudioBufferDequeue()/32767f;
+                } else {
+                    // we didn't have enough bizhawk samples to fill the unity audio buffer
+                    // log a warning if this happens frequently enough
+                    _audioSkipCounter -= 1f;
+                    break;
+                }
+            }
+            // Clear buffer except for a small amount of samples leftover (as buffer against skips/pops)
+            // (kind of a dumb way of doing this, could just reset _audioBufferEnd but whatever)
+            while (AudioBufferCount() > audioBufferSurplus) {
+                _ = AudioBufferDequeue();
+            }
+        }
+    }
+
+    // helper methods for circular audio buffer [should probably go in different class]
+    private int AudioBufferCount() {
+        return (_audioBufferEnd - _audioBufferStart + _audioBuffer.Length)%_audioBuffer.Length;
+    }
+    private void AudioBufferClear() {
+        _audioBufferStart = 0;
+        _audioBufferEnd = 0;
+    }
+    // consume a sample from the queue
+    private short AudioBufferDequeue() {
+        short s = _audioBuffer[_audioBufferStart];
+        _audioBufferStart = (_audioBufferStart + 1)%_audioBuffer.Length;
+        return s;
+    }
+    private void AudioBufferEnqueue(short x) {
+        _audioBuffer[_audioBufferEnd] = x;
+        _audioBufferEnd++;
+        _audioBufferEnd %= _audioBuffer.Length;
+    }
+    private short GetAudioBufferAt(int i) {
+        return _audioBuffer[(_audioBufferStart + i)%_audioBuffer.Length];
     }
 }
 }
