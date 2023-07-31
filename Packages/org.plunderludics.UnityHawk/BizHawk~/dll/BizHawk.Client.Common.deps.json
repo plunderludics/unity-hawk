@@ -11,12 +11,12 @@
         "dependencies": {
           "BizHawk.Bizware.BizwareGL": "1.0.0",
           "BizHawk.Emulation.Cores": "1.0.0",
-          "BizHawk.UnityHawk": "1.0.0",
           "DotNetAnalyzers.DocumentationAnalyzers": "1.0.0-beta.59",
           "Menees.Analyzers": "3.0.8",
           "Meziantou.Analyzer": "1.0.707",
           "NETStandard.Library": "2.0.3",
           "Nullable": "1.3.1",
+          "Plunderludics.UnityHawk.SharedBuffers": "1.0.0",
           "SharedMemory": "2.3.2",
           "SharpCompress": "0.30.1",
           "StyleCop.Analyzers": "1.2.0-beta.435",
@@ -288,9 +288,19 @@
           "BizHawk.Emulation.DiscSystem.dll": {}
         }
       },
-      "BizHawk.UnityHawk/1.0.0": {
+      "Plunderludics.UnityHawk/1.0.0": {
         "runtime": {
-          "BizHawk.UnityHawk.dll": {}
+          "Plunderludics.UnityHawk.dll": {}
+        }
+      },
+      "Plunderludics.UnityHawk.SharedBuffers/1.0.0": {
+        "dependencies": {
+          "BizHawk.Emulation.Common": "1.0.0",
+          "Plunderludics.UnityHawk": "1.0.0",
+          "SharedMemory": "2.3.2"
+        },
+        "runtime": {
+          "Plunderludics.UnityHawk.SharedBuffers.dll": {}
         }
       },
       "NLua/1.4.1.0": {
@@ -567,7 +577,12 @@
       "serviceable": false,
       "sha512": ""
     },
-    "BizHawk.UnityHawk/1.0.0": {
+    "Plunderludics.UnityHawk/1.0.0": {
+      "type": "project",
+      "serviceable": false,
+      "sha512": ""
+    },
+    "Plunderludics.UnityHawk.SharedBuffers/1.0.0": {
       "type": "project",
       "serviceable": false,
       "sha512": ""
