@@ -11,6 +11,8 @@
 
  - update BizHawk (to 2.9.1?)
 
+ - demo scene including savestates & lua scripts
+
  - mac / linux support?? may be possible if the unsupported dependencies on mac os are input / grahpics / audio related
   - [have made some progress on this but current blocker is the SharedMemory library seeming to not work on mac]
 

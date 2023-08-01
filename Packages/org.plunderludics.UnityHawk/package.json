@@ -28,5 +28,12 @@
         "com.openupm"
       ]
     }
+  ],
+  "samples": [
+    {
+        "displayName": "Demo",
+        "description": "Demo scene with emulator on tv. (Copy Roms/ directory to StreamingAssets/Roms/ to make this work)",
+        "path": "Samples~/Demo"
+    }
   ]
 }
