@@ -43,7 +43,7 @@ The `Emulator` component spawns `EmuHawk.exe` as a child process which shares gr
 ## Development
 UnityHawk uses a modified fork of BizHawk which is here: https://github.com/plunderludics/bizhawk/tree/unity-hawk
 
-After building that project copy `EmuHawk.exe` and the `dll/` directory into the `BizHawk/` directory within this package.
+After building that project copy `EmuHawk.exe` and the `dll/` directory into the `BizHawk~/` directory within this package.
 
 ## Contact
 If you want help setting up the tool, or you are interested in contributing, feel free to join our discord: https://discord.gg/ATJSh8W8dp. Github issues also welcome.
