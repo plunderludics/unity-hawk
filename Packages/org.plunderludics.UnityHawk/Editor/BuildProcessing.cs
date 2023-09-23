@@ -73,7 +73,11 @@ public class BuildProcessing : IPostprocessBuildWithReport, IPreprocessBuildWith
                         // ignore anything within StreamingAssets/ since those get copied over already by Unity
                         Debug.Log($"Check isSubPath {origFilePath}, {Application.streamingAssetsPath}");
                         if (IsSubPath(Application.streamingAssetsPath, origFilePath)) {
-                            Debug.Log($"Skipping copy for: {origFilePath}");
+                            Debug.Log($"Skipping copy for: {path}");
+                            // Ensure filepath is relative (to StreamingAssets/)
+                            string newFile = GetRelativePath(origFilePath, Application.streamingAssetsPath);
+                            Debug.Log($"Rewrite {path} to {newFile}");
+                            setter(newFile);
                             continue;
                         }
 
@@ -135,8 +139,18 @@ public class BuildProcessing : IPostprocessBuildWithReport, IPreprocessBuildWith
         return Path.Combine(Path.GetDirectoryName(exePath), Path.GetFileNameWithoutExtension(exePath)+"_Data");
     }
 
+    static string GetRelativePath(string filepath, string folder) {
+        Uri pathUri = new Uri(filepath);
+        // Folders must end in a slash
+        if (!folder.EndsWith(Path.DirectorySeparatorChar.ToString())) {
+            folder += Path.DirectorySeparatorChar;
+        }
+        Uri folderUri = new Uri(folder);
+        return Uri.UnescapeDataString(folderUri.MakeRelativeUri(pathUri).ToString().Replace('/', Path.DirectorySeparatorChar));
+    }
+
     // [https://stackoverflow.com/a/74401631]
-    public static bool IsSubPath(string parent, string child)
+    static bool IsSubPath(string parent, string child)
     {
         try
         {
