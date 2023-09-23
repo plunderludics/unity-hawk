@@ -9,6 +9,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Diagnostics;
 using System.Runtime.InteropServices;
+using System.Threading;
 using Debug = UnityEngine.Debug;
 
 #if UNITY_EDITOR
@@ -115,6 +116,13 @@ public class Emulator : MonoBehaviour
     float _audioSkipCounter;
     float _acceptableSkipsPerSecond = 1f;
 
+    [DllImport("user32.dll")]
+    private static extern int SetForegroundWindow(IntPtr hwnd);
+    [DllImport("user32.dll")]
+    private static extern bool ShowWindow(IntPtr hwnd, int nCmdShow);
+    [DllImport("user32.dll")]
+    private static extern IntPtr GetForegroundWindow();
+
 #if UNITY_EDITOR
     // Set filename fields based on sample directory
     [Button(enabledMode: EButtonEnableMode.Editor)]
@@ -170,6 +178,20 @@ public class Emulator : MonoBehaviour
             return;
         } else if (!_initialized) {
             Initialize();
+        }
+
+        // In headless mode, if bizhawk steals focus, steal it back
+        // [Checking this every frame seems to be the only thing that works
+        //  - fortunately for some reason it doesn't steal focus when clicking into a different application]
+        if (!showBizhawkGui && emuhawk != null) {
+            IntPtr unityWindow = Process.GetCurrentProcess().MainWindowHandle;
+            IntPtr bizhawkWindow = emuhawk.MainWindowHandle;
+            IntPtr focusedWindow = GetForegroundWindow();
+            if (focusedWindow != unityWindow) {
+            //    Debug.Log("refocusing unity window");
+                ShowWindow(unityWindow, 5);
+                SetForegroundWindow(unityWindow);
+            }
         }
 
         if (_sharedTextureBuffer != null && _sharedTextureBuffer.Length > 0) {
@@ -288,7 +310,11 @@ public class Emulator : MonoBehaviour
 
         args.Add($"--firmware={GetAssetPath(firmwareDirName)}"); // could make this configurable but idk if that's really useful
 
-        if (!showBizhawkGui) args.Add("--headless");
+        if (!showBizhawkGui) {
+            args.Add("--headless");
+            emuhawk.StartInfo.CreateNoWindow = true;
+            emuhawk.StartInfo.WindowStyle = ProcessWindowStyle.Hidden;
+        }
 
         _sharedTextureBufferName = "unityhawk-texture-" + GetInstanceID();
         args.Add($"--write-texture-to-shared-buffer={_sharedTextureBufferName}");
