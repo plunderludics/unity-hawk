@@ -23,8 +23,8 @@ openupm add org.plunderludics.unityhawk
 ## Usage
 - Add an `Emulator` component to an object with an attached `Renderer`.
 - Put the rom, savestate, config & lua files you want to use into `Assets/StreamingAssets/`
-- If using a platform that requires firmware, put the files inside `StreamingAssets/Firmware/`
-- Set the filenames on the Emulator component (relative to the `StreamingAssets/` directory)
+- If using a platform that requires firmware, put the files inside `Assets/StreamingAssets/Firmware/`
+- Set the filenames on the Emulator component (relative to the StreamingAssets directory)
 - The live emulator graphics can be grabbed in code via the `Emulator.Texture` property.
 
 ## Features
@@ -34,11 +34,14 @@ openupm add org.plunderludics.unityhawk
     - (unfortunately the current implementation creates some latency and sometimes distorted audio, especially with multiple emulators running concurrently)
 
 ## Building and releasing
-- Building (for Windows) should 'just work'; anything within 
-- (You can also use an absolute path if you want to reference files outside of the Unity project - UnityHawk will attempt to copy the necessary files into the build at build time but relying on this is not really recommended)
+- Building (for Windows) should just work; anything you put in the StreamingAssets directory (roms, firmware) will be copied into the build, as well as the necessary Bizhawk dependencies.
+- (You can use absolute filepaths if you want to reference files outside of the StreamingAssets directory - in that case UnityHawk will attempt to copy the files into the build at build time but it's a bit flaky and relying on this is not really recommended)
 
 ## Implementation
 The `Emulator` component spawns `EmuHawk.exe` as a child process which shares graphics and audio with Unity via [shared memory](https://github.com/justinstenning/SharedMemory).
+
+## Attribution
+The included demo scene contains [this shader](https://github.com/yunoda-3DCG/Simple-CRT-Shader), [this model of a TV](https://sketchfab.com/3d-models/crt-tv-9ba4baa106e64319a0b540cf0af5aa9e), and [a rom of Elite for the NES](http://www.iancgbell.clara.net/elite/nes/index.htm).
 
 ## Development
 UnityHawk uses a modified fork of BizHawk which is here: https://github.com/plunderludics/bizhawk/tree/unity-hawk
