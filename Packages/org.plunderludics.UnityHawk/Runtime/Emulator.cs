@@ -78,11 +78,19 @@ public class Emulator : MonoBehaviour
 
     Process emuhawk;
 
+    // Dictionary of registered methods that can be called from bizhawk lua
+    // bytes-to-bytes only rn but some automatic de/serialization for different types would be nice
+    public delegate string Method(string arg);
+    Dictionary<string, Method> _registeredMethods;
+
     private string _audioRpcBufferName;
     // Audio needs two rpc buffers, one for Bizhawk to request 'samples needed' value from Unity,
     // one for Unity to request the audio buffer from Bizhawk
     RpcBuffer _audioRpcBuffer;
     RpcBuffer _samplesNeededRpcBuffer;
+    
+    private string _sendMessageRpcBufferName;
+    RpcBuffer _sendMessageRpcBuffer;
 
     private string _sharedTextureBufferName;
     SharedArray<int> _sharedTextureBuffer;
@@ -145,8 +153,16 @@ public class Emulator : MonoBehaviour
         }
     }
 
+    // Register a method that can be called via `unityhawk.callmethod('MethodName')` in BizHawk lua
+    public void RegisterMethod(string methodName, Method method)
+    {
+        _registeredMethods.Add(methodName, method);
+    }
+
     void OnEnable()
     {
+        _registeredMethods = new Dictionary<string, Method>();
+
         _initialized = false;
         if (runInEditMode || Application.isPlaying) {
             Initialize();
@@ -319,6 +335,9 @@ public class Emulator : MonoBehaviour
         _sharedTextureBufferName = "unityhawk-texture-" + GetInstanceID();
         args.Add($"--write-texture-to-shared-buffer={_sharedTextureBufferName}");
 
+        _sendMessageRpcBufferName = "unityhawk-callmethod-" + GetInstanceID();
+        args.Add($"--unity-call-method-buffer={_sendMessageRpcBufferName}");
+
         if (passInputFromUnity) {
             _sharedInputBufferName = "unityhawk-input-" + GetInstanceID();
             args.Add($"--read-input-from-shared-buffer={_sharedInputBufferName}");
@@ -374,6 +393,7 @@ public class Emulator : MonoBehaviour
         _isRunning = true;
 
         AttemptOpenSharedTextureBuffer();
+        AttemptOpenSendMessageRpcBuffer();
         if (passInputFromUnity) {
             AttemptOpenSharedInputBuffer();
         }
@@ -400,7 +420,7 @@ public class Emulator : MonoBehaviour
         }
     }
 
-    private byte [] Serialize(object obj)
+    private byte[] Serialize(object obj)
     {
         int len = Marshal.SizeOf(obj);
         byte [] arr = new byte[len];
@@ -546,6 +566,54 @@ public class Emulator : MonoBehaviour
         try {
             _sharedInputBuffer = new (name: _sharedInputBufferName);
             Debug.Log("Connected to shared input buffer");
+        } catch (FileNotFoundException) {
+            // Debug.LogError(e);
+        }
+    }
+
+    void AttemptOpenSendMessageRpcBuffer() {
+        try {
+            _sendMessageRpcBuffer = new (
+                name: _sendMessageRpcBufferName,
+                (msgId, payload) => {
+                    // Debug.Log($"sendmessage rpc request {string.Join(", ", payload)}");
+                    byte[] returnData;
+
+                    // deserialize payload into method name and args (separated by 0)
+                    int methodNameLength = System.Array.IndexOf(payload, (byte)0);
+                    byte[] methodNameBytes = new byte[methodNameLength];
+                    byte[] argBytes = new byte[payload.Length - methodNameLength - 1];
+                    Array.Copy(
+                        sourceArray: payload,
+                        sourceIndex: 0,
+                        destinationArray: methodNameBytes,
+                        destinationIndex: 0,
+                        length: methodNameLength);
+                    Array.Copy(
+                        sourceArray: payload,
+                        sourceIndex: methodNameLength + 1,
+                        destinationArray: argBytes,
+                        destinationIndex: 0,
+                        length: argBytes.Length);
+
+                    string methodName = System.Text.Encoding.ASCII.GetString(methodNameBytes);
+                    string argString = System.Text.Encoding.ASCII.GetString(argBytes);
+                    
+                    Debug.Log(methodName);
+
+                    // call corresponding method
+                    if (_registeredMethods.ContainsKey(methodName)) {
+                        string returnString = _registeredMethods[methodName](argString);
+                        returnData = System.Text.Encoding.ASCII.GetBytes(returnString);
+                        Debug.Log($"Calling registered method {methodName}");
+                    } else {
+                        Debug.LogWarning($"Tried to call a method named {methodName} from lua but none was registered");
+                        returnData = null;
+                    }
+                    return returnData;
+                }
+            );
+            Debug.Log("Connected to sendmessage rpc buffer");
         } catch (FileNotFoundException) {
             // Debug.LogError(e);
         }

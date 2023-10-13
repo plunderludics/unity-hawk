@@ -4,6 +4,8 @@ function main()
     while true do
         -- print("running a frame");
         emu.yield() -- frameadvance() also works
+        local x = unityhawk.callmethod("DoSomething", "hello");
+        print(x);
         -- console.clear();
         -- print("test lua");
         -- client.togglepause();
