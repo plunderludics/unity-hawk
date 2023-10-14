@@ -160,11 +160,12 @@ public class Emulator : MonoBehaviour
             _registeredMethods = new Dictionary<string, Method>();
             // This will never get cleared when running in edit mode but maybe that's fine
         }
-        _registeredMethods.Add(methodName, method);
+        _registeredMethods[methodName] = method;
     }
 
     void OnEnable()
     {
+        Debug.Log("Emulator OnEnable");
         _initialized = false;
         if (runInEditMode || Application.isPlaying) {
             Initialize();
@@ -257,12 +258,14 @@ public class Emulator : MonoBehaviour
     }
 
     void OnDisable() {
+        Debug.Log("Emulator OnDisable");
         if (_initialized) {
             Deactivate();
         }
     }
 
     void Initialize() {
+        Debug.Log("Emulator Initialize");
         _isRunning = false;
 
         _audioSkipCounter = 0f;
@@ -334,14 +337,17 @@ public class Emulator : MonoBehaviour
             emuhawk.StartInfo.WindowStyle = ProcessWindowStyle.Hidden;
         }
 
-        _sharedTextureBufferName = "unityhawk-texture-" + GetInstanceID();
+        System.Random random = new System.Random();
+        int randomNumber = random.Next();
+
+        _sharedTextureBufferName = $"unityhawk-texture-{randomNumber}";
         args.Add($"--write-texture-to-shared-buffer={_sharedTextureBufferName}");
 
-        _callMethodRpcBufferName = "unityhawk-callmethod-" + GetInstanceID();
+        _callMethodRpcBufferName = $"unityhawk-callmethod-{randomNumber}";
         args.Add($"--unity-call-method-buffer={_callMethodRpcBufferName}");
 
         if (passInputFromUnity) {
-            _sharedInputBufferName = "unityhawk-input-" + GetInstanceID();
+            _sharedInputBufferName = $"unityhawk-input-{randomNumber}";
             args.Add($"--read-input-from-shared-buffer={_sharedInputBufferName}");
 
             // for now use a fixed implementation of IInputProvider but
@@ -354,7 +360,7 @@ public class Emulator : MonoBehaviour
         }
 
         if (captureEmulatorAudio) {
-            _audioRpcBufferName = "unityhawk-audio-" + GetInstanceID();
+            _audioRpcBufferName = $"unityhawk-audio-{randomNumber}";
             args.Add($"--share-audio-over-rpc-buffer={_audioRpcBufferName}");
 
             if (runInEditMode) {
@@ -404,6 +410,10 @@ public class Emulator : MonoBehaviour
         }
 
         _initialized = true;
+    }
+
+    string GetUniqueId() {
+        return "" + GetInstanceID();
     }
 
     void WriteInputToBuffer() {
@@ -504,6 +514,8 @@ public class Emulator : MonoBehaviour
     }
 
     void Deactivate() {
+        Debug.Log("Emulator Deactivate");
+
         _initialized = false;
         if (_bizHawkLogWriter != null) {
             _bizHawkLogWriter.Close();
@@ -522,6 +534,7 @@ public class Emulator : MonoBehaviour
             _sharedInputBuffer = null;
         }
         if (_audioRpcBuffer != null) {
+            Debug.Log("Dispose audio buffer");
             _audioRpcBuffer.Dispose();
             _audioRpcBuffer = null;
         }
