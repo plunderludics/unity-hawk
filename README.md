@@ -28,6 +28,7 @@ openupm add org.plunderludics.unityhawk
 - The live emulator graphics can be grabbed in code via the `Emulator.Texture` property.
 
 ## Features
+- Within a BizHawk Lua script, you can use the `unityhawk.methodcall(methodName, argString)` method to send and receive information from Unity. The method must be registered on the Unity side using `Emulator.RegisterMethod(string methodName, Method)`. See `RegisterMethodExample` in the `Demo` sample for a brief example.
 - Enable 'Send Input To Bizhawk' to send keyboard input from Unity to Bizhawk (gamepad input not supported yet). If this isn't enabled Bizhawk will get input directly from the operating system.
 - Enable 'Show Bizhawk Gui' to show the native Bizhawk window; useful for doing plunderludics development (finding save states, tweaking config & scripts, etc) without having to leave Unity
 - \[experimental\] Enable 'Capture Emulator Audio' to route emulator audio to an AudioSource, allowing you to use unity's positional audio system or add audio effects
