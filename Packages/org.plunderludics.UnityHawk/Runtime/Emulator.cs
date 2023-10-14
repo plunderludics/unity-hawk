@@ -9,6 +9,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Diagnostics;
 using System.Runtime.InteropServices;
+using System.Threading;
 using Debug = UnityEngine.Debug;
 
 #if UNITY_EDITOR
@@ -77,11 +78,19 @@ public class Emulator : MonoBehaviour
 
     Process emuhawk;
 
+    // Dictionary of registered methods that can be called from bizhawk lua
+    // bytes-to-bytes only rn but some automatic de/serialization for different types would be nice
+    public delegate string Method(string arg);
+    Dictionary<string, Method> _registeredMethods;
+
     private string _audioRpcBufferName;
     // Audio needs two rpc buffers, one for Bizhawk to request 'samples needed' value from Unity,
     // one for Unity to request the audio buffer from Bizhawk
     RpcBuffer _audioRpcBuffer;
     RpcBuffer _samplesNeededRpcBuffer;
+    
+    private string _callMethodRpcBufferName;
+    RpcBuffer _callMethodRpcBuffer;
 
     private string _sharedTextureBufferName;
     SharedArray<int> _sharedTextureBuffer;
@@ -115,6 +124,13 @@ public class Emulator : MonoBehaviour
     float _audioSkipCounter;
     float _acceptableSkipsPerSecond = 1f;
 
+    [DllImport("user32.dll")]
+    private static extern int SetForegroundWindow(IntPtr hwnd);
+    [DllImport("user32.dll")]
+    private static extern bool ShowWindow(IntPtr hwnd, int nCmdShow);
+    [DllImport("user32.dll")]
+    private static extern IntPtr GetForegroundWindow();
+
 #if UNITY_EDITOR
     // Set filename fields based on sample directory
     [Button(enabledMode: EButtonEnableMode.Editor)]
@@ -135,6 +151,16 @@ public class Emulator : MonoBehaviour
         } else {
             return Path.Combine(Application.streamingAssetsPath, path); // Load relative to StreamingAssets/
         }
+    }
+
+    // Register a method that can be called via `unityhawk.callmethod('MethodName')` in BizHawk lua
+    public void RegisterMethod(string methodName, Method method)
+    {
+        if (_registeredMethods == null) {
+            _registeredMethods = new Dictionary<string, Method>();
+            // This will never get cleared when running in edit mode but maybe that's fine
+        }
+        _registeredMethods.Add(methodName, method);
     }
 
     void OnEnable()
@@ -170,6 +196,20 @@ public class Emulator : MonoBehaviour
             return;
         } else if (!_initialized) {
             Initialize();
+        }
+
+        // In headless mode, if bizhawk steals focus, steal it back
+        // [Checking this every frame seems to be the only thing that works
+        //  - fortunately for some reason it doesn't steal focus when clicking into a different application]
+        if (!showBizhawkGui && emuhawk != null) {
+            IntPtr unityWindow = Process.GetCurrentProcess().MainWindowHandle;
+            IntPtr bizhawkWindow = emuhawk.MainWindowHandle;
+            IntPtr focusedWindow = GetForegroundWindow();
+            if (focusedWindow != unityWindow) {
+            //    Debug.Log("refocusing unity window");
+                ShowWindow(unityWindow, 5);
+                SetForegroundWindow(unityWindow);
+            }
         }
 
         if (_sharedTextureBuffer != null && _sharedTextureBuffer.Length > 0) {
@@ -288,10 +328,17 @@ public class Emulator : MonoBehaviour
 
         args.Add($"--firmware={GetAssetPath(firmwareDirName)}"); // could make this configurable but idk if that's really useful
 
-        if (!showBizhawkGui) args.Add("--headless");
+        if (!showBizhawkGui) {
+            args.Add("--headless");
+            emuhawk.StartInfo.CreateNoWindow = true;
+            emuhawk.StartInfo.WindowStyle = ProcessWindowStyle.Hidden;
+        }
 
         _sharedTextureBufferName = "unityhawk-texture-" + GetInstanceID();
         args.Add($"--write-texture-to-shared-buffer={_sharedTextureBufferName}");
+
+        _callMethodRpcBufferName = "unityhawk-callmethod-" + GetInstanceID();
+        args.Add($"--unity-call-method-buffer={_callMethodRpcBufferName}");
 
         if (passInputFromUnity) {
             _sharedInputBufferName = "unityhawk-input-" + GetInstanceID();
@@ -348,6 +395,7 @@ public class Emulator : MonoBehaviour
         _isRunning = true;
 
         AttemptOpenSharedTextureBuffer();
+        AttemptOpenCallMethodRpcBuffer();
         if (passInputFromUnity) {
             AttemptOpenSharedInputBuffer();
         }
@@ -374,7 +422,7 @@ public class Emulator : MonoBehaviour
         }
     }
 
-    private byte [] Serialize(object obj)
+    private byte[] Serialize(object obj)
     {
         int len = Marshal.SizeOf(obj);
         byte [] arr = new byte[len];
@@ -481,6 +529,10 @@ public class Emulator : MonoBehaviour
             _samplesNeededRpcBuffer.Dispose();
             _samplesNeededRpcBuffer = null;
         }
+        if (_callMethodRpcBuffer != null) {
+            _callMethodRpcBuffer.Dispose();
+            _callMethodRpcBuffer = null;
+        }
     }
 
     // Init/re-init the textures for rendering the screen - has to be done whenever the source dimensions change (which happens often on PSX for some reason)
@@ -520,6 +572,52 @@ public class Emulator : MonoBehaviour
         try {
             _sharedInputBuffer = new (name: _sharedInputBufferName);
             Debug.Log("Connected to shared input buffer");
+        } catch (FileNotFoundException) {
+            // Debug.LogError(e);
+        }
+    }
+
+    void AttemptOpenCallMethodRpcBuffer() {
+        try {
+            _callMethodRpcBuffer = new (
+                name: _callMethodRpcBufferName,
+                (msgId, payload) => {
+                    // Debug.Log($"callmethod rpc request {string.Join(", ", payload)}");
+                    byte[] returnData;
+
+                    // deserialize payload into method name and args (separated by 0)
+                    int methodNameLength = System.Array.IndexOf(payload, (byte)0);
+                    byte[] methodNameBytes = new byte[methodNameLength];
+                    byte[] argBytes = new byte[payload.Length - methodNameLength - 1];
+                    Array.Copy(
+                        sourceArray: payload,
+                        sourceIndex: 0,
+                        destinationArray: methodNameBytes,
+                        destinationIndex: 0,
+                        length: methodNameLength);
+                    Array.Copy(
+                        sourceArray: payload,
+                        sourceIndex: methodNameLength + 1,
+                        destinationArray: argBytes,
+                        destinationIndex: 0,
+                        length: argBytes.Length);
+
+                    string methodName = System.Text.Encoding.ASCII.GetString(methodNameBytes);
+                    string argString = System.Text.Encoding.ASCII.GetString(argBytes);
+
+                    // call corresponding method
+                    if (_registeredMethods != null && _registeredMethods.ContainsKey(methodName)) {
+                        string returnString = _registeredMethods[methodName](argString);
+                        returnData = System.Text.Encoding.ASCII.GetBytes(returnString);
+                        // Debug.Log($"Calling registered method {methodName}");
+                    } else {
+                        Debug.LogWarning($"Tried to call a method named {methodName} from lua but none was registered");
+                        returnData = null;
+                    }
+                    return returnData;
+                }
+            );
+            Debug.Log("Connected to callmethod rpc buffer");
         } catch (FileNotFoundException) {
             // Debug.LogError(e);
         }
