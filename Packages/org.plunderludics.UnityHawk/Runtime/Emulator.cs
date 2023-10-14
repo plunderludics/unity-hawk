@@ -89,8 +89,8 @@ public class Emulator : MonoBehaviour
     RpcBuffer _audioRpcBuffer;
     RpcBuffer _samplesNeededRpcBuffer;
     
-    private string _sendMessageRpcBufferName;
-    RpcBuffer _sendMessageRpcBuffer;
+    private string _callMethodRpcBufferName;
+    RpcBuffer _callMethodRpcBuffer;
 
     private string _sharedTextureBufferName;
     SharedArray<int> _sharedTextureBuffer;
@@ -335,8 +335,8 @@ public class Emulator : MonoBehaviour
         _sharedTextureBufferName = "unityhawk-texture-" + GetInstanceID();
         args.Add($"--write-texture-to-shared-buffer={_sharedTextureBufferName}");
 
-        _sendMessageRpcBufferName = "unityhawk-callmethod-" + GetInstanceID();
-        args.Add($"--unity-call-method-buffer={_sendMessageRpcBufferName}");
+        _callMethodRpcBufferName = "unityhawk-callmethod-" + GetInstanceID();
+        args.Add($"--unity-call-method-buffer={_callMethodRpcBufferName}");
 
         if (passInputFromUnity) {
             _sharedInputBufferName = "unityhawk-input-" + GetInstanceID();
@@ -393,7 +393,7 @@ public class Emulator : MonoBehaviour
         _isRunning = true;
 
         AttemptOpenSharedTextureBuffer();
-        AttemptOpenSendMessageRpcBuffer();
+        AttemptOpenCallMethodRpcBuffer();
         if (passInputFromUnity) {
             AttemptOpenSharedInputBuffer();
         }
@@ -571,12 +571,12 @@ public class Emulator : MonoBehaviour
         }
     }
 
-    void AttemptOpenSendMessageRpcBuffer() {
+    void AttemptOpenCallMethodRpcBuffer() {
         try {
-            _sendMessageRpcBuffer = new (
-                name: _sendMessageRpcBufferName,
+            _callMethodRpcBuffer = new (
+                name: _callMethodRpcBufferName,
                 (msgId, payload) => {
-                    // Debug.Log($"sendmessage rpc request {string.Join(", ", payload)}");
+                    // Debug.Log($"callmethod rpc request {string.Join(", ", payload)}");
                     byte[] returnData;
 
                     // deserialize payload into method name and args (separated by 0)
@@ -613,7 +613,7 @@ public class Emulator : MonoBehaviour
                     return returnData;
                 }
             );
-            Debug.Log("Connected to sendmessage rpc buffer");
+            Debug.Log("Connected to callmethod rpc buffer");
         } catch (FileNotFoundException) {
             // Debug.LogError(e);
         }
