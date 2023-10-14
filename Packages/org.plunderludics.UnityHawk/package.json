@@ -32,7 +32,7 @@
   "samples": [
     {
         "displayName": "Demo",
-        "description": "Demo scene with emulator on tv. (Copy Roms/ directory to StreamingAssets/Roms/ to make this work)",
+        "description": "Demo scene with emulator on tv. (Copy contents of Demo/StreamingAssets/ into the root Assets/StreamingAssets directory to make this work)",
         "path": "Samples~/Demo"
     }
   ]

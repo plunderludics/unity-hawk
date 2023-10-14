@@ -156,13 +156,15 @@ public class Emulator : MonoBehaviour
     // Register a method that can be called via `unityhawk.callmethod('MethodName')` in BizHawk lua
     public void RegisterMethod(string methodName, Method method)
     {
+        if (_registeredMethods == null) {
+            _registeredMethods = new Dictionary<string, Method>();
+            // This will never get cleared when running in edit mode but maybe that's fine
+        }
         _registeredMethods.Add(methodName, method);
     }
 
     void OnEnable()
     {
-        _registeredMethods = new Dictionary<string, Method>();
-
         _initialized = false;
         if (runInEditMode || Application.isPlaying) {
             Initialize();
@@ -527,6 +529,10 @@ public class Emulator : MonoBehaviour
             _samplesNeededRpcBuffer.Dispose();
             _samplesNeededRpcBuffer = null;
         }
+        if (_callMethodRpcBuffer != null) {
+            _callMethodRpcBuffer.Dispose();
+            _callMethodRpcBuffer = null;
+        }
     }
 
     // Init/re-init the textures for rendering the screen - has to be done whenever the source dimensions change (which happens often on PSX for some reason)
@@ -598,14 +604,12 @@ public class Emulator : MonoBehaviour
 
                     string methodName = System.Text.Encoding.ASCII.GetString(methodNameBytes);
                     string argString = System.Text.Encoding.ASCII.GetString(argBytes);
-                    
-                    Debug.Log(methodName);
 
                     // call corresponding method
-                    if (_registeredMethods.ContainsKey(methodName)) {
+                    if (_registeredMethods != null && _registeredMethods.ContainsKey(methodName)) {
                         string returnString = _registeredMethods[methodName](argString);
                         returnData = System.Text.Encoding.ASCII.GetBytes(returnString);
-                        Debug.Log($"Calling registered method {methodName}");
+                        // Debug.Log($"Calling registered method {methodName}");
                     } else {
                         Debug.LogWarning($"Tried to call a method named {methodName} from lua but none was registered");
                         returnData = null;

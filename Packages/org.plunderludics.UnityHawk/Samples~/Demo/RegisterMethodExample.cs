@@ -3,11 +3,12 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityHawk;
 
+[ExecuteInEditMode]
 public class RegisterMethodExample : MonoBehaviour
 {
     public Emulator e;
     // Start is called before the first frame update
-    void Start()
+    void OnEnable()
     {
         e.RegisterMethod("DoSomething", DoSomething);
     }
