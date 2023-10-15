@@ -26,7 +26,7 @@ openupm add org.plunderludics.unityhawk
 - If using a platform that requires firmware, put the files inside `Assets/StreamingAssets/Firmware/`
 - Set the filenames on the Emulator component (relative to the StreamingAssets directory)
 - The live emulator graphics can be grabbed in code via the `Emulator.Texture` property.
-- Within a BizHawk Lua script, you can use the `unityhawk.methodcall(methodName, argString)` method to send and receive information from Unity. The method must be registered on the Unity side using `Emulator.RegisterMethod(string methodName, Method)`. See `RegisterMethodExample` in the `Demo` sample for a brief example.
+- Within a BizHawk Lua script, you can use the `unityhawk.methodcall(methodName, argString)` method to send and receive information from Unity. The method must be registered on the Unity side using `Emulator.RegisterMethod`. See `test.lua` and `RegisterMethodExample` in the `Demo` sample for a brief example.
 
 ## Features
 - Enable 'Send Input To Bizhawk' to send keyboard input from Unity to Bizhawk (gamepad input not supported yet). If this isn't enabled Bizhawk will get input directly from the operating system.

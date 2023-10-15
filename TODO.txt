@@ -28,7 +28,7 @@
 
  - option to reduce build size by including savestates but not roms (possible for samples that never need to load from disk)
 
- - bug: during 'run in edit mode', hitting undo seems to restart the emulator, not sure why
+ - fix annoying behavior where emulator resets when you hit ctrl-z in editor [why does unity call OnDisable + OnEnable whenever you undo in the editor? seems to be not documented anywhere]
 
  - better process for building and updating the upm branch
 

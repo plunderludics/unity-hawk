@@ -41,6 +41,13 @@ public class Emulator : MonoBehaviour
     [HideIf("useAttachedRenderer")]
     public Renderer targetRenderer;
 
+    [Tooltip("rather to write to an existing render texture")]
+    public bool writeToTexture = false;
+    [ShowIf("writeToTexture")]
+    [Tooltip("the render texture to write to")]
+    public RenderTexture renderTexture;
+    // We have to maintain a separate rendertexture just for the purpose of flipping the image we get from the emulator
+
     [Tooltip("If true, Unity will pass keyboard input to the emulator. If false, BizHawk will get input directly from the OS")]
     public bool passInputFromUnity = true;
     [Tooltip("If true, audio will be played via an attached AudioSource (may induce some latency). If false, BizHawk will play audio directly to the OS")]
@@ -73,34 +80,33 @@ public class Emulator : MonoBehaviour
     private RenderTextureFormat renderTextureFormat = RenderTextureFormat.BGRA32;
 
     // Interface for other scripts to use
-    public RenderTexture Texture => _renderTexture;
-    public bool IsRunning => _isRunning; // is the emuhawk process running (best guess, might be wrong)
+    public RenderTexture Texture => renderTexture;
+    public bool IsRunning => _isRunning; // is the _emuhawk process running (best guess, might be wrong)
 
-    Process emuhawk;
+    Process _emuhawk;
 
     // Dictionary of registered methods that can be called from bizhawk lua
     // bytes-to-bytes only rn but some automatic de/serialization for different types would be nice
     public delegate string Method(string arg);
     Dictionary<string, Method> _registeredMethods;
 
-    private string _audioRpcBufferName;
+    string _audioRpcBufferName;
     // Audio needs two rpc buffers, one for Bizhawk to request 'samples needed' value from Unity,
     // one for Unity to request the audio buffer from Bizhawk
     RpcBuffer _audioRpcBuffer;
     RpcBuffer _samplesNeededRpcBuffer;
     
-    private string _callMethodRpcBufferName;
+    string _callMethodRpcBufferName;
     RpcBuffer _callMethodRpcBuffer;
 
-    private string _sharedTextureBufferName;
+    string _sharedTextureBufferName;
     SharedArray<int> _sharedTextureBuffer;
 
-    private IInputProvider inputProvider; // this is fixed for now but could be configurable in the future
-    private string _sharedInputBufferName;
+    IInputProvider inputProvider; // this is fixed for now but could be configurable in the future
+    string _sharedInputBufferName;
     CircularBuffer _sharedInputBuffer;
 
     Texture2D _bufferTexture;
-    RenderTexture _renderTexture; // We have to maintain a separate rendertexture just for the purpose of flipping the image we get from the emulator
 
     static int AudioBufferSize = (int)(2*44100*1); // Size of local audio buffer, 1 sec should be plenty
     [ShowIf("captureEmulatorAudio")]
@@ -160,11 +166,12 @@ public class Emulator : MonoBehaviour
             _registeredMethods = new Dictionary<string, Method>();
             // This will never get cleared when running in edit mode but maybe that's fine
         }
-        _registeredMethods.Add(methodName, method);
+        _registeredMethods[methodName] = method;
     }
 
     void OnEnable()
     {
+        Debug.Log("Emulator OnEnable");
         _initialized = false;
         if (runInEditMode || Application.isPlaying) {
             Initialize();
@@ -201,9 +208,9 @@ public class Emulator : MonoBehaviour
         // In headless mode, if bizhawk steals focus, steal it back
         // [Checking this every frame seems to be the only thing that works
         //  - fortunately for some reason it doesn't steal focus when clicking into a different application]
-        if (!showBizhawkGui && emuhawk != null) {
+        if (!showBizhawkGui && _emuhawk != null) {
             IntPtr unityWindow = Process.GetCurrentProcess().MainWindowHandle;
-            IntPtr bizhawkWindow = emuhawk.MainWindowHandle;
+            IntPtr bizhawkWindow = _emuhawk.MainWindowHandle;
             IntPtr focusedWindow = GetForegroundWindow();
             if (focusedWindow != unityWindow) {
             //    Debug.Log("refocusing unity window");
@@ -250,19 +257,21 @@ public class Emulator : MonoBehaviour
             }
         }
 
-        if (emuhawk != null && emuhawk.HasExited) {
+        if (_emuhawk != null && _emuhawk.HasExited) {
             Debug.LogWarning("EmuHawk process was unexpectedly killed");
             Deactivate();
         }
     }
 
     void OnDisable() {
+        Debug.Log("Emulator OnDisable");
         if (_initialized) {
             Deactivate();
         }
     }
 
     void Initialize() {
+        Debug.Log("Emulator Initialize");
         _isRunning = false;
 
         _audioSkipCounter = 0f;
@@ -273,6 +282,7 @@ public class Emulator : MonoBehaviour
             // Default to the attached Renderer component, if there is one
             targetRenderer = GetComponent<Renderer>();
             if (!targetRenderer) {
+                
                 Debug.LogWarning("No Renderer attached, will not display emulator graphics");
             }
         }
@@ -306,42 +316,45 @@ public class Emulator : MonoBehaviour
             saveStateFullPath = GetAssetPath(saveStateFileName);
         }
 
-        // start emuhawk.exe w args
+        // start _emuhawk.exe w args
         string exePath = Path.GetFullPath(Paths.emuhawkExePath);
-        emuhawk = new Process();
-        emuhawk.StartInfo.UseShellExecute = false;
-        var args = emuhawk.StartInfo.ArgumentList;
+        _emuhawk = new Process();
+        _emuhawk.StartInfo.UseShellExecute = false;
+        var args = _emuhawk.StartInfo.ArgumentList;
         if (_targetMac) {
             // Doesn't really work yet, need to make some more changes in the bizhawk executable
-            emuhawk.StartInfo.EnvironmentVariables["LD_LIBRARY_PATH"] = Paths.dllDir;
-            emuhawk.StartInfo.EnvironmentVariables["MONO_PATH"] = Paths.dllDir;
-            emuhawk.StartInfo.FileName = "/Library/Frameworks/Mono.framework/Versions/Current/Commands/mono";
+            _emuhawk.StartInfo.EnvironmentVariables["LD_LIBRARY_PATH"] = Paths.dllDir;
+            _emuhawk.StartInfo.EnvironmentVariables["MONO_PATH"] = Paths.dllDir;
+            _emuhawk.StartInfo.FileName = "/Library/Frameworks/Mono.framework/Versions/Current/Commands/mono";
             if (showBizhawkGui) {
                 Debug.LogWarning("'Show Bizhawk Gui' is not supported on Mac'");
             }
             args.Add(exePath);
         } else {
             // Windows
-            emuhawk.StartInfo.FileName = exePath;
-            emuhawk.StartInfo.UseShellExecute = false;
+            _emuhawk.StartInfo.FileName = exePath;
+            _emuhawk.StartInfo.UseShellExecute = false;
         }
 
         args.Add($"--firmware={GetAssetPath(firmwareDirName)}"); // could make this configurable but idk if that's really useful
 
         if (!showBizhawkGui) {
             args.Add("--headless");
-            emuhawk.StartInfo.CreateNoWindow = true;
-            emuhawk.StartInfo.WindowStyle = ProcessWindowStyle.Hidden;
+            _emuhawk.StartInfo.CreateNoWindow = true;
+            _emuhawk.StartInfo.WindowStyle = ProcessWindowStyle.Hidden;
         }
 
-        _sharedTextureBufferName = "unityhawk-texture-" + GetInstanceID();
+        System.Random random = new System.Random();
+        int randomNumber = random.Next();
+
+        _sharedTextureBufferName = $"unityhawk-texture-{randomNumber}";
         args.Add($"--write-texture-to-shared-buffer={_sharedTextureBufferName}");
 
-        _callMethodRpcBufferName = "unityhawk-callmethod-" + GetInstanceID();
+        _callMethodRpcBufferName = $"unityhawk-callmethod-{randomNumber}";
         args.Add($"--unity-call-method-buffer={_callMethodRpcBufferName}");
 
         if (passInputFromUnity) {
-            _sharedInputBufferName = "unityhawk-input-" + GetInstanceID();
+            _sharedInputBufferName = $"unityhawk-input-{randomNumber}";
             args.Add($"--read-input-from-shared-buffer={_sharedInputBufferName}");
 
             // for now use a fixed implementation of IInputProvider but
@@ -354,7 +367,7 @@ public class Emulator : MonoBehaviour
         }
 
         if (captureEmulatorAudio) {
-            _audioRpcBufferName = "unityhawk-audio-" + GetInstanceID();
+            _audioRpcBufferName = $"unityhawk-audio-{randomNumber}";
             args.Add($"--share-audio-over-rpc-buffer={_audioRpcBufferName}");
 
             if (runInEditMode) {
@@ -382,16 +395,16 @@ public class Emulator : MonoBehaviour
             if (_bizHawkLogWriter != null) _bizHawkLogWriter.Dispose();
             _bizHawkLogWriter = new(bizhawkLogLocation);
 
-            emuhawk.StartInfo.RedirectStandardOutput = true;
-            emuhawk.StartInfo.RedirectStandardError = true;
-            emuhawk.OutputDataReceived += new DataReceivedEventHandler((sender, e) => LogBizHawk(sender, e, false));
-            emuhawk.ErrorDataReceived += new DataReceivedEventHandler((sender, e) => LogBizHawk(sender, e, true));
+            _emuhawk.StartInfo.RedirectStandardOutput = true;
+            _emuhawk.StartInfo.RedirectStandardError = true;
+            _emuhawk.OutputDataReceived += new DataReceivedEventHandler((sender, e) => LogBizHawk(sender, e, false));
+            _emuhawk.ErrorDataReceived += new DataReceivedEventHandler((sender, e) => LogBizHawk(sender, e, true));
         }
 
         Debug.Log($"{exePath} {string.Join(' ', args)}");
-        emuhawk.Start();
-        emuhawk.BeginOutputReadLine();
-        emuhawk.BeginErrorReadLine();
+        _emuhawk.Start();
+        _emuhawk.BeginOutputReadLine();
+        _emuhawk.BeginErrorReadLine();
         _isRunning = true;
 
         AttemptOpenSharedTextureBuffer();
@@ -404,6 +417,10 @@ public class Emulator : MonoBehaviour
         }
 
         _initialized = true;
+    }
+
+    string GetUniqueId() {
+        return "" + GetInstanceID();
     }
 
     void WriteInputToBuffer() {
@@ -488,7 +505,7 @@ public class Emulator : MonoBehaviour
         // resize textures if necessary
         if ((width != 0 && height != 0)
         && (_bufferTexture == null
-        || _renderTexture == null
+        || renderTexture == null
         ||  _bufferTexture.width != width
         ||  _bufferTexture.height != height)) {
             InitTextures(width, height);
@@ -499,18 +516,20 @@ public class Emulator : MonoBehaviour
             _bufferTexture.Apply(/*updateMipmaps: false*/);
 
             // Correct issues with the texture by applying a shader and blitting to a separate render texture:
-            Graphics.Blit(_bufferTexture, _renderTexture, _textureCorrectionMat, 0);
+            Graphics.Blit(_bufferTexture, renderTexture, _textureCorrectionMat, 0);
         }
     }
 
     void Deactivate() {
+        Debug.Log("Emulator Deactivate");
+
         _initialized = false;
         if (_bizHawkLogWriter != null) {
             _bizHawkLogWriter.Close();
         }
-        if (emuhawk != null && !emuhawk.HasExited) {
-            // Kill the emuhawk process
-            emuhawk.Kill();
+        if (_emuhawk != null && !_emuhawk.HasExited) {
+            // Kill the _emuhawk process
+            _emuhawk.Kill();
         }
         _isRunning = false;
         if (_sharedTextureBuffer != null) {
@@ -522,6 +541,7 @@ public class Emulator : MonoBehaviour
             _sharedInputBuffer = null;
         }
         if (_audioRpcBuffer != null) {
+            Debug.Log("Dispose audio buffer");
             _audioRpcBuffer.Dispose();
             _audioRpcBuffer = null;
         }
@@ -537,8 +557,13 @@ public class Emulator : MonoBehaviour
 
     // Init/re-init the textures for rendering the screen - has to be done whenever the source dimensions change (which happens often on PSX for some reason)
     void InitTextures(int width, int height) {
-        _bufferTexture = new     Texture2D(width, height, textureFormat, false);
-        _renderTexture = new RenderTexture(width, height, depth:0, format:renderTextureFormat);
+        _bufferTexture = new         Texture2D(width, height, textureFormat, false);
+
+        if (!writeToTexture)
+        {
+            renderTexture = new RenderTexture(width, height, depth:0, format:renderTextureFormat);
+        }
+
         if (targetRenderer) {
             if (!Application.isPlaying) {
                 // running in edit mode, manually make a clone of the renderer material
@@ -548,12 +573,12 @@ public class Emulator : MonoBehaviour
                     _renderMaterial = Instantiate(targetRenderer.sharedMaterial);
                     _renderMaterial.name = targetRenderer.sharedMaterial.name;
                 }
-                _renderMaterial.mainTexture = _renderTexture;
+                _renderMaterial.mainTexture = renderTexture;
 
                 targetRenderer.material = _renderMaterial;
             } else  {
                 // play mode, just let unity clone the material the default way
-                targetRenderer.material.mainTexture = _renderTexture;
+                targetRenderer.material.mainTexture = renderTexture;
             }
         }
     }
