@@ -20,6 +20,8 @@ Or, install using [openupm-cli](https://github.com/openupm/openupm-cli):
 openupm add org.plunderludics.unityhawk
 ```
 
+UnityHawk should then appear in the Package Manager window. From the Package Manager window you can import the sample called `Demo` for a simple example of how to use this package.
+
 ## Usage
 - Add an `Emulator` component to an object with an attached `Renderer`.
 - Put the rom, savestate, config & lua files you want to use into `Assets/StreamingAssets/`
