@@ -43,13 +43,10 @@ UnityHawk should then appear in the Package Manager window. From the Package Man
 ## Implementation
 The `Emulator` component spawns `EmuHawk.exe` as a child process which shares graphics and audio with Unity via [shared memory](https://github.com/justinstenning/SharedMemory).
 
+UnityHawk uses a modified fork of BizHawk which is here: https://github.com/plunderludics/bizhawk/tree/unity-hawk
+
 ## Attribution
 The included demo scene contains [this shader](https://github.com/yunoda-3DCG/Simple-CRT-Shader), [this model of a TV](https://sketchfab.com/3d-models/crt-tv-9ba4baa106e64319a0b540cf0af5aa9e), and [a rom of Elite for the NES](http://www.iancgbell.clara.net/elite/nes/index.htm).
 
-## Development
-UnityHawk uses a modified fork of BizHawk which is here: https://github.com/plunderludics/bizhawk/tree/unity-hawk
-
-After building that project copy `EmuHawk.exe` and the `dll/` directory into the `BizHawk~/` directory within this package.
-
 ## Contact
-If you want help setting up the tool, or you are interested in contributing, feel free to join our discord: https://discord.gg/ATJSh8W8dp. Github issues also welcome.
+If you want help setting up the tool, or you are interested in contributing, or have any other questions, feel free to join our discord: https://discord.gg/ATJSh8W8dp. Github issues also welcome.
