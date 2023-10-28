@@ -22,6 +22,8 @@ openupm add org.plunderludics.unityhawk
 
 UnityHawk should then appear in the Package Manager window. From the Package Manager window you can import the sample called `Demo` for a simple example of how to use this package.
 
+You will probably also need to install the BizHawk prerequisites, which can be installed via [this installer](https://github.com/TASEmulators/BizHawk-Prereqs/releases/download/2.4.8_1/bizhawk_prereqs_v2.4.8_1.zip).
+
 ## Usage
 - Add an `Emulator` component to an object with an attached `Renderer`.
 - Put the rom, savestate, config & lua files you want to use into `Assets/StreamingAssets/`
