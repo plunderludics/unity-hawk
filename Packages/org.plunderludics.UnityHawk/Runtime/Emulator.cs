@@ -171,7 +171,7 @@ public class Emulator : MonoBehaviour
 
     void OnEnable()
     {
-        Debug.Log("Emulator OnEnable");
+        // Debug.Log("Emulator OnEnable");
         _initialized = false;
         if (runInEditMode || Application.isPlaying) {
             Initialize();
@@ -264,14 +264,14 @@ public class Emulator : MonoBehaviour
     }
 
     void OnDisable() {
-        Debug.Log("Emulator OnDisable");
+        // Debug.Log("Emulator OnDisable");
         if (_initialized) {
             Deactivate();
         }
     }
 
     void Initialize() {
-        Debug.Log("Emulator Initialize");
+        // Debug.Log("Emulator Initialize");
         _isRunning = false;
 
         _audioSkipCounter = 0f;
@@ -521,7 +521,7 @@ public class Emulator : MonoBehaviour
     }
 
     void Deactivate() {
-        Debug.Log("Emulator Deactivate");
+        // Debug.Log("Emulator Deactivate");
 
         _initialized = false;
         if (_bizHawkLogWriter != null) {
@@ -633,6 +633,12 @@ public class Emulator : MonoBehaviour
                     // call corresponding method
                     if (_registeredMethods != null && _registeredMethods.ContainsKey(methodName)) {
                         string returnString = _registeredMethods[methodName](argString);
+                        // [messy hack] don't allow returning null because it seems to break things on the other side of the RPC
+                        if (returnString == null) {
+                            Debug.LogWarning($"{methodName} returned null but null return values are not supported, converting to empty string");
+                            returnString = "";
+                        }
+                        
                         returnData = System.Text.Encoding.ASCII.GetBytes(returnString);
                         // Debug.Log($"Calling registered method {methodName}");
                     } else {
