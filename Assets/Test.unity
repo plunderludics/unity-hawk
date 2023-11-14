@@ -236,14 +236,17 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   useAttachedRenderer: 1
   targetRenderer: {fileID: 258690621}
-  passInputFromUnity: 0
+  writeToTexture: 0
+  renderTexture: {fileID: 0}
+  passInputFromUnity: 1
+  inputProvider: {fileID: 437861953}
   captureEmulatorAudio: 0
   romFileName: elite.nes
   configFileName: 
   saveStateFileName: 
   luaScriptFileName: test.lua
   runInEditMode: 0
-  showBizhawkGui: 0
+  showBizhawkGui: 1
   writeBizhawkLogs: 1
   bizhawkLogLocation: BizHawkLogs\Elite-18918.log
   _initialized: 0
@@ -262,6 +265,67 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   e: {fileID: 258690624}
+--- !u!1 &437861952
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 437861954}
+  - component: {fileID: 437861953}
+  m_Layer: 0
+  m_Name: Input
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &437861953
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 437861952}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0b04e45bae611064ca0b864cc61c26f6, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  mappings:
+  - action: {fileID: -860854131571165734, guid: ababa63b08ad85e4ea5d0eec49d16871, type: 3}
+    keyName: Return
+  - action: {fileID: 4336910649333051294, guid: ababa63b08ad85e4ea5d0eec49d16871, type: 3}
+    keyName: Space
+  - action: {fileID: 2148411844063239461, guid: ababa63b08ad85e4ea5d0eec49d16871, type: 3}
+    keyName: RightArrow
+  - action: {fileID: -5812774468324038203, guid: ababa63b08ad85e4ea5d0eec49d16871, type: 3}
+    keyName: LeftArrow
+  - action: {fileID: -2488827470134808589, guid: ababa63b08ad85e4ea5d0eec49d16871, type: 3}
+    keyName: UpArrow
+  - action: {fileID: 6333634050549447164, guid: ababa63b08ad85e4ea5d0eec49d16871, type: 3}
+    keyName: DownArrow
+  - action: {fileID: 5144899048940673468, guid: ababa63b08ad85e4ea5d0eec49d16871, type: 3}
+    keyName: Z
+  - action: {fileID: 3485190082489977688, guid: ababa63b08ad85e4ea5d0eec49d16871, type: 3}
+    keyName: X
+--- !u!4 &437861954
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 437861952}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_RootOrder: 4
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!21 &1389039895
 Material:
   serializedVersion: 8
@@ -508,7 +572,10 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   useAttachedRenderer: 1
   targetRenderer: {fileID: 0}
+  writeToTexture: 0
+  renderTexture: {fileID: 0}
   passInputFromUnity: 1
+  inputProvider: {fileID: 0}
   captureEmulatorAudio: 1
   romFileName: Roms/elite.nes
   configFileName: 

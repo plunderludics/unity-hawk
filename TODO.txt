@@ -1,4 +1,3 @@
- - more modular setup for input; should be easy to implement a custom input provider on the unity side (e.g. for remapping controls, or for programatically injecting input)
  - pass modifier keys with input (would be useful for e.g. shift-tab to turbo)
  - fix flaky build script by making a custom build pipeline
  - have a nice interface (for unityhawk users) to interact with the bizhawk apis (e.g. for loading state, reading/writing memory, etc)
@@ -8,6 +7,8 @@
   - maybe better interface for registering methods on the unity side, current setup feels flaky
 
  - update BizHawk (to 2.9.1?)
+
+ - restart emulator when params change
 
  - demo scene including savestates & lua scripts
 
