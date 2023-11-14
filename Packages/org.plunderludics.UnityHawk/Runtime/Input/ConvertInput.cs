@@ -3,10 +3,12 @@ using UnityEngine;
 using System.Collections.Generic;
 using BizHawk.UnityHawk;
 
+namespace UnityHawk {
+
 // Convert from Unity input format to BizHawk input format
 public static class ConvertInput {
     public static BizHawk.UnityHawk.InputEvent ToBizHawk(UnityHawk.InputEvent ke) {
-        string unityButtonName = System.Enum.GetName(typeof(KeyCode), ke.key);
+        string unityButtonName = ke.keyName;
         string bizhawkButtonName = UnityKeyNameToBizHawkKeyName(unityButtonName);
 
         return new BizHawk.UnityHawk.InputEvent {
@@ -32,4 +34,6 @@ public static class ConvertInput {
             return key;
         }
     }
+}
+
 }

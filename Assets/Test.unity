@@ -236,7 +236,10 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   useAttachedRenderer: 1
   targetRenderer: {fileID: 258690621}
-  passInputFromUnity: 0
+  writeToTexture: 0
+  renderTexture: {fileID: 0}
+  passInputFromUnity: 1
+  inputProvider: {fileID: 0}
   captureEmulatorAudio: 0
   romFileName: elite.nes
   configFileName: 
@@ -508,7 +511,10 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   useAttachedRenderer: 1
   targetRenderer: {fileID: 0}
+  writeToTexture: 0
+  renderTexture: {fileID: 0}
   passInputFromUnity: 1
+  inputProvider: {fileID: 0}
   captureEmulatorAudio: 1
   romFileName: Roms/elite.nes
   configFileName: 
