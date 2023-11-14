@@ -42,7 +42,7 @@ public class GenericInputProvider : InputProvider {
             keyName = mapping.keyName;
 
             if (action.action.WasPressedThisFrame()) {
-                Debug.Log($"was pressed: {action}");
+                // Debug.Log($"was pressed: {action}");
                 interaction = true;
                 isPressed = true;
             }
@@ -52,7 +52,7 @@ public class GenericInputProvider : InputProvider {
             }
 
             if (interaction) {
-                Debug.Log($"key event: {keyName} {isPressed}");
+                // Debug.Log($"key event: {keyName} {isPressed}");
                 pressed.Add(new InputEvent {
                     keyName = keyName,
                     isPressed = isPressed
