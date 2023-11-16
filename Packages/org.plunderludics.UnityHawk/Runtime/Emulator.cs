@@ -436,7 +436,7 @@ public class Emulator : MonoBehaviour
             // [for now only supporting keys, no gamepad]
             BizHawk.UnityHawk.InputEvent bie = ConvertInput.ToBizHawk(ie);
             byte[] serialized = Serialize(bie);
-            // Debug.Log($"Writing buffer: {ByteArrayToString(serialized)}");
+            // Debug.Log($"[unity-hawk] Writing buffer: {bie}");
             int amount = _sharedInputBuffer.Write(serialized, timeout: 0);
             if (amount <= 0) {
                 Debug.LogWarning("Failed to write key event to shared buffer");

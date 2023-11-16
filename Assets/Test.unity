@@ -38,7 +38,7 @@ RenderSettings:
   m_ReflectionIntensity: 1
   m_CustomReflection: {fileID: 0}
   m_Sun: {fileID: 0}
-  m_IndirectSpecularColor: {r: 0.18028352, g: 0.22571376, b: 0.30692244, a: 1}
+  m_IndirectSpecularColor: {r: 0.18028378, g: 0.22571412, b: 0.30692285, a: 1}
   m_UseRadianceAmbientProbe: 0
 --- !u!157 &3
 LightmapSettings:
@@ -294,23 +294,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 0b04e45bae611064ca0b864cc61c26f6, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  mappings:
-  - action: {fileID: -860854131571165734, guid: ababa63b08ad85e4ea5d0eec49d16871, type: 3}
-    keyName: Return
-  - action: {fileID: 4336910649333051294, guid: ababa63b08ad85e4ea5d0eec49d16871, type: 3}
-    keyName: Space
-  - action: {fileID: 2148411844063239461, guid: ababa63b08ad85e4ea5d0eec49d16871, type: 3}
-    keyName: RightArrow
-  - action: {fileID: -5812774468324038203, guid: ababa63b08ad85e4ea5d0eec49d16871, type: 3}
-    keyName: LeftArrow
-  - action: {fileID: -2488827470134808589, guid: ababa63b08ad85e4ea5d0eec49d16871, type: 3}
-    keyName: UpArrow
-  - action: {fileID: 6333634050549447164, guid: ababa63b08ad85e4ea5d0eec49d16871, type: 3}
-    keyName: DownArrow
-  - action: {fileID: 5144899048940673468, guid: ababa63b08ad85e4ea5d0eec49d16871, type: 3}
-    keyName: Z
-  - action: {fileID: 3485190082489977688, guid: ababa63b08ad85e4ea5d0eec49d16871, type: 3}
-    keyName: X
+  mappings: {fileID: 11400000, guid: 0465281ca8c875445b8158a5568ad18c, type: 2}
+  anySource: 0
+  source: 1
+  gamepadIndex: 0
 --- !u!4 &437861954
 Transform:
   m_ObjectHideFlags: 0
