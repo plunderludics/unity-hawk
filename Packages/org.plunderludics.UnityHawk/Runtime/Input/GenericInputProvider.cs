@@ -1,4 +1,7 @@
+using System;
 using System.Collections.Generic;
+using System.Linq;
+using NaughtyAttributes;
 using UnityEngine;
 #if ENABLE_INPUT_SYSTEM
 using UnityEngine.InputSystem;
@@ -9,20 +12,72 @@ namespace UnityHawk {
 // Map from InputSystem input actions to bizhawk keys according to user-specified mapping
 public class GenericInputProvider : InputProvider {
 #if ENABLE_INPUT_SYSTEM
-    // [Do it this way rather than having to add a SerializableDictionary implementation]
-    [System.Serializable]
-    public struct Action2Key {
-        public InputActionReference action;
-        public string keyName;
+    const string KEYBOARD_NAME = "Keyboard";
+
+    enum Source {
+        Keyboard,
+        Gamepad
     }
-    public List<Action2Key> mappings;
+
+    // [Do it this way rather than having to add a SerializableDictionary implementation]
+    [Header("refs")]
+    [Tooltip("the unity input to bizhawk keyboard mapping")]
+    [UnityEngine.Serialization.FormerlySerializedAs("mappings")]
+    [SerializeField] GenericInputMapping mappings;
+
+    [Header("sources")]
+    [Tooltip("can the input come from any source?")]
+    [SerializeField] bool anySource = true;
+
+    [HideIf("anySource")]
+    [Tooltip("if not, what kind of source can the input come from?")]
+    [SerializeField] Source source = Source.Keyboard;
+
+    bool showGamePadIndex => !anySource && source == Source.Gamepad;
+    [ShowIf("showGamePadIndex")]
+    [Tooltip("if gamepad, whats the index?")]
+    [SerializeField] int gamepadIndex = 0;
+
 
 #endif
+
+    List<InputEvent> pressed = new();
     public void Start() {
 #if ENABLE_INPUT_SYSTEM
         // [I don't get why you have to manually enable all the actions, but ok]
-        foreach (var mapping in mappings) {  
+        var mappingsDict = mappings.All.ToDictionary(
+            m => m.action.action.id,
+            m => m.keyName
+        );
+        foreach (var mapping in mappings.All) {
             mapping.action.action.Enable();
+
+            // NOTE from mut: i think this is a MAJOR hack to avoid using the player feature
+            // unity has by default, where it manages creating new players for devices
+            // unfortunately, i couldn't find a way to get the device when polling,
+            // so had to change this to use events and flush on read
+            // down
+            mapping.action.action.started += ctx => {
+                // Debug.Log($"[unity-hawk] pressed {ctx.action.name} {ctx.control.device.name}");
+                if(ctx.control.device != targetDevice) {
+                    return;
+                }
+                pressed.Add(new InputEvent {
+                    keyName = mappingsDict[ctx.action.id],
+                    isPressed = true
+                });
+            };
+            // release
+            mapping.action.action.canceled += ctx => {
+                Debug.Log($"pressed {ctx.action.name} {ctx.control.device.name}");
+                if(ctx.control.device != targetDevice) {
+                    return;
+                }
+                pressed.Add(new InputEvent {
+                    keyName = mappingsDict[ctx.action.id],
+                    isPressed = false
+                });
+            };
         }
 #else
         Debug.LogError("GenericInputProvider will not work unless the new input system is enabled.");
@@ -30,37 +85,42 @@ public class GenericInputProvider : InputProvider {
     }
 
     public override List<InputEvent> InputForFrame() {
-        List<InputEvent> pressed = new();
+        // flush input event list
+        // maybe this is bad?
+        var flush = new List<InputEvent>(pressed);
+        pressed.Clear();
 
 #if ENABLE_INPUT_SYSTEM
-        foreach (var mapping in mappings) {  
-            bool interaction = false;
-            bool isPressed = false;
-            string keyName = null;
+#endif
+        return flush;
+    }
 
-            InputActionReference action = mapping.action;
-            keyName = mapping.keyName;
+    // queries
+    public int GamepadIndex{
+        get {
+            return gamepadIndex;
+        }
+        set {
+            gamepadIndex = value;
+        }
+    }
 
-            if (action.action.WasPressedThisFrame()) {
-                // Debug.Log($"was pressed: {action}");
-                interaction = true;
-                isPressed = true;
-            }
-            if (action.action.WasReleasedThisFrame()) {
-                interaction = true;
-                isPressed = false;
-            }
-
-            if (interaction) {
-                // Debug.Log($"key event: {keyName} {isPressed}");
-                pressed.Add(new InputEvent {
-                    keyName = keyName,
-                    isPressed = isPressed
-                });
+    private InputDevice targetDevice {
+        // TODO: maybe cache this and update only when detecting new input
+        get {
+            InputDevice targetGamepad = null;
+            try {
+                return source switch {
+                    // TODO: multiple keyboards?
+                    Source.Keyboard => InputSystem.GetDevice<Keyboard>(),
+                    Source.Gamepad => Gamepad.all[gamepadIndex],
+                    _ => null
+                };
+            } catch (ArgumentOutOfRangeException) {
+                Debug.LogWarning($"[unity-hawk] gamepad #{gamepadIndex} out of range");
+                return null;
             }
         }
-#endif
-        return pressed;
     }
 }
 
