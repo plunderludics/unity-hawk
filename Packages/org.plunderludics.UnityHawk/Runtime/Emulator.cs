@@ -50,6 +50,11 @@ public class Emulator : MonoBehaviour
 
     [Tooltip("If true, Unity will pass keyboard input to the emulator. If false, BizHawk will get input directly from the OS")]
     public bool passInputFromUnity = true;
+    
+    [Tooltip("If null, defaults to BasicInputProvider. Subclass InputProvider for custom behavior.")]
+    [ShowIf("passInputFromUnity")]
+    public InputProvider inputProvider = null;
+
     [Tooltip("If true, audio will be played via an attached AudioSource (may induce some latency). If false, BizHawk will play audio directly to the OS")]
     public bool captureEmulatorAudio = true;
 
@@ -102,7 +107,6 @@ public class Emulator : MonoBehaviour
     string _sharedTextureBufferName;
     SharedArray<int> _sharedTextureBuffer;
 
-    IInputProvider inputProvider; // this is fixed for now but could be configurable in the future
     string _sharedInputBufferName;
     CircularBuffer _sharedInputBuffer;
 
@@ -208,7 +212,7 @@ public class Emulator : MonoBehaviour
         // In headless mode, if bizhawk steals focus, steal it back
         // [Checking this every frame seems to be the only thing that works
         //  - fortunately for some reason it doesn't steal focus when clicking into a different application]
-        if (!showBizhawkGui && _emuhawk != null) {
+        if (!_targetMac && !showBizhawkGui && _emuhawk != null) {
             IntPtr unityWindow = Process.GetCurrentProcess().MainWindowHandle;
             IntPtr bizhawkWindow = _emuhawk.MainWindowHandle;
             IntPtr focusedWindow = GetForegroundWindow();
@@ -230,10 +234,11 @@ public class Emulator : MonoBehaviour
         }
 
         if (passInputFromUnity) {
-            inputProvider.Update();
+            List<InputEvent> inputEvents = inputProvider.InputForFrame();
             if (_sharedInputBuffer != null && _sharedInputBuffer.NodeCount > 0) {
-                WriteInputToBuffer();
+                WriteInputToBuffer(inputEvents);
             } else {
+                // In this case input gets dropped, but that seems fine
                 AttemptOpenSharedInputBuffer();
             }
         }
@@ -357,9 +362,10 @@ public class Emulator : MonoBehaviour
             _sharedInputBufferName = $"unityhawk-input-{randomNumber}";
             args.Add($"--read-input-from-shared-buffer={_sharedInputBufferName}");
 
-            // for now use a fixed implementation of IInputProvider but
-            // in principle could be configurable - easy to add input events programmatically, etc
-            inputProvider = new InputProvider();
+            // default to BasicInputProvider (maps keys directly from keyboard)
+            if (inputProvider == null) {
+                inputProvider = gameObject.AddComponent<BasicInputProvider>();
+            }
 
             if (runInEditMode) {
                 Debug.LogWarning("passInputFromUnity and runInEditMode are both enabled but input passing will not work in edit mode");
@@ -423,15 +429,14 @@ public class Emulator : MonoBehaviour
         return "" + GetInstanceID();
     }
 
-    void WriteInputToBuffer() {
+    void WriteInputToBuffer(List<InputEvent> inputEvents) {
         // Get input from inputProvider, serialize and write to the shared memory
-        InputEvent? ie;
-        while ((ie = inputProvider.DequeueEvent()).HasValue) {
+        foreach (InputEvent ie in inputEvents) {
             // Convert Unity InputEvent to BizHawk InputEvent
             // [for now only supporting keys, no gamepad]
-            BizHawk.UnityHawk.InputEvent bie = ConvertInput.ToBizHawk(ie.Value);
+            BizHawk.UnityHawk.InputEvent bie = ConvertInput.ToBizHawk(ie);
             byte[] serialized = Serialize(bie);
-            // Debug.Log($"Writing buffer: {ByteArrayToString(serialized)}");
+            // Debug.Log($"[unity-hawk] Writing buffer: {bie}");
             int amount = _sharedInputBuffer.Write(serialized, timeout: 0);
             if (amount <= 0) {
                 Debug.LogWarning("Failed to write key event to shared buffer");

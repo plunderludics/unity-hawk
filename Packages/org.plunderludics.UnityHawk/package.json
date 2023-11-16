@@ -1,6 +1,6 @@
 {
   "name": "org.plunderludics.unityhawk",
-  "version": "0.0.3",
+  "version": "0.0.4",
   "displayName": "UnityHawk",
   "description": "Run emulated games within Unity via BizHawk",
   "dependencies": {
