@@ -1,0 +1,31 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 903e8e1f60cbb094cb3aa869a04b22b8, type: 3}
+  m_Name: Default
+  m_EditorClassIdentifier: 
+  All:
+  - action: {fileID: -860854131571165734, guid: ababa63b08ad85e4ea5d0eec49d16871, type: 3}
+    keyName: Return
+  - action: {fileID: 4336910649333051294, guid: ababa63b08ad85e4ea5d0eec49d16871, type: 3}
+    keyName: Space
+  - action: {fileID: 2148411844063239461, guid: ababa63b08ad85e4ea5d0eec49d16871, type: 3}
+    keyName: RightArrow
+  - action: {fileID: -5812774468324038203, guid: ababa63b08ad85e4ea5d0eec49d16871, type: 3}
+    keyName: LeftArrow
+  - action: {fileID: -2488827470134808589, guid: ababa63b08ad85e4ea5d0eec49d16871, type: 3}
+    keyName: UpArrow
+  - action: {fileID: 6333634050549447164, guid: ababa63b08ad85e4ea5d0eec49d16871, type: 3}
+    keyName: DownArrow
+  - action: {fileID: 5144899048940673468, guid: ababa63b08ad85e4ea5d0eec49d16871, type: 3}
+    keyName: Z
+  - action: {fileID: 3485190082489977688, guid: ababa63b08ad85e4ea5d0eec49d16871, type: 3}
+    keyName: X
