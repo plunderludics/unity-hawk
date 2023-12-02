@@ -89,9 +89,6 @@ public class GenericInputProvider : InputProvider {
         // maybe this is bad?
         var flush = new List<InputEvent>(pressed);
         pressed.Clear();
-
-#if ENABLE_INPUT_SYSTEM
-#endif
         return flush;
     }
 
@@ -105,6 +102,7 @@ public class GenericInputProvider : InputProvider {
         }
     }
 
+#if ENABLE_INPUT_SYSTEM
     private InputDevice targetDevice {
         // TODO: maybe cache this and update only when detecting new input
         get {
@@ -122,6 +120,7 @@ public class GenericInputProvider : InputProvider {
             }
         }
     }
+#endif
 }
 
 }
