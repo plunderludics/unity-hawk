@@ -37,8 +37,6 @@ public class GenericInputProvider : InputProvider {
     [ShowIf("showGamePadIndex")]
     [Tooltip("if gamepad, whats the index?")]
     [SerializeField] int gamepadIndex = 0;
-
-
 #endif
 
     List<InputEvent> pressed = new();
@@ -92,6 +90,7 @@ public class GenericInputProvider : InputProvider {
         return flush;
     }
 
+#if ENABLE_INPUT_SYSTEM
     // queries
     public int GamepadIndex{
         get {
@@ -102,7 +101,6 @@ public class GenericInputProvider : InputProvider {
         }
     }
 
-#if ENABLE_INPUT_SYSTEM
     private InputDevice targetDevice {
         // TODO: maybe cache this and update only when detecting new input
         get {
