@@ -37,8 +37,6 @@ public class GenericInputProvider : InputProvider {
     [ShowIf("showGamePadIndex")]
     [Tooltip("if gamepad, whats the index?")]
     [SerializeField] int gamepadIndex = 0;
-
-
 #endif
 
     List<InputEvent> pressed = new();
@@ -89,12 +87,10 @@ public class GenericInputProvider : InputProvider {
         // maybe this is bad?
         var flush = new List<InputEvent>(pressed);
         pressed.Clear();
-
-#if ENABLE_INPUT_SYSTEM
-#endif
         return flush;
     }
 
+#if ENABLE_INPUT_SYSTEM
     // queries
     public int GamepadIndex{
         get {
@@ -108,7 +104,6 @@ public class GenericInputProvider : InputProvider {
     private InputDevice targetDevice {
         // TODO: maybe cache this and update only when detecting new input
         get {
-            InputDevice targetGamepad = null;
             try {
                 return source switch {
                     // TODO: multiple keyboards?
@@ -122,6 +117,7 @@ public class GenericInputProvider : InputProvider {
             }
         }
     }
+#endif
 }
 
 }

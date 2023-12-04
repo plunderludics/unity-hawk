@@ -1,14 +1,15 @@
  - pass modifier keys with input (would be useful for e.g. shift-tab to turbo)
+
  - fix flaky build script by making a custom build pipeline
- - have a nice interface (for unityhawk users) to interact with the bizhawk apis (e.g. for loading state, reading/writing memory, etc)
 
  - improve unity<->lua (callmethod) interface
   - ideally support passing arbitrary structs (or at least primitive types other than just strings)
   - maybe better interface for registering methods on the unity side, current setup feels flaky
+  - realised that the call to unity from lua is synchronous (blocking) rn, it really shouldn't be
 
  - update BizHawk (to 2.9.1?)
 
- - restart emulator when params change
+ - restart emulator when (relevant) params change
 
  - demo scene including savestates & lua scripts
 
@@ -17,13 +18,15 @@
 
  - cleanup code
   - move nasty audio stuff into another class
-  - probably separate all the de/serialization, shared buffer & rpc stuff into separate files too
 
  - improve ipc audio
   - currently either crackly audio or high-latency, especially with multiple simultaneous emulators
   - two separate rpc channels seems unnecessary and probably increases latency
   - i think it would make a lot more sense to do resampling on the unity side instead of bizhawk side, that would simplify the rpc stuff too
    - maybe just copy the code from SoundOutputProvider.cs, rather than have a depemdency on a bunch of bizhawk dlls
+
+ - expand bizhawk api call interface?
+  - could add methods for read/write ram, seems unnecessary tho imo [can just do it from lua and communicate via unityhawk.callmethod()]
 
  - documentation! at least a guide to the params on the Emulator component
 
@@ -32,6 +35,8 @@
  - fix annoying behavior where emulator resets when you hit ctrl-z in editor [why does unity call OnDisable + OnEnable whenever you undo in the editor? seems to be not documented anywhere]
 
  - better process for building and updating the upm branch
+ 
+ - tweak default config to not spew so much stuff into the Packages/ directory
 
 minor:
  - ideally put the protocol / schema for the texture buffer format (and input/audio in the future) somewhere shared
