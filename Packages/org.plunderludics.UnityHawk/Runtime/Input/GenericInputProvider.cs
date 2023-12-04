@@ -104,7 +104,6 @@ public class GenericInputProvider : InputProvider {
     private InputDevice targetDevice {
         // TODO: maybe cache this and update only when detecting new input
         get {
-            InputDevice targetGamepad = null;
             try {
                 return source switch {
                     // TODO: multiple keyboards?
