@@ -28,8 +28,9 @@ You will probably also need to install the BizHawk prerequisites, which can be i
 - Add an `Emulator` component to an object with an attached `Renderer`.
 - Put the rom, savestate, config & lua files you want to use into `Assets/StreamingAssets/`
 - If using a platform that requires firmware, put the files inside `Assets/StreamingAssets/Firmware/`
-- Set the filenames on the Emulator component (relative to the StreamingAssets directory)
+- Set the filenames on the `Emulator` component (relative to the StreamingAssets directory)
 - The live emulator graphics can be grabbed in code via the `Emulator.Texture` property.
+- The `Emulator` component provides an interface to basic Bizhawk API methods: `Pause()`, `Unpause()`, `FrameAdvance()`, `LoadState(path)`, `SaveState(path)`, `LoadRom(path)`. Path argument should be relative to `Assets/StreamingAssets/`. Use the `ApiControls` component to use these methods directly from the Editor.
 - Within a BizHawk Lua script, you can use the `unityhawk.methodcall(methodName, argString)` method to send and receive information from Unity. The method must be registered on the Unity side using `Emulator.RegisterMethod`. See `test.lua` and `RegisterMethodExample` in the `Demo` sample for a brief example.
 
 ## Features
