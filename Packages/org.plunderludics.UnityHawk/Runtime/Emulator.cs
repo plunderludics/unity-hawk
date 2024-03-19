@@ -79,6 +79,8 @@ public class Emulator : MonoBehaviour
         Running  // Bizhawk is running and sending textures [technically gets set when shared texture channel is open]
     }
     [ReadOnly, SerializeField] EmulatorStatus _status;
+    [ReadOnly, SerializeField] int _currentFrame; // The frame index of the most-recently grabbed texture
+
     // Just for convenient reading from inspector:
     [ReadOnly, SerializeField] Vector2Int _textureSize;
 
@@ -91,6 +93,8 @@ public class Emulator : MonoBehaviour
     // Interface for other scripts to use
     public RenderTexture Texture => renderTexture;
     public bool IsRunning => _status == EmulatorStatus.Running; // is the _emuhawk process running (best guess, might be wrong)
+    public int CurrentFrame => _currentFrame;
+
     Process _emuhawk;
 
     // Dictionary of registered methods that can be called from bizhawk lua
@@ -528,8 +532,9 @@ public class Emulator : MonoBehaviour
         // TODO should probably put this protocol in some shared schema file or something idk
         int[] localTextureBuffer = new int[_sharedTextureBuffer.Length];
         _sharedTextureBuffer.CopyTo(localTextureBuffer, 0);
-        int width = localTextureBuffer[_sharedTextureBuffer.Length - 2];
-        int height = localTextureBuffer[_sharedTextureBuffer.Length - 1];
+        int width = localTextureBuffer[_sharedTextureBuffer.Length - 3];
+        int height = localTextureBuffer[_sharedTextureBuffer.Length - 2];
+        _currentFrame = localTextureBuffer[_sharedTextureBuffer.Length - 1]; // frame index of this texture [hacky solution to sync issues]
 
         // Debug.Log($"{width}, {height}");
         // resize textures if necessary

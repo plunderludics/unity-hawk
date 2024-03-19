@@ -13,8 +13,8 @@
 
  - restart emulator when (relevant) params change
 
- - pass current frame count along with texture to make syncing possible
-  - and perhaps a built-in solution for frame-perfect syncing (between lua rpc calls and the texture)?
+ X pass current frame count along with texture to make syncing possible
+ - and perhaps a built-in solution for frame-perfect syncing (between lua rpc calls and the texture)?
 
  - annoying bug: exceptions thrown inside methods called over rpc (from lua) are invisible because not on the main thread
 
