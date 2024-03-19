@@ -231,6 +231,9 @@ public class Emulator : MonoBehaviour
     public void LoadRom(string path) {
         path = GetAssetPath(path);
         _apiCallBuffer.CallMethod("LoadRom", path);
+        // Need to update texture buffer size in case platform has changed:
+        _sharedTextureBuffer.UpdateSize();
+        _status = EmulatorStatus.Started; // Not ready until new texture buffer is set up
     }
     public void FrameAdvance() {
         _apiCallBuffer.CallMethod("FrameAdvance", null);
