@@ -1,3 +1,5 @@
+ - bug: hacky focus stuff seems to mess with unity modal windows, pretty annoying
+
  - pass modifier keys with input (would be useful for e.g. shift-tab to turbo)
 
  - fix flaky build script by making a custom build pipeline

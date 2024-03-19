@@ -40,7 +40,7 @@ public class GenericInputProvider : InputProvider {
 #endif
 
     List<InputEvent> pressed = new();
-    public void Start() {
+    public virtual void Start() {
 #if ENABLE_INPUT_SYSTEM
         // [I don't get why you have to manually enable all the actions, but ok]
         var mappingsDict = mappings.All.ToDictionary(
@@ -67,7 +67,7 @@ public class GenericInputProvider : InputProvider {
             };
             // release
             mapping.action.action.canceled += ctx => {
-                Debug.Log($"pressed {ctx.action.name} {ctx.control.device.name}");
+                // Debug.Log($"pressed {ctx.action.name} {ctx.control.device.name}");
                 if(ctx.control.device != targetDevice) {
                     return;
                 }

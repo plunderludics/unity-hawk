@@ -1,6 +1,5 @@
 // This is the main user-facing component (ie MonoBehaviour)
-// acts as a bridge between Unity and BizHawkInstance, handling input,
-// graphics, audio, multi-threading, and framerate throttling.
+// handles starting up and communicating with the BizHawk process
 
 using System;
 using System.Linq;
@@ -74,7 +73,14 @@ public class Emulator : MonoBehaviour
     [ReadOnly, SerializeField] string bizhawkLogLocation;
 
     [ReadOnly, SerializeField] bool _initialized;
-    [ReadOnly, SerializeField] bool _isRunning;
+    public enum EmulatorStatus {
+        Inactive,
+        Started, // Underlying bizhawk has been started, but not rendering yet
+        Running  // Bizhawk is running and sending textures [technically gets set when shared texture channel is open]
+    }
+    [ReadOnly, SerializeField] EmulatorStatus _status;
+    // Just for convenient reading from inspector:
+    [ReadOnly, SerializeField] Vector2Int _textureSize;
 
     private static string bizhawkLogDirectory = "BizHawkLogs";
 
@@ -84,8 +90,7 @@ public class Emulator : MonoBehaviour
 
     // Interface for other scripts to use
     public RenderTexture Texture => renderTexture;
-    public bool IsRunning => _isRunning; // is the _emuhawk process running (best guess, might be wrong)
-
+    public bool IsRunning => _status == EmulatorStatus.Running; // is the _emuhawk process running (best guess, might be wrong)
     Process _emuhawk;
 
     // Dictionary of registered methods that can be called from bizhawk lua
@@ -144,7 +149,16 @@ public class Emulator : MonoBehaviour
 #if UNITY_EDITOR
     // Set filename fields based on sample directory
     [Button(enabledMode: EButtonEnableMode.Editor)]
-    private void LoadSample() {
+    private void PickRom() {
+        string path = EditorUtility.OpenFilePanel("Sample", "", "");
+        if (!String.IsNullOrEmpty(path)) {
+            romFileName = path;
+        }
+    }
+
+    // Set filename fields based on sample directory
+    [Button(enabledMode: EButtonEnableMode.Editor)]
+    private void PickSample() {
         string path = EditorUtility.OpenFilePanel("Sample", "", "");
         if (!String.IsNullOrEmpty(path)) {
             SetFromSample(path);
@@ -244,7 +258,7 @@ public class Emulator : MonoBehaviour
 
     void Initialize() {
         // Debug.Log("Emulator Initialize");
-        _isRunning = false;
+        _status = EmulatorStatus.Inactive;
 
         _audioSkipCounter = 0f;
 
@@ -254,7 +268,6 @@ public class Emulator : MonoBehaviour
             // Default to the attached Renderer component, if there is one
             targetRenderer = GetComponent<Renderer>();
             if (!targetRenderer) {
-                
                 Debug.LogWarning("No Renderer attached, will not display emulator graphics");
             }
         }
@@ -381,7 +394,7 @@ public class Emulator : MonoBehaviour
         _emuhawk.Start();
         _emuhawk.BeginOutputReadLine();
         _emuhawk.BeginErrorReadLine();
-        _isRunning = true;
+        _status = EmulatorStatus.Started;
 
         // init shared buffers
         _sharedTextureBuffer = new SharedTextureBuffer(_sharedTextureBufferName);
@@ -403,7 +416,7 @@ public class Emulator : MonoBehaviour
 
     void _Update() {
         if (!Application.isPlaying && !runInEditMode) {
-            if (_isRunning) {
+            if (_status != EmulatorStatus.Inactive) {
                 Deactivate();
             }
             return;
@@ -426,12 +439,13 @@ public class Emulator : MonoBehaviour
         }
 
         if (_sharedTextureBuffer.IsOpen()) {
+            _status = EmulatorStatus.Running; 
             UpdateTextureFromBuffer();
         } else {
             AttemptOpenBuffer(_sharedTextureBuffer);
         }
 
-        if (passInputFromUnity) {
+        if (passInputFromUnity && Application.isPlaying) {
             List<InputEvent> inputEvents = inputProvider.InputForFrame();
             if (_sharedInputBuffer.IsOpen()) {
                 WriteInputToBuffer(inputEvents);
@@ -547,7 +561,7 @@ public class Emulator : MonoBehaviour
             // Kill the _emuhawk process
             _emuhawk.Kill();
         }
-        _isRunning = false;
+        _status = EmulatorStatus.Inactive;
 
         foreach (ISharedBuffer buf in new ISharedBuffer[] {
             _sharedTextureBuffer,
@@ -558,32 +572,12 @@ public class Emulator : MonoBehaviour
             if (buf != null && buf.IsOpen()) {
                 buf.Close();
             }
-        } 
-
-        // if (_sharedTextureBuffer != null) {
-        //     _sharedTextureBuffer.Close();
-        //     _sharedTextureBuffer = null;
-        // }
-        // if (_sharedInputBuffer != null) {
-        //     _sharedInputBuffer.Close();
-        //     _sharedInputBuffer = null;
-        // }
-        // if (_audioRpcBuffer != null) {
-        //     _audioRpcBuffer.Dispose();
-        //     _audioRpcBuffer = null;
-        // }
-        // if (_samplesNeededRpcBuffer != null) {
-        //     _samplesNeededRpcBuffer.Dispose();
-        //     _samplesNeededRpcBuffer = null;
-        // }
-        // if (_callMethodRpcBuffer != null) {
-        //     _callMethodRpcBuffer.Dispose();
-        //     _callMethodRpcBuffer = null;
-        // }
+        }
     }
 
     // Init/re-init the textures for rendering the screen - has to be done whenever the source dimensions change (which happens often on PSX for some reason)
     void InitTextures(int width, int height) {
+        _textureSize = new Vector2Int(width, height);
         _bufferTexture = new         Texture2D(width, height, textureFormat, false);
 
         if (!writeToTexture)
