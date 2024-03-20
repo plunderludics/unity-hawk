@@ -154,9 +154,15 @@ public class Emulator : MonoBehaviour
     // Set filename fields based on sample directory
     [Button(enabledMode: EButtonEnableMode.Editor)]
     private void PickRom() {
-        string path = EditorUtility.OpenFilePanel("Sample", "", "");
+        string path = EditorUtility.OpenFilePanel("Sample", Application.streamingAssetsPath, "");
         if (!String.IsNullOrEmpty(path)) {
-            romFileName = path;
+            if (Paths.IsSubPath(Application.streamingAssetsPath, path)) { // TODO move path util methods into separate class
+                // File is within StreamingAssets, use relative path
+                romFileName = Paths.GetRelativePath(path, Application.streamingAssetsPath);
+            } else {
+                // Outside StreamingAssets, use absolute path
+                romFileName = path;
+            }
         }
     }
 
@@ -171,17 +177,6 @@ public class Emulator : MonoBehaviour
 #endif
 
     ///// Public methods
-
-    // Returns the path that will be loaded for a filename param (rom, lua, config, savestate)
-    // [probably should go in Paths.cs]
-    public static string GetAssetPath(string path) {
-        if (path == Path.GetFullPath(path)) {
-            // Already an absolute path, don't change it [Path.Combine below will do this anyway but just to be explicit]
-            return path;
-        } else {
-            return Path.Combine(Application.streamingAssetsPath, path); // Load relative to StreamingAssets/
-        }
-    }
 
     // Register a method that can be called via `unityhawk.callmethod('MethodName')` in BizHawk lua
     public void RegisterMethod(string methodName, Method method)
@@ -221,15 +216,15 @@ public class Emulator : MonoBehaviour
         _apiCallBuffer.CallMethod("Unpause", null);
     }
     public void LoadState(string path) {
-        path = GetAssetPath(path);
+        path = Paths.GetAssetPath(path);
         _apiCallBuffer.CallMethod("LoadState", path);
     }
     public void SaveState(string path) {
-        path = GetAssetPath(path);
+        path = Paths.GetAssetPath(path);
         _apiCallBuffer.CallMethod("SaveState", path);
     }
     public void LoadRom(string path) {
-        path = GetAssetPath(path);
+        path = Paths.GetAssetPath(path);
         _apiCallBuffer.CallMethod("LoadRom", path);
         // Need to update texture buffer size in case platform has changed:
         _sharedTextureBuffer.UpdateSize();
@@ -293,19 +288,19 @@ public class Emulator : MonoBehaviour
         if (String.IsNullOrEmpty(configFileName)) {
             configPath = Path.GetFullPath(Paths.defaultConfigPath);
         } else {
-            configPath = GetAssetPath(configFileName);
+            configPath = Paths.GetAssetPath(configFileName);
         }
 
-        string romPath = GetAssetPath(romFileName);
+        string romPath = Paths.GetAssetPath(romFileName);
 
         string luaScriptFullPath = null;
         if (!string.IsNullOrEmpty(luaScriptFileName)) {
-            luaScriptFullPath = GetAssetPath(luaScriptFileName);
+            luaScriptFullPath = Paths.GetAssetPath(luaScriptFileName);
         }
 
         string saveStateFullPath = null;
         if (!String.IsNullOrEmpty(saveStateFileName)) {
-            saveStateFullPath = GetAssetPath(saveStateFileName);
+            saveStateFullPath = Paths.GetAssetPath(saveStateFileName);
         }
 
         // start _emuhawk.exe w args
@@ -328,7 +323,7 @@ public class Emulator : MonoBehaviour
             _emuhawk.StartInfo.UseShellExecute = false;
         }
 
-        args.Add($"--firmware={GetAssetPath(firmwareDirName)}"); // could make this configurable but idk if that's really useful
+        args.Add($"--firmware={Paths.GetAssetPath(firmwareDirName)}"); // could make this configurable but idk if that's really useful
 
         if (!showBizhawkGui) {
             args.Add("--headless");

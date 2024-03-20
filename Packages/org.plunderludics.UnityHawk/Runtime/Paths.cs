@@ -34,5 +34,44 @@ public static class Paths
     public static readonly string defaultConfigPath = Path.Combine(bizhawkDir, "config.ini");
 
     public static readonly string dllDir = Path.Combine(bizhawkDir, "dll");
+
+    // Returns the path that will be loaded for a filename param (rom, lua, config, savestate)
+    public static string GetAssetPath(string path) {
+        if (path == Path.GetFullPath(path)) {
+            // Already an absolute path, don't change it [Path.Combine below will do this anyway but just to be explicit]
+            return path;
+        } else {
+            return Path.Combine(Application.streamingAssetsPath, path); // Load relative to StreamingAssets/
+        }
+    }
+
+    public static string GetRelativePath(string filepath, string folder) {
+        Uri pathUri = new Uri(filepath);
+        // Folders must end in a slash
+        if (!folder.EndsWith(Path.DirectorySeparatorChar.ToString())) {
+            folder += Path.DirectorySeparatorChar;
+        }
+        Uri folderUri = new Uri(folder);
+        return Uri.UnescapeDataString(folderUri.MakeRelativeUri(pathUri).ToString().Replace('/', Path.DirectorySeparatorChar));
+    }
+
+    // [https://stackoverflow.com/a/74401631]
+    public static bool IsSubPath(string parent, string child)
+    {
+        try
+        {
+            parent = Path.GetFullPath(parent);
+            if (!parent.EndsWith(Path.DirectorySeparatorChar.ToString()))
+                parent = parent + Path.DirectorySeparatorChar;
+            child = Path.GetFullPath(child);
+            if (child.Length <= parent.Length)
+                return false;
+            return child.StartsWith(parent);
+        }
+        catch
+        {
+            return false;
+        }
+    }
 }
 }
