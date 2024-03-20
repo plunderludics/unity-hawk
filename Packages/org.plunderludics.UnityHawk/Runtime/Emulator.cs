@@ -1,6 +1,5 @@
 // This is the main user-facing component (ie MonoBehaviour)
-// acts as a bridge between Unity and BizHawkInstance, handling input,
-// graphics, audio, multi-threading, and framerate throttling.
+// handles starting up and communicating with the BizHawk process
 
 using System;
 using System.Linq;
@@ -22,6 +21,7 @@ using UnityEngine;
 using Unity.Profiling;
 
 using Plunderludics;
+using UnityEngine.Serialization;
 
 namespace UnityHawk {
 
@@ -40,8 +40,9 @@ public class Emulator : MonoBehaviour
     public Renderer targetRenderer;
 
     [Tooltip("Write to an existing render texture rather than creating one automatically")]
-    public bool writeToTexture = false;
-    [ShowIf("writeToTexture")]
+    [FormerlySerializedAs("writeToTexture")]
+    public bool customRenderTexture = false;
+    [ShowIf("customRenderTexture")]
     [Tooltip("The render texture to write to")]
     public RenderTexture renderTexture;
     // We have to maintain a separate rendertexture just for the purpose of flipping the image we get from the emulator
@@ -63,6 +64,10 @@ public class Emulator : MonoBehaviour
     public string saveStateFileName = ""; // Leave empty to boot clean
     public string luaScriptFileName;
 
+    [Header("Other paths")]
+    [Tooltip("Default directory for BizHawk to save savestates")]
+    public string savestatesDirectory = "";
+
     private const string firmwareDirName = "Firmware"; // Firmware loaded from StreamingAssets/Firmware
 
     [Header("Development")]
@@ -74,7 +79,16 @@ public class Emulator : MonoBehaviour
     [ReadOnly, SerializeField] string bizhawkLogLocation;
 
     [ReadOnly, SerializeField] bool _initialized;
-    [ReadOnly, SerializeField] bool _isRunning;
+    public enum EmulatorStatus {
+        Inactive,
+        Started, // Underlying bizhawk has been started, but not rendering yet
+        Running  // Bizhawk is running and sending textures [technically gets set when shared texture channel is open]
+    }
+    [ReadOnly, SerializeField] EmulatorStatus _status;
+    [ReadOnly, SerializeField] int _currentFrame; // The frame index of the most-recently grabbed texture
+
+    // Just for convenient reading from inspector:
+    [ReadOnly, SerializeField] Vector2Int _textureSize;
 
     private static string bizhawkLogDirectory = "BizHawkLogs";
 
@@ -84,7 +98,8 @@ public class Emulator : MonoBehaviour
 
     // Interface for other scripts to use
     public RenderTexture Texture => renderTexture;
-    public bool IsRunning => _isRunning; // is the _emuhawk process running (best guess, might be wrong)
+    public bool IsRunning => _status == EmulatorStatus.Running; // is the _emuhawk process running (best guess, might be wrong)
+    public int CurrentFrame => _currentFrame;
 
     Process _emuhawk;
 
@@ -144,7 +159,22 @@ public class Emulator : MonoBehaviour
 #if UNITY_EDITOR
     // Set filename fields based on sample directory
     [Button(enabledMode: EButtonEnableMode.Editor)]
-    private void LoadSample() {
+    private void PickRom() {
+        string path = EditorUtility.OpenFilePanel("Sample", Application.streamingAssetsPath, "");
+        if (!String.IsNullOrEmpty(path)) {
+            if (Paths.IsSubPath(Application.streamingAssetsPath, path)) { // TODO move path util methods into separate class
+                // File is within StreamingAssets, use relative path
+                romFileName = Paths.GetRelativePath(path, Application.streamingAssetsPath);
+            } else {
+                // Outside StreamingAssets, use absolute path
+                romFileName = path;
+            }
+        }
+    }
+
+    // Set filename fields based on sample directory
+    [Button(enabledMode: EButtonEnableMode.Editor)]
+    private void PickSample() {
         string path = EditorUtility.OpenFilePanel("Sample", "", "");
         if (!String.IsNullOrEmpty(path)) {
             SetFromSample(path);
@@ -153,17 +183,6 @@ public class Emulator : MonoBehaviour
 #endif
 
     ///// Public methods
-
-    // Returns the path that will be loaded for a filename param (rom, lua, config, savestate)
-    // [probably should go in Paths.cs]
-    public static string GetAssetPath(string path) {
-        if (path == Path.GetFullPath(path)) {
-            // Already an absolute path, don't change it [Path.Combine below will do this anyway but just to be explicit]
-            return path;
-        } else {
-            return Path.Combine(Application.streamingAssetsPath, path); // Load relative to StreamingAssets/
-        }
-    }
 
     // Register a method that can be called via `unityhawk.callmethod('MethodName')` in BizHawk lua
     public void RegisterMethod(string methodName, Method method)
@@ -203,16 +222,19 @@ public class Emulator : MonoBehaviour
         _apiCallBuffer.CallMethod("Unpause", null);
     }
     public void LoadState(string path) {
-        path = GetAssetPath(path);
+        path = Paths.GetAssetPath(path);
         _apiCallBuffer.CallMethod("LoadState", path);
     }
     public void SaveState(string path) {
-        path = GetAssetPath(path);
+        path = Paths.GetAssetPath(path);
         _apiCallBuffer.CallMethod("SaveState", path);
     }
     public void LoadRom(string path) {
-        path = GetAssetPath(path);
+        path = Paths.GetAssetPath(path);
         _apiCallBuffer.CallMethod("LoadRom", path);
+        // Need to update texture buffer size in case platform has changed:
+        _sharedTextureBuffer.UpdateSize();
+        _status = EmulatorStatus.Started; // Not ready until new texture buffer is set up
     }
     public void FrameAdvance() {
         _apiCallBuffer.CallMethod("FrameAdvance", null);
@@ -244,7 +266,9 @@ public class Emulator : MonoBehaviour
 
     void Initialize() {
         // Debug.Log("Emulator Initialize");
-        _isRunning = false;
+        if (!customRenderTexture) renderTexture = null; // Clear texture so that it's forced to be reinitialized
+
+        _status = EmulatorStatus.Inactive;
 
         _audioSkipCounter = 0f;
 
@@ -254,7 +278,6 @@ public class Emulator : MonoBehaviour
             // Default to the attached Renderer component, if there is one
             targetRenderer = GetComponent<Renderer>();
             if (!targetRenderer) {
-                
                 Debug.LogWarning("No Renderer attached, will not display emulator graphics");
             }
         }
@@ -273,20 +296,22 @@ public class Emulator : MonoBehaviour
         if (String.IsNullOrEmpty(configFileName)) {
             configPath = Path.GetFullPath(Paths.defaultConfigPath);
         } else {
-            configPath = GetAssetPath(configFileName);
+            configPath = Paths.GetAssetPath(configFileName);
         }
 
-        string romPath = GetAssetPath(romFileName);
+        string romPath = Paths.GetAssetPath(romFileName);
 
         string luaScriptFullPath = null;
         if (!string.IsNullOrEmpty(luaScriptFileName)) {
-            luaScriptFullPath = GetAssetPath(luaScriptFileName);
+            luaScriptFullPath = Paths.GetAssetPath(luaScriptFileName);
         }
 
         string saveStateFullPath = null;
         if (!String.IsNullOrEmpty(saveStateFileName)) {
-            saveStateFullPath = GetAssetPath(saveStateFileName);
+            saveStateFullPath = Paths.GetAssetPath(saveStateFileName);
         }
+
+        string savestatesDirectoryFullPath = Paths.GetAssetPath(savestatesDirectory);
 
         // start _emuhawk.exe w args
         string exePath = Path.GetFullPath(Paths.emuhawkExePath);
@@ -308,7 +333,8 @@ public class Emulator : MonoBehaviour
             _emuhawk.StartInfo.UseShellExecute = false;
         }
 
-        args.Add($"--firmware={GetAssetPath(firmwareDirName)}"); // could make this configurable but idk if that's really useful
+        args.Add($"--firmware={Paths.GetAssetPath(firmwareDirName)}"); // could make this configurable but idk if that's really useful
+        args.Add($"--savestates={savestatesDirectoryFullPath}");
 
         if (!showBizhawkGui) {
             args.Add("--headless");
@@ -381,7 +407,7 @@ public class Emulator : MonoBehaviour
         _emuhawk.Start();
         _emuhawk.BeginOutputReadLine();
         _emuhawk.BeginErrorReadLine();
-        _isRunning = true;
+        _status = EmulatorStatus.Started;
 
         // init shared buffers
         _sharedTextureBuffer = new SharedTextureBuffer(_sharedTextureBufferName);
@@ -403,7 +429,7 @@ public class Emulator : MonoBehaviour
 
     void _Update() {
         if (!Application.isPlaying && !runInEditMode) {
-            if (_isRunning) {
+            if (_status != EmulatorStatus.Inactive) {
                 Deactivate();
             }
             return;
@@ -426,12 +452,13 @@ public class Emulator : MonoBehaviour
         }
 
         if (_sharedTextureBuffer.IsOpen()) {
+            _status = EmulatorStatus.Running; 
             UpdateTextureFromBuffer();
         } else {
             AttemptOpenBuffer(_sharedTextureBuffer);
         }
 
-        if (passInputFromUnity) {
+        if (passInputFromUnity && Application.isPlaying) {
             List<InputEvent> inputEvents = inputProvider.InputForFrame();
             if (_sharedInputBuffer.IsOpen()) {
                 WriteInputToBuffer(inputEvents);
@@ -514,8 +541,9 @@ public class Emulator : MonoBehaviour
         // TODO should probably put this protocol in some shared schema file or something idk
         int[] localTextureBuffer = new int[_sharedTextureBuffer.Length];
         _sharedTextureBuffer.CopyTo(localTextureBuffer, 0);
-        int width = localTextureBuffer[_sharedTextureBuffer.Length - 2];
-        int height = localTextureBuffer[_sharedTextureBuffer.Length - 1];
+        int width = localTextureBuffer[_sharedTextureBuffer.Length - 3];
+        int height = localTextureBuffer[_sharedTextureBuffer.Length - 2];
+        _currentFrame = localTextureBuffer[_sharedTextureBuffer.Length - 1]; // frame index of this texture [hacky solution to sync issues]
 
         // Debug.Log($"{width}, {height}");
         // resize textures if necessary
@@ -547,7 +575,7 @@ public class Emulator : MonoBehaviour
             // Kill the _emuhawk process
             _emuhawk.Kill();
         }
-        _isRunning = false;
+        _status = EmulatorStatus.Inactive;
 
         foreach (ISharedBuffer buf in new ISharedBuffer[] {
             _sharedTextureBuffer,
@@ -558,35 +586,15 @@ public class Emulator : MonoBehaviour
             if (buf != null && buf.IsOpen()) {
                 buf.Close();
             }
-        } 
-
-        // if (_sharedTextureBuffer != null) {
-        //     _sharedTextureBuffer.Close();
-        //     _sharedTextureBuffer = null;
-        // }
-        // if (_sharedInputBuffer != null) {
-        //     _sharedInputBuffer.Close();
-        //     _sharedInputBuffer = null;
-        // }
-        // if (_audioRpcBuffer != null) {
-        //     _audioRpcBuffer.Dispose();
-        //     _audioRpcBuffer = null;
-        // }
-        // if (_samplesNeededRpcBuffer != null) {
-        //     _samplesNeededRpcBuffer.Dispose();
-        //     _samplesNeededRpcBuffer = null;
-        // }
-        // if (_callMethodRpcBuffer != null) {
-        //     _callMethodRpcBuffer.Dispose();
-        //     _callMethodRpcBuffer = null;
-        // }
+        }
     }
 
     // Init/re-init the textures for rendering the screen - has to be done whenever the source dimensions change (which happens often on PSX for some reason)
     void InitTextures(int width, int height) {
+        _textureSize = new Vector2Int(width, height);
         _bufferTexture = new         Texture2D(width, height, textureFormat, false);
 
-        if (!writeToTexture)
+        if (!customRenderTexture)
         {
             renderTexture = new RenderTexture(width, height, depth:0, format:renderTextureFormat);
         }

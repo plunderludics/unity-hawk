@@ -1,3 +1,5 @@
+ - bug: hacky focus stuff seems to mess with unity modal windows, pretty annoying
+
  - pass modifier keys with input (would be useful for e.g. shift-tab to turbo)
 
  - fix flaky build script by making a custom build pipeline
@@ -11,10 +13,16 @@
 
  - restart emulator when (relevant) params change
 
+ X pass current frame count along with texture to make syncing possible
+ - and perhaps a built-in solution for frame-perfect syncing (between lua rpc calls and the texture)?
+
+ - annoying bug: exceptions thrown inside methods called over rpc (from lua) are invisible because not on the main thread
+
  - demo scene including savestates & lua scripts
 
  - mac / linux support?? may be possible if the unsupported dependencies on mac os are input / grahpics / audio related
-  - [have made some progress on this but current blocker is the SharedMemory library seeming to not work on mac]
+  - [SharedMemory library seems to not work on mac - it's possible to implement the shared buffers using NamedPipes instead, but I realised that neither of the PSX cores work on mac, and it seems like a lot of work to fix that, so unlikely this will ever happen]
+  - [linux probably much easier, and apparently supports most cores other than N64]
 
  - cleanup code
   - move nasty audio stuff into another class
