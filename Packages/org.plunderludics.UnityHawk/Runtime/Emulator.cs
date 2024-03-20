@@ -21,6 +21,7 @@ using UnityEngine;
 using Unity.Profiling;
 
 using Plunderludics;
+using UnityEngine.Serialization;
 
 namespace UnityHawk {
 
@@ -39,8 +40,9 @@ public class Emulator : MonoBehaviour
     public Renderer targetRenderer;
 
     [Tooltip("Write to an existing render texture rather than creating one automatically")]
-    public bool writeToTexture = false;
-    [ShowIf("writeToTexture")]
+    [FormerlySerializedAs("writeToTexture")]
+    public bool customRenderTexture = false;
+    [ShowIf("customRenderTexture")]
     [Tooltip("The render texture to write to")]
     public RenderTexture renderTexture;
     // We have to maintain a separate rendertexture just for the purpose of flipping the image we get from the emulator
@@ -61,6 +63,10 @@ public class Emulator : MonoBehaviour
     public string configFileName = ""; // Leave empty for default config.ini
     public string saveStateFileName = ""; // Leave empty to boot clean
     public string luaScriptFileName;
+
+    [Header("Other paths")]
+    [Tooltip("Default directory for BizHawk to save savestates")]
+    public string savestatesDirectory = "";
 
     private const string firmwareDirName = "Firmware"; // Firmware loaded from StreamingAssets/Firmware
 
@@ -260,6 +266,8 @@ public class Emulator : MonoBehaviour
 
     void Initialize() {
         // Debug.Log("Emulator Initialize");
+        if (!customRenderTexture) renderTexture = null; // Clear texture so that it's forced to be reinitialized
+
         _status = EmulatorStatus.Inactive;
 
         _audioSkipCounter = 0f;
@@ -303,6 +311,8 @@ public class Emulator : MonoBehaviour
             saveStateFullPath = Paths.GetAssetPath(saveStateFileName);
         }
 
+        string savestatesDirectoryFullPath = Paths.GetAssetPath(savestatesDirectory);
+
         // start _emuhawk.exe w args
         string exePath = Path.GetFullPath(Paths.emuhawkExePath);
         _emuhawk = new Process();
@@ -324,6 +334,7 @@ public class Emulator : MonoBehaviour
         }
 
         args.Add($"--firmware={Paths.GetAssetPath(firmwareDirName)}"); // could make this configurable but idk if that's really useful
+        args.Add($"--savestates={savestatesDirectoryFullPath}");
 
         if (!showBizhawkGui) {
             args.Add("--headless");
@@ -583,7 +594,7 @@ public class Emulator : MonoBehaviour
         _textureSize = new Vector2Int(width, height);
         _bufferTexture = new         Texture2D(width, height, textureFormat, false);
 
-        if (!writeToTexture)
+        if (!customRenderTexture)
         {
             renderTexture = new RenderTexture(width, height, depth:0, format:renderTextureFormat);
         }

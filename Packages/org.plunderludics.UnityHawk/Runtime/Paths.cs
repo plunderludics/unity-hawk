@@ -37,7 +37,7 @@ public static class Paths
 
     // Returns the path that will be loaded for a filename param (rom, lua, config, savestate)
     public static string GetAssetPath(string path) {
-        if (path == Path.GetFullPath(path)) {
+        if (!string.IsNullOrEmpty(path) && path == Path.GetFullPath(path)) {
             // Already an absolute path, don't change it [Path.Combine below will do this anyway but just to be explicit]
             return path;
         } else {
