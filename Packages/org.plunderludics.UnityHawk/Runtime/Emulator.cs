@@ -440,12 +440,15 @@ public class Emulator : MonoBehaviour
         // In headless mode, if bizhawk steals focus, steal it back
         // [Checking this every frame seems to be the only thing that works
         //  - fortunately for some reason it doesn't steal focus when clicking into a different application]
-        if (!_targetMac && !showBizhawkGui && _emuhawk != null) {
+        // [Except this has a nasty side effect, in the editor in play mode if you try to open a unity modal window
+        //  (e.g. the game view aspect ratio config) it gets closed. This is annoying but not sure how to fix]
+        if (Application.isPlaying && !_targetMac && !showBizhawkGui && _emuhawk != null) {
             IntPtr unityWindow = Process.GetCurrentProcess().MainWindowHandle;
             IntPtr bizhawkWindow = _emuhawk.MainWindowHandle;
             IntPtr focusedWindow = GetForegroundWindow();
+            // Debug.Log($"unityWindow = {unityWindow}; bizhawkWindow = {bizhawkWindow}; focusedWindow = {focusedWindow}");
             if (focusedWindow != unityWindow) {
-            //    Debug.Log("refocusing unity window");
+                // Debug.Log("refocusing unity window");
                 ShowWindow(unityWindow, 5);
                 SetForegroundWindow(unityWindow);
             }

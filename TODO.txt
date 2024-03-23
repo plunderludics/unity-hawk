@@ -1,4 +1,4 @@
- - bug: hacky focus stuff seems to mess with unity modal windows, pretty annoying
+ - bug: hacky focus stuff seems to mess with unity modal windows, pretty annoying [at least this only happens in play mode now]
 
  - pass modifier keys with input (would be useful for e.g. shift-tab to turbo)
 
