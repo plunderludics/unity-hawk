@@ -624,7 +624,7 @@ public class Emulator : MonoBehaviour
     void AttemptOpenBuffer(ISharedBuffer buf) {
         try {
             buf.Open();
-            Debug.Log($"Connected to {buf}");
+            // Debug.Log($"Connected to {buf}");
         } catch (FileNotFoundException) {
             // Debug.LogError(e);
         }
