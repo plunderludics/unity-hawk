@@ -47,7 +47,7 @@ public class Emulator : MonoBehaviour
     public RenderTexture renderTexture;
     // We have to maintain a separate rendertexture just for the purpose of flipping the image we get from the emulator
 
-    [Tooltip("If true, Unity will pass keyboard input to the emulator. If false, BizHawk will get input directly from the OS")]
+    [Tooltip("If true, Unity will pass keyboard input to the emulator (only in play mode!). If false, BizHawk will accept input directly from the OS")]
     public bool passInputFromUnity = true;
     
     [Tooltip("If null, defaults to BasicInputProvider. Subclass InputProvider for custom behavior.")]
@@ -72,6 +72,9 @@ public class Emulator : MonoBehaviour
 
     [Header("Development")]
     public new bool runInEditMode = false;
+    [ShowIf("runInEditMode")]
+    [Tooltip("Whether BizHawk will accept input when window is unfocused (in edit mode)")]
+    public bool acceptBackgroundInput = true;
     public bool showBizhawkGui = false;
     [Header("Debug")]
     public bool writeBizhawkLogs = true;
@@ -354,17 +357,23 @@ public class Emulator : MonoBehaviour
         _apiCallBufferName = $"unityhawk-apicall-{randomNumber}";
         args.Add($"--api-call-method-buffer={_apiCallBufferName}");
 
-        if (passInputFromUnity) {
-            _sharedInputBufferName = $"unityhawk-input-{randomNumber}";
-            args.Add($"--read-input-from-shared-buffer={_sharedInputBufferName}");
+        if (Application.isPlaying) {
+            if (passInputFromUnity) {
+                _sharedInputBufferName = $"unityhawk-input-{randomNumber}";
+                args.Add($"--read-input-from-shared-buffer={_sharedInputBufferName}");
 
-            // default to BasicInputProvider (maps keys directly from keyboard)
-            if (inputProvider == null) {
-                inputProvider = gameObject.AddComponent<BasicInputProvider>();
+                // default to BasicInputProvider (maps keys directly from keyboard)
+                if (inputProvider == null) {
+                    inputProvider = gameObject.AddComponent<BasicInputProvider>();
+                }
+
+                if (runInEditMode) {
+                }
             }
-
-            if (runInEditMode) {
-                Debug.LogWarning("passInputFromUnity and runInEditMode are both enabled but input passing will not work in edit mode");
+        } else if (runInEditMode) {
+            Debug.LogWarning("passInputFromUnity is enabled but will continue");
+            if (acceptBackgroundInput) {
+                args.Add($"--accept-background-input");
             }
         }
 
