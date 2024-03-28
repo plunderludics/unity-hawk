@@ -47,7 +47,7 @@ public class Emulator : MonoBehaviour
     public RenderTexture renderTexture;
     // We have to maintain a separate rendertexture just for the purpose of flipping the image we get from the emulator
 
-    [Tooltip("If true, Unity will pass keyboard input to the emulator. If false, BizHawk will get input directly from the OS")]
+    [Tooltip("If true, Unity will pass keyboard input to the emulator (only in play mode!). If false, BizHawk will accept input directly from the OS")]
     public bool passInputFromUnity = true;
     
     [Tooltip("If null, defaults to BasicInputProvider. Subclass InputProvider for custom behavior.")]
@@ -72,9 +72,15 @@ public class Emulator : MonoBehaviour
 
     [Header("Development")]
     public new bool runInEditMode = false;
+    [ShowIf("runInEditMode")]
+    [Tooltip("Whether BizHawk will accept input when window is unfocused (in edit mode)")]
+    public bool acceptBackgroundInput = true;
     public bool showBizhawkGui = false;
     [Header("Debug")]
     public bool writeBizhawkLogs = true;
+
+
+
     [ShowIf("writeBizhawkLogs")]
     [ReadOnly, SerializeField] string bizhawkLogLocation;
 
@@ -102,6 +108,16 @@ public class Emulator : MonoBehaviour
     public int CurrentFrame => _currentFrame;
 
     Process _emuhawk;
+
+    // Basically these are the params which, if changed, we want to reset the bizhawk process
+    // Don't include the path params here, because then the process gets reset for every character typed/deleted
+    struct BizhawkArgs {
+        public bool passInputFromUnity;
+        public bool captureEmulatorAudio;
+        public bool acceptBackgroundInput;
+        public bool showBizhawkGui;
+    }
+    BizhawkArgs _currentBizhawkArgs; // remember the params corresponding to the currently running process
 
     // Dictionary of registered methods that can be called from bizhawk lua
     // bytes-to-bytes only rn but some automatic de/serialization for different types would be nice
@@ -155,6 +171,12 @@ public class Emulator : MonoBehaviour
     private static extern bool ShowWindow(IntPtr hwnd, int nCmdShow);
     [DllImport("user32.dll")]
     private static extern IntPtr GetForegroundWindow();
+
+    [Button]
+    private void Reset() {
+        Deactivate();
+        // Will be reactivated in Update on next frame
+    }
 
 #if UNITY_EDITOR
     // Set filename fields based on sample directory
@@ -244,7 +266,8 @@ public class Emulator : MonoBehaviour
 
     void OnEnable()
     {
-        // Debug.Log("Emulator OnEnable");
+        // Debug.Log($"Emulator OnEnable");
+        if (Undo.isProcessing) return; // OnEnable gets called after undo/redo, but ignore it
         _initialized = false;
         if (runInEditMode || Application.isPlaying) {
             Initialize();
@@ -256,7 +279,8 @@ public class Emulator : MonoBehaviour
     }
 
     void OnDisable() {
-        // Debug.Log("Emulator OnDisable");
+        // Debug.Log($"Emulator OnDisable");
+        if (Undo.isProcessing) return; // OnDisable gets called after undo/redo, but ignore it
         if (_initialized) {
             Deactivate();
         }
@@ -354,17 +378,19 @@ public class Emulator : MonoBehaviour
         _apiCallBufferName = $"unityhawk-apicall-{randomNumber}";
         args.Add($"--api-call-method-buffer={_apiCallBufferName}");
 
-        if (passInputFromUnity) {
-            _sharedInputBufferName = $"unityhawk-input-{randomNumber}";
-            args.Add($"--read-input-from-shared-buffer={_sharedInputBufferName}");
+        if (Application.isPlaying) {
+            if (passInputFromUnity) {
+                _sharedInputBufferName = $"unityhawk-input-{randomNumber}";
+                args.Add($"--read-input-from-shared-buffer={_sharedInputBufferName}");
 
-            // default to BasicInputProvider (maps keys directly from keyboard)
-            if (inputProvider == null) {
-                inputProvider = gameObject.AddComponent<BasicInputProvider>();
+                // default to BasicInputProvider (maps keys directly from keyboard)
+                if (inputProvider == null) {
+                    inputProvider = gameObject.AddComponent<BasicInputProvider>();
+                }
             }
-
-            if (runInEditMode) {
-                Debug.LogWarning("passInputFromUnity and runInEditMode are both enabled but input passing will not work in edit mode");
+        } else if (runInEditMode) {
+            if (acceptBackgroundInput) {
+                args.Add($"--accept-background-input");
             }
         }
 
@@ -424,10 +450,17 @@ public class Emulator : MonoBehaviour
             });
         }
 
+        _currentBizhawkArgs = MakeBizhawkArgs();
+
         _initialized = true;
     }
 
     void _Update() {
+        if (!Equals(_currentBizhawkArgs, MakeBizhawkArgs())) {
+            // Params set in inspector have changed since the bizhawk process was started, needs restart
+            Deactivate();
+        }
+
         if (!Application.isPlaying && !runInEditMode) {
             if (_status != EmulatorStatus.Inactive) {
                 Deactivate();
@@ -440,12 +473,15 @@ public class Emulator : MonoBehaviour
         // In headless mode, if bizhawk steals focus, steal it back
         // [Checking this every frame seems to be the only thing that works
         //  - fortunately for some reason it doesn't steal focus when clicking into a different application]
-        if (!_targetMac && !showBizhawkGui && _emuhawk != null) {
+        // [Except this has a nasty side effect, in the editor in play mode if you try to open a unity modal window
+        //  (e.g. the game view aspect ratio config) it gets closed. This is annoying but not sure how to fix]
+        if (Application.isPlaying && !_targetMac && !showBizhawkGui && _emuhawk != null) {
             IntPtr unityWindow = Process.GetCurrentProcess().MainWindowHandle;
             IntPtr bizhawkWindow = _emuhawk.MainWindowHandle;
             IntPtr focusedWindow = GetForegroundWindow();
+            // Debug.Log($"unityWindow = {unityWindow}; bizhawkWindow = {bizhawkWindow}; focusedWindow = {focusedWindow}");
             if (focusedWindow != unityWindow) {
-            //    Debug.Log("refocusing unity window");
+                // Debug.Log("refocusing unity window");
                 ShowWindow(unityWindow, 5);
                 SetForegroundWindow(unityWindow);
             }
@@ -621,7 +657,7 @@ public class Emulator : MonoBehaviour
     void AttemptOpenBuffer(ISharedBuffer buf) {
         try {
             buf.Open();
-            Debug.Log($"Connected to {buf}");
+            // Debug.Log($"Connected to {buf}");
         } catch (FileNotFoundException) {
             // Debug.LogError(e);
         }
@@ -648,6 +684,15 @@ public class Emulator : MonoBehaviour
                 Debug.LogWarning(msg);
             }
         }
+    }
+
+    BizhawkArgs MakeBizhawkArgs() {
+        return new BizhawkArgs {
+            passInputFromUnity = passInputFromUnity,
+            captureEmulatorAudio = captureEmulatorAudio,
+            acceptBackgroundInput = acceptBackgroundInput,
+            showBizhawkGui = showBizhawkGui
+        };
     }
 
     // Send audio from the emulator to the AudioSource
@@ -682,6 +727,7 @@ public class Emulator : MonoBehaviour
             }
         }
     }
+    
 
     // helper methods for circular audio buffer [should probably go in different class]
     private int AudioBufferCount() {
