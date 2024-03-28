@@ -109,6 +109,16 @@ public class Emulator : MonoBehaviour
 
     Process _emuhawk;
 
+    // Basically these are the params which, if changed, we want to reset the bizhawk process
+    // Don't include the path params here, because then the process gets reset for every character typed/deleted
+    struct BizhawkArgs {
+        public bool passInputFromUnity;
+        public bool captureEmulatorAudio;
+        public bool acceptBackgroundInput;
+        public bool showBizhawkGui;
+    }
+    BizhawkArgs _currentBizhawkArgs; // remember the params corresponding to the currently running process
+
     // Dictionary of registered methods that can be called from bizhawk lua
     // bytes-to-bytes only rn but some automatic de/serialization for different types would be nice
     public delegate string Method(string arg);
@@ -161,6 +171,12 @@ public class Emulator : MonoBehaviour
     private static extern bool ShowWindow(IntPtr hwnd, int nCmdShow);
     [DllImport("user32.dll")]
     private static extern IntPtr GetForegroundWindow();
+
+    [Button]
+    private void Reset() {
+        Deactivate();
+        // Will be reactivated in Update on next frame
+    }
 
 #if UNITY_EDITOR
     // Set filename fields based on sample directory
@@ -434,10 +450,17 @@ public class Emulator : MonoBehaviour
             });
         }
 
+        _currentBizhawkArgs = MakeBizhawkArgs();
+
         _initialized = true;
     }
 
     void _Update() {
+        if (!Equals(_currentBizhawkArgs, MakeBizhawkArgs())) {
+            // Params set in inspector have changed since the bizhawk process was started, needs restart
+            Deactivate();
+        }
+
         if (!Application.isPlaying && !runInEditMode) {
             if (_status != EmulatorStatus.Inactive) {
                 Deactivate();
@@ -661,6 +684,15 @@ public class Emulator : MonoBehaviour
                 Debug.LogWarning(msg);
             }
         }
+    }
+
+    BizhawkArgs MakeBizhawkArgs() {
+        return new BizhawkArgs {
+            passInputFromUnity = passInputFromUnity,
+            captureEmulatorAudio = captureEmulatorAudio,
+            acceptBackgroundInput = acceptBackgroundInput,
+            showBizhawkGui = showBizhawkGui
+        };
     }
 
     // Send audio from the emulator to the AudioSource

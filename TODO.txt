@@ -11,8 +11,6 @@
 
  - update BizHawk (to 2.9.1?)
 
- - restart emulator when (relevant) params change
-
  X pass current frame count along with texture to make syncing possible
  - and perhaps a built-in solution for frame-perfect syncing (between lua rpc calls and the texture)?
 
