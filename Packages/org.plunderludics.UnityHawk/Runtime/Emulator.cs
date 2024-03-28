@@ -78,6 +78,9 @@ public class Emulator : MonoBehaviour
     public bool showBizhawkGui = false;
     [Header("Debug")]
     public bool writeBizhawkLogs = true;
+
+
+
     [ShowIf("writeBizhawkLogs")]
     [ReadOnly, SerializeField] string bizhawkLogLocation;
 
@@ -247,7 +250,8 @@ public class Emulator : MonoBehaviour
 
     void OnEnable()
     {
-        // Debug.Log("Emulator OnEnable");
+        // Debug.Log($"Emulator OnEnable");
+        if (Undo.isProcessing) return; // OnEnable gets called after undo/redo, but ignore it
         _initialized = false;
         if (runInEditMode || Application.isPlaying) {
             Initialize();
@@ -259,7 +263,8 @@ public class Emulator : MonoBehaviour
     }
 
     void OnDisable() {
-        // Debug.Log("Emulator OnDisable");
+        // Debug.Log($"Emulator OnDisable");
+        if (Undo.isProcessing) return; // OnDisable gets called after undo/redo, but ignore it
         if (_initialized) {
             Deactivate();
         }
@@ -366,12 +371,8 @@ public class Emulator : MonoBehaviour
                 if (inputProvider == null) {
                     inputProvider = gameObject.AddComponent<BasicInputProvider>();
                 }
-
-                if (runInEditMode) {
-                }
             }
         } else if (runInEditMode) {
-            Debug.LogWarning("passInputFromUnity is enabled but will continue");
             if (acceptBackgroundInput) {
                 args.Add($"--accept-background-input");
             }
@@ -694,6 +695,7 @@ public class Emulator : MonoBehaviour
             }
         }
     }
+    
 
     // helper methods for circular audio buffer [should probably go in different class]
     private int AudioBufferCount() {

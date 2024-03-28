@@ -40,8 +40,6 @@
 
  - option to reduce build size by including savestates but not roms (possible for samples that never need to load from disk)
 
- - fix annoying behavior where emulator resets when you hit ctrl-z in editor [why does unity call OnDisable + OnEnable whenever you undo in the editor? seems to be not documented anywhere]
-
  - better process for building and updating the upm branch
  
  - tweak default config to not spew so much stuff into the Packages/ directory
