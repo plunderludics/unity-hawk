@@ -26,6 +26,11 @@ public class GenericInputProvider : InputProvider {
     [Serializable]
     // class rather than struct so that it can be conveniently edited by reference at runtime
     public class Action2Key {
+        public Action2Key(Action2Key other) {
+            action = other.action;
+            keyName = other.keyName;
+            enabled = other.enabled;
+        }
         public InputActionReference action;
         public string keyName;
         public bool enabled = true;
@@ -59,7 +64,7 @@ public class GenericInputProvider : InputProvider {
     List<InputEvent> pressed = new();
     public virtual void Start() {
         if (useMappingObject) {
-            mapping = new(mappingObject.All); // must be a copy!
+            CopyMappingFromMappingObject();
         }
 
         var mappingsDict = mapping.ToDictionary(
@@ -116,7 +121,7 @@ public class GenericInputProvider : InputProvider {
     void Update() {
         // Minor hack so the mapping list is populated from the mapping object when unticking 'use mapping object' in edit mode
         if (useMappingObject) {
-            mapping = new(mappingObject.All); // hve to make a copy!
+            CopyMappingFromMappingObject();
         }
     }
 
@@ -145,6 +150,15 @@ public class GenericInputProvider : InputProvider {
                 return null;
             }
         }
+    }
+
+    private void CopyMappingFromMappingObject() {
+        // Have to copy every mapping which is annoying
+        // So that we can copy from the mappingObject into the mapping
+        // and then make changes without affecting the original
+        mapping = mappingObject.All.Select((Action2Key a2k) => {
+            return new Action2Key(a2k);
+        }).ToList();
     }
 #else
     // Input system not enabled, just log an error on start

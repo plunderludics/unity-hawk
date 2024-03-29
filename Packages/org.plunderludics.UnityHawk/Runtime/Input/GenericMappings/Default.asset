@@ -15,46 +15,46 @@ MonoBehaviour:
   All:
   - action: {fileID: 603034383148328663, guid: 3210f9c94fff9724d9b448ef21abe21a, type: 3}
     keyName: Return
-    disable: 0
+    enabled: 1
   - action: {fileID: -7613962131040797418, guid: 3210f9c94fff9724d9b448ef21abe21a, type: 3}
     keyName: Space
-    disable: 0
+    enabled: 1
   - action: {fileID: -7301321556746296336, guid: 3210f9c94fff9724d9b448ef21abe21a, type: 3}
     keyName: Left
-    disable: 0
+    enabled: 1
   - action: {fileID: -7364878396652934732, guid: 3210f9c94fff9724d9b448ef21abe21a, type: 3}
     keyName: Right
-    disable: 0
+    enabled: 1
   - action: {fileID: 8169854821649047475, guid: 3210f9c94fff9724d9b448ef21abe21a, type: 3}
     keyName: Up
-    disable: 0
+    enabled: 1
   - action: {fileID: -7185891480465749369, guid: 3210f9c94fff9724d9b448ef21abe21a, type: 3}
     keyName: Down
-    disable: 0
+    enabled: 1
   - action: {fileID: 1325312342188776178, guid: 3210f9c94fff9724d9b448ef21abe21a, type: 3}
     keyName: Q
-    disable: 0
+    enabled: 1
   - action: {fileID: 6192581727618293595, guid: 3210f9c94fff9724d9b448ef21abe21a, type: 3}
     keyName: W
-    disable: 0
+    enabled: 1
   - action: {fileID: -6704713936166948424, guid: 3210f9c94fff9724d9b448ef21abe21a, type: 3}
     keyName: E
-    disable: 0
+    enabled: 1
   - action: {fileID: -8099305800166614145, guid: 3210f9c94fff9724d9b448ef21abe21a, type: 3}
     keyName: A
-    disable: 0
+    enabled: 1
   - action: {fileID: 2643467624890297052, guid: 3210f9c94fff9724d9b448ef21abe21a, type: 3}
     keyName: S
-    disable: 0
+    enabled: 1
   - action: {fileID: -1095893798846664409, guid: 3210f9c94fff9724d9b448ef21abe21a, type: 3}
     keyName: D
-    disable: 0
+    enabled: 1
   - action: {fileID: 5025910822003037170, guid: 3210f9c94fff9724d9b448ef21abe21a, type: 3}
     keyName: Z
-    disable: 0
+    enabled: 1
   - action: {fileID: -7506466974729977981, guid: 3210f9c94fff9724d9b448ef21abe21a, type: 3}
     keyName: X
-    disable: 0
+    enabled: 1
   - action: {fileID: 534147393459622111, guid: 3210f9c94fff9724d9b448ef21abe21a, type: 3}
     keyName: C
-    disable: 0
+    enabled: 1
