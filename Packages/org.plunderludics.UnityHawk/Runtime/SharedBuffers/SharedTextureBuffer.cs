@@ -1,6 +1,6 @@
 using SharedMemory;
 
-public class SharedTextureBuffer : ISharedBuffer{
+public class SharedTextureBuffer : ISharedBuffer {
     private string _name;
     private string _trueName;
     private int _index;

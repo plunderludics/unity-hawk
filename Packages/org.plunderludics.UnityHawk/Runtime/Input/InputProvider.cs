@@ -19,6 +19,7 @@ public abstract class InputProvider : MonoBehaviour {
 
     // Return a list of input events for the frame, in chronological order
     public abstract List<InputEvent> InputForFrame();
+    public abstract Dictionary<string, int> AxisValuesForFrame();
 }
 
 }

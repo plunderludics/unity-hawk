@@ -1,8 +1,8 @@
 {
-    "name": "InputActions",
+    "name": "DefaultInputActions",
     "maps": [
         {
-            "name": "UnityHawk",
+            "name": "KeyInputs",
             "id": "9c152035-8400-4bdd-9e14-92232c4a6ccc",
             "actions": [
                 {
@@ -384,6 +384,76 @@
                     "processors": "",
                     "groups": "",
                     "action": "Space",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                }
+            ]
+        },
+        {
+            "name": "AnalogInputs",
+            "id": "fc7cdf4a-7450-463a-a686-fdfab62b0869",
+            "actions": [
+                {
+                    "name": "Horizontal",
+                    "type": "Value",
+                    "id": "e28ad752-9bdc-4c1d-83bd-8fdc17b33ce5",
+                    "expectedControlType": "Button",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": true
+                },
+                {
+                    "name": "Vertical",
+                    "type": "Value",
+                    "id": "8ac0ae01-2b1d-4a4d-8420-2526463ab1e1",
+                    "expectedControlType": "Button",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": true
+                }
+            ],
+            "bindings": [
+                {
+                    "name": "",
+                    "id": "54d4960d-5812-4d0c-a2ae-e8a298f5bd05",
+                    "path": "<Keyboard>/upArrow",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "Vertical",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "d0760390-ba89-4cf0-a875-b65e71864196",
+                    "path": "<Keyboard>/downArrow",
+                    "interactions": "",
+                    "processors": "Invert",
+                    "groups": "",
+                    "action": "Vertical",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "be9c6c73-7d63-427e-b344-66ac783ed5b2",
+                    "path": "<Keyboard>/leftArrow",
+                    "interactions": "",
+                    "processors": "Invert",
+                    "groups": "",
+                    "action": "Horizontal",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "7d9ed535-6a9a-4c27-9536-0fd2e0433bda",
+                    "path": "<Keyboard>/rightArrow",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "Horizontal",
                     "isComposite": false,
                     "isPartOfComposite": false
                 }

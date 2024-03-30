@@ -6,7 +6,7 @@ using System;
 using UnityEngine;
 using SharedMemory;
 using BizHawk.UnityHawk;
-public class SharedAudioBuffer : ISharedBuffer{
+public class SharedAudioBuffer : ISharedBuffer {
     private string _name;
     private RpcBuffer _audioRpcBuffer;
     private RpcBuffer _samplesNeededRpcBuffer;

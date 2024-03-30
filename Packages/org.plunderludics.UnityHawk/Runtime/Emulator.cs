@@ -138,8 +138,11 @@ public class Emulator : MonoBehaviour
     string _sharedTextureBufferName;
     SharedTextureBuffer _sharedTextureBuffer;
 
-    string _sharedInputBufferName;
-    SharedInputBuffer _sharedInputBuffer;
+    string _sharedKeyInputBufferName;
+    SharedKeyInputBuffer _sharedKeyInputBuffer;
+    
+    string _sharedAnalogInputBufferName;
+    SharedAnalogInputBuffer _sharedAnalogInputBuffer;
 
     Texture2D _bufferTexture;
 
@@ -267,7 +270,9 @@ public class Emulator : MonoBehaviour
     void OnEnable()
     {
         // Debug.Log($"Emulator OnEnable");
+#if UNITY_EDITOR
         if (Undo.isProcessing) return; // OnEnable gets called after undo/redo, but ignore it
+#endif
         _initialized = false;
         if (runInEditMode || Application.isPlaying) {
             Initialize();
@@ -280,7 +285,9 @@ public class Emulator : MonoBehaviour
 
     void OnDisable() {
         // Debug.Log($"Emulator OnDisable");
+#if UNITY_EDITOR
         if (Undo.isProcessing) return; // OnDisable gets called after undo/redo, but ignore it
+#endif
         if (_initialized) {
             Deactivate();
         }
@@ -380,8 +387,11 @@ public class Emulator : MonoBehaviour
 
         if (Application.isPlaying) {
             if (passInputFromUnity) {
-                _sharedInputBufferName = $"unityhawk-input-{randomNumber}";
-                args.Add($"--read-input-from-shared-buffer={_sharedInputBufferName}");
+                _sharedKeyInputBufferName = $"unityhawk-key-input-{randomNumber}";
+                args.Add($"--read-key-input-from-shared-buffer={_sharedKeyInputBufferName}");
+
+                _sharedAnalogInputBufferName = $"unityhawk-analog-input-{randomNumber}";
+                args.Add($"--read-analog-input-from-shared-buffer={_sharedAnalogInputBufferName}");
 
                 // default to BasicInputProvider (maps keys directly from keyboard)
                 if (inputProvider == null) {
@@ -439,8 +449,9 @@ public class Emulator : MonoBehaviour
         _sharedTextureBuffer = new SharedTextureBuffer(_sharedTextureBufferName);
         _callMethodRpcBuffer = new CallMethodRpcBuffer(_callMethodRpcBufferName, CallRegisteredMethod);
         _apiCallBuffer = new ApiCallBuffer(_apiCallBufferName);
-        if (passInputFromUnity) {        
-            _sharedInputBuffer = new SharedInputBuffer(_sharedInputBufferName);
+        if (passInputFromUnity) {
+            _sharedKeyInputBuffer = new SharedKeyInputBuffer(_sharedKeyInputBufferName);
+            _sharedAnalogInputBuffer = new SharedAnalogInputBuffer(_sharedAnalogInputBufferName);
         }
         if (captureEmulatorAudio) {
             _sharedAudioBuffer = new SharedAudioBuffer(_sharedAudioBufferName, getSamplesNeeded: () => {
@@ -496,15 +507,24 @@ public class Emulator : MonoBehaviour
 
         if (passInputFromUnity && Application.isPlaying) {
             List<InputEvent> inputEvents = inputProvider.InputForFrame();
-            if (_sharedInputBuffer.IsOpen()) {
+            if (_sharedKeyInputBuffer.IsOpen()) {
                 WriteInputToBuffer(inputEvents);
             } else {
-                AttemptOpenBuffer(_sharedInputBuffer);
+                AttemptOpenBuffer(_sharedKeyInputBuffer);
+            }
+
+            if (_sharedAnalogInputBuffer.IsOpen()) {
+                WriteAxisValuesToBuffer(inputProvider.AxisValuesForFrame());
+            } else {
+                AttemptOpenBuffer(_sharedAnalogInputBuffer);
             }
         }
 
         if (!_callMethodRpcBuffer.IsOpen()) {
             AttemptOpenBuffer(_callMethodRpcBuffer);
+        }
+        if (!_apiCallBuffer.IsOpen()) {
+            AttemptOpenBuffer(_apiCallBuffer);
         }
         if (!_apiCallBuffer.IsOpen()) {
             AttemptOpenBuffer(_apiCallBuffer);
@@ -545,8 +565,11 @@ public class Emulator : MonoBehaviour
             // Convert Unity InputEvent to BizHawk InputEvent
             // [for now only supporting keys, no gamepad]
             BizHawk.UnityHawk.InputEvent bie = ConvertInput.ToBizHawk(ie);
-            _sharedInputBuffer.Write(bie);
+            _sharedKeyInputBuffer.Write(bie);
         }
+    }
+    void WriteAxisValuesToBuffer(Dictionary<string, int> axisValues) {
+        _sharedAnalogInputBuffer.Write(axisValues);
     }
 
     // Request audio samples (since last call) from Bizhawk, and store them into a buffer

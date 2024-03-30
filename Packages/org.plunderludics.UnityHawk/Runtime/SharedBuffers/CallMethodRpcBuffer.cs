@@ -2,7 +2,7 @@ using UnityEngine;
 using System;
 using SharedMemory;
 using BizHawk.UnityHawk;
-public class CallMethodRpcBuffer : ISharedBuffer{
+public class CallMethodRpcBuffer : ISharedBuffer {
     private string _name;
     private RpcBuffer _rpcBuffer;
     private Func<string, string, string> _callRegisteredMethod;

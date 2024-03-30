@@ -11,8 +11,11 @@ namespace UnityHawk {
 public class GenericInputMappingObject : ScriptableObject {
 #if ENABLE_INPUT_SYSTEM
     [FormerlySerializedAs("mappings")]
-    [Tooltip("Mappings from unity input action to bizhawk key name")]
-    public List<GenericInputProvider.Action2Key> All;
+    [Tooltip("Mappings from unity input action to bizhawk key events")]
+    public List<GenericInputProvider.Action2Key> keyMappings;
+
+    [Tooltip("Mappings from unity input action to bizhawk analog inputs")]
+    public List<GenericInputProvider.Action2Axis> axisMappings;
 #endif
 }
 
