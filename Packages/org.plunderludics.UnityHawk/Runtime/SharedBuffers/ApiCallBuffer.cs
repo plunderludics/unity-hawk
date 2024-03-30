@@ -6,7 +6,7 @@ using UnityEngine;
 using SharedMemory;
 using BizHawk.UnityHawk;
 using Plunderludics.UnityHawk;
-public class ApiCallBuffer : ISharedBuffer{
+public class ApiCallBuffer : ISharedBuffer {
     private string _name;
     private CircularBuffer _buffer; // [should this be ReadWriteBuffer instead?]
     public ApiCallBuffer(string name) {

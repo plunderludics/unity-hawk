@@ -7,9 +7,7 @@ using UnityEngine.InputSystem;
 namespace UnityHawk {
 
 // Just gets key events directly from Unity (via old input system)
-// TODO support new input system as well
 public class BasicInputProvider : InputProvider {
-    // Queue<InputEvent> _eventQueue;
     System.Array _allKeyCodes;
 
     public BasicInputProvider() {
@@ -64,6 +62,11 @@ public class BasicInputProvider : InputProvider {
         }
 
         return pressed;
+    }
+
+    public override Dictionary<string, int> AxisValuesForFrame() {
+        // No support for analog input
+        return new();
     }
 }
 

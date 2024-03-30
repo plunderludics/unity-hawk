@@ -117,6 +117,14 @@ public class GenericInputProvider : InputProvider {
         pressed.Clear();
         return flush;
     }
+    
+    public override Dictionary<string, int> AxisValuesForFrame()
+    {
+        // TODO
+        var axisValues = new Dictionary<string, int>();
+        // axisValues["X1 LeftThumbX Axis"] = 9999; // this seems to be roughly the max value for bizhawk (at least for n64)
+        return axisValues;
+    }
 
     void Update() {
         // Minor hack so the mapping list is populated from the mapping object when unticking 'use mapping object' in edit mode
@@ -168,7 +176,8 @@ public class GenericInputProvider : InputProvider {
     
     // Still need a dummy implementation of the interface:
     public override List<InputEvent> InputForFrame() {return new()}
+    public override Dictionary<string, int> InputForFrame() {return new()}
 #endif
-}
+    }
 
 }
