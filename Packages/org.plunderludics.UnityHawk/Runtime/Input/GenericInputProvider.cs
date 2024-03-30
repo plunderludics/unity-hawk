@@ -4,6 +4,7 @@ using System.Linq;
 using NaughtyAttributes;
 using UnityEngine;
 using UnityEngine.Serialization;
+
 #if ENABLE_INPUT_SYSTEM
 using UnityEngine.InputSystem;
 #endif
@@ -24,16 +25,24 @@ public class GenericInputProvider : InputProvider {
     }
 
     [Serializable]
-    // class rather than struct so that it can be conveniently edited by reference at runtime
     public class Action2Key {
+        public InputActionReference action;
+        [FormerlySerializedAs("keyName")]
+        [Tooltip("Name of key/axis on the Bizhawk side")]
+        public string inputName;
+        public bool enabled = true;
         public Action2Key(Action2Key other) {
             action = other.action;
-            keyName = other.keyName;
+            inputName = other.inputName;
             enabled = other.enabled;
         }
-        public InputActionReference action;
-        public string keyName;
-        public bool enabled = true;
+    }
+    [Serializable]
+    public class Action2Axis : Action2Key {
+        public float scale = 1f;
+        public Action2Axis(Action2Axis other) : base(other) {
+            scale = other.scale;
+        }
     }
 
     [Header("Mappings")]
@@ -41,12 +50,17 @@ public class GenericInputProvider : InputProvider {
     [SerializeField] bool useMappingObject;
 
     [HideIf("useMappingObject")]
-    [Tooltip("the unity input to bizhawk keyboard mapping. (Doesn't support editing at runtime!)")]
-    [SerializeField] List<Action2Key> mapping;
+    [Tooltip("the unity input to bizhawk keyboard mapping")]
+    [SerializeField] List<Action2Key> keyMappings;
+    [HideIf("useMappingObject")]
+    [Tooltip("the unity input to bizhawk analog input mapping")]
+    [SerializeField] List<Action2Axis> axisMappings;
 
-    [FormerlySerializedAs("mappings")]
     [ShowIf("useMappingObject")]
     [SerializeField] GenericInputMappingObject mappingObject;
+
+    [Tooltip("Max value of axis input")]
+    [SerializeField] float axisScale = 10000; // [Idk about this but 10000 seems to be ~right for N64 at least]
 
     [Header("Sources")]
     [Tooltip("can the input come from any source?")]
@@ -67,20 +81,25 @@ public class GenericInputProvider : InputProvider {
             CopyMappingFromMappingObject();
         }
 
-        var mappingsDict = mapping.ToDictionary(
+        var mappingsDict = keyMappings.ToDictionary(
             m => m.action.action.id,
             m => m
         );
-        foreach (var action2Key in mapping) {
+        foreach (var a2k in keyMappings) {
+            // Add press/release callbacks for key mappings
+            if (a2k.action.action.type != InputActionType.Button) {
+                Debug.LogWarning($"Mapping from {a2k.action.action.name} to {a2k.inputName} is type {a2k.action.action.type}, should probably be Button for key events");
+            }
+
             // [I don't get why you have to manually enable all the actions, but ok]
-            action2Key.action.action.Enable();
+            a2k.action.action.Enable();
 
             // NOTE from mut: i think this is a MAJOR hack to avoid using the player feature
             // unity has by default, where it manages creating new players for devices
             // unfortunately, i couldn't find a way to get the device when polling,
             // so had to change this to use events and flush on read
-            // down
-            action2Key.action.action.started += ctx => {
+            // press
+            a2k.action.action.started += ctx => {
                 // Debug.Log($"[unity-hawk] pressed {ctx.action.name} {ctx.control.device.name}");
                 if(ctx.control.device != targetDevice) {
                     return;
@@ -89,12 +108,12 @@ public class GenericInputProvider : InputProvider {
                     return;
                 }
                 pressed.Add(new InputEvent {
-                    keyName = mappingsDict[ctx.action.id].keyName,
+                    keyName = mappingsDict[ctx.action.id].inputName,
                     isPressed = true
                 });
             };
             // release
-            action2Key.action.action.canceled += ctx => {
+            a2k.action.action.canceled += ctx => {
                 // Debug.Log($"pressed {ctx.action.name} {ctx.control.device.name}");
                 if(ctx.control.device != targetDevice) {
                     return;
@@ -103,10 +122,15 @@ public class GenericInputProvider : InputProvider {
                     return;
                 }
                 pressed.Add(new InputEvent {
-                    keyName = mappingsDict[ctx.action.id].keyName,
+                    keyName = mappingsDict[ctx.action.id].inputName,
                     isPressed = false
                 });
             };
+        }
+
+        // Also have to enable all the axis mappings
+        foreach (var a2a in axisMappings) {
+            a2a.action.action.Enable();
         }
     }
     
@@ -120,8 +144,19 @@ public class GenericInputProvider : InputProvider {
     
     public override Dictionary<string, int> AxisValuesForFrame()
     {
-        // TODO
         var axisValues = new Dictionary<string, int>();
+
+        // Send latest values for actions of type Value or PassThrough (not Button)
+        foreach (var a2k in axisMappings) {
+            if (!a2k.enabled) continue;
+
+            if (a2k.action.action.type == InputActionType.Button) {
+                Debug.LogWarning($"Mapping from {a2k.action.action.name} to {a2k.inputName} is type {a2k.action.action.type}, should probably be PassThrough or Value for analog inputs");
+            }
+
+            axisValues[a2k.inputName] = (int)(axisScale*a2k.scale*a2k.action.action.ReadValue<float>());
+        }
+
         // axisValues["X1 LeftThumbX Axis"] = 9999; // this seems to be roughly the max value for bizhawk (at least for n64)
         return axisValues;
     }
@@ -161,11 +196,14 @@ public class GenericInputProvider : InputProvider {
     }
 
     private void CopyMappingFromMappingObject() {
-        // Have to copy every mapping which is annoying
         // So that we can copy from the mappingObject into the mapping
         // and then make changes without affecting the original
-        mapping = mappingObject.All.Select((Action2Key a2k) => {
+        keyMappings = mappingObject.keyMappings.Select((Action2Key a2k) => {
             return new Action2Key(a2k);
+        }).ToList();
+
+        axisMappings = mappingObject.axisMappings.Select((Action2Axis a2a) => {
+            return new Action2Axis(a2a);
         }).ToList();
     }
 #else
