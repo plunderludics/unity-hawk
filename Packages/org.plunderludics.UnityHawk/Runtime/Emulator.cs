@@ -270,7 +270,9 @@ public class Emulator : MonoBehaviour
     void OnEnable()
     {
         // Debug.Log($"Emulator OnEnable");
+#if UNITY_EDITOR
         if (Undo.isProcessing) return; // OnEnable gets called after undo/redo, but ignore it
+#endif
         _initialized = false;
         if (runInEditMode || Application.isPlaying) {
             Initialize();
@@ -283,7 +285,9 @@ public class Emulator : MonoBehaviour
 
     void OnDisable() {
         // Debug.Log($"Emulator OnDisable");
+#if UNITY_EDITOR
         if (Undo.isProcessing) return; // OnDisable gets called after undo/redo, but ignore it
+#endif
         if (_initialized) {
             Deactivate();
         }
