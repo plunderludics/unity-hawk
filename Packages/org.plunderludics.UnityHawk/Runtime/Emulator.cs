@@ -71,34 +71,40 @@ public class Emulator : MonoBehaviour
     private const string firmwareDirName = "Firmware"; // Firmware loaded from StreamingAssets/Firmware
 
     [Header("Development")]
+    public bool showBizhawkGui = false;
+    [ReadOnlyWhenPlaying]
     public new bool runInEditMode = false;
     [ShowIf("runInEditMode")]
+    [ReadOnlyWhenPlaying]
     [Tooltip("Whether BizHawk will accept input when window is unfocused (in edit mode)")]
     public bool acceptBackgroundInput = true;
-    public bool showBizhawkGui = false;
-    [Header("Debug")]
-    public bool writeBizhawkLogs = true;
-
-
-
-    [ShowIf("writeBizhawkLogs")]
-    [ReadOnly, SerializeField] string bizhawkLogLocation;
-
+    [Foldout("Debug")]
     [ReadOnly, SerializeField] bool _initialized;
     public enum EmulatorStatus {
         Inactive,
         Started, // Underlying bizhawk has been started, but not rendering yet
         Running  // Bizhawk is running and sending textures [technically gets set when shared texture channel is open]
     }
+    [Foldout("Debug")]
     [ReadOnly, SerializeField] EmulatorStatus _status;
+    [Foldout("Debug")]
     [ReadOnly, SerializeField] int _currentFrame; // The frame index of the most-recently grabbed texture
 
     // Just for convenient reading from inspector:
+    [Foldout("Debug")]
     [ReadOnly, SerializeField] Vector2Int _textureSize;
+    [Foldout("Debug")]
+    public bool writeBizhawkLogs = true;
+    [ShowIf("writeBizhawkLogs")]
+    [Foldout("Debug")]
+    [ReadOnly, SerializeField] string bizhawkLogLocation;
+    
+    [Foldout("Debug")]
+    [ShowIf("captureEmulatorAudio")]
+    [Tooltip("Higher value means more audio latency. Lower value may cause crackles and pops")]
+    public int audioBufferSurplus = (int)(2*44100*0.05);
 
     private static string bizhawkLogDirectory = "BizHawkLogs";
-
-    // [Make these public for debugging texture stuff]
     private TextureFormat textureFormat = TextureFormat.BGRA32;
     private RenderTextureFormat renderTextureFormat = RenderTextureFormat.BGRA32;
 
@@ -147,9 +153,7 @@ public class Emulator : MonoBehaviour
     Texture2D _bufferTexture;
 
     static int AudioBufferSize = (int)(2*44100*1); // Size of local audio buffer, 1 sec should be plenty
-    [ShowIf("captureEmulatorAudio")]
-    [Tooltip("Higher value means more audio latency. Lower value may cause crackles and pops")]
-    public int audioBufferSurplus = (int)(2*44100*0.05);
+
     // ^ This is the actual 'buffer' part - samples that are retained after passing audio to unity.
     // Smaller surplus -> less latency but more clicks & pops (when bizhawk fails to provide audio in time)
     // 50ms seems to be an ok compromise (but probably depends on host machine, users can configure if needed)
@@ -194,6 +198,7 @@ public class Emulator : MonoBehaviour
                 // Outside StreamingAssets, use absolute path
                 romFileName = path;
             }
+            Reset();
         }
     }
 
@@ -203,6 +208,7 @@ public class Emulator : MonoBehaviour
         string path = EditorUtility.OpenFilePanel("Sample", "", "");
         if (!String.IsNullOrEmpty(path)) {
             SetFromSample(path);
+            Reset();
         }
     }
 #endif
@@ -397,6 +403,9 @@ public class Emulator : MonoBehaviour
                 if (inputProvider == null) {
                     inputProvider = gameObject.AddComponent<BasicInputProvider>();
                 }
+            } else {
+                // Always accept background input in play mode if not getting input from unity
+                args.Add($"--accept-background-input");
             }
         } else if (runInEditMode) {
             if (acceptBackgroundInput) {
