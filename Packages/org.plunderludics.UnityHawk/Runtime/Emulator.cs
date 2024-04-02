@@ -64,10 +64,6 @@ public class Emulator : MonoBehaviour
     public string saveStateFileName = ""; // Leave empty to boot clean
     public string luaScriptFileName;
 
-    [Header("Other paths")]
-    [Tooltip("Default directory for BizHawk to save savestates (doesn't work in build)")]
-    public string savestatesOutputDir = "";
-
     private const string firmwareDirName = "Firmware"; // Firmware loaded from StreamingAssets/Firmware
 
     [Header("Development")]
@@ -78,6 +74,9 @@ public class Emulator : MonoBehaviour
     [ReadOnlyWhenPlaying]
     [Tooltip("Whether BizHawk will accept input when window is unfocused (in edit mode)")]
     public bool acceptBackgroundInput = true;
+    [Tooltip("Default directory for BizHawk to save savestates (ignored in build)")]
+    public string savestatesOutputDir = "";
+
     [Foldout("Debug")]
     [ReadOnly, SerializeField] bool _initialized;
     public enum EmulatorStatus {
