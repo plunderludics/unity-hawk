@@ -58,15 +58,33 @@ public class Emulator : MonoBehaviour
     public bool captureEmulatorAudio = true;
 
     [Header("Files")]
+    public bool useManualPathnames = true; // eventually should default to false but make it true for now to avoid breaking older projects
+    [HideIf("useManualPathnames")]
+    public DefaultAsset romFile;
+    [HideIf("useManualPathnames")]
+    public DefaultAsset saveStateFile;
+    [HideIf("useManualPathnames")]
+    public DefaultAsset configFile;
+    [HideIf("useManualPathnames")]
+    public DefaultAsset luaScriptFile;
+
     // All pathnames are loaded relative to ./StreamingAssets/, unless the pathname is absolute (see GetAssetPath)
+    [EnableIf("useManualPathnames")]
     public string romFileName = "Roms/mario.nes";
-    public string configFileName = ""; // Leave empty for default config.ini
+    [EnableIf("useManualPathnames")]
     public string saveStateFileName = ""; // Leave empty to boot clean
+    [EnableIf("useManualPathnames")]
+    public string configFileName = ""; // Leave empty for default config.ini
+    [EnableIf("useManualPathnames")]
     public string luaScriptFileName;
 
     [Header("Other paths")]
+    [HideIf("useManualPathnames")]
+    public DefaultAsset savestatesDirectory;
     [Tooltip("Default directory for BizHawk to save savestates")]
-    public string savestatesDirectory = "";
+    // TODO how to handle this in the referenced asset model (probably just a path still i guess, or a directory)
+    [EnableIf("useManualPathnames")]
+    public string savestatesDirectoryName = "";
 
     private const string firmwareDirName = "Firmware"; // Firmware loaded from StreamingAssets/Firmware
 
@@ -328,29 +346,44 @@ public class Emulator : MonoBehaviour
         _audioSamplesNeeded = 0;
         AudioBufferClear();
 
+        // For input files, convert asset references to filenames
+        // (because bizhawk needs the actual file on disk)
+        if (!useManualPathnames) {
+            // Set filename params based on asset locations
+            // [using absolute path is not really ideal here but ok for now]
+            static string GetAssetPathName(DefaultAsset f) =>
+                f ? Path.GetFullPath(AssetDatabase.GetAssetPath(f)) : null;
+            romFileName = GetAssetPathName(romFile);
+            saveStateFileName = GetAssetPathName(saveStateFile);
+            configFileName = GetAssetPathName(configFile);
+            luaScriptFileName = GetAssetPathName(luaScriptFile);
+
+            savestatesDirectoryName = GetAssetPathName(savestatesDirectory);
+        }
+
         // Process filename args
-        string configPath;
-        if (String.IsNullOrEmpty(configFileName)) {
-            configPath = Path.GetFullPath(Paths.defaultConfigPath);
-        } else {
-            configPath = Paths.GetAssetPath(configFileName);
-        }
-
         string romPath = Paths.GetAssetPath(romFileName);
-
-        string luaScriptFullPath = null;
-        if (!string.IsNullOrEmpty(luaScriptFileName)) {
-            luaScriptFullPath = Paths.GetAssetPath(luaScriptFileName);
-        }
 
         string saveStateFullPath = null;
         if (!String.IsNullOrEmpty(saveStateFileName)) {
             saveStateFullPath = Paths.GetAssetPath(saveStateFileName);
         }
+        
+        string configPath;
+        if (string.IsNullOrEmpty(configFileName)) {
+            configPath = Path.GetFullPath(Paths.defaultConfigPath);
+        } else {
+            configPath = Paths.GetAssetPath(configFileName);
+        }
+        
+        string luaScriptFullPath = null;
+        if (!string.IsNullOrEmpty(luaScriptFileName)) {
+            luaScriptFullPath = Paths.GetAssetPath(luaScriptFileName);
+        }
 
-        string savestatesDirectoryFullPath = Paths.GetAssetPath(savestatesDirectory);
+        string savestatesDirectoryFullPath = Paths.GetAssetPath(savestatesDirectoryName);
 
-        // start _emuhawk.exe w args
+        // Start EmuHawk.exe w args
         string exePath = Path.GetFullPath(Paths.emuhawkExePath);
         _emuhawk = new Process();
         _emuhawk.StartInfo.UseShellExecute = false;
