@@ -78,14 +78,7 @@ public class Emulator : MonoBehaviour
     [EnableIf("useManualPathnames")]
     public string luaScriptFileName;
 
-    [Header("Other paths")]
-    [HideIf("useManualPathnames")]
-    public DefaultAsset savestatesDirectory;
-    [Tooltip("Default directory for BizHawk to save savestates")]
-    // TODO how to handle this in the referenced asset model (probably just a path still i guess, or a directory)
-    [EnableIf("useManualPathnames")]
-    public string savestatesDirectoryName = "";
-
+    // Todo: Firmware should be DefaultAsset reference as well
     private const string firmwareDirName = "Firmware"; // Firmware loaded from StreamingAssets/Firmware
 
     [Header("Development")]
@@ -96,6 +89,13 @@ public class Emulator : MonoBehaviour
     [ReadOnlyWhenPlaying]
     [Tooltip("Whether BizHawk will accept input when window is unfocused (in edit mode)")]
     public bool acceptBackgroundInput = true;
+    
+    [HideIf("useManualPathnames")]
+    public DefaultAsset savestatesDirectory;
+    [Tooltip("Default directory for BizHawk to save savestates (ignored in build)")]
+    [EnableIf("useManualPathnames")]
+    public string savestatesOutputDir = "";
+
     [Foldout("Debug")]
     [ReadOnly, SerializeField] bool _initialized;
     public enum EmulatorStatus {
@@ -228,6 +228,12 @@ public class Emulator : MonoBehaviour
             SetFromSample(path);
             Reset();
         }
+    }
+    
+    // Set filename fields based on sample directory
+    [Button(enabledMode: EButtonEnableMode.Editor)]
+    private void ShowBizhawkLogInOS() {
+        EditorUtility.RevealInFinder(bizhawkLogLocation);
     }
 #endif
 
@@ -381,7 +387,12 @@ public class Emulator : MonoBehaviour
             luaScriptFullPath = Paths.GetAssetPath(luaScriptFileName);
         }
 
-        string savestatesDirectoryFullPath = Paths.GetAssetPath(savestatesDirectoryName);
+        if (!Application.isEditor) {
+            // BizHawk tries to create the savestate dir if it doesn't exist, which can cause crashes
+            // As a hacky solution in the build just point to StreamingAssets, this overrides of any absolute path that might be in the config file
+            savestatesOutputDir = "";
+        }
+        string savestatesOutputDirFullPath = Paths.GetAssetPath(savestatesOutputDir);
 
         // Start EmuHawk.exe w args
         string exePath = Path.GetFullPath(Paths.emuhawkExePath);
@@ -404,7 +415,7 @@ public class Emulator : MonoBehaviour
         }
 
         args.Add($"--firmware={Paths.GetAssetPath(firmwareDirName)}"); // could make this configurable but idk if that's really useful
-        args.Add($"--savestates={savestatesDirectoryFullPath}");
+        args.Add($"--savestates={savestatesOutputDirFullPath}");
 
         if (!showBizhawkGui) {
             args.Add("--headless");
