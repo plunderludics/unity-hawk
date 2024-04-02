@@ -67,6 +67,8 @@ public class Emulator : MonoBehaviour
     public DefaultAsset configFile;
     [HideIf("useManualPathnames")]
     public DefaultAsset luaScriptFile;
+    [HideIf("useManualPathnames")]
+    public DefaultAsset firmwareDirectory;
 
     // All pathnames are loaded relative to ./StreamingAssets/, unless the pathname is absolute (see GetAssetPath)
     [EnableIf("useManualPathnames")]
@@ -77,9 +79,8 @@ public class Emulator : MonoBehaviour
     public string configFileName = ""; // Leave empty for default config.ini
     [EnableIf("useManualPathnames")]
     public string luaScriptFileName;
-
-    // Todo: Firmware should be DefaultAsset reference as well
-    private const string firmwareDirName = "Firmware"; // Firmware loaded from StreamingAssets/Firmware
+    [EnableIf("useManualPathnames")]
+    public string firmwareDirName = "Firmware"; // Firmware loaded from StreamingAssets/Firmware
 
     [Header("Development")]
     public bool showBizhawkGui = false;
@@ -94,7 +95,7 @@ public class Emulator : MonoBehaviour
     public DefaultAsset savestatesDirectory;
     [Tooltip("Default directory for BizHawk to save savestates (ignored in build)")]
     [EnableIf("useManualPathnames")]
-    public string savestatesOutputDir = "";
+    public string savestatesOutputDirName = "";
 
     [Foldout("Debug")]
     [ReadOnly, SerializeField] bool _initialized;
@@ -209,7 +210,7 @@ public class Emulator : MonoBehaviour
     private void PickRom() {
         string path = EditorUtility.OpenFilePanel("Sample", Application.streamingAssetsPath, "");
         if (!String.IsNullOrEmpty(path)) {
-            if (Paths.IsSubPath(Application.streamingAssetsPath, path)) { // TODO move path util methods into separate class
+            if (Paths.IsSubPath(Application.streamingAssetsPath, path)) {
                 // File is within StreamingAssets, use relative path
                 romFileName = Paths.GetRelativePath(path, Application.streamingAssetsPath);
             } else {
@@ -358,13 +359,13 @@ public class Emulator : MonoBehaviour
             // Set filename params based on asset locations
             // [using absolute path is not really ideal here but ok for now]
             static string GetAssetPathName(DefaultAsset f) =>
-                f ? Path.GetFullPath(AssetDatabase.GetAssetPath(f)) : null;
+                f ? Path.GetFullPath(AssetDatabase.GetAssetPath(f)) : "";
             romFileName = GetAssetPathName(romFile);
             saveStateFileName = GetAssetPathName(saveStateFile);
             configFileName = GetAssetPathName(configFile);
             luaScriptFileName = GetAssetPathName(luaScriptFile);
-
-            savestatesDirectoryName = GetAssetPathName(savestatesDirectory);
+            firmwareDirName = GetAssetPathName(firmwareDirectory);
+            savestatesOutputDirName = GetAssetPathName(savestatesDirectory);
         }
 
         // Process filename args
@@ -387,12 +388,18 @@ public class Emulator : MonoBehaviour
             luaScriptFullPath = Paths.GetAssetPath(luaScriptFileName);
         }
 
+        string firmwareDirFullPath = null;
+        if (!string.IsNullOrEmpty(firmwareDirName)) {
+            firmwareDirFullPath = Paths.GetAssetPath(firmwareDirName);
+        }
+
         if (!Application.isEditor) {
             // BizHawk tries to create the savestate dir if it doesn't exist, which can cause crashes
-            // As a hacky solution in the build just point to StreamingAssets, this overrides of any absolute path that might be in the config file
-            savestatesOutputDir = "";
+            // As a hacky solution in the build just point to StreamingAssets, this overrides any absolute path that might be in the config file
+            savestatesOutputDirName = "";
         }
-        string savestatesOutputDirFullPath = Paths.GetAssetPath(savestatesOutputDir);
+        // TODO should default to parent folder of rom if not given
+        string savestatesOutputDirFullPath = Paths.GetAssetPath(savestatesOutputDirName);
 
         // Start EmuHawk.exe w args
         string exePath = Path.GetFullPath(Paths.emuhawkExePath);
@@ -414,7 +421,10 @@ public class Emulator : MonoBehaviour
             _emuhawk.StartInfo.UseShellExecute = false;
         }
 
-        args.Add($"--firmware={Paths.GetAssetPath(firmwareDirName)}"); // could make this configurable but idk if that's really useful
+        if (firmwareDirFullPath != null) {
+            args.Add($"--firmware={firmwareDirFullPath}");
+        }
+
         args.Add($"--savestates={savestatesOutputDirFullPath}");
 
         if (!showBizhawkGui) {
