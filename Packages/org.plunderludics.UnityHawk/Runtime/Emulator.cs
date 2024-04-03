@@ -59,6 +59,8 @@ public class Emulator : MonoBehaviour
 
     [Header("Files")]
     public bool useManualPathnames = true; // eventually should default to false but make it true for now to avoid breaking older projects
+#if UNITY_EDITOR
+// DefaultAsset is only defined in the editor. That's ok because useManualPathnames should always be true in the build (see BuildProcessing.cs)
     [HideIf("useManualPathnames")]
     public DefaultAsset romFile;
     [HideIf("useManualPathnames")]
@@ -69,6 +71,7 @@ public class Emulator : MonoBehaviour
     public DefaultAsset luaScriptFile;
     [HideIf("useManualPathnames")]
     public DefaultAsset firmwareDirectory;
+#endif // UNITY_EDITOR
 
     // All pathnames are loaded relative to ./StreamingAssets/, unless the pathname is absolute (see GetAssetPath)
     [EnableIf("useManualPathnames")]
@@ -90,10 +93,12 @@ public class Emulator : MonoBehaviour
     [ReadOnlyWhenPlaying]
     [Tooltip("Whether BizHawk will accept input when window is unfocused (in edit mode)")]
     public bool acceptBackgroundInput = true;
-    
+
+#if UNITY_EDITOR
     [HideIf("useManualPathnames")]
-    public DefaultAsset savestatesDirectory;
     [Tooltip("Default directory for BizHawk to save savestates (ignored in build)")]
+    public DefaultAsset savestatesOutputDirectory;
+#endif
     [EnableIf("useManualPathnames")]
     public string savestatesOutputDirName = "";
 
@@ -356,23 +361,14 @@ public class Emulator : MonoBehaviour
         // For input files, convert asset references to filenames
         // (because bizhawk needs the actual file on disk)
         if (!useManualPathnames) {
-            // Set filename params based on asset locations
-            // [using absolute path is not really ideal here but ok for now]
-            static string GetAssetPathName(DefaultAsset f) =>
-                f ? Path.GetFullPath(AssetDatabase.GetAssetPath(f)) : "";
-            romFileName = GetAssetPathName(romFile);
-            saveStateFileName = GetAssetPathName(saveStateFile);
-            configFileName = GetAssetPathName(configFile);
-            luaScriptFileName = GetAssetPathName(luaScriptFile);
-            firmwareDirName = GetAssetPathName(firmwareDirectory);
-            savestatesOutputDirName = GetAssetPathName(savestatesDirectory);
+            SetFilenamesFromAssetReferences();
         }
 
         // Process filename args
         string romPath = Paths.GetAssetPath(romFileName);
 
         string saveStateFullPath = null;
-        if (!String.IsNullOrEmpty(saveStateFileName)) {
+        if (!string.IsNullOrEmpty(saveStateFileName)) {
             saveStateFullPath = Paths.GetAssetPath(saveStateFileName);
         }
         
@@ -779,6 +775,27 @@ public class Emulator : MonoBehaviour
             acceptBackgroundInput = acceptBackgroundInput,
             showBizhawkGui = showBizhawkGui
         };
+    }
+    
+    // When using DefaultAsset references to set input file locations (ie when useManualPathnames == false)
+    // Set the filename params based on the location of the DefaultAssets 
+    // (A little awkward but this is a public method because it also needs to be called at build time by BuildProcessing.cs)
+    public void SetFilenamesFromAssetReferences() {
+        // This should only ever be called in the editor - useManualPathnames should always be true in the build
+#if UNITY_EDITOR
+        // Set filename params based on asset locations
+        // [using absolute path is not really ideal here but ok for now]
+        static string GetAssetPathName(DefaultAsset f) =>
+            f ? Path.GetFullPath(AssetDatabase.GetAssetPath(f)) : "";
+        romFileName = GetAssetPathName(romFile);
+        saveStateFileName = GetAssetPathName(saveStateFile);
+        configFileName = GetAssetPathName(configFile);
+        luaScriptFileName = GetAssetPathName(luaScriptFile);
+        firmwareDirName = GetAssetPathName(firmwareDirectory);
+        savestatesOutputDirName = GetAssetPathName(savestatesOutputDirectory);
+#else
+        Debug.LogError("Something is wrong: useManualPathnames should always be enabled in the build");
+#endif
     }
 
     // Send audio from the emulator to the AudioSource
