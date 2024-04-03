@@ -142,12 +142,14 @@ public class Emulator : MonoBehaviour
     // Basically these are the params which, if changed, we want to reset the bizhawk process
     // Don't include the path params here, because then the process gets reset for every character typed/deleted
     struct BizhawkArgs {
+#if UNITY_EDITOR
         public DefaultAsset romFile;
         public DefaultAsset saveStateFile;
         public DefaultAsset configFile;
         public DefaultAsset luaScriptFile;
         public DefaultAsset firmwareDirectory;
         public DefaultAsset savestatesOutputDirectory;
+#endif
         public bool passInputFromUnity;
         public bool captureEmulatorAudio;
         public bool acceptBackgroundInput;
@@ -791,12 +793,14 @@ public class Emulator : MonoBehaviour
 
     BizhawkArgs MakeBizhawkArgs() {
         return new BizhawkArgs {
+#if UNITY_EDITOR
             romFile = romFile,
             saveStateFile = saveStateFile,
             configFile = configFile,
             luaScriptFile = luaScriptFile,
             firmwareDirectory = firmwareDirectory,
             savestatesOutputDirectory = savestatesOutputDirectory,
+#endif
             passInputFromUnity = passInputFromUnity,
             captureEmulatorAudio = captureEmulatorAudio,
             acceptBackgroundInput = acceptBackgroundInput,
@@ -821,7 +825,7 @@ public class Emulator : MonoBehaviour
         firmwareDirName = GetAssetPathName(firmwareDirectory);
         savestatesOutputDirName = GetAssetPathName(savestatesOutputDirectory);
 #else
-        Debug.LogError("Something is wrong: useManualPathnames should always be enabled in the build");
+        Debug.LogError("Something is wrong: SetFilenamesFromAssetReferences should never be called from within a build");
 #endif
     }
 
