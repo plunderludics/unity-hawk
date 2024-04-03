@@ -22,21 +22,23 @@ public class BuildProcessing : IPostprocessBuildWithReport, IPreprocessBuildWith
 {
     public int callbackOrder => 0;
     public bool _didProcessScene = false;
-    public GameObject stupidFakeObject;
     public void OnPreprocessBuild(BuildReport report) {
         // Debug.Log("OnPreprocessBuild");
         // This is so dumb but it seems like OnProcessScene only gets called for the first build after a scene is saved
-        // So to force it to run we make some fake changes to the scene and save it
-        // TODO: This should work for all the scenes in the build rather than just the active one
+        // (because incremental build means a scene won't get re-built if it hasn't changed)
+        // So we make some trivial change to the scene so Unity thinks it's changed and calls the OnProcessScene callback
+        Scene scene = SceneManager.GetActiveScene();
+        string n = "fake-object-to-force-unity-to-rebuild-scene";
+        GameObject g = GameObject.Find(n);
+        if (g == null) {
+            g = new GameObject(n);
+            g.hideFlags = HideFlags.HideInHierarchy;
+        }
+        g.transform.position += Vector3.down;
 
-        // [This still doesn't actually work, can't figure out how to force the callback without actually adding a new object to the scene]
-        // Scene scene = SceneManager.GetActiveScene();
-        // stupidFakeObject = new GameObject("stupid fake object");
-        // // g.hideFlags = HideFlags.HideAndDontSave;
-        // EditorSceneManager.MarkSceneDirty(scene);
-        // EditorSceneManager.SaveScene(scene);
-        // // GameObject.DestroyImmediate(g);
-        // // EditorSceneManager.SaveScene(scene);
+        // TODO: This should happen for all the scenes in the build scene list rather than just the active one
+
+        EditorSceneManager.SaveScene(scene); // Seems to be necessary 
     }
 
     public void OnProcessScene(Scene scene, BuildReport report) {
