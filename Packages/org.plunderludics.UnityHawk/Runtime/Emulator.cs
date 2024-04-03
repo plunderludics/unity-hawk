@@ -142,6 +142,12 @@ public class Emulator : MonoBehaviour
     // Basically these are the params which, if changed, we want to reset the bizhawk process
     // Don't include the path params here, because then the process gets reset for every character typed/deleted
     struct BizhawkArgs {
+        public DefaultAsset romFile;
+        public DefaultAsset saveStateFile;
+        public DefaultAsset configFile;
+        public DefaultAsset luaScriptFile;
+        public DefaultAsset firmwareDirectory;
+        public DefaultAsset savestatesOutputDirectory;
         public bool passInputFromUnity;
         public bool captureEmulatorAudio;
         public bool acceptBackgroundInput;
@@ -195,6 +201,8 @@ public class Emulator : MonoBehaviour
     // Track how many times we skip audio, log a warning if it's too much
     float _audioSkipCounter;
     float _acceptableSkipsPerSecond = 1f;
+
+    private const string _savestateExtension = "savestate";
 
     [DllImport("user32.dll")]
     private static extern int SetForegroundWindow(IntPtr hwnd);
@@ -365,6 +373,10 @@ public class Emulator : MonoBehaviour
         }
 
         // Process filename args
+        if (string.IsNullOrEmpty(romFileName)) {
+            Debug.LogError("Emulator needs a rom file");
+            return;
+        }
         string romPath = Paths.GetAssetPath(romFileName);
 
         string saveStateFullPath = null;
@@ -388,14 +400,19 @@ public class Emulator : MonoBehaviour
         if (!string.IsNullOrEmpty(firmwareDirName)) {
             firmwareDirFullPath = Paths.GetAssetPath(firmwareDirName);
         }
-
+        
         if (!Application.isEditor) {
             // BizHawk tries to create the savestate dir if it doesn't exist, which can cause crashes
-            // As a hacky solution in the build just point to StreamingAssets, this overrides any absolute path that might be in the config file
-            savestatesOutputDirName = "";
+            // As a hacky solution in the build just default to the rom parent directory, this overrides any absolute path that might be in the config file
+            savestatesOutputDirName = null;
         }
-        // TODO should default to parent folder of rom if not given
-        string savestatesOutputDirFullPath = Paths.GetAssetPath(savestatesOutputDirName);
+        string savestatesOutputDirFullPath;
+        if (string.IsNullOrEmpty(savestatesOutputDirName)) {
+            // Default to parent folder of rom file
+            savestatesOutputDirFullPath = Path.GetDirectoryName(romPath);
+        } else {
+            savestatesOutputDirFullPath = Paths.GetAssetPath(savestatesOutputDirName);
+        }
 
         // Start EmuHawk.exe w args
         string exePath = Path.GetFullPath(Paths.emuhawkExePath);
@@ -481,6 +498,9 @@ public class Emulator : MonoBehaviour
         }
 
         args.Add($"--config={configPath}");
+        
+        // Save savestates with extension .savestate instead of .State, this is because Unity treats .State as some other kind of asset
+        args.Add($"--savestate-extension={_savestateExtension}");
 
         args.Add(romPath);
 
@@ -770,6 +790,12 @@ public class Emulator : MonoBehaviour
 
     BizhawkArgs MakeBizhawkArgs() {
         return new BizhawkArgs {
+            romFile = romFile,
+            saveStateFile = saveStateFile,
+            configFile = configFile,
+            luaScriptFile = luaScriptFile,
+            firmwareDirectory = firmwareDirectory,
+            savestatesOutputDirectory = savestatesOutputDirectory,
             passInputFromUnity = passInputFromUnity,
             captureEmulatorAudio = captureEmulatorAudio,
             acceptBackgroundInput = acceptBackgroundInput,
