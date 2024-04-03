@@ -13,6 +13,9 @@ namespace UnityHawk {
 
 // Map from InputSystem input actions to bizhawk keys according to user-specified mapping
 // [Currently has to be a single key for each action, but no reason to have that constraint in theory]
+// [See https://learn.microsoft.com/en-us/dotnet/api/system.linq.lookup-2]
+
+// TODO currently doesn't work for any extra inputs added after Start() gets called, but it should
 [ExecuteInEditMode]
 public class GenericInputProvider : InputProvider {
 // Most of this class is only compiled when new input system is available:
@@ -139,6 +142,7 @@ public class GenericInputProvider : InputProvider {
         // maybe this is bad?
         var flush = new List<InputEvent>(pressed);
         pressed.Clear();
+        // Debug.Log($"GenericInputProvider returning: {flush.Count} events");
         return flush;
     }
     

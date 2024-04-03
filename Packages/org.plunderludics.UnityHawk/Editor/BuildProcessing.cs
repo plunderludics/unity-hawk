@@ -10,42 +10,47 @@ using System.IO;
 using System.Collections.Generic;
 
 using CueSharp;
+using UnityEditor.SceneManagement;
 
 namespace UnityHawk {
 
-// NOTE if this seems to not be working -
-// Make sure every scene is actually added to the list of 'Scenes in Build'
-// otherwise this won't work.
-// It also sometimes just doesn't work for some reason
-
 // This does two main things:
 //  - copy the BizHawk directory (which contains gamedb, etc) into the build
-//  - locate any custom file dependencies from UnityHawk.Emulator components (ie roms, config, lua, savestates)
-//     and copy those into the build too (as well as temporarily updating the reference in the Emulator component)
-//     (this second part is only necessary if you don't put your dependencies in StreamingAssets/
-//      and it's kind of flaky so using StreamingAssets should probably be the recommended method)
-
-// TODO should make this a custom build pipeline instead, will be easier to configure and probably more reliable
+//  - ensure any file dependencies (roms, savestates, etc) from Emulator components are copied into StreamingAssets in the build
 
 public class BuildProcessing : IPostprocessBuildWithReport, IPreprocessBuildWithReport, IProcessSceneWithReport
 {
     public int callbackOrder => 0;
+    public bool _didProcessScene = false;
     public void OnPreprocessBuild(BuildReport report) {
         // Debug.Log("OnPreprocessBuild");
+        // This is so dumb but it seems like OnProcessScene only gets called for the first build after a scene is saved
+        // (because incremental build means a scene won't get re-built if it hasn't changed)
+        // So we make some trivial change to the scene so Unity thinks it's changed and calls the OnProcessScene callback
+        Scene scene = SceneManager.GetActiveScene();
+        string n = "fake-object-to-force-unity-to-rebuild-scene";
+        GameObject g = GameObject.Find(n);
+        if (g == null) {
+            g = new GameObject(n);
+            g.hideFlags = HideFlags.HideInHierarchy;
+        }
+        g.transform.position += Vector3.down;
+
+        // TODO: This should happen for all the scenes in the build scene list rather than just the active one
+
+        EditorSceneManager.SaveScene(scene); // Seems to be necessary 
     }
 
-    // This seems to only get run about 40% of the time, annoying :/
     public void OnProcessScene(Scene scene, BuildReport report) {
-        Debug.Log("OnProcessScene");
-        if (report == null) {
-            // This means the callback is being called during script compilation within the editor,
-            // not a build, so no need to do anything
-            return;
+        // Debug.Log("OnProcessScene");
+        if (BuildPipeline.isBuildingPlayer) {
+            ProcessScene(scene, report.summary.outputPath);
+            _didProcessScene = true;
         }
-        ProcessScene(scene, report.summary.outputPath);
     }
 
     public static void ProcessScene(Scene scene, string exePath) {
+        // Debug.Log("ProcessScene");
         // Need to create the build dir in advance so we can copy files in there before the build actually happens
         string streamingAssetsBuildDir = Path.Combine(GetBuildDataDir(exePath), "StreamingAssets");
         Directory.CreateDirectory (streamingAssetsBuildDir);
@@ -56,14 +61,36 @@ public class BuildProcessing : IPostprocessBuildWithReport, IPreprocessBuildWith
         foreach (var gameObject in gameObjects) {
             var emulators = gameObject.GetComponentsInChildren<Emulator>(includeInactive: true);
             foreach (Emulator emulator in emulators) {
+                if (!emulator.useManualPathnames) {
+                    // The default way for an Emulator to be set up is using DefaultAssets to refer file dependencies
+                    // which is convenient in the editor. But we don't want the files to be packed into the binary resource file,
+                    // they need to remain as separate files on disk. So at build time (ie here) we convert the emulator to 'use manual pathnames'
+                    // hardcode the paths to the file locations (/Assets/x/y/z) and remove the DefaultAsset references so the files don't get packed.
+                    // The rest of the code after this block is already set up to handle the case of hardcoded pathnames, copying them into the StreamingAssets directory in the build
+                    emulator.SetFilenamesFromAssetReferences();
+
+                    emulator.romFile = null;
+                    emulator.saveStateFile = null;
+                    emulator.configFile = null;
+                    emulator.luaScriptFile = null;
+                    emulator.firmwareDirectory = null;
+                    emulator.savestatesOutputDirectory = null;
+
+                    emulator.useManualPathnames = true;
+                }
+
+
                 // define abstract getters and setters just to avoid duplicating code for each field
-                var accessors = new List<(Func<string>, Action<string>)> {
-                    (() => emulator.romFileName, fn => emulator.romFileName = fn),
-                    (() => emulator.configFileName, fn => emulator.configFileName = fn),
-                    (() => emulator.saveStateFileName, fn => emulator.saveStateFileName = fn),
-                    (() => emulator.luaScriptFileName, fn => emulator.luaScriptFileName = fn),
+                var accessors = new List<(bool, Func<string>, Action<string>)> {
+                    (false, () => emulator.romFileName, fn => emulator.romFileName = fn),
+                    (false, () => emulator.configFileName, fn => emulator.configFileName = fn),
+                    (false, () => emulator.saveStateFileName, fn => emulator.saveStateFileName = fn),
+                    (false, () => emulator.luaScriptFileName, fn => emulator.luaScriptFileName = fn),
+                    (true,  () => emulator.firmwareDirName, fn => emulator.firmwareDirName = fn)
+                    // ignore savestatesdirectory because it gets ignored in the build anyway
                 };
-                foreach ((var getter, var setter) in accessors) {
+
+                foreach ((bool isDir, var getter, var setter) in accessors) {
                     string path = getter();
 
                     if (!string.IsNullOrEmpty(path)) {
@@ -91,7 +118,11 @@ public class BuildProcessing : IPostprocessBuildWithReport, IPreprocessBuildWith
                         // And copy into the right location in the build (xxx_Data/StreamingAssets/<hash>)
                         string newFilePath = Path.Combine(streamingAssetsBuildDir, newFileName);
                         Debug.Log($"copy from: {origFilePath} to {newFilePath}");
-                        File.Copy(origFilePath, newFilePath, overwrite: true);
+                        if (isDir) {
+                            FileUtil.ReplaceDirectory(origFilePath, newFilePath);
+                        } else {
+                            FileUtil.ReplaceFile(origFilePath, newFilePath);
+                        }
 
                         if (ext == ".cue") {
                             // This is annoying, but some roms (e.g. for PSX) are .cue files, and those point to other file dependencies
@@ -99,7 +130,7 @@ public class BuildProcessing : IPostprocessBuildWithReport, IPreprocessBuildWith
                             // [if there are other special cases we have to handle like this we should probably rethink this whole approach tbh - too much work]
                             // [definitely at least need an alternative in case this has issues (one way would be to just use StreamingAssets)]
                             
-                            // this also has a minor bug that if separate .bin files hae the same name they'll get clobbered
+                            // this also has a minor bug that if separate .bin files have the same name they'll get clobbered
                             // probably has a ton of edge cases that will break too
                             var cueSheet = new CueSheet(origFilePath);
                             // Copy all the .bin files that are referenced
@@ -107,7 +138,7 @@ public class BuildProcessing : IPostprocessBuildWithReport, IPreprocessBuildWith
                             foreach (Track t in cueSheet.Tracks) {
                                 string binFileName = t.DataFile.Filename;
                                 if (binFileName != Path.GetFileName(binFileName)) {
-                                    throw new ArgumentException("UnityHawk build script doesn't support .cue files that reference files in a different directory. Consider putting your rom files in StreamingAssets instead");
+                                    throw new ArgumentException("UnityHawk build script doesn't support .cue files that reference files in a different directory");
                                 }
                                 // bin file pathname is relative to the directory of the cue file
                                 string binPath = Path.Combine(cueFileParentDir, binFileName);
@@ -124,6 +155,11 @@ public class BuildProcessing : IPostprocessBuildWithReport, IPreprocessBuildWith
 
     public void OnPostprocessBuild(BuildReport report)
     {
+        Debug.Log("OnPostprocessBuild");
+        if (!_didProcessScene) {
+            throw new BuildFailedException("OnProcessScene was not called");
+        }
+
         string exePath = report.summary.outputPath;
         // Gotta make sure all the bizhawk stuff gets into the build
         // Copy over the whole Packages/org.plunderludics.UnityHawk/BizHawk/ directory into xxx_Data/org.plunderludics.UnityHawk/BizHawk/

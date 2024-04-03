@@ -58,53 +58,84 @@ public class Emulator : MonoBehaviour
     public bool captureEmulatorAudio = true;
 
     [Header("Files")]
+    public bool useManualPathnames = true; // eventually should default to false but make it true for now to avoid breaking older projects
+#if UNITY_EDITOR
+// DefaultAsset is only defined in the editor. That's ok because useManualPathnames should always be true in the build (see BuildProcessing.cs)
+    [HideIf("useManualPathnames")]
+    public DefaultAsset romFile;
+    [HideIf("useManualPathnames")]
+    public DefaultAsset saveStateFile;
+    [HideIf("useManualPathnames")]
+    public DefaultAsset configFile;
+    [HideIf("useManualPathnames")]
+    public DefaultAsset luaScriptFile;
+    [HideIf("useManualPathnames")]
+    public DefaultAsset firmwareDirectory;
+#endif // UNITY_EDITOR
+
     // All pathnames are loaded relative to ./StreamingAssets/, unless the pathname is absolute (see GetAssetPath)
+    [EnableIf("useManualPathnames")]
     public string romFileName = "Roms/mario.nes";
-    public string configFileName = ""; // Leave empty for default config.ini
+    [EnableIf("useManualPathnames")]
     public string saveStateFileName = ""; // Leave empty to boot clean
+    [EnableIf("useManualPathnames")]
+    public string configFileName = ""; // Leave empty for default config.ini
+    [EnableIf("useManualPathnames")]
     public string luaScriptFileName;
-
-    [Header("Other paths")]
-    [Tooltip("Default directory for BizHawk to save savestates")]
-    public string savestatesDirectory = "";
-
-    private const string firmwareDirName = "Firmware"; // Firmware loaded from StreamingAssets/Firmware
+    [EnableIf("useManualPathnames")]
+    public string firmwareDirName = "Firmware"; // Firmware loaded from StreamingAssets/Firmware
 
     [Header("Development")]
+    public bool showBizhawkGui = false;
+    [ReadOnlyWhenPlaying]
     public new bool runInEditMode = false;
     [ShowIf("runInEditMode")]
+    [ReadOnlyWhenPlaying]
     [Tooltip("Whether BizHawk will accept input when window is unfocused (in edit mode)")]
     public bool acceptBackgroundInput = true;
-    public bool showBizhawkGui = false;
-    [Header("Debug")]
-    public bool writeBizhawkLogs = true;
 
+#if UNITY_EDITOR
+    [HideIf("useManualPathnames")]
+    [Tooltip("Default directory for BizHawk to save savestates (ignored in build)")]
+    public DefaultAsset savestatesOutputDirectory;
+#endif
+    [EnableIf("useManualPathnames")]
+    public string savestatesOutputDirName = "";
 
-
-    [ShowIf("writeBizhawkLogs")]
-    [ReadOnly, SerializeField] string bizhawkLogLocation;
-
+    [Foldout("Debug")]
     [ReadOnly, SerializeField] bool _initialized;
     public enum EmulatorStatus {
         Inactive,
         Started, // Underlying bizhawk has been started, but not rendering yet
         Running  // Bizhawk is running and sending textures [technically gets set when shared texture channel is open]
     }
+    [Foldout("Debug")]
     [ReadOnly, SerializeField] EmulatorStatus _status;
+    [Foldout("Debug")]
     [ReadOnly, SerializeField] int _currentFrame; // The frame index of the most-recently grabbed texture
 
     // Just for convenient reading from inspector:
+    [Foldout("Debug")]
     [ReadOnly, SerializeField] Vector2Int _textureSize;
+    [Foldout("Debug")]
+    public bool writeBizhawkLogs = true;
+    [ShowIf("writeBizhawkLogs")]
+    [Foldout("Debug")]
+    [ReadOnly, SerializeField] string bizhawkLogLocation;
+    
+    [Foldout("Debug")]
+    [ShowIf("captureEmulatorAudio")]
+    [Tooltip("Higher value means more audio latency. Lower value may cause crackles and pops")]
+    public int audioBufferSurplus = (int)(2*44100*0.05);
 
     private static string bizhawkLogDirectory = "BizHawkLogs";
-
-    // [Make these public for debugging texture stuff]
     private TextureFormat textureFormat = TextureFormat.BGRA32;
     private RenderTextureFormat renderTextureFormat = RenderTextureFormat.BGRA32;
 
     // Interface for other scripts to use
     public RenderTexture Texture => renderTexture;
     public bool IsRunning => _status == EmulatorStatus.Running; // is the _emuhawk process running (best guess, might be wrong)
+    public EmulatorStatus Status => _status;
     public int CurrentFrame => _currentFrame;
 
     Process _emuhawk;
@@ -112,6 +143,14 @@ public class Emulator : MonoBehaviour
     // Basically these are the params which, if changed, we want to reset the bizhawk process
     // Don't include the path params here, because then the process gets reset for every character typed/deleted
     struct BizhawkArgs {
+#if UNITY_EDITOR
+        public DefaultAsset romFile;
+        public DefaultAsset saveStateFile;
+        public DefaultAsset configFile;
+        public DefaultAsset luaScriptFile;
+        public DefaultAsset firmwareDirectory;
+        public DefaultAsset savestatesOutputDirectory;
+#endif
         public bool passInputFromUnity;
         public bool captureEmulatorAudio;
         public bool acceptBackgroundInput;
@@ -147,9 +186,7 @@ public class Emulator : MonoBehaviour
     Texture2D _bufferTexture;
 
     static int AudioBufferSize = (int)(2*44100*1); // Size of local audio buffer, 1 sec should be plenty
-    [ShowIf("captureEmulatorAudio")]
-    [Tooltip("Higher value means more audio latency. Lower value may cause crackles and pops")]
-    public int audioBufferSurplus = (int)(2*44100*0.05);
+
     // ^ This is the actual 'buffer' part - samples that are retained after passing audio to unity.
     // Smaller surplus -> less latency but more clicks & pops (when bizhawk fails to provide audio in time)
     // 50ms seems to be an ok compromise (but probably depends on host machine, users can configure if needed)
@@ -167,6 +204,8 @@ public class Emulator : MonoBehaviour
     // Track how many times we skip audio, log a warning if it's too much
     float _audioSkipCounter;
     float _acceptableSkipsPerSecond = 1f;
+
+    private const string _savestateExtension = "savestate";
 
     [DllImport("user32.dll")]
     private static extern int SetForegroundWindow(IntPtr hwnd);
@@ -187,13 +226,14 @@ public class Emulator : MonoBehaviour
     private void PickRom() {
         string path = EditorUtility.OpenFilePanel("Sample", Application.streamingAssetsPath, "");
         if (!String.IsNullOrEmpty(path)) {
-            if (Paths.IsSubPath(Application.streamingAssetsPath, path)) { // TODO move path util methods into separate class
+            if (Paths.IsSubPath(Application.streamingAssetsPath, path)) {
                 // File is within StreamingAssets, use relative path
                 romFileName = Paths.GetRelativePath(path, Application.streamingAssetsPath);
             } else {
                 // Outside StreamingAssets, use absolute path
                 romFileName = path;
             }
+            Reset();
         }
     }
 
@@ -203,7 +243,14 @@ public class Emulator : MonoBehaviour
         string path = EditorUtility.OpenFilePanel("Sample", "", "");
         if (!String.IsNullOrEmpty(path)) {
             SetFromSample(path);
+            Reset();
         }
+    }
+    
+    // Set filename fields based on sample directory
+    [Button(enabledMode: EButtonEnableMode.Editor)]
+    private void ShowBizhawkLogInOS() {
+        EditorUtility.RevealInFinder(bizhawkLogLocation);
     }
 #endif
 
@@ -240,6 +287,7 @@ public class Emulator : MonoBehaviour
     ///// [should maybe move these into a Emulator.BizhawkApi subobject or similar]
     // For LoadState/SaveState/LoadRom, path should be relative to StreamingAssets (same as for rom/savestate/lua params in the inspector)
     // can also pass absolute path (but this will most likely break in build!)
+    // TODO: should there be a version of these that uses DefaultAssets instead of paths? idk
     public void Pause() {
         _apiCallBuffer.CallMethod("Pause", null);
     }
@@ -267,9 +315,10 @@ public class Emulator : MonoBehaviour
 
     ///// MonoBehaviour lifecycle
 
-    void OnEnable()
+    // (These methods are public only for convenient testing)
+    public void OnEnable()
     {
-        // Debug.Log($"Emulator OnEnable");
+        Debug.Log($"Emulator OnEnable");
 #if UNITY_EDITOR
         if (Undo.isProcessing) return; // OnEnable gets called after undo/redo, but ignore it
 #endif
@@ -279,11 +328,11 @@ public class Emulator : MonoBehaviour
         }
     }
 
-    void Update() {
+    public void Update() {
         _Update();
     }
 
-    void OnDisable() {
+    public void OnDisable() {
         // Debug.Log($"Emulator OnDisable");
 #if UNITY_EDITOR
         if (Undo.isProcessing) return; // OnDisable gets called after undo/redo, but ignore it
@@ -322,29 +371,55 @@ public class Emulator : MonoBehaviour
         _audioSamplesNeeded = 0;
         AudioBufferClear();
 
+        // For input files, convert asset references to filenames
+        // (because bizhawk needs the actual file on disk)
+        if (!useManualPathnames) {
+            SetFilenamesFromAssetReferences();
+        }
+
         // Process filename args
+        if (string.IsNullOrEmpty(romFileName)) {
+            Debug.LogError("Emulator needs a rom file");
+            return;
+        }
+        string romPath = Paths.GetAssetPath(romFileName);
+
+        string saveStateFullPath = null;
+        if (!string.IsNullOrEmpty(saveStateFileName)) {
+            saveStateFullPath = Paths.GetAssetPath(saveStateFileName);
+        }
+        
         string configPath;
-        if (String.IsNullOrEmpty(configFileName)) {
+        if (string.IsNullOrEmpty(configFileName)) {
             configPath = Path.GetFullPath(Paths.defaultConfigPath);
         } else {
             configPath = Paths.GetAssetPath(configFileName);
         }
-
-        string romPath = Paths.GetAssetPath(romFileName);
-
+        
         string luaScriptFullPath = null;
         if (!string.IsNullOrEmpty(luaScriptFileName)) {
             luaScriptFullPath = Paths.GetAssetPath(luaScriptFileName);
         }
 
-        string saveStateFullPath = null;
-        if (!String.IsNullOrEmpty(saveStateFileName)) {
-            saveStateFullPath = Paths.GetAssetPath(saveStateFileName);
+        string firmwareDirFullPath = null;
+        if (!string.IsNullOrEmpty(firmwareDirName)) {
+            firmwareDirFullPath = Paths.GetAssetPath(firmwareDirName);
+        }
+        
+        if (!Application.isEditor) {
+            // BizHawk tries to create the savestate dir if it doesn't exist, which can cause crashes
+            // As a hacky solution in the build just default to the rom parent directory, this overrides any absolute path that might be in the config file
+            savestatesOutputDirName = null;
+        }
+        string savestatesOutputDirFullPath;
+        if (string.IsNullOrEmpty(savestatesOutputDirName)) {
+            // Default to parent folder of rom file
+            savestatesOutputDirFullPath = Path.GetDirectoryName(romPath);
+        } else {
+            savestatesOutputDirFullPath = Paths.GetAssetPath(savestatesOutputDirName);
         }
 
-        string savestatesDirectoryFullPath = Paths.GetAssetPath(savestatesDirectory);
-
-        // start _emuhawk.exe w args
+        // Start EmuHawk.exe w args
         string exePath = Path.GetFullPath(Paths.emuhawkExePath);
         _emuhawk = new Process();
         _emuhawk.StartInfo.UseShellExecute = false;
@@ -364,8 +439,11 @@ public class Emulator : MonoBehaviour
             _emuhawk.StartInfo.UseShellExecute = false;
         }
 
-        args.Add($"--firmware={Paths.GetAssetPath(firmwareDirName)}"); // could make this configurable but idk if that's really useful
-        args.Add($"--savestates={savestatesDirectoryFullPath}");
+        if (firmwareDirFullPath != null) {
+            args.Add($"--firmware={firmwareDirFullPath}");
+        }
+
+        args.Add($"--savestates={savestatesOutputDirFullPath}");
 
         if (!showBizhawkGui) {
             args.Add("--headless");
@@ -397,6 +475,9 @@ public class Emulator : MonoBehaviour
                 if (inputProvider == null) {
                     inputProvider = gameObject.AddComponent<BasicInputProvider>();
                 }
+            } else {
+                // Always accept background input in play mode if not getting input from unity
+                args.Add($"--accept-background-input");
             }
         } else if (runInEditMode) {
             if (acceptBackgroundInput) {
@@ -422,6 +503,9 @@ public class Emulator : MonoBehaviour
         }
 
         args.Add($"--config={configPath}");
+        
+        // Save savestates with extension .savestate instead of .State, this is because Unity treats .State as some other kind of asset
+        args.Add($"--savestate-extension={_savestateExtension}");
 
         args.Add(romPath);
 
@@ -711,11 +795,40 @@ public class Emulator : MonoBehaviour
 
     BizhawkArgs MakeBizhawkArgs() {
         return new BizhawkArgs {
+#if UNITY_EDITOR
+            romFile = romFile,
+            saveStateFile = saveStateFile,
+            configFile = configFile,
+            luaScriptFile = luaScriptFile,
+            firmwareDirectory = firmwareDirectory,
+            savestatesOutputDirectory = savestatesOutputDirectory,
+#endif
             passInputFromUnity = passInputFromUnity,
             captureEmulatorAudio = captureEmulatorAudio,
             acceptBackgroundInput = acceptBackgroundInput,
             showBizhawkGui = showBizhawkGui
         };
+    }
+    
+    // When using DefaultAsset references to set input file locations (ie when useManualPathnames == false)
+    // Set the filename params based on the location of the DefaultAssets 
+    // (A little awkward but this is a public method because it also needs to be called at build time by BuildProcessing.cs)
+    public void SetFilenamesFromAssetReferences() {
+        // This should only ever be called in the editor - useManualPathnames should always be true in the build
+#if UNITY_EDITOR
+        // Set filename params based on asset locations
+        // [using absolute path is not really ideal here but ok for now]
+        static string GetAssetPathName(DefaultAsset f) =>
+            f ? Path.GetFullPath(AssetDatabase.GetAssetPath(f)) : "";
+        romFileName = GetAssetPathName(romFile);
+        saveStateFileName = GetAssetPathName(saveStateFile);
+        configFileName = GetAssetPathName(configFile);
+        luaScriptFileName = GetAssetPathName(luaScriptFile);
+        firmwareDirName = GetAssetPathName(firmwareDirectory);
+        savestatesOutputDirName = GetAssetPathName(savestatesOutputDirectory);
+#else
+        Debug.LogError("Something is wrong: SetFilenamesFromAssetReferences should never be called from within a build");
+#endif
     }
 
     // Send audio from the emulator to the AudioSource

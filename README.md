@@ -26,22 +26,24 @@ You will probably also need to install the BizHawk prerequisites, which can be i
 
 ## Usage
 - Add an `Emulator` component to an object with an attached `Renderer`.
-- Put the rom, savestate, config & lua files you want to use into `Assets/StreamingAssets/`
-- If using a platform that requires firmware, put the files inside `Assets/StreamingAssets/Firmware/`
-- Set the filenames on the `Emulator` component (relative to the StreamingAssets directory)
+- Make sure 'use manual pathnames' is unticked
+- Drag the rom, savestate, config & lua files you want to use into the corresponding Inspector slots
+- If using a platform that requires firmware, drag the firmware folder into the 'Firmware Directory' slot
+- Hit play!
+### More
 - The live emulator graphics can be grabbed in code via the `Emulator.Texture` property.
 - The `Emulator` component provides an interface to basic Bizhawk API methods: `Pause()`, `Unpause()`, `FrameAdvance()`, `LoadState(path)`, `SaveState(path)`, `LoadRom(path)`. Path argument should be relative to `Assets/StreamingAssets/`. Use the `ApiControls` component to use these methods directly from the Editor.
 - Within a BizHawk Lua script, you can use the `unityhawk.methodcall(methodName, argString)` method to send and receive information from Unity. The method must be registered on the Unity side using `Emulator.RegisterMethod`. See `test.lua` and `RegisterMethodExample` in the `Demo` sample for a brief example.
 
 ## Features
-- Enable 'Send Input To Bizhawk' to send keyboard input from Unity to Bizhawk (gamepad input not supported yet). If this isn't enabled Bizhawk will get input directly from the operating system.
+- Enable 'Pass Input From Unity' to send keyboard input from Unity to Bizhawk (gamepad input not supported yet). If this isn't enabled Bizhawk will get input directly from the operating system.
 - Enable 'Show Bizhawk Gui' to show the native Bizhawk window; useful for doing plunderludics development (finding save states, tweaking config & scripts, etc) without having to leave Unity
 - \[experimental\] Enable 'Capture Emulator Audio' to route emulator audio to an AudioSource, allowing you to use unity's positional audio system or add audio effects
     - (unfortunately the current implementation creates some latency and sometimes distorted audio, especially with multiple emulators running concurrently)
 
 ## Building and releasing
-- Building (for Windows) should just work; anything you put in the StreamingAssets directory (roms, firmware) will be copied into the build, as well as the necessary Bizhawk dependencies.
-- (You can use absolute filepaths if you want to reference files outside of the StreamingAssets directory - in that case UnityHawk will attempt to copy the files into the build at build time but it's a bit flaky and relying on this is not really recommended)
+- Building (for Windows) should just work; the input files you choose (roms, firmware) will be copied into the build, as well as the necessary Bizhawk dependencies.
+- (You can also enable 'use manual pathnames' and use absolute filepaths if you want to reference files outside of the Assets directory - in that case UnityHawk will attempt to copy the files into the build at build time but it's a bit flaky and relying on this is not really recommended)
 
 ## Implementation
 The `Emulator` component spawns `EmuHawk.exe` as a child process which shares graphics and audio with Unity via [shared memory](https://github.com/justinstenning/SharedMemory).

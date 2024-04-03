@@ -1,1 +1,0 @@
-To make this work, you need to manually copy the Roms/ directory into StreamingAssets/Roms/ within your project.

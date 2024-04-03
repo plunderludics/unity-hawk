@@ -1,6 +1,6 @@
 {
   "name": "org.plunderludics.unityhawk",
-  "version": "0.0.8",
+  "version": "0.0.9",
   "displayName": "UnityHawk",
   "description": "Run emulated games within Unity via BizHawk",
   "dependencies": {
@@ -30,7 +30,7 @@
   "samples": [
     {
         "displayName": "Demo",
-        "description": "Demo scene with emulator on tv. (Copy contents of Demo/StreamingAssets/ into the root Assets/StreamingAssets directory to make this work)",
+        "description": "Demo scene with emulator on tv",
         "path": "Samples~/Demo"
     }
   ]
