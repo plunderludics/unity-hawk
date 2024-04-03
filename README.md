@@ -43,7 +43,7 @@ You will probably also need to install the BizHawk prerequisites, which can be i
 
 ## Building and releasing
 - Building (for Windows) should just work; the input files you choose (roms, firmware) will be copied into the build, as well as the necessary Bizhawk dependencies.
-- (You can also enable 'use manual pathnames' and use absolute filepaths if you want to reference files outside of the StreamingAssets directory - in that case UnityHawk will attempt to copy the files into the build at build time but it's a bit flaky and relying on this is not really recommended)
+- (You can also enable 'use manual pathnames' and use absolute filepaths if you want to reference files outside of the Assets directory - in that case UnityHawk will attempt to copy the files into the build at build time but it's a bit flaky and relying on this is not really recommended)
 
 ## Implementation
 The `Emulator` component spawns `EmuHawk.exe` as a child process which shares graphics and audio with Unity via [shared memory](https://github.com/justinstenning/SharedMemory).

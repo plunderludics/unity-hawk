@@ -135,6 +135,7 @@ public class Emulator : MonoBehaviour
     // Interface for other scripts to use
     public RenderTexture Texture => renderTexture;
     public bool IsRunning => _status == EmulatorStatus.Running; // is the _emuhawk process running (best guess, might be wrong)
+    public EmulatorStatus Status => _status;
     public int CurrentFrame => _currentFrame;
 
     Process _emuhawk;
@@ -314,9 +315,10 @@ public class Emulator : MonoBehaviour
 
     ///// MonoBehaviour lifecycle
 
-    void OnEnable()
+    // (These methods are public only for convenient testing)
+    public void OnEnable()
     {
-        // Debug.Log($"Emulator OnEnable");
+        Debug.Log($"Emulator OnEnable");
 #if UNITY_EDITOR
         if (Undo.isProcessing) return; // OnEnable gets called after undo/redo, but ignore it
 #endif
@@ -326,11 +328,11 @@ public class Emulator : MonoBehaviour
         }
     }
 
-    void Update() {
+    public void Update() {
         _Update();
     }
 
-    void OnDisable() {
+    public void OnDisable() {
         // Debug.Log($"Emulator OnDisable");
 #if UNITY_EDITOR
         if (Undo.isProcessing) return; // OnDisable gets called after undo/redo, but ignore it
