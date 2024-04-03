@@ -14,19 +14,9 @@ using UnityEditor.SceneManagement;
 
 namespace UnityHawk {
 
-// NOTE if this seems to not be working -
-// Make sure every scene is actually added to the list of 'Scenes in Build'
-// otherwise this won't work.
-// It also sometimes just doesn't work for some reason
-
 // This does two main things:
 //  - copy the BizHawk directory (which contains gamedb, etc) into the build
-//  - locate any custom file dependencies from UnityHawk.Emulator components (ie roms, config, lua, savestates)
-//     and copy those into the build too (as well as temporarily updating the reference in the Emulator component)
-//     (this second part is only necessary if you don't put your dependencies in StreamingAssets/
-//      and it's kind of flaky so using StreamingAssets should probably be the recommended method)
-
-// TODO should make this a custom build pipeline instead, will be easier to configure and probably more reliable
+//  - ensure any file dependencies (roms, savestates, etc) from Emulator components are copied into StreamingAssets in the build
 
 public class BuildProcessing : IPostprocessBuildWithReport, IPreprocessBuildWithReport, IProcessSceneWithReport
 {

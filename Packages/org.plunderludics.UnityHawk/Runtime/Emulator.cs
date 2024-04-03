@@ -284,6 +284,7 @@ public class Emulator : MonoBehaviour
     ///// [should maybe move these into a Emulator.BizhawkApi subobject or similar]
     // For LoadState/SaveState/LoadRom, path should be relative to StreamingAssets (same as for rom/savestate/lua params in the inspector)
     // can also pass absolute path (but this will most likely break in build!)
+    // TODO: should there be a version of these that uses DefaultAssets instead of paths? idk
     public void Pause() {
         _apiCallBuffer.CallMethod("Pause", null);
     }
