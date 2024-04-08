@@ -323,6 +323,7 @@ public class Emulator : MonoBehaviour
         if (Undo.isProcessing) return; // OnEnable gets called after undo/redo, but ignore it
 #endif
         _initialized = false;
+        
         if (runInEditMode || Application.isPlaying) {
             Initialize();
         }
@@ -371,8 +372,8 @@ public class Emulator : MonoBehaviour
         _audioSamplesNeeded = 0;
         AudioBufferClear();
 
-        // For input files, convert asset references to filenames
-        // (because bizhawk needs the actual file on disk)
+        // If using referenced assets then first map those assets to filenames
+        // (Bizhawk requires a path to a real file on disk)
         if (!useManualPathnames) {
             SetFilenamesFromAssetReferences();
         }
@@ -554,6 +555,11 @@ public class Emulator : MonoBehaviour
         if (!Equals(_currentBizhawkArgs, MakeBizhawkArgs())) {
             // Params set in inspector have changed since the bizhawk process was started, needs restart
             Deactivate();
+        }
+
+        // Do this every frame just to ensure the filenames stay synced in edit mode
+        if (!useManualPathnames) {
+            SetFilenamesFromAssetReferences();
         }
 
         if (!Application.isPlaying && !runInEditMode) {
