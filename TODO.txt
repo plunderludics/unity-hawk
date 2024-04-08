@@ -16,8 +16,6 @@
  X pass current frame count along with texture to make syncing possible
  - and perhaps a built-in solution for frame-perfect syncing (between lua rpc calls and the texture)?
 
- - annoying bug: exceptions thrown inside methods called over rpc (from lua) are invisible because not on the main thread
-
  - demo scene including savestates & lua scripts
 
  - mac / linux support?? may be possible if the unsupported dependencies on mac os are input / grahpics / audio related
