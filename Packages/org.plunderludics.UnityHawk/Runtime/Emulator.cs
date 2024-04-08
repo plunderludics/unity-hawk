@@ -248,7 +248,7 @@ public class Emulator : MonoBehaviour
     }
     
     // Set filename fields based on sample directory
-    [Button(enabledMode: EButtonEnableMode.Editor)]
+    [Button]
     private void ShowBizhawkLogInOS() {
         EditorUtility.RevealInFinder(bizhawkLogLocation);
     }
@@ -490,8 +490,8 @@ public class Emulator : MonoBehaviour
             _sharedAudioBufferName = $"unityhawk-audio-{randomNumber}";
             args.Add($"--share-audio-over-rpc-buffer={_sharedAudioBufferName}");
 
-            if (runInEditMode) {
-                Debug.LogWarning("captureEmulatorAudio and runInEditMode are both enabled but emulator audio cannot be captured in edit mode");
+            if (runInEditMode && !Application.isPlaying) {
+                Debug.LogWarning("captureEmulatorAudio is enabled but emulator audio cannot be captured in edit mode");
             }
         }
 
