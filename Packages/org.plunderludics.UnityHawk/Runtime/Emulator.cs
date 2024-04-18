@@ -80,6 +80,8 @@ public class Emulator : MonoBehaviour
     [ReadOnlyWhenPlaying]
     [Tooltip("Whether BizHawk will accept input when window is unfocused (in edit mode)")]
     public bool acceptBackgroundInput = true;
+    [HideIf("useManualPathnames")]
+    public DefaultAsset ramWatchFile;
 
 #if UNITY_EDITOR
     [HideIf("useManualPathnames")]
@@ -128,6 +130,9 @@ public class Emulator : MonoBehaviour
     [Foldout("Debug")]
     [EnableIf("useManualPathnames")]
     public string savestatesOutputDirName;
+    [Foldout("Debug")]
+    [EnableIf("useManualPathnames")]
+    public string ramWatchFileName;
 
     [Foldout("Debug")]
     public bool writeBizhawkLogs = true;
@@ -162,6 +167,7 @@ public class Emulator : MonoBehaviour
         public DefaultAsset luaScriptFile;
         public DefaultAsset firmwareDirectory;
         public DefaultAsset savestatesOutputDirectory;
+        public DefaultAsset ramWatchFile;
 #endif
         public bool passInputFromUnity;
         public bool captureEmulatorAudio;
@@ -421,6 +427,11 @@ public class Emulator : MonoBehaviour
             firmwareDirFullPath = Paths.GetAssetPath(firmwareDirName);
         }
         
+        string ramWatchFullPath = null;
+        if (!string.IsNullOrEmpty(ramWatchFileName)) {
+            ramWatchFullPath = Paths.GetAssetPath(ramWatchFileName);
+        }
+        
         if (!Application.isEditor) {
             // BizHawk tries to create the savestate dir if it doesn't exist, which can cause crashes
             // As a hacky solution in the build just default to the rom parent directory, this overrides any absolute path that might be in the config file
@@ -515,6 +526,10 @@ public class Emulator : MonoBehaviour
 
         if (luaScriptFullPath != null) {
             args.Add($"--lua={luaScriptFullPath}");
+        }
+
+        if (ramWatchFullPath != null) {
+            args.Add($"--ram-watch-file={ramWatchFullPath}");
         }
 
         args.Add($"--config={configPath}");
@@ -818,6 +833,7 @@ public class Emulator : MonoBehaviour
             luaScriptFile = luaScriptFile,
             firmwareDirectory = firmwareDirectory,
             savestatesOutputDirectory = savestatesOutputDirectory,
+            ramWatchFile = ramWatchFile,
 #endif
             passInputFromUnity = passInputFromUnity,
             captureEmulatorAudio = captureEmulatorAudio,
@@ -842,6 +858,7 @@ public class Emulator : MonoBehaviour
         luaScriptFileName = GetAssetPathName(luaScriptFile);
         firmwareDirName = GetAssetPathName(firmwareDirectory);
         savestatesOutputDirName = GetAssetPathName(savestatesOutputDirectory);
+        ramWatchFileName = GetAssetPathName(ramWatchFile);
 #else
         Debug.LogError("Something is wrong: SetFilenamesFromAssetReferences should never be called from within a build");
 #endif
