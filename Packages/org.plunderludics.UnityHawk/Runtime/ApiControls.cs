@@ -9,10 +9,9 @@ using UnityHawk;
 public class ApiControls : MonoBehaviour
 {
     public Emulator emulator;
-    [Tooltip("If null, defaults to BasicInputProvider. Subclass InputProvider for custom behavior.")]
     public string path;
 
-    void Awake() {
+    void OnEnable() {
         if (emulator == null) {
             emulator = GetComponent<Emulator>();
             if (emulator == null) {

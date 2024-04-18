@@ -42,7 +42,7 @@ public class Emulator : MonoBehaviour
     [Tooltip("Write to an existing render texture rather than creating one automatically")]
     [FormerlySerializedAs("writeToTexture")]
     public bool customRenderTexture = false;
-    [ShowIf("customRenderTexture")]
+    [EnableIf("customRenderTexture")]
     [Tooltip("The render texture to write to")]
     public RenderTexture renderTexture;
     // We have to maintain a separate rendertexture just for the purpose of flipping the image we get from the emulator
@@ -58,7 +58,6 @@ public class Emulator : MonoBehaviour
     public bool captureEmulatorAudio = true;
 
     [Header("Files")]
-    public bool useManualPathnames = true; // eventually should default to false but make it true for now to avoid breaking older projects
 #if UNITY_EDITOR
 // DefaultAsset is only defined in the editor. That's ok because useManualPathnames should always be true in the build (see BuildProcessing.cs)
     [HideIf("useManualPathnames")]
@@ -72,18 +71,6 @@ public class Emulator : MonoBehaviour
     [HideIf("useManualPathnames")]
     public DefaultAsset firmwareDirectory;
 #endif // UNITY_EDITOR
-
-    // All pathnames are loaded relative to ./StreamingAssets/, unless the pathname is absolute (see GetAssetPath)
-    [EnableIf("useManualPathnames")]
-    public string romFileName = "Roms/mario.nes";
-    [EnableIf("useManualPathnames")]
-    public string saveStateFileName = ""; // Leave empty to boot clean
-    [EnableIf("useManualPathnames")]
-    public string configFileName = ""; // Leave empty for default config.ini
-    [EnableIf("useManualPathnames")]
-    public string luaScriptFileName;
-    [EnableIf("useManualPathnames")]
-    public string firmwareDirName = "Firmware"; // Firmware loaded from StreamingAssets/Firmware
 
     [Header("Development")]
     public bool showBizhawkGui = false;
@@ -99,8 +86,6 @@ public class Emulator : MonoBehaviour
     [Tooltip("Default directory for BizHawk to save savestates (ignored in build)")]
     public DefaultAsset savestatesOutputDirectory;
 #endif
-    [EnableIf("useManualPathnames")]
-    public string savestatesOutputDirName = "";
 
     [Foldout("Debug")]
     [ReadOnly, SerializeField] bool _initialized;
@@ -117,6 +102,33 @@ public class Emulator : MonoBehaviour
     // Just for convenient reading from inspector:
     [Foldout("Debug")]
     [ReadOnly, SerializeField] Vector2Int _textureSize;
+
+    // Options for using hardcoded filenames instead of DefaultAssets
+    // (hide this in the debug section since it's not recommended and takes up space)
+    [Tooltip("[Not recommended] Reference files by pathname (absolute or relative to StreamingAssets/) instead of as Unity assets. Useful if you need to reference files outside of the Assets directory")]
+    [Foldout("Debug")]
+    public bool useManualPathnames = false;
+    // When useManualPathnames is false, the derived pathnames will show up in the inspector as readonly values
+    // All pathnames are loaded relative to ./StreamingAssets/, unless the pathname is absolute (see GetAssetPath)
+    [Foldout("Debug")]
+    [EnableIf("useManualPathnames")]
+    public string romFileName;
+    [Foldout("Debug")]
+    [EnableIf("useManualPathnames")]
+    public string saveStateFileName;
+    [Foldout("Debug")]
+    [EnableIf("useManualPathnames")]
+    public string configFileName;
+    [Foldout("Debug")]
+    [EnableIf("useManualPathnames")]
+    public string luaScriptFileName;
+    [Foldout("Debug")]
+    [EnableIf("useManualPathnames")]
+    public string firmwareDirName;
+    [Foldout("Debug")]
+    [EnableIf("useManualPathnames")]
+    public string savestatesOutputDirName;
+
     [Foldout("Debug")]
     public bool writeBizhawkLogs = true;
     [ShowIf("writeBizhawkLogs")]
@@ -221,7 +233,8 @@ public class Emulator : MonoBehaviour
     }
 
 #if UNITY_EDITOR
-    // Set filename fields based on sample directory
+    // Set rom filename field using OS file picker
+    [ShowIf("useManualPathnames")]
     [Button(enabledMode: EButtonEnableMode.Editor)]
     private void PickRom() {
         string path = EditorUtility.OpenFilePanel("Sample", Application.streamingAssetsPath, "");
@@ -237,7 +250,8 @@ public class Emulator : MonoBehaviour
         }
     }
 
-    // Set filename fields based on sample directory
+    // Set filename fields based on sample directory (using OS file picker)
+    [ShowIf("useManualPathnames")]
     [Button(enabledMode: EButtonEnableMode.Editor)]
     private void PickSample() {
         string path = EditorUtility.OpenFilePanel("Sample", "", "");
@@ -643,10 +657,6 @@ public class Emulator : MonoBehaviour
             Debug.LogWarning("EmuHawk process was unexpectedly killed");
             Deactivate();
         }
-    }
-
-    string GetUniqueId() {
-        return "" + GetInstanceID();
     }
 
     void WriteInputToBuffer(List<InputEvent> inputEvents) {
