@@ -80,10 +80,10 @@ public class Emulator : MonoBehaviour
     [ReadOnlyWhenPlaying]
     [Tooltip("Whether BizHawk will accept input when window is unfocused (in edit mode)")]
     public bool acceptBackgroundInput = true;
-    [HideIf("useManualPathnames")]
-    public DefaultAsset ramWatchFile;
 
 #if UNITY_EDITOR
+    [HideIf("useManualPathnames")]
+    public DefaultAsset ramWatchFile;
     [HideIf("useManualPathnames")]
     [Tooltip("Default directory for BizHawk to save savestates (ignored in build)")]
     public DefaultAsset savestatesOutputDirectory;
