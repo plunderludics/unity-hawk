@@ -6,11 +6,14 @@ using UnityEngine.InputSystem;
 
 namespace UnityHawk {
 
-// Just gets key events directly from Unity (via old input system)
+// Just gets key events directly from Unity
+[DefaultExecutionOrder(-1000)] // Kinda hacky but this has to run before Emulator or there will be a 1-frame input delay.
 public class BasicInputProvider : InputProvider {
     System.Array _allKeyCodes;
+    List<InputEvent> pressedThisFrame;
 
-    public BasicInputProvider() {
+    void OnEnable() {
+        pressedThisFrame = new();
 #if ENABLE_INPUT_SYSTEM
         _allKeyCodes = System.Enum.GetValues(typeof(Key)); // for new inputsystem
 #else
@@ -18,8 +21,27 @@ public class BasicInputProvider : InputProvider {
 #endif
     }
 
-    public override List<InputEvent> InputForFrame() {
-        List<InputEvent> pressed = new();
+    // Poll for events in Update / FixedUpdate rather than in InputForFrame directly,
+    // to avoid issues in the new inputsystem when UpdateMode is set to FixedUpdate
+    void Update() {
+#if ENABLE_INPUT_SYSTEM
+        if (InputSystem.settings.updateMode != InputSettings.UpdateMode.ProcessEventsInFixedUpdate) {
+            Poll();
+        }
+#else 
+        Poll();
+#endif
+    }
+
+    void FixedUpdate() {
+#if ENABLE_INPUT_SYSTEM
+        if (InputSystem.settings.updateMode == InputSettings.UpdateMode.ProcessEventsInFixedUpdate) {
+            Poll();
+        }
+#endif
+    }
+
+    void Poll() {
         // Grab Unity input and add to the queue.
         // [assuming/hoping that the key codes are ~same between old and new inputsystem]
         foreach(var k in _allKeyCodes)
@@ -54,14 +76,18 @@ public class BasicInputProvider : InputProvider {
 #endif
             if (interaction) {
                 // Debug.Log($"key event: {k} {isPressed}");
-                pressed.Add(new InputEvent {
+                pressedThisFrame.Add(new InputEvent {
                     keyName = keyName,
                     isPressed = isPressed
                 });
             }
         }
+    }
 
-        return pressed;
+    public override List<InputEvent> InputForFrame() {
+        var toReturn = new List<InputEvent>(pressedThisFrame);
+        pressedThisFrame = new ();
+        return toReturn;
     }
 
     public override Dictionary<string, int> AxisValuesForFrame() {
