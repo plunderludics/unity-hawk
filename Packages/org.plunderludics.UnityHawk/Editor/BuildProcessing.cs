@@ -13,10 +13,15 @@ using CueSharp;
 using UnityEditor.SceneManagement;
 
 namespace UnityHawk {
-
 // This does two main things:
 //  - copy the BizHawk directory (which contains gamedb, etc) into the build
 //  - ensure any file dependencies (roms, savestates, etc) from Emulator components are copied into StreamingAssets in the build
+
+
+// TODO: the way this is set up is not really correct; OnProcessScene should alter the scene (set params on the Emulator components)
+//       but not actually copy the files. It should just store a list of files that need to be copied and then all the copying should
+//       happen in OnPostprocessBuild. This would function properly with unity's scene caching behaviour and remove the need for the weird hack
+//       below in OnPreprocessBuild
 
 public class BuildProcessing : IPostprocessBuildWithReport, IPreprocessBuildWithReport, IProcessSceneWithReport
 {
@@ -27,18 +32,18 @@ public class BuildProcessing : IPostprocessBuildWithReport, IPreprocessBuildWith
         // This is so dumb but it seems like OnProcessScene only gets called for the first build after a scene is saved
         // (because incremental build means a scene won't get re-built if it hasn't changed)
         // So we make some trivial change to the scene so Unity thinks it's changed and calls the OnProcessScene callback
-        Scene scene = SceneManager.GetActiveScene();
-        string n = "fake-object-to-force-unity-to-rebuild-scene";
-        GameObject g = GameObject.Find(n);
-        if (g == null) {
-            g = new GameObject(n);
-            g.hideFlags = HideFlags.HideInHierarchy;
+        for (int i = -1; i < SceneManager.sceneCountInBuildSettings; i++) {
+            Scene scene = (i == -1) ? SceneManager.GetActiveScene() : SceneManager.GetSceneByBuildIndex(i); 
+            string n = "unityhawk-fake-object-to-force-rebuild-scene";
+            GameObject g = GameObject.Find(n);
+            if (g == null) {
+                g = new GameObject(n);
+                g.hideFlags = HideFlags.HideInHierarchy;
+            }
+            g.transform.position += Vector3.down;
+
+            EditorSceneManager.SaveScene(scene); // Seems to be necessary 
         }
-        g.transform.position += Vector3.down;
-
-        // TODO: This should happen for all the scenes in the build scene list rather than just the active one
-
-        EditorSceneManager.SaveScene(scene); // Seems to be necessary 
     }
 
     public void OnProcessScene(Scene scene, BuildReport report) {
@@ -61,6 +66,10 @@ public class BuildProcessing : IPostprocessBuildWithReport, IPreprocessBuildWith
         foreach (var gameObject in gameObjects) {
             var emulators = gameObject.GetComponentsInChildren<Emulator>(includeInactive: true);
             foreach (Emulator emulator in emulators) {
+                if ((!emulator.enabled || !emulator.gameObject.activeInHierarchy) && !emulator.forceCopyFilesToBuild) {
+                    // If emulator component is not active, ignore it unless the forceCopyFilesToBuild flag is set
+                    continue;
+                }
                 if (!emulator.useManualPathnames) {
                     // The default way for an Emulator to be set up is using DefaultAssets to refer file dependencies
                     // which is convenient in the editor. But we don't want the files to be packed into the binary resource file,
@@ -98,12 +107,12 @@ public class BuildProcessing : IPostprocessBuildWithReport, IPreprocessBuildWith
                         string origFilePath = Paths.GetAssetPath(path);
 
                         // ignore anything within StreamingAssets/ since those get copied over already by Unity
-                        Debug.Log($"Check isSubPath {origFilePath}, {Application.streamingAssetsPath}");
+                        // Debug.Log($"Check isSubPath {origFilePath}, {Application.streamingAssetsPath}");
                         if (Paths.IsSubPath(Application.streamingAssetsPath, origFilePath)) {
-                            Debug.Log($"Skipping copy for: {path}");
+                            // Debug.Log($"Skipping copy for: {path}");
                             // Ensure filepath is relative (to StreamingAssets/)
                             string newFile = Paths.GetRelativePath(origFilePath, Application.streamingAssetsPath);
-                            Debug.Log($"Rewrite {path} to {newFile}");
+                            // Debug.Log($"Rewrite {path} to {newFile}");
                             setter(newFile);
                             continue;
                         }
@@ -117,7 +126,7 @@ public class BuildProcessing : IPostprocessBuildWithReport, IPreprocessBuildWith
                         setter(newFileName);
                         // And copy into the right location in the build (xxx_Data/StreamingAssets/<hash>)
                         string newFilePath = Path.Combine(streamingAssetsBuildDir, newFileName);
-                        Debug.Log($"copy from: {origFilePath} to {newFilePath}");
+                        Debug.Log($"Copy from: {origFilePath} to {newFilePath}");
                         if (isDir) {
                             FileUtil.ReplaceDirectory(origFilePath, newFilePath);
                         } else {
@@ -143,7 +152,7 @@ public class BuildProcessing : IPostprocessBuildWithReport, IPreprocessBuildWith
                                 // bin file pathname is relative to the directory of the cue file
                                 string binPath = Path.Combine(cueFileParentDir, binFileName);
                                 newFilePath = Path.Combine(streamingAssetsBuildDir, binFileName); 
-                                Debug.Log($"copy from: {binPath} to {newFilePath}");
+                                Debug.Log($"Copy from: {binPath} to {newFilePath}");
                                 File.Copy(binPath, newFilePath, overwrite: true);
                             }
                         }

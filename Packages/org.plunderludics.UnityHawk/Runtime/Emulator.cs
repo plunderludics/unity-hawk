@@ -42,7 +42,7 @@ public class Emulator : MonoBehaviour
     [Tooltip("Write to an existing render texture rather than creating one automatically")]
     [FormerlySerializedAs("writeToTexture")]
     public bool customRenderTexture = false;
-    [ShowIf("customRenderTexture")]
+    [EnableIf("customRenderTexture")]
     [Tooltip("The render texture to write to")]
     public RenderTexture renderTexture;
     // We have to maintain a separate rendertexture just for the purpose of flipping the image we get from the emulator
@@ -58,7 +58,6 @@ public class Emulator : MonoBehaviour
     public bool captureEmulatorAudio = true;
 
     [Header("Files")]
-    public bool useManualPathnames = true; // eventually should default to false but make it true for now to avoid breaking older projects
 #if UNITY_EDITOR
 // DefaultAsset is only defined in the editor. That's ok because useManualPathnames should always be true in the build (see BuildProcessing.cs)
     [HideIf("useManualPathnames")]
@@ -72,18 +71,10 @@ public class Emulator : MonoBehaviour
     [HideIf("useManualPathnames")]
     public DefaultAsset firmwareDirectory;
 #endif // UNITY_EDITOR
-
-    // All pathnames are loaded relative to ./StreamingAssets/, unless the pathname is absolute (see GetAssetPath)
-    [EnableIf("useManualPathnames")]
-    public string romFileName = "Roms/mario.nes";
-    [EnableIf("useManualPathnames")]
-    public string saveStateFileName = ""; // Leave empty to boot clean
-    [EnableIf("useManualPathnames")]
-    public string configFileName = ""; // Leave empty for default config.ini
-    [EnableIf("useManualPathnames")]
-    public string luaScriptFileName;
-    [EnableIf("useManualPathnames")]
-    public string firmwareDirName = "Firmware"; // Firmware loaded from StreamingAssets/Firmware
+    [SerializeField, HideInInspector] private bool _isEnabled = false; // hack to only show the forceCopyFilesToBuild field when component is inactive
+    [HideIf("_isEnabled")]
+    [Tooltip("Copy files into build even though Emulator is not active")]
+    public bool forceCopyFilesToBuild = false;
 
     [Header("Development")]
     public bool showBizhawkGui = false;
@@ -96,11 +87,11 @@ public class Emulator : MonoBehaviour
 
 #if UNITY_EDITOR
     [HideIf("useManualPathnames")]
+    public DefaultAsset ramWatchFile;
+    [HideIf("useManualPathnames")]
     [Tooltip("Default directory for BizHawk to save savestates (ignored in build)")]
     public DefaultAsset savestatesOutputDirectory;
 #endif
-    [EnableIf("useManualPathnames")]
-    public string savestatesOutputDirName = "";
 
     [Foldout("Debug")]
     [ReadOnly, SerializeField] bool _initialized;
@@ -117,6 +108,36 @@ public class Emulator : MonoBehaviour
     // Just for convenient reading from inspector:
     [Foldout("Debug")]
     [ReadOnly, SerializeField] Vector2Int _textureSize;
+
+    // Options for using hardcoded filenames instead of DefaultAssets
+    // (hide this in the debug section since it's not recommended and takes up space)
+    [Tooltip("[Not recommended] Reference files by pathname (absolute or relative to StreamingAssets/) instead of as Unity assets. Useful if you need to reference files outside of the Assets directory")]
+    [Foldout("Debug")]
+    public bool useManualPathnames = false;
+    // When useManualPathnames is false, the derived pathnames will show up in the inspector as readonly values
+    // All pathnames are loaded relative to ./StreamingAssets/, unless the pathname is absolute (see GetAssetPath)
+    [Foldout("Debug")]
+    [EnableIf("useManualPathnames")]
+    public string romFileName;
+    [Foldout("Debug")]
+    [EnableIf("useManualPathnames")]
+    public string saveStateFileName;
+    [Foldout("Debug")]
+    [EnableIf("useManualPathnames")]
+    public string configFileName;
+    [Foldout("Debug")]
+    [EnableIf("useManualPathnames")]
+    public string luaScriptFileName;
+    [Foldout("Debug")]
+    [EnableIf("useManualPathnames")]
+    public string firmwareDirName;
+    [Foldout("Debug")]
+    [EnableIf("useManualPathnames")]
+    public string savestatesOutputDirName;
+    [Foldout("Debug")]
+    [EnableIf("useManualPathnames")]
+    public string ramWatchFileName;
+
     [Foldout("Debug")]
     public bool writeBizhawkLogs = true;
     [ShowIf("writeBizhawkLogs")]
@@ -150,6 +171,7 @@ public class Emulator : MonoBehaviour
         public DefaultAsset luaScriptFile;
         public DefaultAsset firmwareDirectory;
         public DefaultAsset savestatesOutputDirectory;
+        public DefaultAsset ramWatchFile;
 #endif
         public bool passInputFromUnity;
         public bool captureEmulatorAudio;
@@ -221,7 +243,8 @@ public class Emulator : MonoBehaviour
     }
 
 #if UNITY_EDITOR
-    // Set filename fields based on sample directory
+    // Set rom filename field using OS file picker
+    [ShowIf("useManualPathnames")]
     [Button(enabledMode: EButtonEnableMode.Editor)]
     private void PickRom() {
         string path = EditorUtility.OpenFilePanel("Sample", Application.streamingAssetsPath, "");
@@ -237,7 +260,8 @@ public class Emulator : MonoBehaviour
         }
     }
 
-    // Set filename fields based on sample directory
+    // Set filename fields based on sample directory (using OS file picker)
+    [ShowIf("useManualPathnames")]
     [Button(enabledMode: EButtonEnableMode.Editor)]
     private void PickSample() {
         string path = EditorUtility.OpenFilePanel("Sample", "", "");
@@ -248,7 +272,7 @@ public class Emulator : MonoBehaviour
     }
     
     // Set filename fields based on sample directory
-    [Button(enabledMode: EButtonEnableMode.Editor)]
+    [Button]
     private void ShowBizhawkLogInOS() {
         EditorUtility.RevealInFinder(bizhawkLogLocation);
     }
@@ -319,10 +343,12 @@ public class Emulator : MonoBehaviour
     public void OnEnable()
     {
         Debug.Log($"Emulator OnEnable");
+        _isEnabled = true;
 #if UNITY_EDITOR
         if (Undo.isProcessing) return; // OnEnable gets called after undo/redo, but ignore it
 #endif
         _initialized = false;
+        
         if (runInEditMode || Application.isPlaying) {
             Initialize();
         }
@@ -334,6 +360,7 @@ public class Emulator : MonoBehaviour
 
     public void OnDisable() {
         // Debug.Log($"Emulator OnDisable");
+        _isEnabled = false;
 #if UNITY_EDITOR
         if (Undo.isProcessing) return; // OnDisable gets called after undo/redo, but ignore it
 #endif
@@ -371,8 +398,8 @@ public class Emulator : MonoBehaviour
         _audioSamplesNeeded = 0;
         AudioBufferClear();
 
-        // For input files, convert asset references to filenames
-        // (because bizhawk needs the actual file on disk)
+        // If using referenced assets then first map those assets to filenames
+        // (Bizhawk requires a path to a real file on disk)
         if (!useManualPathnames) {
             SetFilenamesFromAssetReferences();
         }
@@ -404,6 +431,11 @@ public class Emulator : MonoBehaviour
         string firmwareDirFullPath = null;
         if (!string.IsNullOrEmpty(firmwareDirName)) {
             firmwareDirFullPath = Paths.GetAssetPath(firmwareDirName);
+        }
+        
+        string ramWatchFullPath = null;
+        if (!string.IsNullOrEmpty(ramWatchFileName)) {
+            ramWatchFullPath = Paths.GetAssetPath(ramWatchFileName);
         }
         
         if (!Application.isEditor) {
@@ -489,8 +521,8 @@ public class Emulator : MonoBehaviour
             _sharedAudioBufferName = $"unityhawk-audio-{randomNumber}";
             args.Add($"--share-audio-over-rpc-buffer={_sharedAudioBufferName}");
 
-            if (runInEditMode) {
-                Debug.LogWarning("captureEmulatorAudio and runInEditMode are both enabled but emulator audio cannot be captured in edit mode");
+            if (runInEditMode && !Application.isPlaying) {
+                Debug.LogWarning("captureEmulatorAudio is enabled but emulator audio cannot be captured in edit mode");
             }
         }
 
@@ -500,6 +532,10 @@ public class Emulator : MonoBehaviour
 
         if (luaScriptFullPath != null) {
             args.Add($"--lua={luaScriptFullPath}");
+        }
+
+        if (ramWatchFullPath != null) {
+            args.Add($"--ram-watch-file={ramWatchFullPath}");
         }
 
         args.Add($"--config={configPath}");
@@ -554,6 +590,11 @@ public class Emulator : MonoBehaviour
         if (!Equals(_currentBizhawkArgs, MakeBizhawkArgs())) {
             // Params set in inspector have changed since the bizhawk process was started, needs restart
             Deactivate();
+        }
+
+        // Do this every frame just to ensure the filenames stay synced in edit mode
+        if (!useManualPathnames) {
+            SetFilenamesFromAssetReferences();
         }
 
         if (!Application.isPlaying && !runInEditMode) {
@@ -637,10 +678,6 @@ public class Emulator : MonoBehaviour
             Debug.LogWarning("EmuHawk process was unexpectedly killed");
             Deactivate();
         }
-    }
-
-    string GetUniqueId() {
-        return "" + GetInstanceID();
     }
 
     void WriteInputToBuffer(List<InputEvent> inputEvents) {
@@ -740,6 +777,7 @@ public class Emulator : MonoBehaviour
         if (!customRenderTexture)
         {
             renderTexture = new RenderTexture(width, height, depth:0, format:renderTextureFormat);
+            renderTexture.name = this.name;
         }
 
         if (targetRenderer) {
@@ -802,6 +840,7 @@ public class Emulator : MonoBehaviour
             luaScriptFile = luaScriptFile,
             firmwareDirectory = firmwareDirectory,
             savestatesOutputDirectory = savestatesOutputDirectory,
+            ramWatchFile = ramWatchFile,
 #endif
             passInputFromUnity = passInputFromUnity,
             captureEmulatorAudio = captureEmulatorAudio,
@@ -826,6 +865,7 @@ public class Emulator : MonoBehaviour
         luaScriptFileName = GetAssetPathName(luaScriptFile);
         firmwareDirName = GetAssetPathName(firmwareDirectory);
         savestatesOutputDirName = GetAssetPathName(savestatesOutputDirectory);
+        ramWatchFileName = GetAssetPathName(ramWatchFile);
 #else
         Debug.LogError("Something is wrong: SetFilenamesFromAssetReferences should never be called from within a build");
 #endif

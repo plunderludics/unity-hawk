@@ -217,8 +217,8 @@ public class GenericInputProvider : InputProvider {
     }
     
     // Still need a dummy implementation of the interface:
-    public override List<InputEvent> InputForFrame() {return new()}
-    public override Dictionary<string, int> InputForFrame() {return new()}
+    public override List<InputEvent> InputForFrame() {return new();}
+    public override Dictionary<string, int> AxisValuesForFrame() {return new();}
 #endif
     }
 
