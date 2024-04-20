@@ -44,7 +44,8 @@ You will probably also need to install the BizHawk prerequisites, which can be i
     - (unfortunately the current implementation creates some latency and sometimes distorted audio, especially with multiple emulators running concurrently)
 
 ## Building and releasing
-- Building (for Windows) should just work; the input files you choose (roms, firmware) will be copied into the build, as well as the necessary Bizhawk dependencies.
+- Building (for Windows) should just work; the input files you choose (roms, firmware) will be copied into the build, as well as the necessary Bizhawk dependencies. (Building multiple scenes might work but is untested.)
+- By default, UnityHawk only copies files for Emulator components that are enabled and start active in the scene. For any Emulator that needs to start inactive and be enabled later, make sure to set the 'Force Copy Files To Build' flag.
 - (You can also enable 'use manual pathnames' and use absolute filepaths if you want to reference files outside of the Assets directory - in that case UnityHawk will attempt to copy the files into the build at build time but it's a bit flaky and relying on this is not really recommended)
 
 ## Implementation
