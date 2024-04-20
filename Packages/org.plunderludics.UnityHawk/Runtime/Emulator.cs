@@ -71,6 +71,10 @@ public class Emulator : MonoBehaviour
     [HideIf("useManualPathnames")]
     public DefaultAsset firmwareDirectory;
 #endif // UNITY_EDITOR
+    [SerializeField, HideInInspector] private bool _isEnabled = false; // hack to only show the forceCopyFilesToBuild field when component is inactive
+    [HideIf("_isEnabled")]
+    [Tooltip("Copy files into build even though Emulator is not active")]
+    public bool forceCopyFilesToBuild = false;
 
     [Header("Development")]
     public bool showBizhawkGui = false;
@@ -339,6 +343,7 @@ public class Emulator : MonoBehaviour
     public void OnEnable()
     {
         Debug.Log($"Emulator OnEnable");
+        _isEnabled = true;
 #if UNITY_EDITOR
         if (Undo.isProcessing) return; // OnEnable gets called after undo/redo, but ignore it
 #endif
@@ -355,6 +360,7 @@ public class Emulator : MonoBehaviour
 
     public void OnDisable() {
         // Debug.Log($"Emulator OnDisable");
+        _isEnabled = false;
 #if UNITY_EDITOR
         if (Undo.isProcessing) return; // OnDisable gets called after undo/redo, but ignore it
 #endif
