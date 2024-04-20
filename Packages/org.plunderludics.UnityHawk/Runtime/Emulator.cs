@@ -777,6 +777,7 @@ public class Emulator : MonoBehaviour
         if (!customRenderTexture)
         {
             renderTexture = new RenderTexture(width, height, depth:0, format:renderTextureFormat);
+            renderTexture.name = this.name;
         }
 
         if (targetRenderer) {
