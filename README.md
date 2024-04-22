@@ -28,7 +28,6 @@ You will probably also need to install the BizHawk prerequisites, which can be i
 
 ## Usage
 - Add an `Emulator` component to an object with an attached `Renderer`.
-- Make sure 'use manual pathnames' is unticked
 - Drag the rom, savestate, config & lua files you want to use into the corresponding Inspector slots
 - If using a platform that requires firmware, drag the firmware folder into the 'Firmware Directory' slot
 - Hit play!
