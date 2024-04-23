@@ -30,7 +30,7 @@ You will probably also need to install the BizHawk prerequisites, which can be i
 - Add an `Emulator` component to an object with an attached `Renderer`.
 - Drag the rom and savestate files you want to use into the corresponding Inspector slots (plus config and lua files if needed)
 - If using a platform that requires firmware, drag the firmware folder into the 'Firmware Directory' slot
-- Hit play!
+- Hit play
 ### More
 - The live emulator graphics can be grabbed in code via the `Emulator.Texture` property.
 - The `Emulator` component provides an interface to basic Bizhawk API methods: `Pause()`, `Unpause()`, `FrameAdvance()`, `LoadState(path)`, `SaveState(path)`, `LoadRom(path)`. Path argument should be relative to `Assets/StreamingAssets/`. Use the `ApiControls` component to use these methods directly from the Editor.
