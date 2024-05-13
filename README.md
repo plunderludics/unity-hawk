@@ -34,7 +34,7 @@ You will probably also need to install the BizHawk prerequisites, which can be i
 ### More
 - The live emulator graphics can be grabbed in code via the `Emulator.Texture` property.
 - The `Emulator` component provides an interface to basic Bizhawk API methods: `Pause()`, `Unpause()`, `FrameAdvance()`, `LoadState(path)`, `SaveState(path)`, `LoadRom(path)`. Path argument should be relative to `Assets/StreamingAssets/`. Use the `ApiControls` component to use these methods directly from the Editor.
-- Within a BizHawk Lua script, you can use the `unityhawk.methodcall(methodName, argString)` method to send and receive information from Unity. The method must be registered on the Unity side using `Emulator.RegisterMethod`. See `test.lua` and `RegisterMethodExample` in the `Demo` sample for a brief example.
+- Within a BizHawk Lua script, you can use the `unityhawk.callmethod(methodName, argString)` method to send and receive information from Unity. The method must be registered on the Unity side using `Emulator.RegisterMethod`. See `test.lua` and `RegisterMethodExample` in the `Demo` sample for a brief example.
 
 ## Features
 - Enable 'Pass Input From Unity' to send keyboard input from Unity to Bizhawk (gamepad input not supported yet). If this isn't enabled Bizhawk will get input directly from the operating system.
