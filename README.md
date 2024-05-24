@@ -28,14 +28,13 @@ You will probably also need to install the BizHawk prerequisites, which can be i
 
 ## Usage
 - Add an `Emulator` component to an object with an attached `Renderer`.
-- Make sure 'use manual pathnames' is unticked
-- Drag the rom, savestate, config & lua files you want to use into the corresponding Inspector slots
+- Drag the rom and savestate files you want to use into the corresponding Inspector slots (plus config and lua files if needed)
 - If using a platform that requires firmware, drag the firmware folder into the 'Firmware Directory' slot
-- Hit play!
+- Hit play
 ### More
 - The live emulator graphics can be grabbed in code via the `Emulator.Texture` property.
 - The `Emulator` component provides an interface to basic Bizhawk API methods: `Pause()`, `Unpause()`, `FrameAdvance()`, `LoadState(path)`, `SaveState(path)`, `LoadRom(path)`. Path argument should be relative to `Assets/StreamingAssets/`. Use the `ApiControls` component to use these methods directly from the Editor.
-- Within a BizHawk Lua script, you can use the `unityhawk.methodcall(methodName, argString)` method to send and receive information from Unity. The method must be registered on the Unity side using `Emulator.RegisterMethod`. See `test.lua` and `RegisterMethodExample` in the `Demo` sample for a brief example.
+- Within a BizHawk Lua script, you can use the `unityhawk.callmethod(methodName, argString)` method to send and receive information from Unity. The method must be registered on the Unity side using `Emulator.RegisterMethod`. See `test.lua` and `RegisterMethodExample` in the `Demo` sample for a brief example.
 
 ## Features
 - Enable 'Pass Input From Unity' to send keyboard input from Unity to Bizhawk (gamepad input not supported yet). If this isn't enabled Bizhawk will get input directly from the operating system.
@@ -57,4 +56,4 @@ UnityHawk uses a modified fork of BizHawk which is here: https://github.com/plun
 The included demo scene contains [this shader](https://github.com/yunoda-3DCG/Simple-CRT-Shader), [this model of a TV](https://sketchfab.com/3d-models/crt-tv-9ba4baa106e64319a0b540cf0af5aa9e), and [a rom of Elite for the NES](http://www.iancgbell.clara.net/elite/nes/index.htm).
 
 ## Contact
-If you want help setting up the tool, or you are interested in contributing, or have any other questions, feel free to join our discord: https://discord.gg/ATJSh8W8dp. Github issues also welcome.
+If you want help setting up the tool, or you are interested in contributing, or have any other questions, feel free to join our discord: https://discord.gg/ATJSh8W8dp.
