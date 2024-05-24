@@ -26,7 +26,7 @@ using UnityEngine.Serialization;
 namespace UnityHawk {
 
 [ExecuteInEditMode]
-public class Emulator : MonoBehaviour
+public partial class Emulator : MonoBehaviour
 {
     static readonly bool _targetMac = 
 #if UNITY_EDITOR_OSX || UNITY_STANDALONE_OSX
@@ -284,84 +284,6 @@ public class Emulator : MonoBehaviour
         EditorUtility.RevealInFinder(bizhawkLogLocation);
     }
 #endif
-
-    ///// Public methods
-
-    // Register a method that can be called via `unityhawk.callmethod('MethodName')` in BizHawk lua
-    public void RegisterMethod(string methodName, Method method)
-    {
-        if (_registeredMethods == null) {
-            _registeredMethods = new Dictionary<string, Method>();
-            // This will never get cleared when running in edit mode but maybe that's fine
-        }
-        _registeredMethods[methodName] = method;
-    }
-    
-    // For editor convenience: Set filename fields by reading a sample directory
-    public void SetFromSample(string samplePath) {
-        // Read the sample dir to get the necessary filenames (rom, config, etc)
-        Sample s = Sample.LoadFromDir(samplePath);
-        romFileName = s.romPath;
-        configFileName = s.configPath;
-        saveStateFileName = s.saveStatePath;
-        var luaScripts = s.luaScriptPaths.ToList();
-        if (luaScripts != null && luaScripts.Count > 0) {
-            luaScriptFileName = luaScripts[0];
-            if (luaScripts.Count > 1) {
-                Debug.LogWarning($"Currently only support one lua script, loading {luaScripts[0]}");
-                // because bizhawk only supports passing a single lua script from the command line
-            }
-        }
-    }
-
-    ///// Bizhawk API methods
-    ///// [should maybe move these into a Emulator.BizhawkApi subobject or similar]
-    // For LoadState/SaveState/LoadRom, path should be relative to StreamingAssets (same as for rom/savestate/lua params in the inspector)
-    // can also pass absolute path (but this will most likely break in build!)
-    // TODO: should there be a version of these that uses DefaultAssets instead of paths? idk
-    public void Pause() {
-        _apiCallBuffer.CallMethod("Pause", null);
-    }
-    public void Unpause() {
-        _apiCallBuffer.CallMethod("Unpause", null);
-    }
-    public void LoadState(string path) {
-        path = Paths.GetAssetPath(path);
-        saveStateFileName = path;
-        if (_status == EmulatorStatus.Inactive) return;
-        _apiCallBuffer.CallMethod("LoadState", path);
-    }
-    public void SaveState(string path) {
-        path = Paths.GetAssetPath(path);
-        if (!path.Contains(".State"))
-        {
-            path += ".State";
-        }
-        _apiCallBuffer.CallMethod("SaveState", path);
-    }
-    public void LoadRom(string path) {
-        path = Paths.GetAssetPath(path);
-        romFileName = path;
-        if (_status == EmulatorStatus.Inactive) return;
-        
-        _apiCallBuffer.CallMethod("LoadRom", path);
-        // Need to update texture buffer size in case platform has changed:
-        _sharedTextureBuffer.UpdateSize();
-        _status = EmulatorStatus.Started; // Not ready until new texture buffer is set up
-    }
-
-    public void LoadSample(string path)
-    {
-        Sample s = Sample.LoadFromDir(path);
-        LoadRom(s.romPath);
-        LoadState(s.saveStatePath);
-        // TODO: lua / config?
-    }
-    
-    public void FrameAdvance() {
-        _apiCallBuffer.CallMethod("FrameAdvance", null);
-    }
-
     ///// MonoBehaviour lifecycle
 
     // (These methods are public only for convenient testing)
