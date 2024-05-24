@@ -242,6 +242,13 @@ public class Emulator : MonoBehaviour
         // Will be reactivated in Update on next frame
     }
 
+    private void OnValidate()
+    {
+        if (!useManualPathnames) {
+            SetFilenamesFromAssetReferences();
+        }
+    }
+
 #if UNITY_EDITOR
     // Set rom filename field using OS file picker
     [ShowIf("useManualPathnames")]
@@ -320,19 +327,37 @@ public class Emulator : MonoBehaviour
     }
     public void LoadState(string path) {
         path = Paths.GetAssetPath(path);
+        saveStateFileName = path;
+        if (_status == EmulatorStatus.Inactive) return;
         _apiCallBuffer.CallMethod("LoadState", path);
     }
     public void SaveState(string path) {
         path = Paths.GetAssetPath(path);
+        if (!path.Contains(".State"))
+        {
+            path += ".State";
+        }
         _apiCallBuffer.CallMethod("SaveState", path);
     }
     public void LoadRom(string path) {
         path = Paths.GetAssetPath(path);
+        romFileName = path;
+        if (_status == EmulatorStatus.Inactive) return;
+        
         _apiCallBuffer.CallMethod("LoadRom", path);
         // Need to update texture buffer size in case platform has changed:
         _sharedTextureBuffer.UpdateSize();
         _status = EmulatorStatus.Started; // Not ready until new texture buffer is set up
     }
+
+    public void LoadSample(string path)
+    {
+        Sample s = Sample.LoadFromDir(path);
+        LoadRom(s.romPath);
+        LoadState(s.saveStatePath);
+        // TODO: lua / config?
+    }
+    
     public void FrameAdvance() {
         _apiCallBuffer.CallMethod("FrameAdvance", null);
     }
@@ -342,15 +367,14 @@ public class Emulator : MonoBehaviour
     // (These methods are public only for convenient testing)
     public void OnEnable()
     {
-        Debug.Log($"Emulator OnEnable");
         _isEnabled = true;
-#if UNITY_EDITOR
+#if UNITY_EDITOR && UNITY_2022_2
         if (Undo.isProcessing) return; // OnEnable gets called after undo/redo, but ignore it
 #endif
         _initialized = false;
         
-        if (runInEditMode || Application.isPlaying) {
-            Initialize();
+        if (runInEditMode || (Application.isPlaying && !string.IsNullOrEmpty(romFileName))) {
+            TryInitialize();
         }
     }
 
@@ -361,7 +385,7 @@ public class Emulator : MonoBehaviour
     public void OnDisable() {
         // Debug.Log($"Emulator OnDisable");
         _isEnabled = false;
-#if UNITY_EDITOR
+#if UNITY_EDITOR && UNITY_2022_2
         if (Undo.isProcessing) return; // OnDisable gets called after undo/redo, but ignore it
 #endif
         if (_initialized) {
@@ -371,7 +395,7 @@ public class Emulator : MonoBehaviour
 
     ////// Core methods
 
-    void Initialize() {
+    bool TryInitialize() {
         // Debug.Log("Emulator Initialize");
         if (!customRenderTexture) renderTexture = null; // Clear texture so that it's forced to be reinitialized
 
@@ -400,15 +424,13 @@ public class Emulator : MonoBehaviour
 
         // If using referenced assets then first map those assets to filenames
         // (Bizhawk requires a path to a real file on disk)
-        if (!useManualPathnames) {
-            SetFilenamesFromAssetReferences();
-        }
 
         // Process filename args
         if (string.IsNullOrEmpty(romFileName)) {
-            Debug.LogError("Emulator needs a rom file");
-            return;
+            Debug.LogWarning("Attempt to initialize emulator without a rom");
+            return false;
         }
+        
         string romPath = Paths.GetAssetPath(romFileName);
 
         string saveStateFullPath = null;
@@ -584,6 +606,7 @@ public class Emulator : MonoBehaviour
         _currentBizhawkArgs = MakeBizhawkArgs();
 
         _initialized = true;
+        return true;
     }
 
     void _Update() {
@@ -592,18 +615,16 @@ public class Emulator : MonoBehaviour
             Deactivate();
         }
 
-        // Do this every frame just to ensure the filenames stay synced in edit mode
-        if (!useManualPathnames) {
-            SetFilenamesFromAssetReferences();
-        }
-
         if (!Application.isPlaying && !runInEditMode) {
             if (_status != EmulatorStatus.Inactive) {
                 Deactivate();
             }
             return;
-        } else if (!_initialized) {
-            Initialize();
+        } 
+        
+        if (!_initialized && !TryInitialize())
+        {
+            return;
         }
 
         // In headless mode, if bizhawk steals focus, steal it back
