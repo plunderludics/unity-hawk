@@ -50,7 +50,7 @@ public partial class Emulator : MonoBehaviour
     [Tooltip("If true, Unity will pass keyboard input to the emulator (only in play mode!). If false, BizHawk will accept input directly from the OS")]
     public bool passInputFromUnity = true;
     
-    [Tooltip("If null, defaults to BasicInputProvider. Subclass InputProvider for custom behavior.")]
+    [Tooltip("If null and no InputProvider component attached, defaults to BasicInputProvider. Subclass InputProvider for custom behavior.")]
     [ShowIf("passInputFromUnity")]
     public InputProvider inputProvider = null;
 
@@ -448,7 +448,9 @@ public partial class Emulator : MonoBehaviour
 
                 // default to BasicInputProvider (maps keys directly from keyboard)
                 if (inputProvider == null) {
-                    inputProvider = gameObject.AddComponent<BasicInputProvider>();
+                    if (!(inputProvider = GetComponent<InputProvider>())) {
+                        inputProvider = gameObject.AddComponent<BasicInputProvider>();
+                    }
                 }
             } else {
                 // Always accept background input in play mode if not getting input from unity

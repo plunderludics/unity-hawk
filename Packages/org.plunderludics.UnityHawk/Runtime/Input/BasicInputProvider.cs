@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 #if ENABLE_INPUT_SYSTEM
 using UnityEngine.InputSystem;
@@ -86,8 +87,8 @@ public class BasicInputProvider : InputProvider {
 
     public override List<InputEvent> InputForFrame() {
         var toReturn = new List<InputEvent>(pressedThisFrame);
-        pressedThisFrame = new ();
-        return toReturn;
+        pressedThisFrame.Clear(); // Not ideal because will break if multiple clients use the same InputProvider, should clear at the end of the frame
+        return toReturn.Concat(base.InputForFrame()).ToList();
     }
 
     public override Dictionary<string, int> AxisValuesForFrame() {

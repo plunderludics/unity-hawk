@@ -141,9 +141,9 @@ public class GenericInputProvider : InputProvider {
         // flush input event list
         // maybe this is bad?
         var flush = new List<InputEvent>(pressed);
-        pressed.Clear();
+        pressed.Clear(); // Not ideal because will break if multiple clients use the same InputProvider, should clear at the end of the frame
         // Debug.Log($"GenericInputProvider returning: {flush.Count} events");
-        return flush;
+        return flush.Concat(base.InputForFrame()).ToList(); ;
     }
     
     public override Dictionary<string, int> AxisValuesForFrame()
