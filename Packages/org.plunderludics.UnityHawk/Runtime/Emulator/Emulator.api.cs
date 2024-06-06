@@ -25,10 +25,10 @@ public partial class Emulator : MonoBehaviour
     public void SetFromSample(string samplePath) {
         // Read the sample dir to get the necessary filenames (rom, config, etc)
         Sample s = Sample.LoadFromDir(samplePath);
-        romFileName = s.romPath;
-        configFileName = s.configPath;
-        saveStateFileName = s.saveStatePath;
-        var luaScripts = s.luaScriptPaths.ToList();
+        romFileName = s.RomPath;
+        configFileName = s.ConfigPath;
+        saveStateFileName = s.SaveStatePath;
+        var luaScripts = s.LuaScriptPaths.ToList();
         if (luaScripts != null && luaScripts.Count > 0) {
             luaScriptFileName = luaScripts[0];
             if (luaScripts.Count > 1) {
@@ -107,8 +107,8 @@ public partial class Emulator : MonoBehaviour
     public void LoadSample(string path)
     {
         Sample s = Sample.LoadFromDir(path);
-        LoadRom(s.romPath);
-        LoadState(s.saveStatePath);
+        LoadRom(s.RomPath);
+        LoadState(s.SaveStatePath);
         // TODO: lua / config?
     }
     
