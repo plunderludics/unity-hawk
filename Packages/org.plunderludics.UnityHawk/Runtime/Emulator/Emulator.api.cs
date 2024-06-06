@@ -1,25 +1,10 @@
-// This is the main user-facing component (ie MonoBehaviour)
-// handles starting up and communicating with the BizHawk process
-
-using System;
-using System.Linq;
-using System.Collections.Generic;
-using System.IO;
-using System.Diagnostics;
-using System.Runtime.InteropServices;
-using Debug = UnityEngine.Debug;
-
-#if UNITY_EDITOR
-using UnityEditor;
-#endif
-
-using NaughtyAttributes;
+// Public methods for the Emulator component
+// Including methods for interfacing with the BizHawk API (loading/saving states, etc)
 
 using UnityEngine;
-using Unity.Profiling;
-
 using Plunderludics;
-using UnityEngine.Serialization;
+using System.Collections.Generic;
+using System.Linq;
 
 namespace UnityHawk {
 

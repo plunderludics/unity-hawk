@@ -1,4 +1,4 @@
-// This is the main user-facing component (ie MonoBehaviour)
+// This is the main user-facing MonoBehaviour
 // handles starting up and communicating with the BizHawk process
 
 using System;
@@ -278,7 +278,6 @@ public partial class Emulator : MonoBehaviour
         }
     }
     
-    // Set filename fields based on sample directory
     [Button]
     private void ShowBizhawkLogInOS() {
         EditorUtility.RevealInFinder(bizhawkLogLocation);
@@ -290,7 +289,7 @@ public partial class Emulator : MonoBehaviour
     public void OnEnable()
     {
         _isEnabled = true;
-#if UNITY_EDITOR && UNITY_2022_2
+#if UNITY_EDITOR && UNITY_2022_2_OR_NEWER
         if (Undo.isProcessing) return; // OnEnable gets called after undo/redo, but ignore it
 #endif
         _initialized = false;
