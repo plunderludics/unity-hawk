@@ -977,7 +977,7 @@
             implements a simple dialog which chooses an IVideoWriter to record with
             </summary>
         </member>
-        <member name="M:BizHawk.Client.EmuHawk.VideoWriterChooserForm.DoVideoWriterChooserDlg``1(System.Collections.Generic.IEnumerable{BizHawk.Client.EmuHawk.VideoWriterInfo},``0,BizHawk.Emulation.Common.IEmulator,BizHawk.Client.Common.Config,System.Int32@,System.Int32@,System.Boolean@,System.Boolean@)">
+        <member name="M:BizHawk.Client.EmuHawk.VideoWriterChooserForm.DoVideoWriterChooserDlg``1(System.Collections.Generic.IEnumerable{BizHawk.Client.EmuHawk.VideoWriterInfo},``0,BizHawk.Emulation.Common.IEmulator,BizHawk.Client.Common.Config)">
             <summary>
             chose an IVideoWriter
             </summary>
@@ -3120,6 +3120,36 @@
             the contents of this method with the code editor.
             </summary>
         </member>
+        <member name="F:BizHawk.Client.EmuHawk.RCheevos._inactiveHttpRequests">
+            <summary>
+            A concurrent stack containing all pending HTTP requests
+            The main thread will push new requests onto this stack
+            The HTTP thread will pop requests and start them
+            </summary>
+        </member>
+        <member name="F:BizHawk.Client.EmuHawk.RCheevos._activeHttpRequests">
+            <summary>
+            A list containing all currently active HTTP requests
+            Completed requests might be restarted if ShouldRetry is true
+            Otherwise, the completed request is disposed and removed
+            Only the HTTP thread is allowed to use this list, no other thread may use it
+            </summary>
+        </member>
+        <member name="T:BizHawk.Client.EmuHawk.RCheevos.RCheevoHttpRequest">
+            <summary>
+            Base class for all HTTP requests to rcheevos servers
+            </summary>
+        </member>
+        <member name="M:BizHawk.Client.EmuHawk.RCheevos.RCheevoHttpRequest.DisposeWithoutWait">
+            <summary>
+            Don't use, for FailedRCheevosRequest use only
+            </summary>
+        </member>
+        <member name="T:BizHawk.Client.EmuHawk.RCheevos.FailedRCheevosRequest">
+            <summary>
+            Represents a generic failed rcheevos request
+            </summary>
+        </member>
         <member name="T:BizHawk.Client.EmuHawk.RCheevosAchievementForm">
             <summary>
             Shows information about a specific achievement
@@ -3485,10 +3515,7 @@
         </member>
         <member name="M:BizHawk.Client.EmuHawk.ExternalToolManager.GenerateToolTipFromFileName(System.String)">
             <summary>Generates a <see cref="T:System.Windows.Forms.ToolStripMenuItem"/> from an assembly at <paramref name="fileName"/> containing an external tool.</summary>
-            <returns>
-            a <see cref="T:System.Windows.Forms.ToolStripMenuItem"/> with its <see cref="P:System.Windows.Forms.ToolStripItem.Tag"/> containing a <see cref="T:BizHawk.Client.EmuHawk.ExternalToolManager.MenuItemInfo"/>;
-            the first is the assembly path (<paramref name="fileName"/>) and the second is the <see cref="P:System.Type.FullName"/> of the entry point form's type
-            </returns>
+            <returns>a <see cref="T:System.Windows.Forms.ToolStripMenuItem"/> with its <see cref="P:System.Windows.Forms.ToolStripItem.Tag"/> containing a <see cref="T:BizHawk.Client.EmuHawk.ExternalToolManager.MenuItemInfo"/></returns>
         </member>
         <member name="M:BizHawk.Client.EmuHawk.ExternalToolManager.DirectoryMonitor_Created(System.Object,System.IO.FileSystemEventArgs)">
             <summary>
@@ -3498,12 +3525,6 @@
             </summary>
             <param name="sender">Object that raised the event</param>
             <param name="e">Event arguments</param>
-        </member>
-        <member name="P:BizHawk.Client.EmuHawk.ExternalToolManager.ToolStripMenu">
-            <summary>
-            Gets a prebuild <see cref="T:System.Windows.Forms.ToolStripMenuItem"/>
-            This list auto-updated by the <see cref="T:BizHawk.Client.EmuHawk.ExternalToolManager"/> itself
-            </summary>
         </member>
         <member name="F:BizHawk.Client.EmuHawk.GameShark.components">
             <summary>
@@ -4383,6 +4404,7 @@
             Determines whether a given IToolForm is already loaded
             </summary>
             <typeparam name="T">Type of tool to check</typeparam>
+            <remarks>yo why do we have 4 versions of this, each with slightly different behaviour in edge cases --yoshi</remarks>
         </member>
         <member name="M:BizHawk.Client.EmuHawk.ToolManager.Has``1">
             <summary>
@@ -4398,6 +4420,16 @@
             Gets the instance of T, or creates and returns a new instance
             </summary>
             <typeparam name="T">Type of tool to get</typeparam>
+        </member>
+        <member name="M:BizHawk.Client.EmuHawk.ToolManager.LazyGet(System.Type)">
+            <summary>
+            returns the instance of <paramref name="toolType"/>, regardless of whether it's loaded,<br/>
+            but doesn't create and load a new instance if it's not found
+            </summary>
+            <remarks>
+            does not check <paramref name="toolType"/> is a class implementing <see cref="T:BizHawk.Client.Common.IToolForm"/>;<br/>
+            you may pass any class or interface
+            </remarks>
         </member>
         <member name="M:BizHawk.Client.EmuHawk.ToolManager.UpdateValues``1">
             <summary>

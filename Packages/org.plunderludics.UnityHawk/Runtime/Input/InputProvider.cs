@@ -17,9 +17,19 @@ public struct InputEvent {
 public abstract class InputProvider : MonoBehaviour {
     // (derive from monobehaviour so params can be easily tweaked in inspector)
 
+    List<InputEvent> _addedInputs = new();
+
     // Return a list of input events for the frame, in chronological order
-    public abstract List<InputEvent> InputForFrame();
+    public virtual List<InputEvent> InputForFrame() {
+        var toReturn = new List<InputEvent>(_addedInputs);
+        _addedInputs.Clear(); // Not ideal because will break if multiple clients use the same InputProvider, should clear at the end of the frame
+        return toReturn;
+    }
     public abstract Dictionary<string, int> AxisValuesForFrame();
+
+    public void AddInputEvent(InputEvent ie) {
+        _addedInputs.Add(ie);
+    }
 }
 
 }

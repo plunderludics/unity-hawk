@@ -1,4 +1,4 @@
-// This is the main user-facing component (ie MonoBehaviour)
+// This is the main user-facing MonoBehaviour
 // handles starting up and communicating with the BizHawk process
 
 using System;
@@ -51,7 +51,7 @@ public partial class Emulator : MonoBehaviour
     [Tooltip("If true, Unity will pass keyboard input to the emulator (only in play mode!). If false, BizHawk will accept input directly from the OS")]
     public bool passInputFromUnity = true;
     
-    [Tooltip("If null, defaults to BasicInputProvider. Subclass InputProvider for custom behavior.")]
+    [Tooltip("If null and no InputProvider component attached, defaults to BasicInputProvider. Subclass InputProvider for custom behavior.")]
     [ShowIf("passInputFromUnity")]
     public InputProvider inputProvider = null;
 
@@ -300,7 +300,6 @@ public partial class Emulator : MonoBehaviour
         }
     }
     
-    // Set filename fields based on sample directory
     [Button]
     private void ShowBizhawkLogInOS() {
         EditorUtility.RevealInFinder(bizhawkLogLocation);
@@ -312,7 +311,7 @@ public partial class Emulator : MonoBehaviour
     public void OnEnable()
     {
         _isEnabled = true;
-#if UNITY_EDITOR && UNITY_2022_2
+#if UNITY_EDITOR && UNITY_2022_2_OR_NEWER
         if (Undo.isProcessing) return; // OnEnable gets called after undo/redo, but ignore it
 #endif
         _initialized = false;
@@ -471,7 +470,9 @@ public partial class Emulator : MonoBehaviour
 
                 // default to BasicInputProvider (maps keys directly from keyboard)
                 if (inputProvider == null) {
-                    inputProvider = gameObject.AddComponent<BasicInputProvider>();
+                    if (!(inputProvider = GetComponent<InputProvider>())) {
+                        inputProvider = gameObject.AddComponent<BasicInputProvider>();
+                    }
                 }
             } else {
                 // Always accept background input in play mode if not getting input from unity
