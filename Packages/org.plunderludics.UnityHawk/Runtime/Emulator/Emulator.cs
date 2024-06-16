@@ -21,6 +21,7 @@ using UnityEngine;
 using Unity.Profiling;
 
 using Plunderludics;
+using UnityEngine.Events;
 using UnityEngine.Serialization;
 
 namespace UnityHawk {
@@ -85,6 +86,10 @@ public partial class Emulator : MonoBehaviour
     [Tooltip("Whether BizHawk will accept input when window is unfocused (in edit mode)")]
     public bool acceptBackgroundInput = true;
 
+    public UnityEvent OnStarted;
+    
+    public UnityEvent OnRunning;
+
 #if UNITY_EDITOR
     [HideIf("useManualPathnames")]
     public DefaultAsset ramWatchFile;
@@ -100,8 +105,10 @@ public partial class Emulator : MonoBehaviour
         Started, // Underlying bizhawk has been started, but not rendering yet
         Running  // Bizhawk is running and sending textures [technically gets set when shared texture channel is open]
     }
+    
     [Foldout("Debug")]
     [ReadOnly, SerializeField] EmulatorStatus _status;
+    
     [Foldout("Debug")]
     [ReadOnly, SerializeField] int _currentFrame; // The frame index of the most-recently grabbed texture
 
@@ -155,8 +162,23 @@ public partial class Emulator : MonoBehaviour
 
     // Interface for other scripts to use
     public RenderTexture Texture => renderTexture;
-    public bool IsRunning => _status == EmulatorStatus.Running; // is the _emuhawk process running (best guess, might be wrong)
-    public EmulatorStatus Status => _status;
+    public bool IsRunning => Status == EmulatorStatus.Running; // is the _emuhawk process running (best guess, might be wrong)
+    public EmulatorStatus Status {
+        get => _status;
+        private set {
+            if (_status != value) {
+                var raise = value switch {
+                    EmulatorStatus.Running => OnRunning,
+                    EmulatorStatus.Inactive => OnRunning,
+                    _ => null,
+                };
+                
+                raise?.Invoke();
+            }
+            _status = value;
+        }
+    }
+
     public int CurrentFrame => _currentFrame;
 
     Process _emuhawk;
@@ -321,7 +343,7 @@ public partial class Emulator : MonoBehaviour
         // Debug.Log("Emulator Initialize");
         if (!customRenderTexture) renderTexture = null; // Clear texture so that it's forced to be reinitialized
 
-        _status = EmulatorStatus.Inactive;
+        Status = EmulatorStatus.Inactive;
 
         _audioSkipCounter = 0f;
 
@@ -507,7 +529,7 @@ public partial class Emulator : MonoBehaviour
         _emuhawk.Start();
         _emuhawk.BeginOutputReadLine();
         _emuhawk.BeginErrorReadLine();
-        _status = EmulatorStatus.Started;
+        Status = EmulatorStatus.Started;
 
         // init shared buffers
         _sharedTextureBuffer = new SharedTextureBuffer(_sharedTextureBufferName);
@@ -538,7 +560,7 @@ public partial class Emulator : MonoBehaviour
         }
 
         if (!Application.isPlaying && !runInEditMode) {
-            if (_status != EmulatorStatus.Inactive) {
+            if (Status != EmulatorStatus.Inactive) {
                 Deactivate();
             }
             return;
@@ -567,7 +589,7 @@ public partial class Emulator : MonoBehaviour
         }
 
         if (_sharedTextureBuffer.IsOpen()) {
-            _status = EmulatorStatus.Running; 
+            Status = EmulatorStatus.Running; 
             UpdateTextureFromBuffer();
         } else {
             AttemptOpenBuffer(_sharedTextureBuffer);
@@ -698,7 +720,7 @@ public partial class Emulator : MonoBehaviour
             // Kill the _emuhawk process
             _emuhawk.Kill();
         }
-        _status = EmulatorStatus.Inactive;
+        Status = EmulatorStatus.Inactive;
 
         foreach (ISharedBuffer buf in new ISharedBuffer[] {
             _sharedTextureBuffer,

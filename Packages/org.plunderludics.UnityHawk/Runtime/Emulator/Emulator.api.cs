@@ -92,6 +92,14 @@ public partial class Emulator : MonoBehaviour
     }
     
     /// <summary>
+    /// reloads the current state 
+    /// </summary>
+    /// <param name="path"></param>
+    public void ReloadState() {
+        LoadState(saveStateFileName);
+    }
+    
+    /// <summary>
     /// saves a state to a given path
     /// </summary>
     /// <param name="path"></param>
