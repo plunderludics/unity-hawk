@@ -1,5 +1,11 @@
 # Ignore bizhawk logs
 /BizHawkLogs/
+/Assets/StreamingAssets/Firmware/
+**/BizHawk~/Lua/
+**/BizHawk~/N64/
+**/BizHawk~/NES/
+**/BizHawk~/PSX/
+**/BizHawk~/Gameboy/
 
 # Ignore the dlls - these should be copied from BizHawk/output/dlls
 /Assets/Plugins/

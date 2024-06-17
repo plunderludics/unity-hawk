@@ -17,7 +17,7 @@ public class PlayModeTests
     public IEnumerator BigTest1()
     {
         // First find rom
-        var eliteRomFile = (DefaultAsset)AssetDatabase.LoadAssetAtPath<DefaultAsset>(
+        var eliteRomFile = AssetDatabase.LoadAssetAtPath<Rom>(
             "Packages/org.plunderludics.UnityHawk/Tests/TestResources/eliteRomForTests.nes");
         var o = new GameObject();
         var e = o.AddComponent<Emulator>();

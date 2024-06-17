@@ -62,16 +62,17 @@ public partial class Emulator : MonoBehaviour
 #if UNITY_EDITOR
 // DefaultAsset is only defined in the editor. That's ok because useManualPathnames should always be true in the build (see BuildProcessing.cs)
     [HideIf("useManualPathnames")]
-    public DefaultAsset romFile;
+    public Rom romFile;
     [HideIf("useManualPathnames")]
-    public DefaultAsset saveStateFile;
+    public Savestate saveStateFile;
     [HideIf("useManualPathnames")]
-    public DefaultAsset configFile;
+    public Config configFile;
     [HideIf("useManualPathnames")]
-    public DefaultAsset luaScriptFile;
+    public LuaScript luaScriptFile;
     [HideIf("useManualPathnames")]
     public DefaultAsset firmwareDirectory;
 #endif // UNITY_EDITOR
+    
     [SerializeField, HideInInspector] private bool _isEnabled = false; // hack to only show the forceCopyFilesToBuild field when component is inactive
     [HideIf("_isEnabled")]
     [Tooltip("Copy files into build even though Emulator is not active")]
@@ -86,9 +87,9 @@ public partial class Emulator : MonoBehaviour
     [Tooltip("Whether BizHawk will accept input when window is unfocused (in edit mode)")]
     public bool acceptBackgroundInput = true;
 
-    public UnityEvent OnStarted;
-    
-    public UnityEvent OnRunning;
+    public Action OnStarted;
+
+    public Action OnRunning;
 
 #if UNITY_EDITOR
     [HideIf("useManualPathnames")]
@@ -168,8 +169,8 @@ public partial class Emulator : MonoBehaviour
         private set {
             if (_status != value) {
                 var raise = value switch {
+                    EmulatorStatus.Started => OnStarted,
                     EmulatorStatus.Running => OnRunning,
-                    EmulatorStatus.Inactive => OnRunning,
                     _ => null,
                 };
                 
@@ -187,10 +188,10 @@ public partial class Emulator : MonoBehaviour
     // Don't include the path params here, because then the process gets reset for every character typed/deleted
     struct BizhawkArgs {
 #if UNITY_EDITOR
-        public DefaultAsset romFile;
-        public DefaultAsset saveStateFile;
-        public DefaultAsset configFile;
-        public DefaultAsset luaScriptFile;
+        public Rom romFile;
+        public Savestate saveStateFile;
+        public Config configFile;
+        public LuaScript luaScriptFile;
         public DefaultAsset firmwareDirectory;
         public DefaultAsset savestatesOutputDirectory;
         public DefaultAsset ramWatchFile;
@@ -315,10 +316,10 @@ public partial class Emulator : MonoBehaviour
         if (Undo.isProcessing) return; // OnEnable gets called after undo/redo, but ignore it
 #endif
         _initialized = false;
+
+        if (!runInEditMode && (!Application.isPlaying || string.IsNullOrEmpty(romFileName))) return;
         
-        if (runInEditMode || (Application.isPlaying && !string.IsNullOrEmpty(romFileName))) {
-            TryInitialize();
-        }
+        TryInitialize();
     }
 
     public void Update() {
@@ -369,6 +370,12 @@ public partial class Emulator : MonoBehaviour
         // (Bizhawk requires a path to a real file on disk)
 
         // Process filename args
+        if (string.IsNullOrEmpty(romFileName)) {
+            if (!useManualPathnames) {
+                SetFilenamesFromAssetReferences();
+            }
+        }
+
         if (string.IsNullOrEmpty(romFileName)) {
             Debug.LogWarning("Attempt to initialize emulator without a rom");
             return false;
@@ -651,7 +658,7 @@ public partial class Emulator : MonoBehaviour
         foreach (InputEvent ie in inputEvents) {
             // Convert Unity InputEvent to BizHawk InputEvent
             // [for now only supporting keys, no gamepad]
-            BizHawk.UnityHawk.InputEvent bie = ConvertInput.ToBizHawk(ie);
+            var bie = ConvertInput.ToBizHawk(ie);
             _sharedKeyInputBuffer.Write(bie);
         }
     }
@@ -823,15 +830,20 @@ public partial class Emulator : MonoBehaviour
 #if UNITY_EDITOR
         // Set filename params based on asset locations
         // [using absolute path is not really ideal here but ok for now]
-        static string GetAssetPathName(DefaultAsset f) =>
+        static string GetDefaultAssetPathName(DefaultAsset f) =>
             f ? Path.GetFullPath(AssetDatabase.GetAssetPath(f)) : "";
-        romFileName = GetAssetPathName(romFile);
-        saveStateFileName = GetAssetPathName(saveStateFile);
-        configFileName = GetAssetPathName(configFile);
-        luaScriptFileName = GetAssetPathName(luaScriptFile);
-        firmwareDirName = GetAssetPathName(firmwareDirectory);
-        savestatesOutputDirName = GetAssetPathName(savestatesOutputDirectory);
-        ramWatchFileName = GetAssetPathName(ramWatchFile);
+        
+        static string GetBizhawkAssetPathName(BizhawkAsset f) =>
+            f ? Path.GetFullPath(f.Path) : "";
+        
+        romFileName = GetBizhawkAssetPathName(romFile);
+        saveStateFileName = GetBizhawkAssetPathName(saveStateFile);
+        configFileName = GetBizhawkAssetPathName(configFile);
+        luaScriptFileName = GetBizhawkAssetPathName(luaScriptFile);
+        
+        firmwareDirName = GetDefaultAssetPathName(firmwareDirectory);
+        savestatesOutputDirName = GetDefaultAssetPathName(savestatesOutputDirectory);
+        ramWatchFileName = GetDefaultAssetPathName(ramWatchFile);
 #else
         Debug.LogError("Something is wrong: SetFilenamesFromAssetReferences should never be called from within a build");
 #endif

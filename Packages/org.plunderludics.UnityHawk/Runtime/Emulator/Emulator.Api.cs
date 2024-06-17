@@ -8,7 +8,7 @@ using System.Linq;
 
 namespace UnityHawk {
 
-public partial class Emulator : MonoBehaviour
+public partial class Emulator
 {
     ///// Public methods
     // Register a method that can be called via `unityhawk.callmethod('MethodName')` in BizHawk lua
@@ -89,10 +89,10 @@ public partial class Emulator : MonoBehaviour
     /// </summary>
     /// <param name="path"></param>
     public void SaveState(string path) {
-        path = Paths.GetAssetPath(path);
-        if (!path.Contains(".State"))
+        // path = Paths.GetAssetPath(path);
+        if (!path.Contains(".savestate"))
         {
-            path += ".State";
+            path += ".savestate";
         }
         _apiCallBuffer.CallMethod("SaveState", path);
     }

@@ -2,10 +2,9 @@
 // I think the way it should be done instead is just do the resampling stuff on the unity side
 // And hopefully just use a simple circular buffer instead of this dual RPC mess
 using System;
-
 using UnityEngine;
 using SharedMemory;
-using BizHawk.UnityHawk;
+
 public class SharedAudioBuffer : ISharedBuffer {
     private string _name;
     private RpcBuffer _audioRpcBuffer;

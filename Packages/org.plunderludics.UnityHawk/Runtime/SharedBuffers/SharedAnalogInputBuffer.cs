@@ -1,11 +1,7 @@
-using UnityEngine;
-
 using System.Collections.Generic;
 using SharedMemory;
-using System.Linq;
-
-using BizHawk.UnityHawk;
 using Plunderludics.UnityHawk;
+
 public class SharedAnalogInputBuffer : ISharedBuffer {
     private string _name;
     private SharedArray<byte> _buffer;
