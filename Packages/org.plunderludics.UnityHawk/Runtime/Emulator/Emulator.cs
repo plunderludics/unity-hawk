@@ -306,7 +306,7 @@ public partial class Emulator : MonoBehaviour
     public void OnDisable() {
         // Debug.Log($"Emulator OnDisable");
         _isEnabled = false;
-#if UNITY_EDITOR && UNITY_2022_2
+#if UNITY_EDITOR && UNITY_2022_2_OR_NEWER
         if (Undo.isProcessing) return; // OnDisable gets called after undo/redo, but ignore it
 #endif
         if (_initialized) {
