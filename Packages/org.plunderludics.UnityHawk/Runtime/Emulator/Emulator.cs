@@ -2,13 +2,10 @@
 // handles starting up and communicating with the BizHawk process
 
 using System;
-using System.Linq;
-using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 using System.Diagnostics;
 using System.Runtime.InteropServices;
-using System.Threading;
 using Debug = UnityEngine.Debug;
 
 #if UNITY_EDITOR
@@ -138,6 +135,9 @@ public partial class Emulator : MonoBehaviour
     [EnableIf("useManualPathnames")]
     public string ramWatchFileName;
 
+    [Foldout("Debug")]
+    [Tooltip("Prevent BizHawk from popping up windows for warnings and errors; these will still appear in logs")]
+    public bool suppressBizhawkPopups = true;
     [Foldout("Debug")]
     public bool writeBizhawkLogs = true;
     [ShowIf("writeBizhawkLogs")]
@@ -487,6 +487,10 @@ public partial class Emulator : MonoBehaviour
         
         // Save savestates with extension .savestate instead of .State, this is because Unity treats .State as some other kind of asset
         args.Add($"--savestate-extension={_savestateExtension}");
+
+        if (suppressBizhawkPopups) {
+            args.Add("--suppress-popups"); // Don't pop up windows for messages/exceptions (they will still appear in the logs)
+        }
 
         args.Add(romPath);
 
