@@ -58,6 +58,18 @@ MonoBehaviour:
   - action: {fileID: -1872781982163622326, guid: 3210f9c94fff9724d9b448ef21abe21a, type: 3}
     inputName: V
     enabled: 1
+  - action: {fileID: 7784095451061708310, guid: 3210f9c94fff9724d9b448ef21abe21a, type: 3}
+    inputName: I
+    enabled: 1
+  - action: {fileID: 2380197775502924196, guid: 3210f9c94fff9724d9b448ef21abe21a, type: 3}
+    inputName: J
+    enabled: 1
+  - action: {fileID: -4898507285565206679, guid: 3210f9c94fff9724d9b448ef21abe21a, type: 3}
+    inputName: K
+    enabled: 1
+  - action: {fileID: 7942108997908146821, guid: 3210f9c94fff9724d9b448ef21abe21a, type: 3}
+    inputName: L
+    enabled: 1
   - action: {fileID: 8169854821649047475, guid: 3210f9c94fff9724d9b448ef21abe21a, type: 3}
     inputName: Up
     enabled: 1
