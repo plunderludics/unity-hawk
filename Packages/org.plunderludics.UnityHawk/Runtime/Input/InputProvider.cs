@@ -18,6 +18,7 @@ public abstract class InputProvider : MonoBehaviour {
     // (derive from monobehaviour so params can be easily tweaked in inspector)
 
     List<InputEvent> _addedInputs = new();
+    Dictionary<string, int> _addedAxisInputs = new();
 
     // Return a list of input events for the frame, in chronological order
     public virtual List<InputEvent> InputForFrame() {
@@ -25,10 +26,19 @@ public abstract class InputProvider : MonoBehaviour {
         _addedInputs.Clear(); // Not ideal because will break if multiple clients use the same InputProvider, should clear at the end of the frame
         return toReturn;
     }
-    public abstract Dictionary<string, int> AxisValuesForFrame();
+
+    public virtual Dictionary<string, int> AxisValuesForFrame() {
+        var toReturn = new Dictionary<string, int>(_addedAxisInputs);
+        _addedAxisInputs.Clear();
+        return toReturn;
+    }
 
     public void AddInputEvent(InputEvent ie) {
         _addedInputs.Add(ie);
+    }
+
+    public void AddAxisInputEvent(string axis, int value) {
+        _addedAxisInputs.Add(axis, value);
     }
 }
 

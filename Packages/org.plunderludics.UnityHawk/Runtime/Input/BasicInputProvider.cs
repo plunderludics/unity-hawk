@@ -90,11 +90,6 @@ public class BasicInputProvider : InputProvider {
         pressedThisFrame.Clear(); // Not ideal because will break if multiple clients use the same InputProvider, should clear at the end of the frame
         return toReturn.Concat(base.InputForFrame()).ToList();
     }
-
-    public override Dictionary<string, int> AxisValuesForFrame() {
-        // No support for analog input
-        return new();
-    }
 }
 
 }
