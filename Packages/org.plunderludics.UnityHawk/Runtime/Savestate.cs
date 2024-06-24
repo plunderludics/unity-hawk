@@ -1,22 +1,19 @@
-﻿using NaughtyAttributes;
+﻿using BizHawk.Emulation.Common;
+using NaughtyAttributes;
 using UnityEngine;
+using UnityEngine.Serialization;
 
 namespace UnityHawk {
 
 public class Savestate : BizhawkAsset {
-    public string Name;
-
-    public string Hash;
-
-    public string System;
-
-    public string Region;
-
-    public bool NotInDatabase;
-
-    public string Core;
+    [FormerlySerializedAs("GameInfo")] [Header("Game")]
+    public RomInfo RomInfo;
 
     // TODO: get the rom associated with this game using gamedb
     public Rom Rom;
+
+    public string Name {
+        get => RomInfo.Name != "NULL" ? RomInfo.Name : name;
+    }
 }
 }

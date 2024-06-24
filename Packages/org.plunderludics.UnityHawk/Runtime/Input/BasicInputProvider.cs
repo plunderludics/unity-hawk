@@ -29,7 +29,7 @@ public class BasicInputProvider : InputProvider {
         if (InputSystem.settings.updateMode != InputSettings.UpdateMode.ProcessEventsInFixedUpdate) {
             Poll();
         }
-#else 
+#else
         Poll();
 #endif
     }

@@ -8,29 +8,29 @@ using UnityEngine;
 using UnityEngine.Events;
 
 namespace UnityHawk.Editor {
-    
+
 [CustomEditor(typeof(SavestateImporter))]
 public class SavestateImporterEditor : ScriptedImporterEditor {
     const string k_ErrorMessage =
-        "the savestate does not contain the info for the game, add the rom below and press 'validate' to update savestate"; 
+        "the savestate does not contain the info for the game, add the rom below and press 'validate' to update savestate";
     Rom _rom;
 
     public override async void OnInspectorGUI()
     {
         // if the imported savestate has no gameinfo
         var savestate = assetTarget as Savestate;
-        
-        if (!savestate || savestate.Name == GameInfo.NullInstance.Name) {
+
+        if (!savestate || savestate.RomName == GameInfo.NullInstance.Name) {
             EditorGUILayout.HelpBox(k_ErrorMessage, MessageType.Error);
             _rom = EditorGUILayout.ObjectField("rom", _rom, typeof(Rom), _rom) as Rom;
-            
+
             // TODO: the idea is that you should be able to open the rom
             // and resave the savestate with the required information
             // open bizhawk with the savestate and just immediately resave
             // not working yet
-            // EditorGUI.BeginDisabledGroup(!_rom); 
+            // EditorGUI.BeginDisabledGroup(!_rom);
             // could also just be able to manually input the info here for old savestates
-            EditorGUI.BeginDisabledGroup(true); 
+            EditorGUI.BeginDisabledGroup(true);
             if (GUILayout.Button("validate")) {
                 var path = _rom ? Path.GetFullPath(AssetDatabase.GetAssetPath(_rom)) : "";
                 var go = new GameObject();
@@ -63,11 +63,11 @@ public class SavestateImporterEditor : ScriptedImporterEditor {
                     throw;
                 }
             }
-            EditorGUI.BeginDisabledGroup(!_rom); 
+            EditorGUI.BeginDisabledGroup(!_rom);
         }
 
         base.ApplyRevertGUI();
-    } 
-        
+    }
+
 }
 }

@@ -4,6 +4,7 @@
 using UnityEngine;
 using Plunderludics;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 
 namespace UnityHawk {
@@ -42,7 +43,6 @@ public partial class Emulator
     ///// [should maybe move these into a Emulator.BizhawkApi subobject or similar]
     // For LoadState/SaveState/LoadRom, path should be relative to StreamingAssets (same as for rom/savestate/lua params in the inspector)
     // can also pass absolute path (but this will most likely break in build!)
-    // TODO: should there be a version of these that uses DefaultAssets instead of paths? idk
 
     /// <summary>
     /// pauses the emulator
@@ -94,7 +94,7 @@ public partial class Emulator
     /// </summary>
     /// <param name="sample"></param>
     public void LoadState(Savestate sample) {
-        LoadState(sample.Path);
+        LoadState(Path.GetFullPath(sample.Path));
     }
 
     /// <summary>
@@ -113,7 +113,7 @@ public partial class Emulator
         path = Paths.GetAssetPath(path);
         romFileName = path;
         if (_status == EmulatorStatus.Inactive) return;
-        
+
         _apiCallBuffer.CallMethod("LoadRom", path);
         // Need to update texture buffer size in case platform has changed:
         _sharedTextureBuffer.UpdateSize();
@@ -127,7 +127,7 @@ public partial class Emulator
         LoadState(s.SaveStatePath);
         // TODO: lua / config?
     }
-    
+
     public void FrameAdvance() {
         _apiCallBuffer.CallMethod("FrameAdvance", null);
     }
