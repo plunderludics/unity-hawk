@@ -11,14 +11,11 @@
   - maybe better interface for registering methods on the unity side, current setup feels flaky
   - realised that the call to unity from lua is synchronous (blocking) rn, it really shouldn't be
 
- - update BizHawk (to 2.9.1?)
-
- X pass current frame count along with texture to make syncing possible
- - and perhaps a built-in solution for frame-perfect syncing (between lua rpc calls and the texture)?
+ - perhaps a built-in solution for frame-perfect syncing (between lua rpc calls and the texture)?
 
  - demo scene including savestates & lua scripts
 
- - mac / linux support?? may be possible if the unsupported dependencies on mac os are input / grahpics / audio related
+ - mac / linux support?? may be possible if the unsupported dependencies on mac os are input / graphics / audio related
   - [SharedMemory library seems to not work on mac - it's possible to implement the shared buffers using NamedPipes instead, but I realised that neither of the PSX cores work on mac, and it seems like a lot of work to fix that, so unlikely this will ever happen]
   - [linux probably much easier, and apparently supports most cores other than N64]
 
@@ -44,5 +41,5 @@
 
 minor:
  - ideally put the protocol / schema for the texture buffer format (and input/audio in the future) somewhere shared
- - pause bizhawk when unity editor is paused [https://docs.unity3d.com/ScriptReference/EditorApplication-pauseStateChanged.html]
+ - pause bizhawk when unity editor is paused? [https://docs.unity3d.com/ScriptReference/EditorApplication-pauseStateChanged.html]
  - should log an error if unable to connect to ipc buffers after x amount of time
