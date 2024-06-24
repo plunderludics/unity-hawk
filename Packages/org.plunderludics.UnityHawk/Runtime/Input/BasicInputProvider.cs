@@ -29,7 +29,7 @@ public class BasicInputProvider : InputProvider {
         if (InputSystem.settings.updateMode != InputSettings.UpdateMode.ProcessEventsInFixedUpdate) {
             Poll();
         }
-#else 
+#else
         Poll();
 #endif
     }
@@ -89,11 +89,6 @@ public class BasicInputProvider : InputProvider {
         var toReturn = new List<InputEvent>(pressedThisFrame);
         pressedThisFrame.Clear(); // Not ideal because will break if multiple clients use the same InputProvider, should clear at the end of the frame
         return toReturn.Concat(base.InputForFrame()).ToList();
-    }
-
-    public override Dictionary<string, int> AxisValuesForFrame() {
-        // No support for analog input
-        return new();
     }
 }
 

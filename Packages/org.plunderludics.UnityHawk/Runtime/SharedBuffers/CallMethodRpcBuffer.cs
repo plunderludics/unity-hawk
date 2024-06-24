@@ -1,8 +1,7 @@
 using UnityEngine;
 using System;
 using SharedMemory;
-using BizHawk.UnityHawk;
-using System.Runtime.InteropServices.WindowsRuntime;
+
 public class CallMethodRpcBuffer : ISharedBuffer {
     private string _name;
     private RpcBuffer _rpcBuffer;

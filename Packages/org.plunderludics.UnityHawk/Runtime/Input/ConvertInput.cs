@@ -1,17 +1,17 @@
 using System.Linq;
 using UnityEngine;
 using System.Collections.Generic;
-using BizHawk.UnityHawk;
+using Plunderludics.UnityHawk;
 
 namespace UnityHawk {
 
 // Convert from Unity input format to BizHawk input format
 public static class ConvertInput {
-    public static BizHawk.UnityHawk.InputEvent ToBizHawk(UnityHawk.InputEvent ke) {
+    public static Plunderludics.UnityHawk.InputEvent ToBizHawk(UnityHawk.InputEvent ke) {
         string unityButtonName = ke.keyName;
         string bizhawkButtonName = UnityKeyNameToBizHawkKeyName(unityButtonName);
 
-        return new BizHawk.UnityHawk.InputEvent {
+        return new Plunderludics.UnityHawk.InputEvent {
             EventType = ke.isPressed ? InputEventType.Press : InputEventType.Release,
             ButtonName = bizhawkButtonName,
             Source = ClientInputFocus.Keyboard

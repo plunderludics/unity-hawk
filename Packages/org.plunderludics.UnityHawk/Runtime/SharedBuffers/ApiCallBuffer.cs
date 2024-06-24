@@ -2,10 +2,9 @@
 // Implemented as a simple queue rather than RPC
 // since we have to queue the calls on the bizhawk side anyway, doing as rpc causes thread safety issues
 using UnityEngine;
-
 using SharedMemory;
-using BizHawk.UnityHawk;
 using Plunderludics.UnityHawk;
+
 public class ApiCallBuffer : ISharedBuffer {
     private string _name;
     private CircularBuffer _buffer; // [should this be ReadWriteBuffer instead?]

@@ -4,11 +4,12 @@
 using UnityEngine;
 using Plunderludics;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 
 namespace UnityHawk {
 
-public partial class Emulator : MonoBehaviour
+public partial class Emulator
 {
     ///// Public methods
     // Register a method that can be called via `unityhawk.callmethod('MethodName')` in BizHawk lua
@@ -20,7 +21,7 @@ public partial class Emulator : MonoBehaviour
         }
         _registeredMethods[methodName] = method;
     }
-    
+
     // For editor convenience: Set filename fields by reading a sample directory
     public void SetFromSample(string samplePath) {
         // Read the sample dir to get the necessary filenames (rom, config, etc)
@@ -42,29 +43,41 @@ public partial class Emulator : MonoBehaviour
     ///// [should maybe move these into a Emulator.BizhawkApi subobject or similar]
     // For LoadState/SaveState/LoadRom, path should be relative to StreamingAssets (same as for rom/savestate/lua params in the inspector)
     // can also pass absolute path (but this will most likely break in build!)
-    // TODO: should there be a version of these that uses DefaultAssets instead of paths? idk
-    
+
     /// <summary>
     /// pauses the emulator
     /// </summary>
     public void Pause() {
         _apiCallBuffer.CallMethod("Pause", null);
     }
-    
+
     /// <summary>
     /// unpauses the emulator
     /// </summary>
     public void Unpause() {
         _apiCallBuffer.CallMethod("Unpause", null);
     }
-    
+
     /// <summary>
     /// unpauses the emulator
     /// </summary>
     public void SetVolume(float volume) {
         _apiCallBuffer.CallMethod("SetVolume", $"{volume}");
     }
-    
+
+    /// <summary>
+    /// saves a state to a given path
+    /// </summary>
+    /// <param name="path"></param>
+    public void SaveState(string path) {
+        // path = Paths.GetAssetPath(path);
+        if (!path.Contains(".savestate"))
+        {
+            path += ".savestate";
+        }
+        _apiCallBuffer.CallMethod("SaveState", path);
+    }
+
     /// <summary>
     /// loads a state from a given path
     /// </summary>
@@ -75,28 +88,23 @@ public partial class Emulator : MonoBehaviour
         if (_status == EmulatorStatus.Inactive) return;
         _apiCallBuffer.CallMethod("LoadState", path);
     }
-    
+
     /// <summary>
-    /// reloads the current state 
+    /// loads a state from a Savestate asset
+    /// </summary>
+    /// <param name="sample"></param>
+    public void LoadState(Savestate sample) {
+        LoadState(Path.GetFullPath(sample.Path));
+    }
+
+    /// <summary>
+    /// reloads the current state
     /// </summary>
     /// <param name="path"></param>
     public void ReloadState() {
         LoadState(saveStateFileName);
     }
-    
-    /// <summary>
-    /// saves a state to a given path
-    /// </summary>
-    /// <param name="path"></param>
-    public void SaveState(string path) {
-        path = Paths.GetAssetPath(path);
-        if (!path.Contains(".State"))
-        {
-            path += ".State";
-        }
-        _apiCallBuffer.CallMethod("SaveState", path);
-    }
-    
+
     /// <summary>
     /// loads a rom from a given path
     /// </summary>
@@ -105,7 +113,7 @@ public partial class Emulator : MonoBehaviour
         path = Paths.GetAssetPath(path);
         romFileName = path;
         if (_status == EmulatorStatus.Inactive) return;
-        
+
         _apiCallBuffer.CallMethod("LoadRom", path);
         // Need to update texture buffer size in case platform has changed:
         _sharedTextureBuffer.UpdateSize();
@@ -119,7 +127,7 @@ public partial class Emulator : MonoBehaviour
         LoadState(s.SaveStatePath);
         // TODO: lua / config?
     }
-    
+
     public void FrameAdvance() {
         _apiCallBuffer.CallMethod("FrameAdvance", null);
     }
