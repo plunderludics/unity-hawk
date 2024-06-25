@@ -20,7 +20,7 @@ public class SavestateImporterEditor : ScriptedImporterEditor {
         // if the imported savestate has no gameinfo
         var savestate = assetTarget as Savestate;
 
-        if (!savestate || savestate.RomName == GameInfo.NullInstance.Name) {
+        if (!savestate || savestate.RomInfo.Name == GameInfo.NullInstance.Name) {
             EditorGUILayout.HelpBox(k_ErrorMessage, MessageType.Error);
             _rom = EditorGUILayout.ObjectField("rom", _rom, typeof(Rom), _rom) as Rom;
 
