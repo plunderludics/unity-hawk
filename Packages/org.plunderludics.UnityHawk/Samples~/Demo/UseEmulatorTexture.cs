@@ -1,18 +1,14 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 using UnityHawk;
 
+namespace UnityHawk.Samples {
+
 public class UseEmulatorTexture : MonoBehaviour
 {
-    public Emulator emulator;
-    bool _initialized = false;
-    // Start is called before the first frame update
-    void Start()
-    {
-    }
+    [SerializeField] Emulator emulator;
 
-    // Update is called once per frame
+    bool _initialized = false;
+
     void Update()
     {
         if (!_initialized && emulator && emulator.Texture != null) {
@@ -21,4 +17,6 @@ public class UseEmulatorTexture : MonoBehaviour
             r.material.SetTexture("_EmissionMap", emulator.Texture);
         }
     }
+}
+
 }
