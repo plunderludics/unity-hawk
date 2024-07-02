@@ -5,64 +5,39 @@ using System;
 using UnityEngine;
 using SharedMemory;
 
+using System.Collections.Generic;
 public class SharedAudioBuffer : ISharedBuffer {
     private string _name;
-    private RpcBuffer _audioRpcBuffer;
-    private RpcBuffer _samplesNeededRpcBuffer;
-    Func<int> _getSamplesNeeded;
-    public SharedAudioBuffer(string name, Func<int> getSamplesNeeded) {
+    private CircularBuffer _buffer;
+    
+    public SharedAudioBuffer(string name) {
         _name = name;
-        _getSamplesNeeded = getSamplesNeeded;
     }
 
     public void Open() {
-        _audioRpcBuffer = new (name: _name);
-        _samplesNeededRpcBuffer = new (
-            name: _name + "-samples-needed", // [suffix must match UnityHawkSound.cs in BizHawk - should move this to a constant in shared code]
-            (msgId, payload) => {
-                // This method should get called once after each emulated frame by bizhawk
-                // Returns int _audioSamplesNeeded as a 4 byte array
-                int nSamples = _getSamplesNeeded();
-                // Debug.Log($"GetSamplesNeeded() RPC call: Returning {nSamples}");
-                byte[] data = BitConverter.GetBytes(nSamples);
-                return data;
-            }
-        );
+        _buffer = new CircularBuffer(_name);
     }
 
     public bool IsOpen() {
-        return _audioRpcBuffer != null && _samplesNeededRpcBuffer != null;
+        return _buffer != null && _buffer.NodeCount > 0;
     }
 
     public void Close() {
-        _audioRpcBuffer.Dispose();
-        _audioRpcBuffer = null;
-        _samplesNeededRpcBuffer.Dispose();
-        _samplesNeededRpcBuffer = null;
+        _buffer.Close();
+        _buffer = null;
     }
 
-    // static readonly ProfilerMarker s_BizhawkRpcGetSamples = new ProfilerMarker("BizhawkRpcGetSamples");
-
     public short[] GetSamples() {
-        // s_BizhawkRpcGetSamples.Begin();
-        RpcResponse response = _audioRpcBuffer.RemoteRequest(new byte[] {}, timeoutMs: 500);
-        // s_BizhawkRpcGetSamples.End();
-        if (!response.Success) {
-            // This happens sometimes, especially when audioCaptureFramerate is high, i have no idea why
-            Debug.LogWarning("Rpc call to get audio from BizHawk failed for some reason");
-            return null;
+        // Read all available samples in the circular buffer
+
+        List<short> samplesList = new();
+
+        // Read one sample at a time (this seems very inefficient...)
+        while (_buffer.Read<short>(out short sample, timeout: 0) > 0) {
+            samplesList.Add(sample);
         }
 
-        // convert bytes into short
-        byte[] bytes = response.Data;
-        if (bytes == null || bytes.Length == 0) {
-            // This is fine, sometimes bizhawk just doesn't have any samples ready
-            return null;
-        }
-        short[] samples = new short[bytes.Length/2];
-        Buffer.BlockCopy(bytes, 0, samples, 0, bytes.Length);
-        // Debug.Log($"Got audio over rpc: {samples.Length} samples");
-        // Debug.Log($"first = {samples[0]}; last = {samples[samples.Length-1]}");
-        return samples;
+        Debug.Log($"Reading {samplesList.Count} samples from buffer");
+        return samplesList.ToArray();
     }
 }

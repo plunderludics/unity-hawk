@@ -156,7 +156,7 @@ public partial class Emulator : MonoBehaviour
     [Foldout("Debug")]
     [ShowIf("captureEmulatorAudio")]
     [Tooltip("Higher value means more audio latency. Lower value may cause crackles and pops")]
-    public int audioBufferSurplus = (int)(2*44100*0.05);
+    public int audioBufferSurplus = (int)(2*44100*0.1); // 0.1s seems to be enough
 
     private static string bizhawkLogDirectory = "BizHawkLogs";
     private TextureFormat textureFormat = TextureFormat.BGRA32;
@@ -231,7 +231,7 @@ public partial class Emulator : MonoBehaviour
 
     Texture2D _bufferTexture;
 
-    static int AudioBufferSize = (int)(2*44100*1); // Size of local audio buffer, 1 sec should be plenty
+    static int AudioBufferSize = (int)(10*44100*1); // Size of local audio buffer, 1 sec should be plenty
 
     // ^ This is the actual 'buffer' part - samples that are retained after passing audio to unity.
     // Smaller surplus -> less latency but more clicks & pops (when bizhawk fails to provide audio in time)
@@ -553,11 +553,7 @@ public partial class Emulator : MonoBehaviour
             _sharedAnalogInputBuffer = new SharedAnalogInputBuffer(_sharedAnalogInputBufferName);
         }
         if (captureEmulatorAudio) {
-            _sharedAudioBuffer = new SharedAudioBuffer(_sharedAudioBufferName, getSamplesNeeded: () => {
-                int nSamples = _audioSamplesNeeded;
-                _audioSamplesNeeded = 0; // Reset audio sample counter each frame
-                return nSamples;
-            });
+            _sharedAudioBuffer = new SharedAudioBuffer(_sharedAudioBufferName);
         }
 
         _currentBizhawkArgs = MakeBizhawkArgs();
@@ -643,7 +639,7 @@ public partial class Emulator : MonoBehaviour
                 _audioSkipCounter += _acceptableSkipsPerSecond*Time.deltaTime;
                 if (_audioSkipCounter < 0f) {
                     if (Time.realtimeSinceStartup > 5f) { // ignore the first few seconds while bizhawk is starting up
-                        Debug.LogWarning("Suffering frequent audio drops (consider increasing audioBufferSurplus value)");
+                        // Debug.LogWarning("Suffering frequent audio drops (consider increasing audioBufferSurplus value)");
                     }
                     _audioSkipCounter = 0f;
                 }
@@ -869,7 +865,8 @@ public partial class Emulator : MonoBehaviour
 
         // copy from the local running audio buffer into unity's buffer, convert short to float
         lock (_audioBuffer) { // (lock since the buffer gets filled in a different thread)
-            for (int out_i = 0; out_i < out_buffer.Length; out_i++) {
+            int out_i;
+            for (out_i = 0; out_i < out_buffer.Length; out_i++) {
                 if (AudioBufferCount() > 0) {
                     out_buffer[out_i] = AudioBufferDequeue()/32767f;
                 } else {
@@ -879,11 +876,18 @@ public partial class Emulator : MonoBehaviour
                     break;
                 }
             }
+            // Debug.Log($"Consumed {out_i} samples; Current buffer length: {AudioBufferCount()}");
+            int lacking = out_buffer.Length - out_i;
+            if (lacking > 0) Debug.LogWarning($"Starved of bizhawk samples, filling {lacking} samples with silence");
+
             // Clear buffer except for a small amount of samples leftover (as buffer against skips/pops)
             // (kind of a dumb way of doing this, could just reset _audioBufferEnd but whatever)
+            int droppedSamples = 0;
             while (AudioBufferCount() > audioBufferSurplus) {
                 _ = AudioBufferDequeue();
+                droppedSamples++;
             }
+            if (droppedSamples > 0) Debug.LogWarning($"Dropped {droppedSamples} samples from bizhawk");
         }
     }
 
