@@ -153,11 +153,6 @@ public partial class Emulator : MonoBehaviour
     [Foldout("Debug")]
     [ReadOnly, SerializeField] string bizhawkLogLocation;
 
-    [Foldout("Debug")]
-    [ShowIf("captureEmulatorAudio")]
-    [Tooltip("Higher value means more audio latency. Lower value may cause crackles and pops")]
-    public int audioBufferSurplus = (int)(2*44100*0.1); // 0.1s seems to be enough
-
     private static string bizhawkLogDirectory = "BizHawkLogs";
     private TextureFormat textureFormat = TextureFormat.BGRA32;
     private RenderTextureFormat renderTextureFormat = RenderTextureFormat.BGRA32;
@@ -210,8 +205,6 @@ public partial class Emulator : MonoBehaviour
     Dictionary<string, Method> _registeredMethods;
 
     string _sharedAudioBufferName;
-    // Audio needs two rpc buffers, one for Bizhawk to request 'samples needed' value from Unity,
-    // one for Unity to request the audio buffer from Bizhawk
     SharedAudioBuffer _sharedAudioBuffer;
 
     string _callMethodRpcBufferName;
@@ -231,25 +224,12 @@ public partial class Emulator : MonoBehaviour
 
     Texture2D _bufferTexture;
 
-    static int AudioBufferSize = (int)(10*44100*1); // Size of local audio buffer, 1 sec should be plenty
-
-    // ^ This is the actual 'buffer' part - samples that are retained after passing audio to unity.
-    // Smaller surplus -> less latency but more clicks & pops (when bizhawk fails to provide audio in time)
-    // 50ms seems to be an ok compromise (but probably depends on host machine, users can configure if needed)
-    short[] _audioBuffer; // circular buffer (queue) to locally store audio samples accumulated from the emulator
-    int _audioBufferStart, _audioBufferEnd;
-    int _audioSamplesNeeded; // track how many samples unity wants to consume
-
     static readonly string textureCorrectionShaderName = "TextureCorrection";
     Material _textureCorrectionMat;
 
     Material _renderMaterial; // just used for rendering in edit mode
 
     StreamWriter _bizHawkLogWriter;
-
-    // Track how many times we skip audio, log a warning if it's too much
-    float _audioSkipCounter;
-    float _acceptableSkipsPerSecond = 1f;
 
     private const string _savestateExtension = "savestate";
 
@@ -346,8 +326,6 @@ public partial class Emulator : MonoBehaviour
 
         Status = EmulatorStatus.Inactive;
 
-        _audioSkipCounter = 0f;
-
         _textureCorrectionMat = new Material(Resources.Load<Shader>(textureCorrectionShaderName));
 
         if (useAttachedRenderer) {
@@ -363,9 +341,7 @@ public partial class Emulator : MonoBehaviour
         }
 
         // Init local audio buffer
-        _audioBuffer = new short[AudioBufferSize];
-        _audioSamplesNeeded = 0;
-        AudioBufferClear();
+        InitAudio();
 
         // If using referenced assets then first map those assets to filenames
         // (Bizhawk requires a path to a real file on disk)
@@ -631,18 +607,7 @@ public partial class Emulator : MonoBehaviour
 
         if (captureEmulatorAudio) {
             if (_sharedAudioBuffer.IsOpen()) {
-                // request audio buffer over rpc
-                // Don't want to do this every frame so only do it if more samples are needed
-                if (AudioBufferCount() < audioBufferSurplus) {
-                    CaptureBizhawkAudio();
-                }
-                _audioSkipCounter += _acceptableSkipsPerSecond*Time.deltaTime;
-                if (_audioSkipCounter < 0f) {
-                    if (Time.realtimeSinceStartup > 5f) { // ignore the first few seconds while bizhawk is starting up
-                        // Debug.LogWarning("Suffering frequent audio drops (consider increasing audioBufferSurplus value)");
-                    }
-                    _audioSkipCounter = 0f;
-                }
+                UpdateAudio();
             } else {
                 AttemptOpenBuffer(_sharedAudioBuffer);
             }
@@ -665,28 +630,6 @@ public partial class Emulator : MonoBehaviour
     }
     void WriteAxisValuesToBuffer(Dictionary<string, int> axisValues) {
         _sharedAnalogInputBuffer.Write(axisValues);
-    }
-
-    // Request audio samples (since last call) from Bizhawk, and store them into a buffer
-    // to be played back in OnAudioFilterRead
-    // [this really shouldn't be running every Unity frame, totally unnecessary]
-    static readonly ProfilerMarker s_BizhawkRpcGetSamples = new ProfilerMarker("s_BizhawkRpcGetSamples");
-    static readonly ProfilerMarker s_ReceivedBizhawkAudio = new ProfilerMarker("ReceivedBizhawkAudio");
-
-    void CaptureBizhawkAudio() {
-        short[] samples = _sharedAudioBuffer.GetSamples();
-        if (samples == null) return; // This is fine, sometimes bizhawk just doesn't have any samples ready
-
-        // Append samples to running audio buffer to be played back later
-        lock (_audioBuffer) { // (lock since OnAudioFilterRead reads from the buffer in a different thread)
-            // [Doing an Array.Copy here instead would probably be way faster but not a big deal]
-            for (int i = 0; i < samples.Length; i++) {
-                if (AudioBufferCount() == _audioBuffer.Length - 1) {
-                    Debug.LogWarning("local audio buffer full, dropping samples");
-                }
-                AudioBufferEnqueue(samples[i]);
-            }
-        }
     }
 
     void UpdateTextureFromBuffer() {
@@ -848,71 +791,6 @@ public partial class Emulator : MonoBehaviour
 #else
         Debug.LogError("Something is wrong: SetFilenamesFromAssetReferences should never be called from within a build");
 #endif
-    }
-
-    // Send audio from the emulator to the AudioSource
-    // (this method gets called by Unity if there is an AudioSource component attached)
-    void OnAudioFilterRead(float[] out_buffer, int channels) {
-        if (!captureEmulatorAudio) return;
-        if (!_sharedAudioBuffer.IsOpen()) return;
-        if (channels != 2) {
-            Debug.LogError("AudioSource must be set to 2 channels");
-            return;
-        }
-
-        // track how many samples we wanna request from bizhawk next time
-        _audioSamplesNeeded += out_buffer.Length;
-
-        // copy from the local running audio buffer into unity's buffer, convert short to float
-        lock (_audioBuffer) { // (lock since the buffer gets filled in a different thread)
-            int out_i;
-            for (out_i = 0; out_i < out_buffer.Length; out_i++) {
-                if (AudioBufferCount() > 0) {
-                    out_buffer[out_i] = AudioBufferDequeue()/32767f;
-                } else {
-                    // we didn't have enough bizhawk samples to fill the unity audio buffer
-                    // log a warning if this happens frequently enough
-                    _audioSkipCounter -= 1f;
-                    break;
-                }
-            }
-            // Debug.Log($"Consumed {out_i} samples; Current buffer length: {AudioBufferCount()}");
-            int lacking = out_buffer.Length - out_i;
-            if (lacking > 0) Debug.LogWarning($"Starved of bizhawk samples, filling {lacking} samples with silence");
-
-            // Clear buffer except for a small amount of samples leftover (as buffer against skips/pops)
-            // (kind of a dumb way of doing this, could just reset _audioBufferEnd but whatever)
-            int droppedSamples = 0;
-            while (AudioBufferCount() > audioBufferSurplus) {
-                _ = AudioBufferDequeue();
-                droppedSamples++;
-            }
-            if (droppedSamples > 0) Debug.LogWarning($"Dropped {droppedSamples} samples from bizhawk");
-        }
-    }
-
-
-    // helper methods for circular audio buffer [should probably go in different class]
-    private int AudioBufferCount() {
-        return (_audioBufferEnd - _audioBufferStart + _audioBuffer.Length)%_audioBuffer.Length;
-    }
-    private void AudioBufferClear() {
-        _audioBufferStart = 0;
-        _audioBufferEnd = 0;
-    }
-    // consume a sample from the queue
-    private short AudioBufferDequeue() {
-        short s = _audioBuffer[_audioBufferStart];
-        _audioBufferStart = (_audioBufferStart + 1)%_audioBuffer.Length;
-        return s;
-    }
-    private void AudioBufferEnqueue(short x) {
-        _audioBuffer[_audioBufferEnd] = x;
-        _audioBufferEnd++;
-        _audioBufferEnd %= _audioBuffer.Length;
-    }
-    private short GetAudioBufferAt(int i) {
-        return _audioBuffer[(_audioBufferStart + i)%_audioBuffer.Length];
     }
 }
 }
