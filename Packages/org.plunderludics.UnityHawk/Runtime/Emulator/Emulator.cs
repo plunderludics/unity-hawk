@@ -340,9 +340,6 @@ public partial class Emulator : MonoBehaviour
             Debug.LogWarning("captureEmulatorAudio is enabled but no AudioSource is attached, will not play audio");
         }
 
-        // Init local audio buffer
-        InitAudio();
-
         // If using referenced assets then first map those assets to filenames
         // (Bizhawk requires a path to a real file on disk)
 
@@ -530,6 +527,7 @@ public partial class Emulator : MonoBehaviour
         }
         if (captureEmulatorAudio) {
             _sharedAudioBuffer = new SharedAudioBuffer(_sharedAudioBufferName);
+            InitAudio(_sharedAudioBuffer);
         }
 
         _currentBizhawkArgs = MakeBizhawkArgs();

@@ -28,16 +28,22 @@ public class SharedAudioBuffer : ISharedBuffer {
     }
 
     public short[] GetSamples() {
-        // Read all available samples in the circular buffer
+        // Read all available samples from shared memory
+        short[] bigBuffer = new short[1000000];
 
-        List<short> samplesList = new();
-
-        // Read one sample at a time (this seems very inefficient...)
-        while (_buffer.Read<short>(out short sample, timeout: 0) > 0) {
-            samplesList.Add(sample);
+        // Debug.Log($">>");
+        int amount;
+        int totalAmount = 0;
+        while ((amount = _buffer.Read<short>(bigBuffer, startIndex: totalAmount, timeout: 0)) > 0) {
+            // Debug.Log($"Read {amount} samples from buffer");
+            totalAmount += amount;
         }
+        Debug.Log($"Read {totalAmount} samples from sharedmemory buffer");
 
-        Debug.Log($"Reading {samplesList.Count} samples from buffer");
-        return samplesList.ToArray();
+        // Debug.Log($"<<");
+        short[] samples = new short[totalAmount];
+        Array.Copy(bigBuffer, 0, samples, 0, totalAmount);
+
+        return samples;
     }
 }
