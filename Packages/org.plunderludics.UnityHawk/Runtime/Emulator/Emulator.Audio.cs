@@ -1,6 +1,7 @@
 using UnityEngine;
 using NaughtyAttributes;
 using System.Collections.Generic;
+using System;
 
 namespace UnityHawk {
 
@@ -9,35 +10,62 @@ public partial class Emulator {
     [ShowIf("captureEmulatorAudio")]
     [Tooltip("Higher value means more audio latency. Lower value may cause crackles and pops")]
     public int audioBufferSurplus = (int)(2*44100*0.05);
-    static int AudioBufferSize = (int)(2*44100*1); // Size of local audio buffer, 1 sec should be plenty
+    
+    [Foldout("Debug")]
+    [ShowIf("captureEmulatorAudio")]
+    [Tooltip("Higher value means smoother audio but more latency")]
+    public int minCountToResample = 2048*16; // Size of chunk for resampling audio
 
-    // ^ This is the actual 'buffer' part - samples that are retained after passing audio to unity.
-    // Smaller surplus -> less latency but more clicks & pops (when bizhawk fails to provide audio in time)
-    // 50ms seems to be an ok compromise (but probably depends on host machine, users can configure if needed)
-    short[] _audioBuffer; // circular buffer (queue) to locally store audio samples accumulated from the emulator
-    int _audioBufferStart, _audioBufferEnd;
+    [Foldout("Debug")]
+    [ShowIf("captureEmulatorAudio")]
+    [ReadOnly, SerializeField]
+    private int resampledBufferCount;
+
+    static int RawBufferSize = (int)(2*44100*1); // Size of local audio buffer, 1 sec should be plenty
+    static int ResampledBufferSize = (int)(2*44100*1); // Size of local audio buffer, 1 sec should be plenty
+    
+    private Queue<short> _rawBuffer;
+    private Queue<short> _resampledBuffer;
+
+
     int _audioSamplesNeeded; // track how many samples unity wants to consume
     
     // Track how many times we skip audio, log a warning if it's too much
     float _audioSkipCounter;
     float _acceptableSkipsPerSecond = 1f;
 
-    private Queue<short> _localBuffer;
+
+    private const int ChannelCount = 2;
 
     void InitAudio() {
         // Init local audio buffer
-        _audioBuffer = new short[AudioBufferSize];
-        _audioSamplesNeeded = 0;
-        _localBuffer = new();
+        _resampledBuffer = new();
+        _rawBuffer = new();
         
         _audioSkipCounter = 0f;
     }
     void UpdateAudio() {
-        // request audio buffer over rpc
-        // Don't want to do this every frame so only do it if more samples are needed
-        if (_localBuffer.Count < audioBufferSurplus) {
-            CaptureBizhawkAudio();
+        CaptureBizhawkAudio(); // Probably don't need to do this every frame, but if it's fast enough it's fine
+
+        // If we've accumulated enough audio from bizhawk, resample it and append to resampled buffer
+        if (_rawBuffer.Count >= minCountToResample) {
+            // Dump all samples from queue into array
+            short[] rawSamples = new short[_rawBuffer.Count]; // TODO init elsewhere
+            for (int i = 0; i < rawSamples.Length; i++) {
+                rawSamples[i] = _rawBuffer.Dequeue();
+            }
+
+            // Resample
+            Debug.Log($"Resampling from {rawSamples.Length} to {_audioSamplesNeeded} ({rawSamples.Length/(float)_audioSamplesNeeded})");
+            short[] resampled = Resample(rawSamples, rawSamples.Length/ChannelCount, _audioSamplesNeeded/ChannelCount);
+            _audioSamplesNeeded = 0;
+
+            // Add to buffer
+            for (int i = 0; i < resampled.Length; i++) {
+                _resampledBuffer.Enqueue(resampled[i]);
+            }
         }
+
         _audioSkipCounter += _acceptableSkipsPerSecond*Time.deltaTime;
         if (_audioSkipCounter < 0f) {
             if (Time.realtimeSinceStartup > 5f) { // ignore the first few seconds while bizhawk is starting up
@@ -53,10 +81,8 @@ public partial class Emulator {
         // Append samples to running audio buffer to be played back later
         // [Doing an Array.Copy here instead would probably be way faster but not a big deal]
         for (int i = 0; i < samples.Length; i++) {
-            if (_localBuffer.Count == _audioBuffer.Length - 1) {
-                Debug.LogWarning("local audio buffer full, dropping samples");
-            }
-            _localBuffer.Enqueue(samples[i]);
+            // TODO may want to cap the size of the queue
+            _rawBuffer.Enqueue(samples[i]);
         }
     }
 
@@ -76,8 +102,8 @@ public partial class Emulator {
         // copy from the local running audio buffer into unity's buffer, convert short to float
         int out_i;
         for (out_i = 0; out_i < out_buffer.Length; out_i++) {
-            if (_localBuffer.Count > 0) {
-                out_buffer[out_i] = _localBuffer.Dequeue()/32767f;
+            if (_resampledBuffer.Count > 0) {
+                out_buffer[out_i] = _resampledBuffer.Dequeue()/32767f;
             } else {
                 // we didn't have enough bizhawk samples to fill the unity audio buffer
                 // log a warning if this happens frequently enough
@@ -88,14 +114,56 @@ public partial class Emulator {
         int lacking = out_buffer.Length - out_i;
         if (lacking > 0) Debug.LogWarning($"Starved of bizhawk samples, generating {lacking} empty samples");
 
+        resampledBufferCount = _resampledBuffer.Count;
+
         // Clear buffer except for a small amount of samples leftover (as buffer against skips/pops)
         // (kind of a dumb way of doing this, could just reset _audioBufferEnd but whatever)
-        int droppedSamples = 0;
-        while (_localBuffer.Count > audioBufferSurplus) {
-            _ = _localBuffer.Dequeue();
-            droppedSamples++;
+        // int droppedSamples = 0;
+        // while (_resampledBuffer.Count > audioBufferSurplus) {
+        //     _ = _resampledBuffer.Dequeue();
+        //     droppedSamples++;
+        // }
+        // if (droppedSamples > 0) Debug.LogWarning($"Dropped {droppedSamples} samples from bizhawk");
+    }
+
+    // Simple linear interpolation, based on SoundOutputProvider.cs in Bizhawk
+    private short[] Resample(short[] input, int inputCount, int outputCount)
+    {
+        if (inputCount == outputCount)
+        {
+            return input;
         }
-        if (droppedSamples > 0) Debug.LogWarning($"Dropped {droppedSamples} samples from bizhawk");
+
+        short[] output = new short[outputCount*ChannelCount]; // Not efficient to initialize every frame
+
+        if (inputCount == 0 || outputCount == 0)
+        {
+            Array.Clear(output, 0, outputCount * ChannelCount);
+            return output;
+        }
+
+        for (int iOutput = 0; iOutput < outputCount; iOutput++)
+        {
+            double iInput = ((double)iOutput / (outputCount - 1)) * (inputCount - 1);
+            int iInput0 = (int)iInput;
+            int iInput1 = iInput0 + 1;
+            double input0Weight = iInput1 - iInput;
+            double input1Weight = iInput - iInput0;
+
+            if (iInput1 == inputCount)
+                iInput1 = inputCount - 1;
+
+            for (int iChannel = 0; iChannel < ChannelCount; iChannel++)
+            {
+                double value =
+                    input[iInput0 * ChannelCount + iChannel] * input0Weight +
+                    input[iInput1 * ChannelCount + iChannel] * input1Weight;
+
+                output[iOutput * ChannelCount + iChannel] = (short)((int)(value + 32768.5) - 32768);
+            }
+        }
+
+        return output;
     }
 
 }

@@ -38,7 +38,7 @@ public class SharedAudioBuffer : ISharedBuffer {
             // Debug.Log($"Read {amount} samples from buffer");
             totalAmount += amount;
         }
-        Debug.Log($"Read {totalAmount} samples from sharedmemory buffer");
+        // Debug.Log($"Read {totalAmount} samples from sharedmemory buffer");
 
         // Debug.Log($"<<");
         short[] samples = new short[totalAmount];
