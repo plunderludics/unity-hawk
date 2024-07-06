@@ -27,9 +27,17 @@ public partial class Emulator {
     private Queue<short> _rawBuffer;
     private Queue<short> _resampledBuffer;
 
+    [Foldout("Debug")]
+    [ShowIf("captureEmulatorAudio")]
+    public int movingAverageN = 5;
+    private List<double> _resampleRatios;
+
 
     int _audioSamplesNeeded; // track how many samples unity wants to consume
     
+    int _audioSamplesNeededSinceForever;
+    int _audioSamplesProvidedSinceForever;
+
     // Track how many times we skip audio, log a warning if it's too much
     float _audioSkipCounter;
     float _acceptableSkipsPerSecond = 1f;
@@ -43,6 +51,10 @@ public partial class Emulator {
         _rawBuffer = new();
         
         _audioSkipCounter = 0f;
+        _audioSamplesNeededSinceForever = 0;
+        _audioSamplesProvidedSinceForever = 0;
+
+        _resampleRatios = new();
     }
     void UpdateAudio() {
         CaptureBizhawkAudio(); // Probably don't need to do this every frame, but if it's fast enough it's fine
@@ -56,8 +68,16 @@ public partial class Emulator {
             }
 
             // Resample
-            Debug.Log($"Resampling from {rawSamples.Length} to {_audioSamplesNeeded} ({rawSamples.Length/(float)_audioSamplesNeeded})");
-            short[] resampled = Resample(rawSamples, rawSamples.Length/ChannelCount, _audioSamplesNeeded/ChannelCount);
+            double ratio = (double)_audioSamplesNeeded/rawSamples.Length;
+            _resampleRatios.Add(ratio);
+            while (_resampleRatios.Count > movingAverageN) {
+                _resampleRatios.RemoveAt(0);
+            }
+            ratio = Average(_resampleRatios);
+
+            int targetCount =  (int)(ratio*rawSamples.Length);
+            Debug.Log($"Resampling from {rawSamples.Length} to {targetCount} ({ratio})");
+            short[] resampled = Resample(rawSamples, rawSamples.Length/ChannelCount, targetCount/ChannelCount);
             _audioSamplesNeeded = 0;
 
             // Add to buffer
@@ -83,6 +103,7 @@ public partial class Emulator {
         for (int i = 0; i < samples.Length; i++) {
             // TODO may want to cap the size of the queue
             _rawBuffer.Enqueue(samples[i]);
+            _audioSamplesProvidedSinceForever++;
         }
     }
 
@@ -98,6 +119,7 @@ public partial class Emulator {
 
         // track how many samples we wanna request from bizhawk next time
         _audioSamplesNeeded += out_buffer.Length;
+        _audioSamplesNeededSinceForever += out_buffer.Length;
 
         // copy from the local running audio buffer into unity's buffer, convert short to float
         int out_i;
@@ -118,12 +140,12 @@ public partial class Emulator {
 
         // Clear buffer except for a small amount of samples leftover (as buffer against skips/pops)
         // (kind of a dumb way of doing this, could just reset _audioBufferEnd but whatever)
-        // int droppedSamples = 0;
-        // while (_resampledBuffer.Count > audioBufferSurplus) {
-        //     _ = _resampledBuffer.Dequeue();
-        //     droppedSamples++;
-        // }
-        // if (droppedSamples > 0) Debug.LogWarning($"Dropped {droppedSamples} samples from bizhawk");
+        int droppedSamples = 0;
+        while (_resampledBuffer.Count > audioBufferSurplus) {
+            _ = _resampledBuffer.Dequeue();
+            droppedSamples++;
+        }
+        if (droppedSamples > 0) Debug.LogWarning($"Dropped {droppedSamples} samples from bizhawk");
     }
 
     // Simple linear interpolation, based on SoundOutputProvider.cs in Bizhawk
@@ -164,6 +186,14 @@ public partial class Emulator {
         }
 
         return output;
+    }
+
+    static double Average(List<double> l) {
+        double s = 0;
+        foreach(double d in l) {
+            s += d;
+        }
+        return s / l.Count;
     }
 
 }
