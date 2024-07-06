@@ -205,8 +205,6 @@ public partial class Emulator : MonoBehaviour
     Dictionary<string, Method> _registeredMethods;
 
     string _sharedAudioBufferName;
-    // Audio needs two rpc buffers, one for Bizhawk to request 'samples needed' value from Unity,
-    // one for Unity to request the audio buffer from Bizhawk
     SharedAudioBuffer _sharedAudioBuffer;
 
     string _callMethodRpcBufferName;
@@ -341,6 +339,9 @@ public partial class Emulator : MonoBehaviour
         if (captureEmulatorAudio && GetComponent<AudioSource>() == null) {
             Debug.LogWarning("captureEmulatorAudio is enabled but no AudioSource is attached, will not play audio");
         }
+
+        // Init local audio buffer
+        InitAudio();
 
         // If using referenced assets then first map those assets to filenames
         // (Bizhawk requires a path to a real file on disk)
@@ -528,7 +529,7 @@ public partial class Emulator : MonoBehaviour
             _sharedAnalogInputBuffer = new SharedAnalogInputBuffer(_sharedAnalogInputBufferName);
         }
         if (captureEmulatorAudio) {
-            InitAudio();
+            _sharedAudioBuffer = new SharedAudioBuffer(_sharedAudioBufferName);
         }
 
         _currentBizhawkArgs = MakeBizhawkArgs();
@@ -630,12 +631,6 @@ public partial class Emulator : MonoBehaviour
     void WriteAxisValuesToBuffer(Dictionary<string, int> axisValues) {
         _sharedAnalogInputBuffer.Write(axisValues);
     }
-
-    // Request audio samples (since last call) from Bizhawk, and store them into a buffer
-    // to be played back in OnAudioFilterRead
-    // [this really shouldn't be running every Unity frame, totally unnecessary]
-    static readonly ProfilerMarker s_BizhawkRpcGetSamples = new ProfilerMarker("s_BizhawkRpcGetSamples");
-    static readonly ProfilerMarker s_ReceivedBizhawkAudio = new ProfilerMarker("ReceivedBizhawkAudio");
 
     void UpdateTextureFromBuffer() {
         // Get the texture buffer and dimensions from BizHawk via the shared memory file

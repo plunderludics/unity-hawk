@@ -25,12 +25,6 @@ public partial class Emulator {
     private Queue<short> _localBuffer;
 
     void InitAudio() {
-        _sharedAudioBuffer = new SharedAudioBuffer(_sharedAudioBufferName, getSamplesNeeded: () => {
-            int nSamples = _audioSamplesNeeded;
-            _audioSamplesNeeded = 0; // Reset audio sample counter each frame
-            return nSamples;
-        });
-        
         // Init local audio buffer
         _audioBuffer = new short[AudioBufferSize];
         _audioSamplesNeeded = 0;
