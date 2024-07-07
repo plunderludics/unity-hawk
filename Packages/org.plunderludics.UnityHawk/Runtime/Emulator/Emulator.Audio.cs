@@ -33,9 +33,9 @@ public partial class Emulator {
     private List<double> _resampleRatios;
 
 
-    int _audioSamplesNeeded; // track how many samples unity wants to consume
+    int _stereoSamplesNeeded; // track how many samples unity wants to consume
     
-    int _audioSamplesNeededSinceForever;
+    int _stereoSamplesNeededSinceForever;
     int _audioSamplesProvidedSinceForever;
 
     // Track how many times we skip audio, log a warning if it's too much
@@ -51,7 +51,7 @@ public partial class Emulator {
         _rawBuffer = new();
         
         _audioSkipCounter = 0f;
-        _audioSamplesNeededSinceForever = 0;
+        _stereoSamplesNeededSinceForever = 0;
         _audioSamplesProvidedSinceForever = 0;
 
         _resampleRatios = new();
@@ -68,17 +68,18 @@ public partial class Emulator {
             }
 
             // Resample
-            double ratio = (double)_audioSamplesNeeded/rawSamples.Length;
+            int stereoSamplesProvided = rawSamples.Length/ChannelCount;
+            double ratio = (double)_stereoSamplesNeeded/stereoSamplesProvided;
             _resampleRatios.Add(ratio);
             while (_resampleRatios.Count > movingAverageN) {
                 _resampleRatios.RemoveAt(0);
             }
             ratio = Average(_resampleRatios);
 
-            int targetCount =  (int)(ratio*rawSamples.Length);
-            Debug.Log($"Resampling from {rawSamples.Length} to {targetCount} ({ratio})");
-            short[] resampled = Resample(rawSamples, rawSamples.Length/ChannelCount, targetCount/ChannelCount);
-            _audioSamplesNeeded = 0;
+            int targetCount =  (int)(ratio*stereoSamplesProvided);
+            Debug.Log($"Resampling from {stereoSamplesProvided} to {targetCount} ({ratio})");
+            short[] resampled = Resample(rawSamples, stereoSamplesProvided, targetCount);
+            _stereoSamplesNeeded = 0;
 
             // Add to buffer
             for (int i = 0; i < resampled.Length; i++) {
@@ -118,8 +119,8 @@ public partial class Emulator {
         }
 
         // track how many samples we wanna request from bizhawk next time
-        _audioSamplesNeeded += out_buffer.Length;
-        _audioSamplesNeededSinceForever += out_buffer.Length;
+        _stereoSamplesNeeded += out_buffer.Length/ChannelCount;
+        _stereoSamplesNeededSinceForever += out_buffer.Length/ChannelCount;
 
         // copy from the local running audio buffer into unity's buffer, convert short to float
         int out_i;
