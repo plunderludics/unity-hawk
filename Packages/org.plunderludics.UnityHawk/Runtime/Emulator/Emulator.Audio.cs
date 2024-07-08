@@ -12,11 +12,6 @@ public partial class Emulator {
     [ShowIf("captureEmulatorAudio")]
     [Tooltip("Higher value means more audio latency. Lower value may cause crackles and pops")]
     public int audioBufferSurplus = (int)(44100*0.05);
-    
-    [Foldout("Debug")]
-    [ShowIf("captureEmulatorAudio")]
-    [Tooltip("Higher value means smoother audio but more latency")]
-    public int minCountToResample = 128; // Size of chunk for resampling audio
 
     [Foldout("Debug")]
     [ShowIf("captureEmulatorAudio")]

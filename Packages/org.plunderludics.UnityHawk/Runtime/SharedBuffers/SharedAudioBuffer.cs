@@ -6,43 +6,57 @@ using UnityEngine;
 using SharedMemory;
 
 using System.Collections.Generic;
+using System.Collections.Concurrent;
 public class SharedAudioBuffer : ISharedBuffer {
     private string _name;
-    private CircularBuffer _buffer;
+    private RpcBuffer _rpc;
+
+    private ConcurrentQueue<short> _localBuffer;
     
     public SharedAudioBuffer(string name) {
         _name = name;
+        _localBuffer = new();
     }
 
     public void Open() {
-        _buffer = new CircularBuffer(_name);
+        _rpc = new (
+            name: _name,
+            (msgId, payload) => {
+                ReceiveBizhawkSamples(payload);
+            }
+        );
     }
 
     public bool IsOpen() {
-        return _buffer != null && _buffer.NodeCount > 0;
+        return _rpc != null;
     }
 
     public void Close() {
-        _buffer.Close();
-        _buffer = null;
+        _rpc.Dispose();
+        _rpc = null;
+    }
+
+    public void ReceiveBizhawkSamples(byte[] bytes) {
+        // Bizhawk calls this method each frame to send samples to unity
+        if (bytes == null || bytes.Length == 0) {
+            Debug.LogWarning("BizHawk sent empty samples array");
+            return;
+        }
+        // Convert bytes to shorts
+        short[] samples = new short[bytes.Length/2];
+        Buffer.BlockCopy(bytes, 0, samples, 0, bytes.Length);
+
+        // Debug.Log($"Received {samples.Length} samples from bizhawk");
+        // Add to local buffer
+        for (int i = 0; i < samples.Length; i++) {
+            _localBuffer.Enqueue(samples[i]);
+        }
     }
 
     public short[] GetSamples() {
-        // Read all available samples from shared memory
-        short[] bigBuffer = new short[1000000];
-
-        // Debug.Log($">>");
-        int amount;
-        int totalAmount = 0;
-        while ((amount = _buffer.Read<short>(bigBuffer, startIndex: totalAmount, timeout: 0)) > 0) {
-            // Debug.Log($"Read {amount} samples from buffer");
-            totalAmount += amount;
-        }
-        // Debug.Log($"Read {totalAmount} samples from sharedmemory buffer");
-
-        // Debug.Log($"<<");
-        short[] samples = new short[totalAmount];
-        Array.Copy(bigBuffer, 0, samples, 0, totalAmount);
+        // Read all available samples from local buffer
+        short[] samples = _localBuffer.ToArray();
+        _localBuffer.Clear();
 
         return samples;
     }
