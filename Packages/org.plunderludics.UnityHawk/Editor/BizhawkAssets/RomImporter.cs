@@ -42,7 +42,7 @@ namespace UnityHawk.Editor {
 	/* Disc Images: */ "cue", "ccd", "cdi", "mds", "m3u"
 })]
 public class RomImporter : BizHawkAssetImporter<Rom>
-	{
+{
     public override void OnImportAsset(AssetImportContext ctx) {
         base.OnImportAsset(ctx);
     }
