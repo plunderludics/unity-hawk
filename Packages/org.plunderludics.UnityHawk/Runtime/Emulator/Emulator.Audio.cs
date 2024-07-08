@@ -9,12 +9,12 @@ public partial class Emulator {
     [Foldout("Debug")]
     [ShowIf("captureEmulatorAudio")]
     [Tooltip("Higher value means more audio latency. Lower value may cause crackles and pops")]
-    public int audioBufferSurplus = (int)(2*44100*0.05);
+    public int audioBufferSurplus = (int)(44100*0.05);
     
     [Foldout("Debug")]
     [ShowIf("captureEmulatorAudio")]
     [Tooltip("Higher value means smoother audio but more latency")]
-    public int minCountToResample = 2048*16; // Size of chunk for resampling audio
+    public int minCountToResample = 2048*8; // Size of chunk for resampling audio
 
     [Foldout("Debug")]
     [ShowIf("captureEmulatorAudio")]
@@ -42,7 +42,6 @@ public partial class Emulator {
     float _audioSkipCounter;
     float _acceptableSkipsPerSecond = 1f;
 
-
     private const int ChannelCount = 2;
 
     void InitAudio() {
@@ -60,7 +59,7 @@ public partial class Emulator {
         CaptureBizhawkAudio(); // Probably don't need to do this every frame, but if it's fast enough it's fine
 
         // If we've accumulated enough audio from bizhawk, resample it and append to resampled buffer
-        if (_rawBuffer.Count >= minCountToResample) {
+        if (_rawBuffer.Count >= minCountToResample*ChannelCount) {
             // Dump all samples from queue into array
             short[] rawSamples = new short[_rawBuffer.Count]; // TODO init elsewhere
             for (int i = 0; i < rawSamples.Length; i++) {
@@ -142,7 +141,7 @@ public partial class Emulator {
         // Clear buffer except for a small amount of samples leftover (as buffer against skips/pops)
         // (kind of a dumb way of doing this, could just reset _audioBufferEnd but whatever)
         int droppedSamples = 0;
-        while (_resampledBuffer.Count > audioBufferSurplus) {
+        while (_resampledBuffer.Count > audioBufferSurplus*ChannelCount) {
             _ = _resampledBuffer.Dequeue();
             droppedSamples++;
         }
