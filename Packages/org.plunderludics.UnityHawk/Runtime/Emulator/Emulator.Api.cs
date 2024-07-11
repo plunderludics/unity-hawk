@@ -15,8 +15,8 @@ public partial class Emulator
 {
     ///// Public methods
     // Register a method that can be called via `unityhawk.callmethod('MethodName')` in BizHawk lua
-    public void RegisterMethod(string methodName, Method method) {
-        _registeredMethods[methodName] = method;
+    public void RegisterMethod(string methodName, LuaCallback luaCallback) {
+        _registeredLuaCallbacks[methodName] = luaCallback;
     }
 
     // For editor convenience: Set filename fields by reading a sample directory
