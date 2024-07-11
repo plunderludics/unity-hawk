@@ -231,6 +231,11 @@ public partial class Emulator : MonoBehaviour
 
     StreamWriter _bizHawkLogWriter;
 
+    [SerializeField]
+    [Foldout("Debug")]
+    [ShowIf("captureEmulatorAudio")]
+    AudioResampler _audioResampler;
+
     private const string _savestateExtension = "savestate";
 
     [DllImport("user32.dll")]
@@ -339,9 +344,6 @@ public partial class Emulator : MonoBehaviour
         if (captureEmulatorAudio && GetComponent<AudioSource>() == null) {
             Debug.LogWarning("captureEmulatorAudio is enabled but no AudioSource is attached, will not play audio");
         }
-
-        // Init local audio buffer
-        InitAudio();
 
         // If using referenced assets then first map those assets to filenames
         // (Bizhawk requires a path to a real file on disk)
@@ -530,6 +532,8 @@ public partial class Emulator : MonoBehaviour
         }
         if (captureEmulatorAudio) {
             _sharedAudioBuffer = new SharedAudioBuffer(_sharedAudioBufferName);
+
+            _audioResampler = new(defaultResampleRatio: 44100.0 / AudioSettings.outputSampleRate);
         }
 
         _currentBizhawkArgs = MakeBizhawkArgs();
@@ -608,8 +612,10 @@ public partial class Emulator : MonoBehaviour
         if (captureEmulatorAudio && Application.isPlaying) {
             if (_sharedAudioBuffer.IsOpen()) {
                 if (Status == EmulatorStatus.Running) {
+                    
+                    short[] samples = _sharedAudioBuffer.GetSamples();
                     // Updating audio before the emulator is actually running messes up the resampling algorithm
-                    UpdateAudio();
+                    _audioResampler.PushSamples(samples);
                 }
             } else {
                 AttemptOpenBuffer(_sharedAudioBuffer);
@@ -717,6 +723,16 @@ public partial class Emulator : MonoBehaviour
                 targetRenderer.material.mainTexture = renderTexture;
             }
         }
+    }
+
+    // Send audio from the emulator to the AudioSource
+    // (this method gets called by Unity if there is an AudioSource component attached)
+    void OnAudioFilterRead(float[] out_buffer, int channels) {
+        if (!captureEmulatorAudio) return;
+        if (!_sharedAudioBuffer.IsOpen()) return;
+        if (Status != EmulatorStatus.Running) return;
+
+        _audioResampler.GetSamples(out_buffer, channels);
     }
 
     void AttemptOpenBuffer(ISharedBuffer buf) {
