@@ -5,6 +5,7 @@ function main()
         -- print("running a frame");
         emu.yield() -- frameadvance() also works
         local x = unityhawk.callmethod("DoSomething", "hello from lua");
+        local x = unityhawk.callmethod("DoSomethingElse", "hello from lua");
         print(x);
     end
 end
