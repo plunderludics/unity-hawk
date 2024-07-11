@@ -3,6 +3,7 @@ using UnityEditor;
 using UnityEngine;
 
 namespace UnityHawk {
+
 public static class BizhawkAssetDatabase {
     // this uses the fact that Paths.cs treats absolute paths differently than relative
     public static string GetFullPath(BizhawkAsset asset) {
@@ -15,4 +16,5 @@ public static class BizhawkAssetDatabase {
         return asset.Path;
     }
 }
+
 }
