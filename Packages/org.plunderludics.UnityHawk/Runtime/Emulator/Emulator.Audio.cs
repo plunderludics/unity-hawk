@@ -26,28 +26,20 @@ public partial class Emulator {
 
     [Foldout("Debug")]
     [ShowIf("captureEmulatorAudio")]
-    public int movingAverageN = 5;
+    public int movingAverageN = 1024; // Has to be biiig because the input is so unstable
     private List<int> _samplesProvidedHistory;
 
     [Foldout("Debug")]
     [ShowIf("captureEmulatorAudio")]
     public float excessConsumptionFactor = 0.01f;
-    
-    [Foldout("Debug")]
-    [ShowIf("captureEmulatorAudio")]
-    public bool forceRatio;
-    
-    [Foldout("Debug")]
-    [ShowIf(EConditionOperator.And, "captureEmulatorAudio", "forceRatio")]
-    public float forcedRatio = 1f;
-
 
     // Track how many times we skip audio, log a warning if it's too much
     float _audioSkipCounter;
-    float _acceptableSkipsPerSecond = 1f;
+    float _acceptableSkipsPerSecond = 0.5f;
 
-    private int samplesProvidedThisFrame;
+    private int _samplesProvidedThisFrame;
 
+    private const float BizhawkSampleRate = 44100;
     private const int ChannelCount = 2;
 
     [Foldout("Debug")]
@@ -55,21 +47,24 @@ public partial class Emulator {
     [ReadOnly, SerializeField]
     private double resampleRatio = 1f;
 
+    private const int maxConsecutiveEmptyFrames = 5; // If we get more empty frames than this, stop processing audio
+    private int _consecutiveEmptyFrames = 0;
+    private float _unitySampleRate;
+
     [Button]
-    public void OnVolatility() {
+    public void ResetAudio() {
         // Reset everything
         _rawBuffer = new();
         _samplesProvidedHistory = new();
+        _audioSkipCounter = 0f;
+        _consecutiveEmptyFrames = 0;
+        _samplesProvidedThisFrame = 0;
+        _unitySampleRate = AudioSettings.outputSampleRate;
     }
 
     void InitAudio() {
         // Init local audio buffer
-        _rawBuffer = new();
-        
-        _audioSkipCounter = 0f;
-        samplesProvidedThisFrame = 0;
-
-        _samplesProvidedHistory = new();
+        ResetAudio();
     }
     void UpdateAudio() {
         CaptureBizhawkAudio(); // Probably don't need to do this every frame, but if it's fast enough it's fine
@@ -88,7 +83,9 @@ public partial class Emulator {
         short[] samples = _sharedAudioBuffer.GetSamples();
         if (samples == null) return; // This is fine, sometimes bizhawk just doesn't have any samples ready
 
-        samplesProvidedThisFrame += samples.Length/ChannelCount;
+        _samplesProvidedThisFrame += samples.Length/ChannelCount;
+        // Debug.Log($"Capturing audio, received {_samplesProvidedThisFrame} samples");
+
         // Append samples to running audio buffer to be played back later
         // [Doing an Array.Copy here instead would probably be way faster but not a big deal]
         for (int i = 0; i < samples.Length; i++) {
@@ -102,34 +99,41 @@ public partial class Emulator {
     void OnAudioFilterRead(float[] out_buffer, int channels) {
         if (!captureEmulatorAudio) return;
         if (!_sharedAudioBuffer.IsOpen()) return;
+        if (Status != EmulatorStatus.Running) return;
+
         if (channels != 2) {
             Debug.LogError("AudioSource must be set to 2 channels");
             return;
         }
 
+        if (_samplesProvidedThisFrame == 0) {
+            _consecutiveEmptyFrames++;
+            if (_consecutiveEmptyFrames > maxConsecutiveEmptyFrames) {
+                return;
+            }
+        } else {
+            _consecutiveEmptyFrames = 0;
+        }
+
         // Resample
         int stereoSamplesNeeded = out_buffer.Length/ChannelCount;
 
-        _samplesProvidedHistory.Add(samplesProvidedThisFrame);
-        samplesProvidedThisFrame = 0;
+        _samplesProvidedHistory.Add(_samplesProvidedThisFrame);
+        _samplesProvidedThisFrame = 0;
         while (_samplesProvidedHistory.Count > movingAverageN) {
             _samplesProvidedHistory.RemoveAt(0);
         }
-        double avgSamplesProvided = Average(_samplesProvidedHistory);
+        float avgSamplesProvided = Mathf.Lerp(
+            stereoSamplesNeeded*BizhawkSampleRate/_unitySampleRate,
+            (float)Average(_samplesProvidedHistory),
+            (float)_samplesProvidedHistory.Count/movingAverageN
+        );
 
         _avgSamplesProvided = avgSamplesProvided;
 
         // Calculate rescale ratio, add to history, then calculate smoothed ratio based on moving average
         double ratio = (double)avgSamplesProvided/stereoSamplesNeeded;
         resampleRatio = ratio;
-
-        // // Experimental: increase ratio slightly when there are too many samples in the buffer, to stop it getting too long
-        // if (excessStereoSamples > 0) {
-        //     double excessRatio = excessStereoSamples/(double)stereoSamplesNeeded;
-        //     ratio = ratio*(1-bufferPressure) + excessRatio*bufferPressure;
-        // }
-
-        if (forceRatio) ratio = forcedRatio;
 
         int stereoSamplesToConsume = (int)(ratio*stereoSamplesNeeded);
         int availableStereoSamples = _rawBuffer.Count/ChannelCount;
@@ -142,7 +146,7 @@ public partial class Emulator {
 
         // Debug.Log($"Want {stereoSamplesToConsume} samples, {availableStereoSamples} are available");
         if (stereoSamplesToConsume > availableStereoSamples) {
-            Debug.LogWarning($"Starved of bizhawk samples");
+            // Debug.LogWarning($"Starved of bizhawk samples");
             _audioSkipCounter -= 1f;
             stereoSamplesToConsume = availableStereoSamples;
         }

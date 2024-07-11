@@ -607,7 +607,10 @@ public partial class Emulator : MonoBehaviour
 
         if (captureEmulatorAudio) {
             if (_sharedAudioBuffer.IsOpen()) {
-                UpdateAudio();
+                if (Status == EmulatorStatus.Running) {
+                    // Updating audio before the emulator is actually running messes up the resampling algorithm
+                    UpdateAudio();
+                }
             } else {
                 AttemptOpenBuffer(_sharedAudioBuffer);
             }
