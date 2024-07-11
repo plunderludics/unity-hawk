@@ -204,18 +204,24 @@ public partial class Emulator : MonoBehaviour
     }
     BizhawkArgs _currentBizhawkArgs; // remember the params corresponding to the currently running process
 
-    // Dictionary of registered methods that can be called from bizhawk lua
-    // bytes-to-bytes only rn but some automatic de/serialization for different types would be nice
+    /// TODO: bytes-to-bytes only rn but some automatic de/serialization for different types would be nice
     public delegate string Method(string arg);
-    Dictionary<string, Method> _registeredMethods;
+
+    /// Dictionary of registered methods that can be called from bizhawk lua
+    readonly Dictionary<string, Method> _registeredMethods = new();
+
+    #if UNITY_EDITOR
+    /// a set of all the called methods
+    readonly HashSet<string> _calledMethods = new();
+    #endif
+
+    string _callMethodRpcBufferName;
+    CallMethodRpcBuffer _callMethodRpcBuffer;
 
     string _sharedAudioBufferName;
     // Audio needs two rpc buffers, one for Bizhawk to request 'samples needed' value from Unity,
     // one for Unity to request the audio buffer from Bizhawk
     SharedAudioBuffer _sharedAudioBuffer;
-
-    string _callMethodRpcBufferName;
-    CallMethodRpcBuffer _callMethodRpcBuffer;
 
     string _apiCallBufferName;
     ApiCallBuffer _apiCallBuffer;
@@ -782,15 +788,24 @@ public partial class Emulator : MonoBehaviour
         }
     }
 
-    string CallRegisteredMethod(string methodName, string argString) {
+    bool CallRegisteredMethod(string methodName, string argString, out string returnString) {
         // call corresponding method
-        if (_registeredMethods != null && _registeredMethods.ContainsKey(methodName)) {
-            return _registeredMethods[methodName](argString);
-            // Debug.Log($"Calling registered method {methodName}");
-        } else {
-            Debug.LogWarning($"Tried to call a method named {methodName} from lua but none was registered");
-            return null;
+        returnString = "";
+        var exists = _registeredMethods.TryGetValue(methodName, out var callback);
+        if (exists) {
+            returnString = callback(argString);
         }
+
+        #if UNITY_EDITOR
+        // add to set of called methods to not spam this warning
+        if (!exists && !_calledMethods.Contains(methodName)){
+            Debug.LogWarning($"Tried to call a method named {methodName} from lua but none was registered");
+        }
+
+        _calledMethods.Add(methodName);
+        #endif
+
+        return exists;
     }
 
     void LogBizHawk(object sender, DataReceivedEventArgs e, bool isError) {

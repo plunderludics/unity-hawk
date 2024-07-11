@@ -6,6 +6,8 @@ using Plunderludics;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using BizHawk.Common;
+using BizHawk.Emulation.Common;
 
 namespace UnityHawk {
 
@@ -13,12 +15,7 @@ public partial class Emulator
 {
     ///// Public methods
     // Register a method that can be called via `unityhawk.callmethod('MethodName')` in BizHawk lua
-    public void RegisterMethod(string methodName, Method method)
-    {
-        if (_registeredMethods == null) {
-            _registeredMethods = new Dictionary<string, Method>();
-            // This will never get cleared when running in edit mode but maybe that's fine
-        }
+    public void RegisterMethod(string methodName, Method method) {
         _registeredMethods[methodName] = method;
     }
 

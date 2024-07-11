@@ -2,11 +2,20 @@ using UnityEngine;
 using System;
 using SharedMemory;
 
+namespace Plunderludics {
+
 public class CallMethodRpcBuffer : ISharedBuffer {
-    private string _name;
-    private RpcBuffer _rpcBuffer;
-    private Func<string, string, string> _callRegisteredMethod;
-    public CallMethodRpcBuffer(string name, Func<string, string, string> callRegisteredMethod) {
+    /// the buffer name
+    string _name;
+
+    /// .
+    RpcBuffer _rpcBuffer;
+
+    /// the callback for this rpc
+    public delegate bool CallRegisteredMethod(string methodName, string argString, out string output);
+    CallRegisteredMethod _callRegisteredMethod;
+
+    public CallMethodRpcBuffer(string name, CallRegisteredMethod callRegisteredMethod) {
         _name = name;
         _callRegisteredMethod = callRegisteredMethod;
     }
@@ -40,7 +49,7 @@ public class CallMethodRpcBuffer : ISharedBuffer {
                     string methodName = System.Text.Encoding.ASCII.GetString(methodNameBytes);
                     string argString = System.Text.Encoding.ASCII.GetString(argBytes);
 
-                    returnString = _callRegisteredMethod(methodName, argString);
+                    var exists = _callRegisteredMethod(methodName, argString, out returnString);
 
                     // [messy hack] don't allow returning null because it seems to break things on the other side of the RPC
                     if (returnString == null) {
@@ -66,4 +75,6 @@ public class CallMethodRpcBuffer : ISharedBuffer {
         _rpcBuffer.Dispose();
         _rpcBuffer = null;
     }
+}
+
 }
