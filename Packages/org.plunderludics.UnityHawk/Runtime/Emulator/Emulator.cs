@@ -533,7 +533,7 @@ public partial class Emulator : MonoBehaviour
         if (captureEmulatorAudio) {
             _sharedAudioBuffer = new SharedAudioBuffer(_sharedAudioBufferName);
 
-            _audioResampler = new(defaultResampleRatio: 44100.0 / AudioSettings.outputSampleRate);
+            _audioResampler.Init(defaultResampleRatio: 44100.0 / AudioSettings.outputSampleRate);
         }
 
         _currentBizhawkArgs = MakeBizhawkArgs();

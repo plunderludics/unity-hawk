@@ -43,9 +43,8 @@ public class AudioResampler {
 
     private const int maxConsecutiveEmptyFrames = 5; // If we get more empty frames than this, stop processing audio
     private int _consecutiveEmptyFrames = 0;
-    private float _unitySampleRate;
 
-    public AudioResampler(double defaultResampleRatio) {
+    public void Init(double defaultResampleRatio) {
         _rawBuffer = new();
         _samplesProvidedHistory = new();
         _consecutiveEmptyFrames = 0;
@@ -53,15 +52,6 @@ public class AudioResampler {
         _defaultResampleRatio = defaultResampleRatio;
     }
 
-    void UpdateAudio() {
-        // _audioSkipCounter += _acceptableSkipsPerSecond*Time.deltaTime;
-        // if (_audioSkipCounter < 0f) {
-        //     if (Time.realtimeSinceStartup > 5f) { // ignore the first few seconds while bizhawk is starting up
-        //         Debug.LogWarning("Suffering frequent audio drops (consider increasing idealBufferSize value)");
-        //     }
-        //     _audioSkipCounter = 0f;
-        // }
-    }
     public void PushSamples(short [] samples) {
         if (samples == null) return;
 
@@ -105,7 +95,7 @@ public class AudioResampler {
         double avgSamplesProvided = Lerp(
             stereoSamplesNeeded*_defaultResampleRatio,
             Average(_samplesProvidedHistory),
-            _samplesProvidedHistory.Count/movingAverageN
+            (float)_samplesProvidedHistory.Count/movingAverageN
         );
 
         _avgSamplesProvided = avgSamplesProvided;
@@ -138,6 +128,8 @@ public class AudioResampler {
             _rawBuffer.TryDequeue(out x);
             rawSamples[i] = x;
         }
+        rawBufferCount = _rawBuffer.Count/ChannelCount;
+
         // Debug.Log($"Resampling from {stereoSamplesToConsume} to {stereoSamplesNeeded} ({ratio})");
         short[] resampled = Resample(rawSamples, stereoSamplesToConsume, stereoSamplesNeeded);
 
@@ -211,7 +203,7 @@ public class AudioResampler {
     }
     public static double Lerp(double a, double b, double t)
     {
-        return a + (b - a);
+        return a + (b - a)*t;
     }
 }
 
