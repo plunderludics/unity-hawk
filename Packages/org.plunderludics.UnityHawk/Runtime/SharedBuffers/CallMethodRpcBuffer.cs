@@ -8,7 +8,7 @@ public class CallMethodRpcBuffer : ISharedBuffer {
     /// the buffer name
     string _name;
 
-    /// .
+    /// the rpc buffer
     RpcBuffer _rpcBuffer;
 
     /// the callback for this rpc

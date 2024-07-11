@@ -205,17 +205,14 @@ public partial class Emulator : MonoBehaviour
 
     BizhawkArgs _currentBizhawkArgs; // remember the params corresponding to the currently running process
 
-    /// TODO: bytes-to-bytes only rn but some automatic de/serialization for different types would be nice
+    /// TODO: string-to-string only rn but some automatic de/serialization for different types would be nice
     public delegate string LuaCallback(string arg);
 
     /// Dictionary of registered methods that can be called from bizhawk lua
     readonly Dictionary<string, LuaCallback> _registeredLuaCallbacks = new();
 
-    #if UNITY_EDITOR
     /// a set of all the called methods
     readonly HashSet<string> _invokedLuaCallbacks = new();
-    #endif
-
 
     // Audio needs two rpc buffers, one for Bizhawk to request 'samples needed' value from Unity,
     // one for Unity to request the audio buffer from Bizhawk
@@ -800,14 +797,12 @@ public partial class Emulator : MonoBehaviour
             returnString = callback(argString);
         }
 
-        #if UNITY_EDITOR
         // add to set of called methods to not spam this warning
         if (!exists && !_invokedLuaCallbacks.Contains(callbackName)){
             Debug.LogWarning($"Tried to call a method named {callbackName} from lua but none was registered");
         }
 
         _invokedLuaCallbacks.Add(callbackName);
-        #endif
 
         return exists;
     }

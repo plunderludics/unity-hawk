@@ -1,21 +1,24 @@
 // Public methods for the Emulator component
 // Including methods for interfacing with the BizHawk API (loading/saving states, etc)
 
+using System;
 using UnityEngine;
 using Plunderludics;
-using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using BizHawk.Common;
-using BizHawk.Emulation.Common;
 
 namespace UnityHawk {
 
 public partial class Emulator
 {
-    ///// Public methods
-    // Register a method that can be called via `unityhawk.callmethod('MethodName')` in BizHawk lua
+    /// Register a method that can be called via `unityhawk.callmethod('MethodName')` in BizHawk lua
+    [Obsolete("use RegisterLuaCallback instead")]
     public void RegisterMethod(string methodName, LuaCallback luaCallback) {
+        RegisterLuaCallback(methodName, luaCallback);
+    }
+
+    /// Register a callback that can be called via `unityhawk.callmethod('MethodName')` in BizHawk lua
+    public void RegisterLuaCallback(string methodName, LuaCallback luaCallback) {
         _registeredLuaCallbacks[methodName] = luaCallback;
     }
 

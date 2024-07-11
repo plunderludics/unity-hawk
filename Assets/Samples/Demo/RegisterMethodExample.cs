@@ -10,7 +10,7 @@ public class RegisterMethodExample : MonoBehaviour
     // Start is called before the first frame update
     void OnEnable()
     {
-        e.RegisterMethod("DoSomething", DoSomething);
+        e.RegisterLuaCallback("DoSomething", DoSomething);
     }
 
     static string DoSomething(string arg) {
