@@ -354,7 +354,7 @@ public partial class Emulator : MonoBehaviour
         }
 
         if (string.IsNullOrEmpty(romFileName)) {
-            Debug.LogWarning("Attempt to initialize emulator without a rom");
+            // Debug.LogWarning("Attempt to initialize emulator without a rom");
             return false;
         }
 
