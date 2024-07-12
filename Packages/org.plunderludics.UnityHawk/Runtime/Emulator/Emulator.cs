@@ -99,11 +99,6 @@ public partial class Emulator : MonoBehaviour
 
     [Foldout("Debug")]
     [ReadOnly, SerializeField] bool _initialized;
-    public enum EmulatorStatus {
-        Inactive,
-        Started, // Underlying bizhawk has been started, but not rendering yet
-        Running  // Bizhawk is running and sending textures [technically gets set when shared texture channel is open]
-    }
 
     [Foldout("Debug")]
     [ReadOnly, SerializeField] EmulatorStatus _status;
@@ -156,27 +151,6 @@ public partial class Emulator : MonoBehaviour
     private static string bizhawkLogDirectory = "BizHawkLogs";
     private TextureFormat textureFormat = TextureFormat.BGRA32;
     private RenderTextureFormat renderTextureFormat = RenderTextureFormat.BGRA32;
-
-    // Interface for other scripts to use
-    public RenderTexture Texture => renderTexture;
-    public bool IsRunning => Status == EmulatorStatus.Running; // is the _emuhawk process running (best guess, might be wrong)
-    public EmulatorStatus Status {
-        get => _status;
-        private set {
-            if (_status != value) {
-                var raise = value switch {
-                    EmulatorStatus.Started => OnStarted,
-                    EmulatorStatus.Running => OnRunning,
-                    _ => null,
-                };
-
-                raise?.Invoke();
-            }
-            _status = value;
-        }
-    }
-
-    public int CurrentFrame => _currentFrame;
 
     Process _emuhawk;
 
