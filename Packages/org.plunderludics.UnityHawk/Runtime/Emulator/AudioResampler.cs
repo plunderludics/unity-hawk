@@ -2,9 +2,7 @@ using UnityEngine;
 using NaughtyAttributes;
 using System.Collections.Generic;
 using System;
-using System.Linq;
 using System.Collections.Concurrent;
-using UnityEditor.EditorTools;
 
 namespace UnityHawk {
 
