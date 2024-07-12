@@ -11,6 +11,32 @@ namespace UnityHawk {
 
 public partial class Emulator
 {
+    public RenderTexture Texture => renderTexture;
+    public bool IsRunning => Status == EmulatorStatus.Running; // is the emuhawk.exe process running? (best guess, might be wrong)
+
+    public enum EmulatorStatus {
+        Inactive,
+        Started, // Underlying bizhawk has been started, but not rendering yet
+        Running  // Bizhawk is running and sending textures [technically gets set when shared texture channel is open]
+    }
+    public EmulatorStatus Status {
+        get => _status;
+        private set {
+            if (_status != value) {
+                var raise = value switch {
+                    EmulatorStatus.Started => OnStarted,
+                    EmulatorStatus.Running => OnRunning,
+                    _ => null,
+                };
+
+                raise?.Invoke();
+            }
+            _status = value;
+        }
+    }
+
+    public int CurrentFrame => _currentFrame;
+
     /// Register a method that can be called via `unityhawk.callmethod('MethodName')` in BizHawk lua
     [Obsolete("use RegisterLuaCallback instead")]
     public void RegisterMethod(string methodName, LuaCallback luaCallback) {
@@ -40,7 +66,6 @@ public partial class Emulator
     }
 
     ///// Bizhawk API methods
-    ///// [should maybe move these into a Emulator.BizhawkApi subobject or similar]
     // For LoadState/SaveState/LoadRom, path should be relative to StreamingAssets (same as for rom/savestate/lua params in the inspector)
     // can also pass absolute path (but this will most likely break in build!)
 
