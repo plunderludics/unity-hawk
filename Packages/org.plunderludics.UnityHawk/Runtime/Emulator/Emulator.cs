@@ -240,6 +240,8 @@ public partial class Emulator : MonoBehaviour
     [ShowIf("captureEmulatorAudio")]
     AudioResampler _audioResampler;
 
+    private const double BizhawkSampleRate = 44100f;
+
     private const string _savestateExtension = "savestate";
 
     [DllImport("user32.dll")]
@@ -458,12 +460,14 @@ public partial class Emulator : MonoBehaviour
 
         // create & register audio buffer
         if (captureEmulatorAudio) {
-            var sharedAudioBufferName = $"unityhawk-audio-{randomNumber}";
-            args.Add($"--share-audio-over-rpc-buffer={sharedAudioBufferName}");
-            _sharedAudioBuffer = new SharedAudioBuffer(sharedAudioBufferName);
-
             if (runInEditMode && !Application.isPlaying) {
                 Debug.LogWarning("captureEmulatorAudio is enabled but emulator audio cannot be captured in edit mode");
+            } else {
+                var sharedAudioBufferName = $"unityhawk-audio-{randomNumber}";
+                args.Add($"--share-audio-over-rpc-buffer={sharedAudioBufferName}");
+                _sharedAudioBuffer = new SharedAudioBuffer(sharedAudioBufferName);
+
+                _audioResampler.Init(BizhawkSampleRate/AudioSettings.outputSampleRate);
             }
         }
 
@@ -615,7 +619,6 @@ public partial class Emulator : MonoBehaviour
         if (captureEmulatorAudio && Application.isPlaying) {
             if (_sharedAudioBuffer.IsOpen()) {
                 if (Status == EmulatorStatus.Running) {
-                    
                     short[] samples = _sharedAudioBuffer.GetSamples();
                     // Updating audio before the emulator is actually running messes up the resampling algorithm
                     _audioResampler.PushSamples(samples);
