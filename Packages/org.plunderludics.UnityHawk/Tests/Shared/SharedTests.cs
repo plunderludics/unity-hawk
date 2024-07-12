@@ -13,17 +13,24 @@ namespace UnityHawk.Tests {
 public class SharedTests
 {
     private Rom eliteRom;
-    private Savestate eliteSavestate;
+    private Rom swoopRom;
+    private Savestate eliteSavestate2000;
+    private Savestate eliteSavestate5000;
 
     public SharedTests() {
         // This breaks when trying to test in standalone player because AssetDatabase is unavailable
         // Probably have to use Addressables instead
         eliteRom = AssetDatabase.LoadAssetAtPath<Rom>("Packages/org.plunderludics.UnityHawk/Tests/Shared/eliteRomForTests.nes");
-        eliteSavestate = AssetDatabase.LoadAssetAtPath<Savestate>("Packages/org.plunderludics.UnityHawk/Tests/Shared/eliteSavestateForTests.savestate");
-        
+        swoopRom = AssetDatabase.LoadAssetAtPath<Rom>("Packages/org.plunderludics.UnityHawk/Tests/Shared/swoopRomForTests.n64");
+
+        eliteSavestate2000 = AssetDatabase.LoadAssetAtPath<Savestate>("Packages/org.plunderludics.UnityHawk/Tests/Shared/eliteSavestate2000.savestate");
+        eliteSavestate5000 = AssetDatabase.LoadAssetAtPath<Savestate>("Packages/org.plunderludics.UnityHawk/Tests/Shared/eliteSavestate5000.savestate");
+
         Assert.That(eliteRom, Is.Not.Null);
-        Assert.That(eliteSavestate, Is.Not.Null);
+        Assert.That(eliteSavestate2000, Is.Not.Null);
+        Assert.That(eliteSavestate5000, Is.Not.Null);
     }
+
     [UnityTest]
     public IEnumerator TestEmulatorIsRunning()
     {
@@ -33,21 +40,21 @@ public class SharedTests
         
         AssertEmulatorIsRunning(e);
 
-        yield return null;
+        GameObject.Destroy(e.gameObject);
     }
 
     [UnityTest]
     public IEnumerator TestWithSavestate()
     {
         Emulator e = AddEliteEmulatorForTesting();
-        e.saveStateFile = eliteSavestate;
+        e.saveStateFile = eliteSavestate2000;
 
         yield return WaitForAWhile(e);
         
         AssertEmulatorIsRunning(e);
         Assert.That(e.CurrentFrame, Is.GreaterThan(2000)); // Hacky way of checking if the savestate actually got loaded
-        
-        yield return null;
+
+        GameObject.Destroy(e.gameObject);
     }
 
     [UnityTest]
@@ -69,6 +76,49 @@ public class SharedTests
 
         yield return WaitForAWhile(e);
         Assert.That(e.CurrentFrame, Is.GreaterThan(frame));
+
+        GameObject.Destroy(e.gameObject);
+    }
+
+    [UnityTest]
+    public IEnumerator TestLoadState()
+    {
+        Emulator e = AddEliteEmulatorForTesting();
+
+        yield return WaitForAWhile(e);
+        AssertEmulatorIsRunning(e);
+
+        // Checking frame count is a hacky way of checking if the rom really got loaded
+        e.LoadState(eliteSavestate5000);
+        yield return WaitForAWhile(e);
+        Assert.That(e.CurrentFrame, Is.GreaterThan(5000));
+        
+        e.LoadState(eliteSavestate2000);
+        yield return WaitForAWhile(e);
+        Assert.That(e.CurrentFrame, Is.GreaterThan(2000));
+        Assert.That(e.CurrentFrame, Is.LessThan(5000));
+
+        GameObject.Destroy(e.gameObject);
+    }
+
+    [UnityTest]
+    public IEnumerator TestLoadRom()
+    {
+        Emulator e = AddEliteEmulatorForTesting();
+
+        yield return WaitForAWhile(e);
+        AssertEmulatorIsRunning(e);
+
+        // Checking texture size is a hacky way of knowing if the rom really got loaded
+        // Since nes and n64 texture sizes are different
+        Assert.That(e.Texture.width, Is.EqualTo(256));
+        
+        e.LoadRom(swoopRom);
+        yield return WaitForAWhile(e);
+        AssertEmulatorIsRunning(e);
+        Assert.That(e.Texture.width, Is.EqualTo(320));
+
+        GameObject.Destroy(e.gameObject);
     }
 
     // Helpers
