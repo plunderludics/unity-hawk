@@ -144,6 +144,14 @@ public partial class Emulator
         _sharedTextureBuffer.UpdateSize();
         _status = EmulatorStatus.Started; // Not ready until new texture buffer is set up
     }
+    
+    /// <summary>
+    /// loads a rom from a Rom asset
+    /// </summary>
+    /// <param name="rom"></param>
+    public void LoadRom(Rom rom) {
+        LoadRom(Path.GetFullPath(rom.Path));
+    }
 
     public void LoadSample(string path)
     {

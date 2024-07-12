@@ -9,7 +9,10 @@ using UnityHawk;
 public class ApiControls : MonoBehaviour
 {
     public Emulator emulator;
-    public string path;
+    public Rom rom;
+    public Savestate savestate;
+    public string pathToSave;
+
 
     void OnEnable() {
         if (emulator == null) {
@@ -23,15 +26,15 @@ public class ApiControls : MonoBehaviour
 #if UNITY_EDITOR
     [Button]
     private void LoadRom() {
-        emulator.LoadRom(path);
+        emulator.LoadRom(rom);
     }
     [Button]
     private void LoadState() {
-        emulator.LoadState(path);
+        emulator.LoadState(savestate);
     }
     [Button]
     private void SaveState() {
-        emulator.SaveState(path);
+        emulator.SaveState(pathToSave);
     }
     [Button]
     private void Pause() {
