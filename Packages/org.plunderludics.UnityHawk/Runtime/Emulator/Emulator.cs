@@ -467,6 +467,9 @@ public partial class Emulator : MonoBehaviour
                 args.Add($"--share-audio-over-rpc-buffer={sharedAudioBufferName}");
                 _sharedAudioBuffer = new SharedAudioBuffer(sharedAudioBufferName);
 
+                if (_audioResampler == null) {
+                    _audioResampler = new();
+                }
                 _audioResampler.Init(BizhawkSampleRate/AudioSettings.outputSampleRate);
             }
         }
