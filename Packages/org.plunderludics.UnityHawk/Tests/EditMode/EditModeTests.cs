@@ -9,15 +9,17 @@ using System;
 
 namespace UnityHawk.Tests {
 
-// (A UnityTest behaves like a coroutine in Play Mode. In Edit Mode you can use
-// `yield return null;` to skip a frame.)
-
+// For any extra tests we need to run in edit mode but not play mode
 public class EditModeTests: SharedTests
 {
+    public EditModeTests(bool passInputFromUnity, bool captureEmulatorAudio, bool showBizhawkGui)
+        : base(passInputFromUnity, captureEmulatorAudio, showBizhawkGui)
+    {
+    }
+
     [UnityTest]
     public IEnumerator TestNotRunningInEditMode()
     {
-        Emulator e = AddEliteEmulatorForTesting();
         e.runInEditMode = false;
 
         yield return WaitForAWhile(e);

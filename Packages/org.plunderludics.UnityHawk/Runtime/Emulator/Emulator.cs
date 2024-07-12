@@ -226,8 +226,9 @@ public partial class Emulator : MonoBehaviour
     private static extern IntPtr GetForegroundWindow();
 
     [Button]
-    private void Reset() {
+    public void Reset() {
         Deactivate();
+        OnValidate();
         // Will be reactivated in Update on next frame
     }
 

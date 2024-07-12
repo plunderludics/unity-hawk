@@ -4,12 +4,10 @@ using UnityEngine;
 using UnityEngine.TestTools;
 using UnityEditor;
 
-// What we really need but don't have is a way to test the build process
-// to make sure all the files get copied in correctly etc. Not sure how to do it yet
-
 namespace UnityHawk.Tests {
     
-public class PlayModeTests: SharedTests
+// If there are any tests we only want to run in play mode but not edit mode we can add those here
+public class PlayModeTests
 {
     
 }
