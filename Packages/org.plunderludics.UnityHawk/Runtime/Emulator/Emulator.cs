@@ -53,7 +53,7 @@ public partial class Emulator : MonoBehaviour
     public InputProvider inputProvider = null;
 
     [Tooltip("If true, audio will be played via an attached AudioSource (may induce some latency). If false, BizHawk will play audio directly to the OS")]
-    public bool captureEmulatorAudio = true;
+    public bool captureEmulatorAudio = false;
 
     [Header("Files")]
 #if UNITY_EDITOR
