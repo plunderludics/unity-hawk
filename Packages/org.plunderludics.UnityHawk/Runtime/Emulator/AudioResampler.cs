@@ -41,15 +41,19 @@ public class AudioResampler {
     [ReadOnly, SerializeField]
     private double resampleRatio = 1f;
 
-    private const int maxConsecutiveEmptyFrames = 5; // If we get more empty frames than this, stop processing audio
+    private const int ConsecutiveEmptyFramesToStopAudio = 5; // If we get more empty frames than this, stop processing audio
     private int _consecutiveEmptyFrames = 0;
 
+    private int _inputSampleDeficit;
+    private const int MaxDeficitSampleCountForWarning = 1024;
+
     public void Init(double defaultResampleRatio) {
+        _defaultResampleRatio = defaultResampleRatio;
         _rawBuffer = new();
         _samplesProvidedHistory = new();
         _consecutiveEmptyFrames = 0;
         _samplesProvidedThisFrame = 0;
-        _defaultResampleRatio = defaultResampleRatio;
+        _inputSampleDeficit = 0;
     }
 
     public void PushSamples(short [] samples) {
@@ -76,7 +80,7 @@ public class AudioResampler {
 
         if (_samplesProvidedThisFrame == 0) {
             _consecutiveEmptyFrames++;
-            if (_consecutiveEmptyFrames > maxConsecutiveEmptyFrames) {
+            if (_consecutiveEmptyFrames > ConsecutiveEmptyFramesToStopAudio) {
                 // Sometimes bizhawk just stops sending sound (e.g. when paused), we don't want this to affect the moving average resample ratio
                 return;
             }
@@ -116,6 +120,11 @@ public class AudioResampler {
         // Debug.Log($"Want {stereoSamplesToConsume} samples, {availableStereoSamples} are available");
         if (stereoSamplesToConsume > availableStereoSamples) {
             // Debug.LogWarning($"Starved of bizhawk samples");
+            _inputSampleDeficit += stereoSamplesToConsume - availableStereoSamples;
+            if (_inputSampleDeficit > MaxDeficitSampleCountForWarning) {
+                Debug.LogWarning($"Starved of audio samples, consider increasing idealBufferSize");
+                _inputSampleDeficit = 0;
+            }
             stereoSamplesToConsume = availableStereoSamples;
         }
 
@@ -139,20 +148,11 @@ public class AudioResampler {
             if (out_i < resampled.Length) {
                 out_buffer[out_i] = resampled[out_i]/32767f;
             } else {
-                Debug.LogError("Ran out of resampled audio, this should never happen");
+                Debug.LogError("[unity-hawk] Ran out of resampled audio, this should never happen");
                 break;
             }
         }
-
-        // Clear buffer except for a small amount of samples leftover (as buffer against skips/pops)
-        // (kind of a dumb way of doing this, could just reset _audioBufferEnd but whatever)
-        // int droppedSamples = 0;
-        // while (_resampledBuffer.Count > audioBufferSurplus*ChannelCount) {
-        //     _ = _resampledBuffer.Dequeue();
-        //     droppedSamples++;
-        // }
-        // if (droppedSamples > 0) Debug.LogWarning($"Dropped {droppedSamples} samples from bizhawk");
-    }
+   }
 
     // Simple linear interpolation, based on SoundOutputProvider.cs in Bizhawk
     private short[] Resample(short[] input, int inputCount, int outputCount)
