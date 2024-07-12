@@ -12,32 +12,77 @@ namespace UnityHawk.Tests {
     
 public class SharedTests
 {
+    private Rom eliteRom;
+    private Savestate eliteSavestate;
+
+    public SharedTests() {
+        // This breaks when trying to test in standalone player because AssetDatabase is unavailable
+        // Probably have to use Addressables instead
+        eliteRom = AssetDatabase.LoadAssetAtPath<Rom>("Packages/org.plunderludics.UnityHawk/Tests/Shared/eliteRomForTests.nes");
+        eliteSavestate = AssetDatabase.LoadAssetAtPath<Savestate>("Packages/org.plunderludics.UnityHawk/Tests/Shared/eliteSavestateForTests.savestate");
+        
+        Assert.That(eliteRom, Is.Not.Null);
+        Assert.That(eliteSavestate, Is.Not.Null);
+    }
     [UnityTest]
     public IEnumerator TestEmulatorIsRunning()
     {
         Emulator e = AddEliteEmulatorForTesting();
-        Debug.Log(e.romFile);
 
         yield return WaitForAWhile(e);
         
-        Debug.Log(e.Status);
-        Assert.That(e.IsRunning, Is.True);
-        Assert.That(e.Status, Is.EqualTo(Emulator.EmulatorStatus.Running));
+        AssertEmulatorIsRunning(e);
+
+        yield return null;
+    }
+
+    [UnityTest]
+    public IEnumerator TestWithSavestate()
+    {
+        Emulator e = AddEliteEmulatorForTesting();
+        e.saveStateFile = eliteSavestate;
+
+        yield return WaitForAWhile(e);
+        
+        AssertEmulatorIsRunning(e);
+        Assert.That(e.CurrentFrame, Is.GreaterThan(2000)); // Hacky way of checking if the savestate actually got loaded
         
         yield return null;
     }
 
+    [UnityTest]
+    public IEnumerator TestPauseAndUnpause()
+    {
+        Emulator e = AddEliteEmulatorForTesting();
+
+        yield return WaitForAWhile(e);
+        AssertEmulatorIsRunning(e);
+
+        e.Pause();
+        yield return WaitForAWhile(e); // Takes some time for the Pause message to reach the emulator
+        int frame = e.CurrentFrame;
+        Assert.That(frame, Is.GreaterThan(1));
+        
+        yield return WaitForAWhile(e);
+        Assert.That(e.CurrentFrame, Is.EqualTo(frame));
+        e.Unpause();
+
+        yield return WaitForAWhile(e);
+        Assert.That(e.CurrentFrame, Is.GreaterThan(frame));
+    }
+
     // Helpers
 
-    public static Emulator AddEliteEmulatorForTesting() {
-        // First find rom
-        var eliteRomFile = AssetDatabase.LoadAssetAtPath<Rom>(
-            "Packages/org.plunderludics.UnityHawk/Tests/Shared/eliteRomForTests.nes");
-        Assert.That(eliteRomFile, Is.Not.Null);
+    public void AssertEmulatorIsRunning(Emulator e) {
+        Assert.That(e.IsRunning, Is.True);
+        Assert.That(e.Status, Is.EqualTo(Emulator.EmulatorStatus.Running));
+        Assert.That(e.Texture, Is.Not.Null);
+    }
 
+    public Emulator AddEliteEmulatorForTesting() {
         var o = new GameObject();
         var e = o.AddComponent<Emulator>();
-        e.romFile = eliteRomFile;
+        e.romFile = eliteRom;
         e.suppressBizhawkPopups = false;
         e.showBizhawkGui = true;
         e.runInEditMode = true;

@@ -3,7 +3,9 @@ guid: 14a7df4f8cbe3d74cab1d8683f6c06ed
 MonoImporter:
   externalObjects: {}
   serializedVersion: 2
-  defaultReferences: []
+  defaultReferences:
+  - eliteRom: {fileID: 5022602860645237092, guid: 3ffde77fbdc869d40a69c60e45600bdc, type: 3}
+  - eliteSavestate: {fileID: 5022602860645237092, guid: d722373b8935ef446921e7884bb7eac5, type: 3}
   executionOrder: 0
   icon: {instanceID: 0}
   userData: 
