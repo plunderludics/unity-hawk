@@ -7,28 +7,23 @@ using UnityEditor;
 // What we really need but don't have is a way to test the build process
 // to make sure all the files get copied in correctly etc. Not sure how to do it yet
 
-namespace UnityHawk.Tests.PlayMode {
+namespace UnityHawk.Tests {
     
 public class PlayModeTests
 {
-    // This is copy-pasted from EditModeTests.cs
-    // TODO: find a way to share code between them
     [UnityTest]
     public IEnumerator BigTest1()
     {
-        // First find rom
-        var eliteRomFile = AssetDatabase.LoadAssetAtPath<Rom>(
-            "Packages/org.plunderludics.UnityHawk/Tests/TestResources/eliteRomForTests.nes");
-        var o = new GameObject();
-        var e = o.AddComponent<Emulator>();
+        Emulator e = Shared.AddEliteEmulatorForTesting();
+        Debug.Log(e.romFile);
+
+        yield return Shared.WaitForAWhile();
         
-        e.useManualPathnames = false;
-        e.romFile = eliteRomFile;
-        e.runInEditMode = false;
-        
-        for (var i = 0; i < 100; i++) yield return null;
-        
+        Debug.Log(e.Status);
         Assert.That(e.IsRunning, Is.True);
+        Assert.That(e.Status, Is.EqualTo(Emulator.EmulatorStatus.Started));
+        
+        yield return null;
     }
 }
 

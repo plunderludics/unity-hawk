@@ -5,6 +5,9 @@ using UnityEngine;
 using UnityEngine.TestTools;
 using UnityHawk;
 using UnityEditor;
+using System;
+
+namespace UnityHawk.Tests {
 
 public class EditModeTests
 {
@@ -13,26 +16,17 @@ public class EditModeTests
     [UnityTest]
     public IEnumerator BigTest1()
     {
-        // First find rom
-        var eliteRomFile = AssetDatabase.LoadAssetAtPath<Rom>(
-            "Packages/org.plunderludics.UnityHawk/Tests/TestResources/eliteRomForTests.nes");
-        var o = new GameObject();
-        var e = o.AddComponent<Emulator>();
-        e.useManualPathnames = false;
-        e.romFile = eliteRomFile;
+        Emulator e = Shared.AddEliteEmulatorForTesting();
+
         e.runInEditMode = false;
-        e.Update();
-        for (int i = 0; i < 100; i++) yield return null;
+        yield return Shared.WaitForAWhile(action: () => e.Update());
         Assert.That(e.IsRunning, Is.False); // Emulator should not be running since runInEditMode is false
 
         e.runInEditMode = true;
-        e.Update();
-        Assert.That(e.Status, Is.EqualTo(Emulator.EmulatorStatus.Started));
-        for (int i = 0; i < 100; i++) {
-            System.Threading.Thread.Sleep(10);
-            e.Update();
-            yield return null;
-        }
+        yield return Shared.WaitForAWhile(action: () => e.Update());
+        Assert.That(e.Status, Is.EqualTo(Emulator.EmulatorStatus.Running));
         Assert.That(e.IsRunning, Is.True);
     }
+}
+
 }
