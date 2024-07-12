@@ -9,22 +9,9 @@ using UnityEditor;
 
 namespace UnityHawk.Tests {
     
-public class PlayModeTests
+public class PlayModeTests: SharedTests
 {
-    [UnityTest]
-    public IEnumerator BigTest1()
-    {
-        Emulator e = Shared.AddEliteEmulatorForTesting();
-        Debug.Log(e.romFile);
-
-        yield return Shared.WaitForAWhile();
-        
-        Debug.Log(e.Status);
-        Assert.That(e.IsRunning, Is.True);
-        Assert.That(e.Status, Is.EqualTo(Emulator.EmulatorStatus.Started));
-        
-        yield return null;
-    }
+    
 }
 
 }

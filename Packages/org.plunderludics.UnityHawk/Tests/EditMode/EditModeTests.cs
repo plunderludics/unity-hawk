@@ -9,23 +9,20 @@ using System;
 
 namespace UnityHawk.Tests {
 
-public class EditModeTests
+// (A UnityTest behaves like a coroutine in Play Mode. In Edit Mode you can use
+// `yield return null;` to skip a frame.)
+
+public class EditModeTests: SharedTests
 {
-    // A UnityTest behaves like a coroutine in Play Mode. In Edit Mode you can use
-    // `yield return null;` to skip a frame.
     [UnityTest]
-    public IEnumerator BigTest1()
+    public IEnumerator TestNotRunningInEditMode()
     {
-        Emulator e = Shared.AddEliteEmulatorForTesting();
-
+        Emulator e = AddEliteEmulatorForTesting();
         e.runInEditMode = false;
-        yield return Shared.WaitForAWhile(action: () => e.Update());
-        Assert.That(e.IsRunning, Is.False); // Emulator should not be running since runInEditMode is false
 
-        e.runInEditMode = true;
-        yield return Shared.WaitForAWhile(action: () => e.Update());
-        Assert.That(e.Status, Is.EqualTo(Emulator.EmulatorStatus.Running));
-        Assert.That(e.IsRunning, Is.True);
+        yield return WaitForAWhile(e);
+        Assert.That(e.Status, Is.EqualTo(Emulator.EmulatorStatus.Inactive));
+        Assert.That(e.IsRunning, Is.False);
     }
 }
 
