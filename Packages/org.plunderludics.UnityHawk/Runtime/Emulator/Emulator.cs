@@ -214,6 +214,8 @@ public partial class Emulator : MonoBehaviour
     [ShowIf("captureEmulatorAudio")]
     AudioResampler _audioResampler;
 
+    float _startedTime;
+
     private const double BizhawkSampleRate = 44100f;
 
     private const string _savestateExtension = "savestate";
@@ -520,6 +522,7 @@ public partial class Emulator : MonoBehaviour
         _emuhawk.BeginOutputReadLine();
         _emuhawk.BeginErrorReadLine();
         Status = EmulatorStatus.Started;
+        _startedTime = Time.realtimeSinceStartup;
 
         _currentBizhawkArgs = MakeBizhawkArgs();
 
@@ -549,8 +552,8 @@ public partial class Emulator : MonoBehaviour
         // [Checking this every frame seems to be the only thing that works
         //  - fortunately for some reason it doesn't steal focus when clicking into a different application]
         // [Except this has a nasty side effect, in the editor in play mode if you try to open a unity modal window
-        //  (e.g. the game view aspect ratio config) it gets closed. This is annoying but not sure how to fix]
-        if (Application.isPlaying && !_targetMac && !showBizhawkGui && _emuhawk != null) {
+        //  (e.g. the game view aspect ratio config) it gets closed. To avoid this only do the check in the first 5 seconds after starting up]
+        if (Time.realtimeSinceStartup - _startedTime < 5f && Application.isPlaying && !_targetMac && !showBizhawkGui && _emuhawk != null) {
             IntPtr unityWindow = Process.GetCurrentProcess().MainWindowHandle;
             IntPtr bizhawkWindow = _emuhawk.MainWindowHandle;
             IntPtr focusedWindow = GetForegroundWindow();
