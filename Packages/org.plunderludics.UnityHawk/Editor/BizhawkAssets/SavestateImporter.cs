@@ -11,26 +11,27 @@ public class SavestateImporter : BizHawkAssetImporter<Savestate> {
     const string k_GameInfoFile = "GameInfo.json";
 
     public override void OnImportAsset(AssetImportContext ctx) {
+
         using var stateFile = ZipFile.OpenRead(ctx.assetPath);
-        GameInfo gi = GameInfo.NullInstance;
+        var gameInfo = GameInfo.NullInstance;
         // find the game info file and deserialize it
         foreach (var entry in stateFile.Entries) {
             if (entry.Name != k_GameInfoFile) continue;
 
             using var s = entry.Open();
-            gi = GameInfo.Deserialize(s) ?? GameInfo.NullInstance;
+            gameInfo = GameInfo.Deserialize(s) ?? GameInfo.NullInstance;
             break;
         }
 
         var savestate = ScriptableObject.CreateInstance<Savestate>();
-        savestate.Path = ctx.assetPath;
+        savestate.Path = GetPath(ctx);
 
-        savestate.RomInfo.Name = gi.Name;
-        savestate.RomInfo.Hash = gi.Hash;
-        savestate.RomInfo.Region = gi.Region;
-        savestate.RomInfo.System = gi.System;
-        savestate.RomInfo.NotInDatabase = gi.NotInDatabase;
-        savestate.RomInfo.Core = gi.ForcedCore;
+        savestate.RomInfo.Name = gameInfo.Name;
+        savestate.RomInfo.Hash = gameInfo.Hash;
+        savestate.RomInfo.Region = gameInfo.Region;
+        savestate.RomInfo.System = gameInfo.System;
+        savestate.RomInfo.NotInDatabase = gameInfo.NotInDatabase;
+        savestate.RomInfo.Core = gameInfo.ForcedCore;
 
         ctx.AddObjectToAsset("main obj", savestate);
         ctx.SetMainObject(savestate);

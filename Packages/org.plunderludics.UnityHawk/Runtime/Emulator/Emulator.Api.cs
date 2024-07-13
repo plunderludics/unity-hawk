@@ -37,15 +37,18 @@ public partial class Emulator
 
     public int CurrentFrame => _currentFrame;
 
-    /// Register a method that can be called via `unityhawk.callmethod('MethodName')` in BizHawk lua
-    [Obsolete("use RegisterLuaCallback instead")]
-    public void RegisterMethod(string methodName, LuaCallback luaCallback) {
-        RegisterLuaCallback(methodName, luaCallback);
-    }
+    /// TODO: string-to-string only rn but some automatic de/serialization for different types would be nice
+    public delegate string LuaCallback(string arg);
 
     /// Register a callback that can be called via `unityhawk.callmethod('MethodName')` in BizHawk lua
     public void RegisterLuaCallback(string methodName, LuaCallback luaCallback) {
         _registeredLuaCallbacks[methodName] = luaCallback;
+    }
+
+    /// Register a method that can be called via `unityhawk.callmethod('MethodName')` in BizHawk lua
+    [Obsolete("use RegisterLuaCallback instead")]
+    public void RegisterMethod(string methodName, LuaCallback luaCallback) {
+        RegisterLuaCallback(methodName, luaCallback);
     }
 
     // For editor convenience: Set filename fields by reading a sample directory
@@ -119,7 +122,7 @@ public partial class Emulator
     /// </summary>
     /// <param name="sample"></param>
     public void LoadState(Savestate sample) {
-        LoadState(Path.GetFullPath(sample.Path));
+        LoadState(BizhawkAssetDatabase.GetFullPath(sample));
     }
 
     /// <summary>

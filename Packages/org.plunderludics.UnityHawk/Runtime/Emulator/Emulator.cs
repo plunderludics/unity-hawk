@@ -174,9 +174,6 @@ public partial class Emulator : MonoBehaviour
 
     BizhawkArgs _currentBizhawkArgs; // remember the params corresponding to the currently running process
 
-    /// TODO: string-to-string only rn but some automatic de/serialization for different types would be nice
-    public delegate string LuaCallback(string arg);
-
     /// Dictionary of registered methods that can be called from bizhawk lua
     readonly Dictionary<string, LuaCallback> _registeredLuaCallbacks = new();
 
@@ -213,6 +210,8 @@ public partial class Emulator : MonoBehaviour
     [Foldout("Debug")]
     [ShowIf("captureEmulatorAudio")]
     AudioResampler _audioResampler;
+
+    float _startedTime;
 
     private const double BizhawkSampleRate = 44100f;
 
@@ -409,6 +408,11 @@ public partial class Emulator : MonoBehaviour
 
         args.Add($"--savestates={savestatesOutputDirFullPath}");
 
+        // Save ram watch files to parent folder of rom
+        string ramWatchOutputDirFullPath = Path.GetDirectoryName(romPath);
+        args.Add($"--save-ram-watch={ramWatchOutputDirFullPath}");
+
+
         if (!showBizhawkGui) {
             args.Add("--headless");
             _emuhawk.StartInfo.CreateNoWindow = true;
@@ -520,6 +524,7 @@ public partial class Emulator : MonoBehaviour
         _emuhawk.BeginOutputReadLine();
         _emuhawk.BeginErrorReadLine();
         Status = EmulatorStatus.Started;
+        _startedTime = Time.realtimeSinceStartup;
 
         _currentBizhawkArgs = MakeBizhawkArgs();
 
@@ -549,8 +554,8 @@ public partial class Emulator : MonoBehaviour
         // [Checking this every frame seems to be the only thing that works
         //  - fortunately for some reason it doesn't steal focus when clicking into a different application]
         // [Except this has a nasty side effect, in the editor in play mode if you try to open a unity modal window
-        //  (e.g. the game view aspect ratio config) it gets closed. This is annoying but not sure how to fix]
-        if (Application.isPlaying && !_targetMac && !showBizhawkGui && _emuhawk != null) {
+        //  (e.g. the game view aspect ratio config) it gets closed. To avoid this only do the check in the first 5 seconds after starting up]
+        if (Time.realtimeSinceStartup - _startedTime < 5f && Application.isPlaying && !_targetMac && !showBizhawkGui && _emuhawk != null) {
             IntPtr unityWindow = Process.GetCurrentProcess().MainWindowHandle;
             IntPtr bizhawkWindow = _emuhawk.MainWindowHandle;
             IntPtr focusedWindow = GetForegroundWindow();
@@ -784,16 +789,13 @@ public partial class Emulator : MonoBehaviour
 #if UNITY_EDITOR
         // Set filename params based on asset locations
         // [using absolute path is not really ideal here but ok for now]
-        static string GetDefaultAssetPathName(DefaultAsset f) =>
+        static string GetDefaultAssetPathName(UnityEngine.Object f) =>
             f ? Path.GetFullPath(AssetDatabase.GetAssetPath(f)) : "";
 
-        static string GetBizhawkAssetPathName(BizhawkAsset f) =>
-            f ? Path.GetFullPath(f.Path) : "";
-
-        romFileName = GetBizhawkAssetPathName(romFile);
-        saveStateFileName = GetBizhawkAssetPathName(saveStateFile);
-        configFileName = GetBizhawkAssetPathName(configFile);
-        luaScriptFileName = GetBizhawkAssetPathName(luaScriptFile);
+        romFileName = GetDefaultAssetPathName(romFile);
+        saveStateFileName = GetDefaultAssetPathName(saveStateFile);
+        configFileName = GetDefaultAssetPathName(configFile);
+        luaScriptFileName = GetDefaultAssetPathName(luaScriptFile);
 
         firmwareDirName = GetDefaultAssetPathName(firmwareDirectory);
         savestatesOutputDirName = GetDefaultAssetPathName(savestatesOutputDirectory);
