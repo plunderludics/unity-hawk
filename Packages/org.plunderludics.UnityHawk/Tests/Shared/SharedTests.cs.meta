@@ -1,0 +1,13 @@
+fileFormatVersion: 2
+guid: 03afc70335ba7eb41bd349fd5e567246
+MonoImporter:
+  externalObjects: {}
+  serializedVersion: 2
+  defaultReferences:
+  - eliteRom: {fileID: 5022602860645237092, guid: 3ffde77fbdc869d40a69c60e45600bdc, type: 3}
+  - eliteSavestate: {fileID: 5022602860645237092, guid: d722373b8935ef446921e7884bb7eac5, type: 3}
+  executionOrder: 0
+  icon: {instanceID: 0}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
