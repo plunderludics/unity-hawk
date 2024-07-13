@@ -5,33 +5,27 @@ using UnityEngine;
 using UnityEngine.TestTools;
 using UnityHawk;
 using UnityEditor;
+using System;
 
-public class EditModeTests
+namespace UnityHawk.Tests {
+
+// For any extra tests we need to run in edit mode but not play mode
+public class EditModeTests: SharedTests
 {
-    // A UnityTest behaves like a coroutine in Play Mode. In Edit Mode you can use
-    // `yield return null;` to skip a frame.
-    [UnityTest]
-    public IEnumerator BigTest1()
+    public EditModeTests(bool passInputFromUnity, bool captureEmulatorAudio, bool showBizhawkGui)
+        : base(passInputFromUnity, captureEmulatorAudio, showBizhawkGui)
     {
-        // First find rom
-        var eliteRomFile = AssetDatabase.LoadAssetAtPath<Rom>(
-            "Packages/org.plunderludics.UnityHawk/Tests/TestResources/eliteRomForTests.nes");
-        var o = new GameObject();
-        var e = o.AddComponent<Emulator>();
-        e.romFile = eliteRomFile;
-        e.runInEditMode = false;
-        e.Update();
-        for (int i = 0; i < 100; i++) yield return null;
-        Assert.That(e.IsRunning, Is.False); // Emulator should not be running since runInEditMode is false
-
-        e.runInEditMode = true;
-        e.Update();
-        Assert.That(e.Status, Is.EqualTo(Emulator.EmulatorStatus.Started));
-        for (int i = 0; i < 100; i++) {
-            System.Threading.Thread.Sleep(10);
-            e.Update();
-            yield return null;
-        }
-        Assert.That(e.IsRunning, Is.True);
     }
+
+    [UnityTest]
+    public IEnumerator TestNotRunningInEditMode()
+    {
+        e.runInEditMode = false;
+
+        yield return WaitForAWhile(e);
+        Assert.That(e.Status, Is.EqualTo(Emulator.EmulatorStatus.Inactive));
+        Assert.That(e.IsRunning, Is.False);
+    }
+}
+
 }

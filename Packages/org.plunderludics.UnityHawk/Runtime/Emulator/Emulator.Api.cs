@@ -11,19 +11,47 @@ namespace UnityHawk {
 
 public partial class Emulator
 {
-    /// Register a method that can be called via `unityhawk.callmethod('MethodName')` in BizHawk lua
-    [Obsolete("use RegisterLuaCallback instead")]
-    public void RegisterMethod(string methodName, LuaCallback luaCallback) {
-        RegisterLuaCallback(methodName, luaCallback);
+    public RenderTexture Texture => renderTexture;
+    public bool IsRunning => Status == EmulatorStatus.Running; // is the emuhawk.exe process running? (best guess, might be wrong)
+
+    public enum EmulatorStatus {
+        Inactive,
+        Started, // Underlying bizhawk has been started, but not rendering yet
+        Running  // Bizhawk is running and sending textures [technically gets set when shared texture channel is open]
     }
+    public EmulatorStatus Status {
+        get => _status;
+        private set {
+            if (_status != value) {
+                var raise = value switch {
+                    EmulatorStatus.Started => OnStarted,
+                    EmulatorStatus.Running => OnRunning,
+                    _ => null,
+                };
+
+                raise?.Invoke();
+            }
+            _status = value;
+        }
+    }
+
+    public int CurrentFrame => _currentFrame;
+
+    /// TODO: string-to-string only rn but some automatic de/serialization for different types would be nice
+    public delegate string LuaCallback(string arg);
 
     /// Register a callback that can be called via `unityhawk.callmethod('MethodName')` in BizHawk lua
     public void RegisterLuaCallback(string methodName, LuaCallback luaCallback) {
         _registeredLuaCallbacks[methodName] = luaCallback;
     }
 
+    /// Register a method that can be called via `unityhawk.callmethod('MethodName')` in BizHawk lua
+    [Obsolete("use RegisterLuaCallback instead")]
+    public void RegisterMethod(string methodName, LuaCallback luaCallback) {
+        RegisterLuaCallback(methodName, luaCallback);
+    }
+
     ///// Bizhawk API methods
-    ///// [should maybe move these into a Emulator.BizhawkApi subobject or similar]
     // For LoadState/SaveState/LoadRom, path should be relative to StreamingAssets (same as for rom/savestate/lua params in the inspector)
     // can also pass absolute path (but this will most likely break in build!)
 
@@ -107,7 +135,7 @@ public partial class Emulator
     }
 
     /// <summary>
-    /// loads a rom from a rom asset
+    /// loads a rom from a Rom asset
     /// </summary>
     /// <param name="rom"></param>
     public void LoadRom(Rom rom) {

@@ -53,7 +53,7 @@ public partial class Emulator : MonoBehaviour
     public InputProvider inputProvider = null;
 
     [Tooltip("If true, audio will be played via an attached AudioSource (may induce some latency). If false, BizHawk will play audio directly to the OS")]
-    public bool captureEmulatorAudio = true;
+    public bool captureEmulatorAudio = false;
 
     [Header("Files")]
     public Rom romFile;
@@ -88,11 +88,6 @@ public partial class Emulator : MonoBehaviour
 
     [Foldout("Debug")]
     [ReadOnly, SerializeField] bool _initialized;
-    public enum EmulatorStatus {
-        Inactive,
-        Started, // Underlying bizhawk has been started, but not rendering yet
-        Running  // Bizhawk is running and sending textures [technically gets set when shared texture channel is open]
-    }
 
     [Foldout("Debug")]
     [ReadOnly, SerializeField] EmulatorStatus _status;
@@ -119,27 +114,6 @@ public partial class Emulator : MonoBehaviour
     private TextureFormat textureFormat = TextureFormat.BGRA32;
     private RenderTextureFormat renderTextureFormat = RenderTextureFormat.BGRA32;
 
-    // Interface for other scripts to use
-    public RenderTexture Texture => renderTexture;
-    public bool IsRunning => Status == EmulatorStatus.Running; // is the _emuhawk process running (best guess, might be wrong)
-    public EmulatorStatus Status {
-        get => _status;
-        private set {
-            if (_status != value) {
-                var raise = value switch {
-                    EmulatorStatus.Started => OnStarted,
-                    EmulatorStatus.Running => OnRunning,
-                    _ => null,
-                };
-
-                raise?.Invoke();
-            }
-            _status = value;
-        }
-    }
-
-    public int CurrentFrame => _currentFrame;
-
     Process _emuhawk;
 
     // Basically these are the params which, if changed, we want to reset the bizhawk process
@@ -159,9 +133,6 @@ public partial class Emulator : MonoBehaviour
     }
 
     BizhawkArgs _currentBizhawkArgs; // remember the params corresponding to the currently running process
-
-    /// TODO: string-to-string only rn but some automatic de/serialization for different types would be nice
-    public delegate string LuaCallback(string arg);
 
     /// Dictionary of registered methods that can be called from bizhawk lua
     readonly Dictionary<string, LuaCallback> _registeredLuaCallbacks = new();
@@ -195,6 +166,15 @@ public partial class Emulator : MonoBehaviour
 
     StreamWriter _bizHawkLogWriter;
 
+    [SerializeField]
+    [Foldout("Debug")]
+    [ShowIf("captureEmulatorAudio")]
+    AudioResampler _audioResampler;
+
+    float _startedTime;
+
+    private const double BizhawkSampleRate = 44100f;
+
     private const string _savestateExtension = "savestate";
 
     [DllImport("user32.dll")]
@@ -205,7 +185,7 @@ public partial class Emulator : MonoBehaviour
     private static extern IntPtr GetForegroundWindow();
 
     [Button]
-    private void Reset() {
+    public void Reset() {
         Deactivate();
         // Will be reactivated in Update on next frame
     }
@@ -268,9 +248,6 @@ public partial class Emulator : MonoBehaviour
         if (captureEmulatorAudio && GetComponent<AudioSource>() == null) {
             Debug.LogWarning("captureEmulatorAudio is enabled but no AudioSource is attached, will not play audio");
         }
-
-        // Init local audio buffer
-        InitAudio();
 
         // If using referenced assets then first map those assets to filenames
         // (Bizhawk requires a path to a real file on disk)
@@ -336,6 +313,11 @@ public partial class Emulator : MonoBehaviour
         // add firmware
         args.Add($"--firmware={Paths.FirmwarePath}");
 
+        // Save ram watch files to parent folder of rom
+        string ramWatchOutputDirFullPath = Path.GetDirectoryName(romPath);
+        args.Add($"--save-ram-watch={ramWatchOutputDirFullPath}");
+
+
         if (!showBizhawkGui) {
             args.Add("--headless");
             _emuhawk.StartInfo.CreateNoWindow = true;
@@ -363,12 +345,17 @@ public partial class Emulator : MonoBehaviour
 
         // create & register audio buffer
         if (captureEmulatorAudio) {
-            var sharedAudioBufferName = $"unityhawk-audio-{randomNumber}";
-            args.Add($"--share-audio-over-rpc-buffer={sharedAudioBufferName}");
-            _sharedAudioBuffer = new SharedAudioBuffer(sharedAudioBufferName);
-
             if (runInEditMode && !Application.isPlaying) {
                 Debug.LogWarning("captureEmulatorAudio is enabled but emulator audio cannot be captured in edit mode");
+            } else {
+                var sharedAudioBufferName = $"unityhawk-audio-{randomNumber}";
+                args.Add($"--share-audio-over-rpc-buffer={sharedAudioBufferName}");
+                _sharedAudioBuffer = new SharedAudioBuffer(sharedAudioBufferName);
+
+                if (_audioResampler == null) {
+                    _audioResampler = new();
+                }
+                _audioResampler.Init(BizhawkSampleRate/AudioSettings.outputSampleRate);
             }
         }
 
@@ -425,6 +412,7 @@ public partial class Emulator : MonoBehaviour
         _emuhawk.BeginOutputReadLine();
         _emuhawk.BeginErrorReadLine();
         Status = EmulatorStatus.Started;
+        _startedTime = Time.realtimeSinceStartup;
 
         _currentBizhawkArgs = MakeBizhawkArgs();
 
@@ -454,8 +442,8 @@ public partial class Emulator : MonoBehaviour
         // [Checking this every frame seems to be the only thing that works
         //  - fortunately for some reason it doesn't steal focus when clicking into a different application]
         // [Except this has a nasty side effect, in the editor in play mode if you try to open a unity modal window
-        //  (e.g. the game view aspect ratio config) it gets closed. This is annoying but not sure how to fix]
-        if (Application.isPlaying && !_targetMac && !showBizhawkGui && _emuhawk != null) {
+        //  (e.g. the game view aspect ratio config) it gets closed. To avoid this only do the check in the first 5 seconds after starting up]
+        if (Time.realtimeSinceStartup - _startedTime < 5f && Application.isPlaying && !_targetMac && !showBizhawkGui && _emuhawk != null) {
             IntPtr unityWindow = Process.GetCurrentProcess().MainWindowHandle;
             IntPtr bizhawkWindow = _emuhawk.MainWindowHandle;
             IntPtr focusedWindow = GetForegroundWindow();
@@ -499,9 +487,13 @@ public partial class Emulator : MonoBehaviour
             AttemptOpenBuffer(_apiCallBuffer);
         }
 
-        if (captureEmulatorAudio) {
+        if (captureEmulatorAudio && Application.isPlaying) {
             if (_sharedAudioBuffer.IsOpen()) {
-                UpdateAudio();
+                if (Status == EmulatorStatus.Running) {
+                    short[] samples = _sharedAudioBuffer.GetSamples();
+                    // Updating audio before the emulator is actually running messes up the resampling algorithm
+                    _audioResampler.PushSamples(samples);
+                }
             } else {
                 AttemptOpenBuffer(_sharedAudioBuffer);
             }
@@ -608,6 +600,16 @@ public partial class Emulator : MonoBehaviour
                 targetRenderer.material.mainTexture = renderTexture;
             }
         }
+    }
+
+    // Send audio from the emulator to the AudioSource
+    // (this method gets called by Unity if there is an AudioSource component attached)
+    void OnAudioFilterRead(float[] out_buffer, int channels) {
+        if (!captureEmulatorAudio) return;
+        if (!_sharedAudioBuffer.IsOpen()) return;
+        if (Status != EmulatorStatus.Running) return;
+
+        _audioResampler.GetSamples(out_buffer, channels);
     }
 
     void AttemptOpenBuffer(ISharedBuffer buf) {
