@@ -290,8 +290,26 @@ public partial class Emulator : MonoBehaviour
             _emuhawk.StartInfo.UseShellExecute = false;
         }
 
-        args.Add($"--firmware={Paths.FirmwarePath}");
+        // add rom path
+        args.Add(Paths.GetAssetPath(romFile));
+
+        // add config path
+        if (configFile) {
+            args.Add($"--config={Paths.GetAssetPath(configFile)}");
+        }
+
+        // add save state path
+        if (saveStateFile) {
+            args.Add($"--load-state={Paths.GetAssetPath(saveStateFile)}");
+        }
+
+        // Save savestates with extension .savestate instead of .State, this is because Unity treats .State as some other kind of asset
+        args.Add($"--savestate-extension={_savestateExtension}");
+
         args.Add($"--savestates={Paths.SavestatesOutputPath}");
+
+        // add firmware
+        args.Add($"--firmware={Paths.FirmwarePath}");
 
         if (!showBizhawkGui) {
             args.Add("--headless");
@@ -299,6 +317,7 @@ public partial class Emulator : MonoBehaviour
             _emuhawk.StartInfo.WindowStyle = ProcessWindowStyle.Hidden;
         }
 
+        // add buffers
         // get a random number to identify the buffers
         var randomNumber = new System.Random().Next();
 
@@ -358,19 +377,9 @@ public partial class Emulator : MonoBehaviour
 
         args.Add($"--ram-watch-file={Paths.RamWatchPath}");
 
-        if (configFile) {
-            args.Add($"--config={Paths.GetAssetPath(configFile)}");
-        }
-
-        // Save savestates with extension .savestate instead of .State, this is because Unity treats .State as some other kind of asset
-        args.Add($"--savestate-extension={_savestateExtension}");
-
         if (suppressBizhawkPopups) {
             args.Add("--suppress-popups"); // Don't pop up windows for messages/exceptions (they will still appear in the logs)
         }
-
-        // add rom path
-        args.Add(Paths.GetAssetPath(romFile));
 
         if (writeBizhawkLogs) {
             // Redirect bizhawk output + error into a log file
