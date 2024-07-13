@@ -60,6 +60,7 @@ public partial class Emulator : MonoBehaviour
     public Savestate saveStateFile;
     public Config configFile;
     public LuaScript luaScriptFile;
+    public RamWatch ramWatchFile;
 
     [SerializeField, HideInInspector]
     bool _isEnabled = false; // hack to only show the forceCopyFilesToBuild field when component is inactive
@@ -145,6 +146,7 @@ public partial class Emulator : MonoBehaviour
         public Savestate saveStateFile;
         public Config configFile;
         public LuaScript luaScriptFile;
+        public RamWatch ramWatchFile;
 #endif
         public bool passInputFromUnity;
         public bool captureEmulatorAudio;
@@ -294,13 +296,25 @@ public partial class Emulator : MonoBehaviour
         args.Add(Paths.GetAssetPath(romFile));
 
         // add config path
-        if (configFile) {
-            args.Add($"--config={Paths.GetAssetPath(configFile)}");
-        }
+        var configPath = configFile
+            ? Paths.GetAssetPath(configFile)
+            : Path.GetFullPath(Paths.defaultConfigPath);
+
+        args.Add($"--config={configPath}");
 
         // add save state path
         if (saveStateFile) {
             args.Add($"--load-state={Paths.GetAssetPath(saveStateFile)}");
+        }
+
+        // add ram watch file
+        if (ramWatchFile) {
+            args.Add($"--ram-watch-file={Paths.GetAssetPath(ramWatchFile)}");
+        }
+
+        // add lua script file
+        if (luaScriptFile) {
+            args.Add($"--lua={Paths.GetAssetPath(luaScriptFile)}");
         }
 
         // Save savestates with extension .savestate instead of .State, this is because Unity treats .State as some other kind of asset
@@ -375,7 +389,6 @@ public partial class Emulator : MonoBehaviour
             }
         }
 
-        args.Add($"--ram-watch-file={Paths.RamWatchPath}");
 
         if (suppressBizhawkPopups) {
             args.Add("--suppress-popups"); // Don't pop up windows for messages/exceptions (they will still appear in the logs)
