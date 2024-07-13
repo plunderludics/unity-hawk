@@ -8,7 +8,7 @@ using UnityEditor.Build.Reporting;
 using System;
 using System.IO;
 using System.Collections.Generic;
-
+using System.Linq;
 using CueSharp;
 using UnityEditor.SceneManagement;
 
@@ -62,9 +62,21 @@ public class BuildProcessing : IPostprocessBuildWithReport, IPreprocessBuildWith
 
         // look through all Emulator components in the scene and
         // locate (external) file dependencies, copy them into the build, and (temporarily) update the path references
-        GameObject[] gameObjects = scene.GetRootGameObjects();
-        foreach (var gameObject in gameObjects) {
+        var root = scene.GetRootGameObjects();
+        var dependencies = EditorUtility.CollectDependencies(root);
+        var bizhawkDependencies = dependencies.OfType<BizhawkAsset>();
+
+        Debug.Log($"[unity-hawk] build processing, moving dependencies to StreamingAssets: \n {string.Join("\n", bizhawkDependencies)}");
+
+        foreach (var dependency in bizhawkDependencies) {
+            MoveToDirectory(false, BizhawkAssetDatabase.GetFullPath(dependency), streamingAssetsBuildDir);
+        }
+
+        foreach (var gameObject in root) {
+            // RecurseGameObjects(gameObject);
+            // comb through the entire scene
             var emulators = gameObject.GetComponentsInChildren<Emulator>(includeInactive: true);
+            // TODO: with the BizhawkAssetDatabase, all the emulator pathnames can go away
             foreach (Emulator emulator in emulators) {
                 if ((!emulator.enabled || !emulator.gameObject.activeInHierarchy) && !emulator.forceCopyFilesToBuild) {
                     // If emulator component is not active, ignore it unless the forceCopyFilesToBuild flag is set
@@ -82,12 +94,11 @@ public class BuildProcessing : IPostprocessBuildWithReport, IPreprocessBuildWith
                     emulator.saveStateFile = null;
                     emulator.configFile = null;
                     emulator.luaScriptFile = null;
-                    emulator.firmwareDirectory = null;
+                    // emulator.firmwareDirectory = null;
                     emulator.savestatesOutputDirectory = null;
 
                     emulator.useManualPathnames = true;
                 }
-
 
                 // define abstract getters and setters just to avoid duplicating code for each field
                 var accessors = new List<(bool, Func<string>, Action<string>)> {
@@ -100,66 +111,74 @@ public class BuildProcessing : IPostprocessBuildWithReport, IPreprocessBuildWith
                 };
 
                 foreach ((bool isDir, var getter, var setter) in accessors) {
-                    string path = getter();
-
-                    if (!string.IsNullOrEmpty(path)) {
-                        // Get the path that Emulator will actually look for the file
-                        string origFilePath = Paths.GetAssetPath(path);
-
-                        // ignore anything within StreamingAssets/ since those get copied over already by Unity
-                        // Debug.Log($"Check isSubPath {origFilePath}, {Application.streamingAssetsPath}");
-                        if (Paths.IsSubPath(Application.streamingAssetsPath, origFilePath)) {
-                            // Debug.Log($"Skipping copy for: {path}");
-                            // Ensure filepath is relative (to StreamingAssets/)
-                            string newFile = Paths.GetRelativePath(origFilePath, Application.streamingAssetsPath);
-                            // Debug.Log($"Rewrite {path} to {newFile}");
-                            setter(newFile);
-                            continue;
-                        }
-
-                        // Use a hash of the abs path for the new file, so that files won't conflict
-                        // but also if a file is used multiple times it won't be duplicated in the build
-                        // also need to preserve the file extension since bizhawk uses that to determine the platform
-                        string ext = Path.GetExtension(path);
-                        string newFileName = origFilePath.GetHashCode().ToString("x") + ext;
-                        // Set the emulator to point to the new file [don't worry, this change doesn't persist in the scene, only affects the build]
-                        setter(newFileName);
-                        // And copy into the right location in the build (xxx_Data/StreamingAssets/<hash>)
-                        string newFilePath = Path.Combine(streamingAssetsBuildDir, newFileName);
-                        Debug.Log($"Copy from: {origFilePath} to {newFilePath}");
-                        if (isDir) {
-                            FileUtil.ReplaceDirectory(origFilePath, newFilePath);
-                        } else {
-                            FileUtil.ReplaceFile(origFilePath, newFilePath);
-                        }
-
-                        if (ext == ".cue") {
-                            // This is annoying, but some roms (e.g. for PSX) are .cue files, and those point to other file dependencies
-                            // so we need to copy those files over as well (without renaming)
-                            // [if there are other special cases we have to handle like this we should probably rethink this whole approach tbh - too much work]
-                            // [definitely at least need an alternative in case this has issues (one way would be to just use StreamingAssets)]
-                            
-                            // this also has a minor bug that if separate .bin files have the same name they'll get clobbered
-                            // probably has a ton of edge cases that will break too
-                            var cueSheet = new CueSheet(origFilePath);
-                            // Copy all the .bin files that are referenced
-                            string cueFileParentDir = Path.GetDirectoryName(origFilePath);
-                            foreach (Track t in cueSheet.Tracks) {
-                                string binFileName = t.DataFile.Filename;
-                                if (binFileName != Path.GetFileName(binFileName)) {
-                                    throw new ArgumentException("UnityHawk build script doesn't support .cue files that reference files in a different directory");
-                                }
-                                // bin file pathname is relative to the directory of the cue file
-                                string binPath = Path.Combine(cueFileParentDir, binFileName);
-                                newFilePath = Path.Combine(streamingAssetsBuildDir, binFileName); 
-                                Debug.Log($"Copy from: {binPath} to {newFilePath}");
-                                File.Copy(binPath, newFilePath, overwrite: true);
-                            }
-                        }
-                    }
+                    // Set the emulator to point to the new file [don't worry, this change doesn't persist in the scene, only affects the build]
+                    // basically have to redo this so that the emulator points to the correct files
+                    // maybe this can be completely removed (except for the firmware folder)
+                    setter(MoveToDirectory(isDir, getter(), streamingAssetsBuildDir));
                 }
             }
         }
+    }
+
+    /// moves an asset to a new directory (so that we can place things in the streaming assets folder)
+    static string MoveToDirectory(bool isDir, string path, string targetDir) {
+        if (!string.IsNullOrEmpty(path)) {
+            // Get the path that Emulator will actually look for the file
+            string origFilePath = Paths.GetAssetPath(path);
+
+            // ignore anything within StreamingAssets/ since those get copied over already by Unity
+            // Debug.Log($"Check isSubPath {origFilePath}, {Application.streamingAssetsPath}");
+            if (Paths.IsSubPath(Application.streamingAssetsPath, origFilePath)) {
+                // Debug.Log($"Skipping copy for: {path}");
+                // Ensure filepath is relative (to StreamingAssets/)
+                string newFile = Paths.GetRelativePath(origFilePath, Application.streamingAssetsPath);
+                return newFile;
+            }
+
+            string newFileName = Path.GetRelativePath(Application.dataPath, origFilePath);
+
+            // And copy into the right location in the build (xxx_Data/StreamingAssets/relative/path)
+            string newFilePath = Path.Combine(targetDir, newFileName);
+            Debug.Log($"Copy from: {origFilePath} to {newFilePath}");
+            Directory.CreateDirectory(Path.GetDirectoryName(newFilePath));
+            if (!File.Exists(newFilePath)) {
+                if (isDir) {
+                    FileUtil.ReplaceDirectory(origFilePath, newFilePath);
+                } else {
+                    FileUtil.ReplaceFile(origFilePath, newFilePath);
+                }
+            }
+
+            if (Path.GetExtension(path) == ".cue") {
+                // This is annoying, but some roms (e.g. for PSX) are .cue files, and those point to other file dependencies
+                // so we need to copy those files over as well (without renaming)
+                // [if there are other special cases we have to handle like this we should probably rethink this whole approach tbh - too much work]
+                // [definitely at least need an alternative in case this has issues (one way would be to just use StreamingAssets)]
+
+                // this also has a minor bug that if separate .bin files have the same name they'll get clobbered
+                // probably has a ton of edge cases that will break too
+                var cueSheet = new CueSheet(origFilePath);
+                // Copy all the .bin files that are referenced
+                string cueFileParentDir = Path.GetDirectoryName(origFilePath);
+                foreach (Track t in cueSheet.Tracks) {
+                    string binFileName = t.DataFile.Filename;
+                    if (binFileName != Path.GetFileName(binFileName)) {
+                        throw new ArgumentException("UnityHawk build script doesn't support .cue files that reference files in a different directory");
+                    }
+                    // bin file pathname is relative to the directory of the cue file
+                    string binPath = Path.Combine(cueFileParentDir, binFileName);
+                    var cueFilePath = Path.Combine(targetDir, binFileName);
+                    Debug.Log($"Copy from: {binPath} to {cueFilePath}");
+                    if (!File.Exists(cueFilePath)) {
+                        File.Copy(binPath, cueFilePath, overwrite: true);
+                    }
+                }
+            }
+
+            return newFileName;
+        }
+
+        return "";
     }
 
     public void OnPostprocessBuild(BuildReport report)

@@ -119,7 +119,7 @@ public partial class Emulator
     /// </summary>
     /// <param name="sample"></param>
     public void LoadState(Savestate sample) {
-        LoadState(Path.GetFullPath(sample.Path));
+        LoadState(BizhawkAssetDatabase.GetFullPath(sample));
     }
 
     /// <summary>

@@ -19,6 +19,9 @@
 # Ignore the dlls - these should be copied from BizHawk/output/dlls
 /Assets/Plugins/
 
+# Ignore any artifacts
+/[Aa]rtifacts/
+
 # This .gitignore file should be placed at the root of your Unity project directory
 #
 # Get latest from https://github.com/github/gitignore/blob/main/Unity.gitignore
