@@ -1,10 +1,14 @@
-﻿using UnityEngine;
+﻿using UnityEditor;
+using UnityEngine;
 
 namespace UnityHawk {
 
 public class BizhawkAsset : ScriptableObject {
-    // the path relative to the Assets/StreamingAssets folder for this asset
-    public string Path;
+    // the file location
+    public string Location;
+
+    void OnValidate() {
+    }
 }
 
 }
