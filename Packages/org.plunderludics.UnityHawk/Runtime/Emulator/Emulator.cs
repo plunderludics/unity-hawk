@@ -328,7 +328,7 @@ public partial class Emulator : MonoBehaviour
         var saveStatesOutputPath = SavestatesOutputPath;
         // use rom directory as default savestates output path
         if (string.IsNullOrEmpty(saveStatesOutputPath)) {
-            saveStatesOutputPath = new FileInfo(romPath).Directory.FullName;
+            saveStatesOutputPath = Path.GetDirectoryName(romPath);
         }
 
         args.Add($"--savestates={saveStatesOutputPath}");
