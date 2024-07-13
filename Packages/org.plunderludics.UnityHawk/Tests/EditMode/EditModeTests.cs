@@ -18,7 +18,6 @@ public class EditModeTests
             "Packages/org.plunderludics.UnityHawk/Tests/TestResources/eliteRomForTests.nes");
         var o = new GameObject();
         var e = o.AddComponent<Emulator>();
-        e.useManualPathnames = false;
         e.romFile = eliteRomFile;
         e.runInEditMode = false;
         e.Update();

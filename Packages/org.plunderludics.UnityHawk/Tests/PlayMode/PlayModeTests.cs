@@ -8,7 +8,7 @@ using UnityEditor;
 // to make sure all the files get copied in correctly etc. Not sure how to do it yet
 
 namespace UnityHawk.Tests.PlayMode {
-    
+
 public class PlayModeTests
 {
     // This is copy-pasted from EditModeTests.cs
@@ -21,13 +21,12 @@ public class PlayModeTests
             "Packages/org.plunderludics.UnityHawk/Tests/TestResources/eliteRomForTests.nes");
         var o = new GameObject();
         var e = o.AddComponent<Emulator>();
-        
-        e.useManualPathnames = false;
+
         e.romFile = eliteRomFile;
         e.runInEditMode = false;
-        
+
         for (var i = 0; i < 100; i++) yield return null;
-        
+
         Assert.That(e.IsRunning, Is.True);
     }
 }

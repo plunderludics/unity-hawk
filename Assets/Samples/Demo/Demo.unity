@@ -721,26 +721,15 @@ MonoBehaviour:
   saveStateFile: {fileID: 5022602860645237092, guid: d92495ae39503f74c8d6a22a9f53d88a, type: 3}
   configFile: {fileID: 0}
   luaScriptFile: {fileID: 5022602860645237092, guid: 434efe047eaa4ae4f95d2d4dce245843, type: 3}
-  firmwareDirectory: {fileID: 102900000, guid: d83ec102feb083d4daa7f66a07ca0855, type: 3}
   _isEnabled: 1
   forceCopyFilesToBuild: 0
   showBizhawkGui: 0
   runInEditMode: 0
   acceptBackgroundInput: 1
-  ramWatchFile: {fileID: 0}
-  savestatesOutputDirectory: {fileID: 0}
   _initialized: 0
   _status: 0
   _currentFrame: 2288
   _textureSize: {x: 256, y: 224}
-  useManualPathnames: 0
-  romFileName: C:\Users\gusta\Desktop\gamedev\plunderludics\unity-hawk\Assets\Samples\Demo\elite.nes
-  saveStateFileName: C:\Users\gusta\Desktop\gamedev\plunderludics\unity-hawk\Assets\Samples\Demo\elite-start.savestate
-  configFileName: 
-  luaScriptFileName: C:\Users\gusta\Desktop\gamedev\plunderludics\unity-hawk\Assets\Samples\Demo\RegisterMethodExample.lua
-  firmwareDirName: C:\Users\gusta\Desktop\gamedev\plunderludics\unity-hawk\Assets\Samples\Demo\Firmware
-  savestatesOutputDirName: 
-  ramWatchFileName: 
   suppressBizhawkPopups: 1
   writeBizhawkLogs: 1
   bizhawkLogLocation: BizHawkLogs\Emulator-26394.log

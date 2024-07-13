@@ -22,23 +22,6 @@ public partial class Emulator
         _registeredLuaCallbacks[methodName] = luaCallback;
     }
 
-    // For editor convenience: Set filename fields by reading a sample directory
-    public void SetFromSample(string samplePath) {
-        // Read the sample dir to get the necessary filenames (rom, config, etc)
-        Sample s = Sample.LoadFromDir(samplePath);
-        romFileName = s.RomPath;
-        configFileName = s.ConfigPath;
-        saveStateFileName = s.SaveStatePath;
-        var luaScripts = s.LuaScriptPaths.ToList();
-        if (luaScripts != null && luaScripts.Count > 0) {
-            luaScriptFileName = luaScripts[0];
-            if (luaScripts.Count > 1) {
-                Debug.LogWarning($"Currently only support one lua script, loading {luaScripts[0]}");
-                // because bizhawk only supports passing a single lua script from the command line
-            }
-        }
-    }
-
     ///// Bizhawk API methods
     ///// [should maybe move these into a Emulator.BizhawkApi subobject or similar]
     // For LoadState/SaveState/LoadRom, path should be relative to StreamingAssets (same as for rom/savestate/lua params in the inspector)
@@ -69,8 +52,9 @@ public partial class Emulator
     /// saves a state to a given path
     /// </summary>
     /// <param name="path"></param>
+    /// TODO: how can this return a savestate object?
     public void SaveState(string path) {
-        // path = Paths.GetAssetPath(path);
+        path = Paths.GetFullPath(path);
         if (!path.Contains(".savestate"))
         {
             path += ".savestate";
@@ -82,9 +66,7 @@ public partial class Emulator
     /// loads a state from a given path
     /// </summary>
     /// <param name="path"></param>
-    public void LoadState(string path) {
-        path = Paths.GetAssetPath(path);
-        saveStateFileName = path;
+    private void LoadState(string path) {
         if (_status == EmulatorStatus.Inactive) return;
         _apiCallBuffer.CallMethod("LoadState", path);
     }
@@ -94,7 +76,7 @@ public partial class Emulator
     /// </summary>
     /// <param name="sample"></param>
     public void LoadState(Savestate sample) {
-        LoadState(BizhawkAssetDatabase.GetFullPath(sample));
+        LoadState(Paths.GetAssetPath(sample));
     }
 
     /// <summary>
@@ -102,16 +84,15 @@ public partial class Emulator
     /// </summary>
     /// <param name="path"></param>
     public void ReloadState() {
-        LoadState(saveStateFileName);
+        LoadState(saveStateFile);
     }
 
     /// <summary>
     /// loads a rom from a given path
     /// </summary>
     /// <param name="path"></param>
-    public void LoadRom(string path) {
-        path = Paths.GetAssetPath(path);
-        romFileName = path;
+    private void LoadRom(string path) {
+        path = Paths.GetFullPath(path);
         if (_status == EmulatorStatus.Inactive) return;
 
         _apiCallBuffer.CallMethod("LoadRom", path);
@@ -120,12 +101,12 @@ public partial class Emulator
         _status = EmulatorStatus.Started; // Not ready until new texture buffer is set up
     }
 
-    public void LoadSample(string path)
-    {
-        Sample s = Sample.LoadFromDir(path);
-        LoadRom(s.RomPath);
-        LoadState(s.SaveStatePath);
-        // TODO: lua / config?
+    /// <summary>
+    /// loads a rom from a rom asset
+    /// </summary>
+    /// <param name="rom"></param>
+    public void LoadRom(Rom rom) {
+        LoadRom(Paths.GetAssetPath(rom));
     }
 
     public void FrameAdvance() {
