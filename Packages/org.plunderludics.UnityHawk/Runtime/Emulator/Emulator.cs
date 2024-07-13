@@ -174,9 +174,6 @@ public partial class Emulator : MonoBehaviour
 
     BizhawkArgs _currentBizhawkArgs; // remember the params corresponding to the currently running process
 
-    /// TODO: string-to-string only rn but some automatic de/serialization for different types would be nice
-    public delegate string LuaCallback(string arg);
-
     /// Dictionary of registered methods that can be called from bizhawk lua
     readonly Dictionary<string, LuaCallback> _registeredLuaCallbacks = new();
 
