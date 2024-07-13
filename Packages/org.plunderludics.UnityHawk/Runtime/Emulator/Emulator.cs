@@ -64,7 +64,7 @@ public partial class Emulator : MonoBehaviour
 
     [Header("paths")]
     [Tooltip("if left blank, defaults to initial romFile directory")]
-    public string SavestatesOutputPath;
+    public string savestatesOutputPath;
 
     [SerializeField, HideInInspector]
     bool _isEnabled = false; // hack to only show the forceCopyFilesToBuild field when component is inactive
@@ -302,7 +302,7 @@ public partial class Emulator : MonoBehaviour
         // Save savestates with extension .savestate instead of .State, this is because Unity treats .State as some other kind of asset
         args.Add($"--savestate-extension={_savestateExtension}");
 
-        var saveStatesOutputPath = SavestatesOutputPath;
+        var saveStatesOutputPath = savestatesOutputPath;
         // use rom directory as default savestates output path
         if (string.IsNullOrEmpty(saveStatesOutputPath)) {
             saveStatesOutputPath = Path.GetDirectoryName(romPath);
