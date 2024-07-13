@@ -411,6 +411,11 @@ public partial class Emulator : MonoBehaviour
 
         args.Add($"--savestates={savestatesOutputDirFullPath}");
 
+        // Save ram watch files to parent folder of rom
+        string ramWatchOutputDirFullPath = Path.GetDirectoryName(romPath);
+        args.Add($"--save-ram-watch={ramWatchOutputDirFullPath}");
+
+
         if (!showBizhawkGui) {
             args.Add("--headless");
             _emuhawk.StartInfo.CreateNoWindow = true;
