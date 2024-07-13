@@ -27,6 +27,7 @@ public class SharedTests
 
     private Savestate eliteSavestate2000;
     private Savestate eliteSavestate5000;
+    private LuaScript testCallbacksLua;
 
     protected Emulator e;
     
@@ -169,6 +170,27 @@ public class SharedTests
         yield return WaitForAWhile(e);
         AssertEmulatorIsRunning(e);
         Assert.That(e.Texture.width, Is.EqualTo(320));
+    }
+
+    private string _submittedResult;
+    [UnityTest]
+    public IEnumerator TestLuaCallbacks()
+    {
+        e.luaScriptFile = testCallbacksLua;
+        e.Reset();
+        e.RegisterLuaCallback("reverseString", (arg) => {
+            char[] cs = arg.ToCharArray();
+            Array.Reverse(cs);
+            return new string(cs);
+        });
+        e.RegisterLuaCallback("submitResult", (arg) => {
+            _submittedResult = arg;
+            return "";
+        });
+
+        yield return WaitForAWhile(e);
+        AssertEmulatorIsRunning(e);
+        Assert.That(_submittedResult, Is.EqualTo("tseT"));
     }
 
     
