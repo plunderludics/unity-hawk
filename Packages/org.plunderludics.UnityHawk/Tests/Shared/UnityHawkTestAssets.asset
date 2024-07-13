@@ -1,0 +1,45 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: bbb281ee3bf0b054c82ac2347e9e782c, type: 3}
+  m_Name: UnityHawkTestAssets
+  m_EditorClassIdentifier: 
+  m_GroupName: UnityHawkTestAssets
+  m_Data:
+    m_SerializedData: []
+  m_GUID: 43df071a488b2744eaae296082a153dc
+  m_SerializeEntries:
+  - m_GUID: 3ffde77fbdc869d40a69c60e45600bdc
+    m_Address: Packages/org.plunderludics.unityhawk/Tests/Shared/eliteRomForTests.nes
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: d722373b8935ef446921e7884bb7eac5
+    m_Address: Packages/org.plunderludics.unityhawk/Tests/Shared/eliteSavestate2000.savestate
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 8e3d291e8dd01304d874b57ee32dabea
+    m_Address: Packages/org.plunderludics.unityhawk/Tests/Shared/eliteSavestate5000.savestate
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: a7151e2017a607a4b889cebee160a462
+    m_Address: Packages/org.plunderludics.unityhawk/Tests/Shared/swoopRomForTests.n64
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  m_ReadOnly: 0
+  m_Settings: {fileID: 11400000, guid: 6280a141d21fe114f83afa4862797c57, type: 2}
+  m_SchemaSet:
+    m_Schemas:
+    - {fileID: 11400000, guid: a8db3eee9e41c0a41a1f3843eb0dbe20, type: 2}
+    - {fileID: 11400000, guid: fdf6e3f6ee73dde4dbaa884bea2b35b6, type: 2}

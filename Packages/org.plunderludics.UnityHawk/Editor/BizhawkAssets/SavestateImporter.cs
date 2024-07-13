@@ -1,3 +1,4 @@
+using System.IO;
 using System.IO.Compression;
 using BizHawk.Emulation.Common;
 using UnityEditor.AssetImporters;
@@ -24,7 +25,7 @@ public class SavestateImporter : BizHawkAssetImporter<Savestate> {
         }
 
         var savestate = ScriptableObject.CreateInstance<Savestate>();
-        savestate.Path = GetPath(ctx);
+        savestate.Location = Path.GetRelativePath(Application.dataPath, ctx.assetPath);
 
         savestate.RomInfo.Name = gameInfo.Name;
         savestate.RomInfo.Hash = gameInfo.Hash;

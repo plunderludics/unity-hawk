@@ -39,7 +39,7 @@ public class SharedAudioBuffer : ISharedBuffer {
     public void ReceiveBizhawkSamples(byte[] bytes) {
         // Bizhawk calls this method each frame to send samples to unity
         if (bytes == null || bytes.Length == 0) {
-            Debug.LogWarning("BizHawk sent empty samples array");
+            // Debug.LogWarning("BizHawk sent empty samples array");
             return;
         }
         // Convert bytes to shorts
