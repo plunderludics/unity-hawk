@@ -4,6 +4,7 @@ using UnityEngine;
 using UnityEngine.TestTools;
 using UnityEditor;
 using System;
+using UnityEngine.AddressableAssets;
 
 
 // (A UnityTest behaves like a coroutine in Play Mode. In Edit Mode you can use
@@ -23,6 +24,7 @@ public class SharedTests
 {
     private Rom eliteRom;
     private Rom swoopRom;
+
     private Savestate eliteSavestate2000;
     private Savestate eliteSavestate5000;
 
@@ -36,11 +38,11 @@ public class SharedTests
     {
         // This breaks when trying to test in standalone player because AssetDatabase is unavailable
         // Probably have to use Addressables instead
-        eliteRom = AssetDatabase.LoadAssetAtPath<Rom>("Packages/org.plunderludics.UnityHawk/Tests/Shared/eliteRomForTests.nes");
-        swoopRom = AssetDatabase.LoadAssetAtPath<Rom>("Packages/org.plunderludics.UnityHawk/Tests/Shared/swoopRomForTests.n64");
+        swoopRom = Addressables.LoadAssetAsync<Rom>("Packages/org.plunderludics.UnityHawk/Tests/Shared/swoopRomForTests.n64").WaitForCompletion();
+        eliteRom = Addressables.LoadAssetAsync<Rom>("Packages/org.plunderludics.unityhawk/Tests/Shared/eliteRomForTests.nes").WaitForCompletion();
 
-        eliteSavestate2000 = AssetDatabase.LoadAssetAtPath<Savestate>("Packages/org.plunderludics.UnityHawk/Tests/Shared/eliteSavestate2000.savestate");
-        eliteSavestate5000 = AssetDatabase.LoadAssetAtPath<Savestate>("Packages/org.plunderludics.UnityHawk/Tests/Shared/eliteSavestate5000.savestate");
+        eliteSavestate2000 = Addressables.LoadAssetAsync<Savestate>("Packages/org.plunderludics.UnityHawk/Tests/Shared/eliteSavestate2000.savestate").WaitForCompletion();
+        eliteSavestate5000 = Addressables.LoadAssetAsync<Savestate>("Packages/org.plunderludics.UnityHawk/Tests/Shared/eliteSavestate5000.savestate").WaitForCompletion();
 
         Assert.That(eliteRom, Is.Not.Null);
         Assert.That(eliteSavestate2000, Is.Not.Null);
