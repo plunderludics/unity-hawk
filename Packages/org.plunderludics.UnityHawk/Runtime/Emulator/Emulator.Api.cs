@@ -11,36 +11,47 @@ namespace UnityHawk {
 
 public partial class Emulator
 {
-    /// Register a method that can be called via `unityhawk.callmethod('MethodName')` in BizHawk lua
-    [Obsolete("use RegisterLuaCallback instead")]
-    public void RegisterMethod(string methodName, LuaCallback luaCallback) {
-        RegisterLuaCallback(methodName, luaCallback);
+    public RenderTexture Texture => renderTexture;
+    public bool IsRunning => Status == EmulatorStatus.Running; // is the emuhawk.exe process running? (best guess, might be wrong)
+
+    public enum EmulatorStatus {
+        Inactive,
+        Started, // Underlying bizhawk has been started, but not rendering yet
+        Running  // Bizhawk is running and sending textures [technically gets set when shared texture channel is open]
     }
+    public EmulatorStatus Status {
+        get => _status;
+        private set {
+            if (_status != value) {
+                var raise = value switch {
+                    EmulatorStatus.Started => OnStarted,
+                    EmulatorStatus.Running => OnRunning,
+                    _ => null,
+                };
+
+                raise?.Invoke();
+            }
+            _status = value;
+        }
+    }
+
+    public int CurrentFrame => _currentFrame;
+
+    /// TODO: string-to-string only rn but some automatic de/serialization for different types would be nice
+    public delegate string LuaCallback(string arg);
 
     /// Register a callback that can be called via `unityhawk.callmethod('MethodName')` in BizHawk lua
     public void RegisterLuaCallback(string methodName, LuaCallback luaCallback) {
         _registeredLuaCallbacks[methodName] = luaCallback;
     }
 
-    // For editor convenience: Set filename fields by reading a sample directory
-    public void SetFromSample(string samplePath) {
-        // Read the sample dir to get the necessary filenames (rom, config, etc)
-        Sample s = Sample.LoadFromDir(samplePath);
-        romFileName = s.RomPath;
-        configFileName = s.ConfigPath;
-        saveStateFileName = s.SaveStatePath;
-        var luaScripts = s.LuaScriptPaths.ToList();
-        if (luaScripts != null && luaScripts.Count > 0) {
-            luaScriptFileName = luaScripts[0];
-            if (luaScripts.Count > 1) {
-                Debug.LogWarning($"Currently only support one lua script, loading {luaScripts[0]}");
-                // because bizhawk only supports passing a single lua script from the command line
-            }
-        }
+    /// Register a method that can be called via `unityhawk.callmethod('MethodName')` in BizHawk lua
+    [Obsolete("use RegisterLuaCallback instead")]
+    public void RegisterMethod(string methodName, LuaCallback luaCallback) {
+        RegisterLuaCallback(methodName, luaCallback);
     }
 
     ///// Bizhawk API methods
-    ///// [should maybe move these into a Emulator.BizhawkApi subobject or similar]
     // For LoadState/SaveState/LoadRom, path should be relative to StreamingAssets (same as for rom/savestate/lua params in the inspector)
     // can also pass absolute path (but this will most likely break in build!)
 
@@ -69,8 +80,9 @@ public partial class Emulator
     /// saves a state to a given path
     /// </summary>
     /// <param name="path"></param>
+    /// TODO: how can this return a savestate object?
     public void SaveState(string path) {
-        // path = Paths.GetAssetPath(path);
+        path = Paths.GetFullPath(path);
         if (!path.Contains(".savestate"))
         {
             path += ".savestate";
@@ -83,8 +95,9 @@ public partial class Emulator
     /// </summary>
     /// <param name="path"></param>
     public void LoadState(string path) {
-        path = Paths.GetAssetPath(path);
-        saveStateFileName = path;
+        // TODO: set emulator savestateFile?
+        path = Paths.GetFullPath(path);
+
         if (_status == EmulatorStatus.Inactive) return;
         _apiCallBuffer.CallMethod("LoadState", path);
     }
@@ -94,7 +107,7 @@ public partial class Emulator
     /// </summary>
     /// <param name="sample"></param>
     public void LoadState(Savestate sample) {
-        LoadState(BizhawkAssetDatabase.GetFullPath(sample));
+        LoadState(Paths.GetAssetPath(sample));
     }
 
     /// <summary>
@@ -102,7 +115,7 @@ public partial class Emulator
     /// </summary>
     /// <param name="path"></param>
     public void ReloadState() {
-        LoadState(saveStateFileName);
+        LoadState(saveStateFile);
     }
 
     /// <summary>
@@ -110,24 +123,28 @@ public partial class Emulator
     /// </summary>
     /// <param name="path"></param>
     public void LoadRom(string path) {
-        path = Paths.GetAssetPath(path);
-        romFileName = path;
+        path = Paths.GetFullPath(path);
+
         if (_status == EmulatorStatus.Inactive) return;
 
+        // TODO: set emulator romFile?
         _apiCallBuffer.CallMethod("LoadRom", path);
         // Need to update texture buffer size in case platform has changed:
         _sharedTextureBuffer.UpdateSize();
         _status = EmulatorStatus.Started; // Not ready until new texture buffer is set up
     }
 
-    public void LoadSample(string path)
-    {
-        Sample s = Sample.LoadFromDir(path);
-        LoadRom(s.RomPath);
-        LoadState(s.SaveStatePath);
-        // TODO: lua / config?
+    /// <summary>
+    /// loads a rom from a Rom asset
+    /// </summary>
+    /// <param name="rom"></param>
+    public void LoadRom(Rom rom) {
+        LoadRom(Paths.GetAssetPath(rom));
     }
 
+    /// <summary>
+    /// advances a frame on the emulator
+    /// </summary>
     public void FrameAdvance() {
         _apiCallBuffer.CallMethod("FrameAdvance", null);
     }
