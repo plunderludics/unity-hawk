@@ -59,7 +59,7 @@ public static class Paths
             return path;
         }
 
-        return Path.Combine(_bizHawkAssetsDir, path); // Load relative to StreamingAssets/
+        return Path.Combine(_bizHawkAssetsDir, path);
     }
 
     // this uses the fact that Paths.cs treats absolute paths differently than relative
@@ -71,7 +71,7 @@ public static class Paths
         return Path.GetFullPath(Path.Combine(Application.dataPath, "..", AssetDatabase.GetAssetPath(asset)));
         #endif
 
-        return Path.Combine(BizHawkAssetsDirForBuild, asset.Location); // Load relative to build location
+        return Path.Combine(BizHawkAssetsDirForBuild, asset.Location);
     }
 }
 

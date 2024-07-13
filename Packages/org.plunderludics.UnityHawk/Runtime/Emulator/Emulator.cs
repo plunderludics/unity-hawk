@@ -62,6 +62,10 @@ public partial class Emulator : MonoBehaviour
     public LuaScript luaScriptFile;
     public RamWatch ramWatchFile;
 
+    [Header("paths")]
+    [Tooltip("if left blank, defaults to initial romFile directory")]
+    public string SavestatesOutputPath;
+
     [SerializeField, HideInInspector]
     bool _isEnabled = false; // hack to only show the forceCopyFilesToBuild field when component is inactive
 
@@ -293,7 +297,8 @@ public partial class Emulator : MonoBehaviour
         }
 
         // add rom path
-        args.Add(Paths.GetAssetPath(romFile));
+        var romPath = Paths.GetAssetPath(romFile);
+        args.Add(romPath);
 
         // add config path
         var configPath = configFile
@@ -320,7 +325,13 @@ public partial class Emulator : MonoBehaviour
         // Save savestates with extension .savestate instead of .State, this is because Unity treats .State as some other kind of asset
         args.Add($"--savestate-extension={_savestateExtension}");
 
-        args.Add($"--savestates={Paths.SavestatesOutputPath}");
+        var saveStatesOutputPath = SavestatesOutputPath;
+        // use rom directory as default savestates output path
+        if (string.IsNullOrEmpty(saveStatesOutputPath)) {
+            saveStatesOutputPath = new FileInfo(romPath).Directory.FullName;
+        }
+
+        args.Add($"--savestates={saveStatesOutputPath}");
 
         // add firmware
         args.Add($"--firmware={Paths.FirmwarePath}");
