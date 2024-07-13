@@ -8,6 +8,11 @@ using System.Collections.Concurrent;
 namespace UnityHawk {
 
 public partial class Emulator {
+    [Serializable]
+    partial class IsLogging {
+        public bool Audio = true;
+    }
+
     [Foldout("Debug")]
     [ShowIf("captureEmulatorAudio")]
     [Tooltip("Higher value means more audio latency. Lower value may cause crackles and pops")]
@@ -34,16 +39,17 @@ public partial class Emulator {
     [Foldout("Debug")]
     [ShowIf("captureEmulatorAudio")]
     public float bufferPressure = 0.01f;
-    
+
     [Foldout("Debug")]
     [ShowIf("captureEmulatorAudio")]
     public bool forceRatio;
-    
+
     [Foldout("Debug")]
     [ShowIf(EConditionOperator.And, "captureEmulatorAudio", "forceRatio")]
     public float forcedRatio = 1f;
 
-    
+    [SerializeField]
+    IsLogging Logging;
 
     // Track how many times we skip audio, log a warning if it's too much
     float _audioSkipCounter;
@@ -68,7 +74,7 @@ public partial class Emulator {
     void InitAudio() {
         // Init local audio buffer
         _rawBuffer = new();
-        
+
         _audioSkipCounter = 0f;
         samplesProvidedThisFrame = 0;
 
@@ -152,7 +158,9 @@ public partial class Emulator {
             _rawBuffer.TryDequeue(out x);
             rawSamples[i] = x;
         }
-        Debug.Log($"Resampling from {stereoSamplesToConsume} to {stereoSamplesNeeded} ({ratio})");
+        if (Logging.Audio) {
+            Debug.Log($"Resampling from {stereoSamplesToConsume} to {stereoSamplesNeeded} ({ratio})");
+        }
         short[] resampled = Resample(rawSamples, stereoSamplesToConsume, stereoSamplesNeeded);
 
         // copy from the local running audio buffer into unity's buffer, convert short to float

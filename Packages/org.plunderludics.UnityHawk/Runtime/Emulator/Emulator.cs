@@ -786,16 +786,13 @@ public partial class Emulator : MonoBehaviour
 #if UNITY_EDITOR
         // Set filename params based on asset locations
         // [using absolute path is not really ideal here but ok for now]
-        static string GetDefaultAssetPathName(DefaultAsset f) =>
+        static string GetDefaultAssetPathName(UnityEngine.Object f) =>
             f ? Path.GetFullPath(AssetDatabase.GetAssetPath(f)) : "";
 
-        static string GetBizhawkAssetPathName(BizhawkAsset f) =>
-            f ? Path.GetFullPath(f.Path) : "";
-
-        romFileName = GetBizhawkAssetPathName(romFile);
-        saveStateFileName = GetBizhawkAssetPathName(saveStateFile);
-        configFileName = GetBizhawkAssetPathName(configFile);
-        luaScriptFileName = GetBizhawkAssetPathName(luaScriptFile);
+        romFileName = GetDefaultAssetPathName(romFile);
+        saveStateFileName = GetDefaultAssetPathName(saveStateFile);
+        configFileName = GetDefaultAssetPathName(configFile);
+        luaScriptFileName = GetDefaultAssetPathName(luaScriptFile);
 
         firmwareDirName = GetDefaultAssetPathName(firmwareDirectory);
         savestatesOutputDirName = GetDefaultAssetPathName(savestatesOutputDirectory);
