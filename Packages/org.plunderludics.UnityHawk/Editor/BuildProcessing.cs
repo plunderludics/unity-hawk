@@ -76,7 +76,7 @@ public class BuildProcessing : IPostprocessBuildWithReport, IPreprocessBuildWith
     }
 
     /// moves an asset to a new directory
-    static void MoveToDirectory(bool isDir, BizhawkAsset asset, string targetDir) {
+    static void MoveToDirectory(bool isDir, BizhawkAsset asset, string baseTargetDir) {
         if (asset == null) {
             return;
         }
@@ -87,9 +87,10 @@ public class BuildProcessing : IPostprocessBuildWithReport, IPreprocessBuildWith
         var newFileName = asset.Location;
 
         // And copy into the right location in the build (xxx_Data/BizhawkAssets/relative/path)
-        var newFilePath = Path.Combine(targetDir, newFileName);
+        var newFilePath = Path.Combine(baseTargetDir, newFileName);
+        var targetDir = Path.GetDirectoryName(newFilePath);
         Debug.Log($"Copy from: {origFilePath} to {newFilePath}");
-        Directory.CreateDirectory(Path.GetDirectoryName(newFilePath));
+        Directory.CreateDirectory(targetDir);
         if (!File.Exists(newFilePath)) {
             if (isDir) {
                 FileUtil.ReplaceDirectory(origFilePath, newFilePath);
@@ -98,6 +99,7 @@ public class BuildProcessing : IPostprocessBuildWithReport, IPreprocessBuildWith
             }
         }
 
+        // TODO: .ccd files
         if (Path.GetExtension(origFilePath) == ".cue") {
             // This is annoying, but some roms (e.g. for PSX) are .cue files, and those point to other file dependencies
             // so we need to copy those files over as well (without renaming)
@@ -114,6 +116,7 @@ public class BuildProcessing : IPostprocessBuildWithReport, IPreprocessBuildWith
                 if (binFileName != Path.GetFileName(binFileName)) {
                     throw new ArgumentException("UnityHawk build script doesn't support .cue files that reference files in a different directory");
                 }
+
                 // bin file pathname is relative to the directory of the cue file
                 var binPath = Path.Combine(cueFileParentDir, binFileName);
                 var cueFilePath = Path.Combine(targetDir, binFileName);
