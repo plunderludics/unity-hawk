@@ -12,9 +12,6 @@ namespace UnityHawk.Tests {
 // For any extra tests we need to run in edit mode but not play mode
 public class EditModeTests: SharedTests
 {
-    // public EditModeTests() {
-    //     Debug.Log("Why is defulat constructor getting called?");
-    // }
     public EditModeTests(bool passInputFromUnity, bool captureEmulatorAudio, bool showBizhawkGui)
         : base(passInputFromUnity, captureEmulatorAudio, showBizhawkGui)
     {

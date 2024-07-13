@@ -4,9 +4,7 @@
     "references": [
         "UnityEngine.TestRunner",
         "UnityEditor.TestRunner",
-        "UnityHawk",
-        "Unity.Addressables",
-        "Unity.ResourceManager"
+        "UnityHawk"
     ],
     "includePlatforms": [],
     "excludePlatforms": [],
