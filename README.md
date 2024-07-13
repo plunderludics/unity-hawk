@@ -6,7 +6,7 @@ UnityHawk lets you run emulated games within a Unity project, using [BizHawk](ht
 
 Made as a tool for the development of [plunderludics](https://plunderludics.github.io/).
 
-Only works on Windows currently.
+Only works on Windows currently. Works best with Unity 2022.2 or later.
 
 Under development, may have bugs; issues, feature requests or contributions are welcome.
 
