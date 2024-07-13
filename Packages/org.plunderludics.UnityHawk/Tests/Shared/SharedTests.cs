@@ -21,6 +21,8 @@ namespace UnityHawk.Tests {
 [TestFixture(false, false, true)]
 public class SharedTests
 {
+    private const float WhileDuration = 5f;
+    private const float MomentDuration = 0.5f;
     private Rom eliteRom;
     private Rom swoopRom;
     private Savestate eliteSavestate2000;
@@ -43,9 +45,13 @@ public class SharedTests
         eliteSavestate2000 = AssetDatabase.LoadAssetAtPath<Savestate>("Packages/org.plunderludics.UnityHawk/Tests/Shared/eliteSavestate2000.savestate");
         eliteSavestate5000 = AssetDatabase.LoadAssetAtPath<Savestate>("Packages/org.plunderludics.UnityHawk/Tests/Shared/eliteSavestate5000.savestate");
 
+        testCallbacksLua = AssetDatabase.LoadAssetAtPath<LuaScript>("Packages/org.plunderludics.UnityHawk/Tests/Shared/testCallbacks.lua");
+
         Assert.That(eliteRom, Is.Not.Null);
+        Assert.That(swoopRom, Is.Not.Null);
         Assert.That(eliteSavestate2000, Is.Not.Null);
         Assert.That(eliteSavestate5000, Is.Not.Null);
+        Assert.That(testCallbacksLua, Is.Not.Null);
 
         _passInputFromUnity = passInputFromUnity;
         _captureEmulatorAudio = captureEmulatorAudio;
@@ -115,25 +121,25 @@ public class SharedTests
         AssertEmulatorIsRunning(e);
 
         e.Pause();
-        yield return WaitForAWhile(e);
+        yield return WaitForAMoment(e);
         int frame = e.CurrentFrame;
         Assert.That(frame, Is.GreaterThan(1));
         
-        yield return WaitForAWhile(e);
+        yield return WaitForAMoment(e);
         Assert.That(e.CurrentFrame, Is.EqualTo(frame));
 
         e.FrameAdvance();
-        yield return WaitForAWhile(e);
+        yield return WaitForAMoment(e);
         Assert.That(e.CurrentFrame, Is.EqualTo(frame+1));
         
         e.FrameAdvance();
-        yield return WaitForAWhile(e);
+        yield return WaitForAMoment(e);
         Assert.That(e.CurrentFrame, Is.EqualTo(frame+2));
 
         for (int i = 0; i < 100; i++) {
             e.FrameAdvance();
         }
-        yield return WaitForAWhile(e);
+        yield return WaitForAMoment(e);
         Assert.That(e.CurrentFrame, Is.EqualTo(frame+102));
     }
 
@@ -177,11 +183,13 @@ public class SharedTests
         e.luaScriptFile = testCallbacksLua;
         e.Reset();
         e.RegisterLuaCallback("reverseString", (arg) => {
+            Debug.Log("reverseString");
             char[] cs = arg.ToCharArray();
             Array.Reverse(cs);
             return new string(cs);
         });
         e.RegisterLuaCallback("submitResult", (arg) => {
+            Debug.Log("submitResult");
             _submittedResult = arg;
             return "";
         });
@@ -200,7 +208,7 @@ public class SharedTests
         Assert.That(e.Texture, Is.Not.Null);
     }
 
-    public static IEnumerator WaitForAWhile(Emulator emulator, float duration = 3f, Action action = null) {
+    public static IEnumerator WaitForDuration(Emulator emulator, float duration, Action action = null) {
         float beginTime = Time.realtimeSinceStartup;
         while (Time.realtimeSinceStartup - beginTime < duration) {
             System.Threading.Thread.Sleep(10);
@@ -210,6 +218,13 @@ public class SharedTests
             action?.Invoke();
             yield return null;
         }
+    }
+
+    public static IEnumerator WaitForAMoment(Emulator emulator, Action action = null) {
+        yield return WaitForDuration(emulator, MomentDuration, action);
+    }
+    public static IEnumerator WaitForAWhile(Emulator emulator, Action action = null) {
+        yield return WaitForDuration(emulator, WhileDuration, action);
     }
 }
 
