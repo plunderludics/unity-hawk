@@ -721,6 +721,8 @@ MonoBehaviour:
   saveStateFile: {fileID: 5022602860645237092, guid: d92495ae39503f74c8d6a22a9f53d88a, type: 3}
   configFile: {fileID: 0}
   luaScriptFile: {fileID: 5022602860645237092, guid: 434efe047eaa4ae4f95d2d4dce245843, type: 3}
+  ramWatchFile: {fileID: 0}
+  SavestatesOutputPath: 
   _isEnabled: 1
   forceCopyFilesToBuild: 0
   showBizhawkGui: 0

@@ -59,8 +59,8 @@ public class BuildProcessing : IPostprocessBuildWithReport, IPreprocessBuildWith
     private static void ProcessScene(Scene scene, string exePath) {
         // Debug.Log("ProcessScene");
         // Need to create the build dir in advance so we can copy files in there before the build actually happens
-        var streamingAssetsBuildDir = Path.Combine(GetBuildDataDir(exePath), "StreamingAssets");
-        Directory.CreateDirectory (streamingAssetsBuildDir);
+        var bizhawkAssetsPath = Path.Combine(GetBuildDataDir(exePath), Paths.BizHawkAssetsDirName);
+        Directory.CreateDirectory (bizhawkAssetsPath);
 
         // look through all Emulator components in the scene and
         // locate (external) file dependencies, copy them into the build, and (temporarily) update the path references
@@ -68,27 +68,14 @@ public class BuildProcessing : IPostprocessBuildWithReport, IPreprocessBuildWith
         var dependencies = EditorUtility.CollectDependencies(root);
         var bizhawkDependencies = dependencies.OfType<BizhawkAsset>();
 
-        Debug.Log($"[unity-hawk] build processing, moving dependencies to StreamingAssets: \n {string.Join("\n", bizhawkDependencies)}");
+        Debug.Log($"[unity-hawk] build processing, moving dependencies to {bizhawkAssetsPath}: \n {string.Join("\n", bizhawkDependencies)}");
 
         foreach (var dependency in bizhawkDependencies) {
-            MoveToDirectory(false, dependency, Paths.BizHawkAssetsDirForBuild);
-        }
-
-        foreach (var gameObject in root) {
-            // RecurseGameObjects(gameObject);
-            // comb through the entire scene
-            var emulators = gameObject.GetComponentsInChildren<Emulator>(includeInactive: true);
-            // TODO: with the BizhawkAssetDatabase, all the emulator pathnames can go away
-            foreach (Emulator emulator in emulators) {
-                if ((!emulator.enabled || !emulator.gameObject.activeInHierarchy) && !emulator.forceCopyFilesToBuild) {
-                    // If emulator component is not active, ignore it unless the forceCopyFilesToBuild flag is set
-                    continue;
-                }
-            }
+            MoveToDirectory(false, dependency, bizhawkAssetsPath);
         }
     }
 
-    /// moves an asset to a new directory (so that we can place things in the streaming assets folder)
+    /// moves an asset to a new directory
     static void MoveToDirectory(bool isDir, BizhawkAsset asset, string targetDir) {
         if (asset == null) {
             return;
@@ -99,7 +86,7 @@ public class BuildProcessing : IPostprocessBuildWithReport, IPreprocessBuildWith
 
         var newFileName = asset.Location;
 
-        // And copy into the right location in the build (xxx_Data/StreamingAssets/relative/path)
+        // And copy into the right location in the build (xxx_Data/BizhawkAssets/relative/path)
         var newFilePath = Path.Combine(targetDir, newFileName);
         Debug.Log($"Copy from: {origFilePath} to {newFilePath}");
         Directory.CreateDirectory(Path.GetDirectoryName(newFilePath));

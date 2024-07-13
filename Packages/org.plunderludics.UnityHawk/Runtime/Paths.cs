@@ -37,15 +37,15 @@ public static class Paths
     public static readonly string dllDir = Path.Combine(BizHawkDir, "dll");
 
     // -- assets --
+    public const string BizHawkAssetsDirName = "BizhawkAssets";
     private static readonly string _bizhawkAssetsDirForEditor = Application.dataPath;
-    public static readonly string BizHawkAssetsDirForBuild = Path.Combine(Application.dataPath, "BizhawkAssets");
+    public static readonly string BizHawkAssetsDirForBuild = Path.Combine(Application.dataPath, BizHawkAssetsDirName);
 
     static string _bizHawkAssetsDir =>
 #if UNITY_EDITOR
         _bizhawkAssetsDirForEditor;
-#else
-        BizHawkAssetsDirForBuild
-        // Path.Combine(Application.dataPath, "BizhawkAssets");
+    #else
+        BizHawkAssetsDirForBuild;
 #endif
 
     public static readonly string FirmwarePath = Path.Combine(Application.streamingAssetsPath, "Firmware");
