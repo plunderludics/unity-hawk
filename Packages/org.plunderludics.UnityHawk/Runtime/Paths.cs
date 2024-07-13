@@ -5,6 +5,7 @@ using UnityEngine;
 
 namespace UnityHawk {
 
+// TODO: make a bunch of these paths configurable in some config file
 public static class Paths
 {
     // -- exe --
@@ -37,16 +38,17 @@ public static class Paths
 
     // -- assets --
     private static readonly string _bizhawkAssetsDirForEditor = Application.dataPath;
-    public static readonly string BizHawkAssetsDirForBuild = Application.streamingAssetsPath;
+    public static readonly string BizHawkAssetsDirForBuild = Path.Combine(Application.dataPath, "BizhawkAssets");
 
     static string _bizHawkAssetsDir =>
 #if UNITY_EDITOR
         _bizhawkAssetsDirForEditor;
 #else
-        Application.streamingAssetsPath;
+        BizHawkAssetsDirForBuild
+        // Path.Combine(Application.dataPath, "BizhawkAssets");
 #endif
 
-    public static readonly string FirmwarePath = Path.Combine(_bizHawkAssetsDir, "StreamingAssets/Firmware");
+    public static readonly string FirmwarePath = Path.Combine(Application.streamingAssetsPath, "Firmware");
     public static readonly string RamWatchPath = _bizHawkAssetsDir;
     public static readonly object SavestatesOutputPath = _bizHawkAssetsDir;
 
@@ -69,7 +71,7 @@ public static class Paths
         return Path.GetFullPath(Path.Combine(Application.dataPath, "..", AssetDatabase.GetAssetPath(asset)));
         #endif
 
-        return Path.Combine(BizHawkAssetsDirForBuild, asset.Location); // Load relative to StreamingAssets
+        return Path.Combine(BizHawkAssetsDirForBuild, asset.Location); // Load relative to build location
     }
 }
 

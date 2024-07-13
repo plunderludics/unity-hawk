@@ -66,7 +66,10 @@ public partial class Emulator
     /// loads a state from a given path
     /// </summary>
     /// <param name="path"></param>
-    private void LoadState(string path) {
+    public void LoadState(string path) {
+        // TODO: set emulator savestateFile?
+        path = Paths.GetFullPath(path);
+
         if (_status == EmulatorStatus.Inactive) return;
         _apiCallBuffer.CallMethod("LoadState", path);
     }
@@ -91,10 +94,12 @@ public partial class Emulator
     /// loads a rom from a given path
     /// </summary>
     /// <param name="path"></param>
-    private void LoadRom(string path) {
+    public void LoadRom(string path) {
         path = Paths.GetFullPath(path);
+
         if (_status == EmulatorStatus.Inactive) return;
 
+        // TODO: set emulator romFile?
         _apiCallBuffer.CallMethod("LoadRom", path);
         // Need to update texture buffer size in case platform has changed:
         _sharedTextureBuffer.UpdateSize();
@@ -109,6 +114,9 @@ public partial class Emulator
         LoadRom(Paths.GetAssetPath(rom));
     }
 
+    /// <summary>
+    /// advances a frame on the emulator
+    /// </summary>
     public void FrameAdvance() {
         _apiCallBuffer.CallMethod("FrameAdvance", null);
     }
