@@ -62,10 +62,6 @@ public partial class Emulator : MonoBehaviour
     public LuaScript luaScriptFile;
     public RamWatch ramWatchFile;
 
-    [Header("paths")]
-    [Tooltip("if left blank, defaults to initial romFile directory")]
-    public string savestatesOutputPath;
-
     [SerializeField, HideInInspector]
     bool _isEnabled = false; // hack to only show the forceCopyFilesToBuild field when component is inactive
 
@@ -109,6 +105,10 @@ public partial class Emulator : MonoBehaviour
     [ShowIf("writeBizhawkLogs")]
     [Foldout("Debug")]
     [ReadOnly, SerializeField] string bizhawkLogLocation;
+    
+    [Foldout("Debug")]
+    [Tooltip("if left blank, defaults to initial romFile directory")]
+    public string savestatesOutputPath;
 
     private static string bizhawkLogDirectory = "BizHawkLogs";
     private TextureFormat textureFormat = TextureFormat.BGRA32;
