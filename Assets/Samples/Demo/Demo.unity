@@ -700,16 +700,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 1e98f0c32c4b9ba42a802fccb13ff791, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  audioBufferSurplus: 4410
-  _avgSamplesProvided: 0
-  rawBufferCount: 0
-  movingAverageN: 5
-  bufferPressure: 0.01
-  forceRatio: 0
-  forcedRatio: 1
-  Logging:
-    Audio: 0
-  resampleRatio: 1
   useAttachedRenderer: 1
   targetRenderer: {fileID: 734294839}
   customRenderTexture: 0
@@ -726,6 +716,7 @@ MonoBehaviour:
   forceCopyFilesToBuild: 0
   showBizhawkGui: 0
   runInEditMode: 0
+  isMuted: 0
   acceptBackgroundInput: 1
   _initialized: 0
   _status: 0

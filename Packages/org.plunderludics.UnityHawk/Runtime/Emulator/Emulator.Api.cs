@@ -6,11 +6,35 @@ using UnityEngine;
 using Plunderludics;
 using System.IO;
 using System.Linq;
+using NaughtyAttributes;
 
 namespace UnityHawk {
 
 public partial class Emulator
 {
+	[Tooltip("the the volume of the emulator, 0-100")]
+	[OnValueChanged(nameof(SetVolume))]
+	[Range(0, 100)]
+	[SerializeField] int volume = 100;
+
+	/// the volume of the emulator, 0-100
+	public int Volume
+	{
+		get => volume;
+		set => SetVolume(value);
+	}
+
+	[Tooltip("if the emulator is muted")]
+	[OnValueChanged(nameof(SetIsMuted))]
+	[SerializeField] bool isMuted;
+
+	/// if the emulator is muted
+	public bool IsMuted
+	{
+		get => isMuted;
+		set => SetIsMuted(value);
+	}
+
     public RenderTexture Texture => renderTexture;
     public bool IsRunning => Status == EmulatorStatus.Running; // is the emuhawk.exe process running? (best guess, might be wrong)
 
@@ -19,6 +43,7 @@ public partial class Emulator
         Started, // Underlying bizhawk has been started, but not rendering yet
         Running  // Bizhawk is running and sending textures [technically gets set when shared texture channel is open]
     }
+
     public EmulatorStatus Status {
         get => _status;
         private set {
@@ -70,10 +95,19 @@ public partial class Emulator
     }
 
     /// <summary>
-    /// unpauses the emulator
+    /// sets the emulator volume, 0-100
     /// </summary>
-    public void SetVolume(float volume) {
+    public void SetVolume(int volume) {
         _apiCallBuffer.CallMethod("SetVolume", $"{volume}");
+        this.volume = volume;
+    }
+
+    /// <summary>
+    /// sets the emulator volume
+    /// </summary>
+    public void SetIsMuted(bool isMuted) {
+        _apiCallBuffer.CallMethod("SetSoundOn", $"{!isMuted}");
+        this.isMuted = isMuted;
     }
 
     /// <summary>

@@ -8,6 +8,7 @@ using System.Diagnostics;
 using System.Linq;
 using System.Reflection;
 using System.Runtime.InteropServices;
+using BizHawk.Client.Common;
 using Debug = UnityEngine.Debug;
 using BizHawkConfig = BizHawk.Client.Common.Config;
 
@@ -21,6 +22,8 @@ using UnityEngine;
 using Unity.Profiling;
 
 using Plunderludics;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Serialization;
 using UnityEngine.Events;
 using UnityEngine.Serialization;
 
@@ -79,13 +82,16 @@ public partial class Emulator : MonoBehaviour
     [ReadOnlyWhenPlaying]
     [Tooltip("whether bizhawk should run when in edit mode")]
     public new bool runInEditMode = false;
+
     [ShowIf("runInEditMode")]
     [ReadOnlyWhenPlaying]
     [Tooltip("Whether BizHawk will accept input when window is unfocused (in edit mode)")]
     public bool acceptBackgroundInput = true;
 
+    /// when the emulator boots up
     public Action OnStarted;
 
+    /// when the emulator starts running its game
     public Action OnRunning;
 
     [Foldout("Debug")]
@@ -101,23 +107,23 @@ public partial class Emulator : MonoBehaviour
     [Foldout("Debug")]
     [ReadOnly, SerializeField] Vector2Int _textureSize;
 
-    // Options for using hardcoded filenames instead of Assets
-
     [Foldout("Debug")]
     [SerializeField] UnityHawkConfig config;
+
     [Tooltip("Prevent BizHawk from popping up windows for warnings and errors; these will still appear in logs")]
-    public bool suppressBizhawkPopups = true;
+    [SerializeField] bool suppressBizhawkPopups = true;
+
     [Foldout("Debug")]
-    public bool writeBizhawkLogs = true;
+    [SerializeField] bool writeBizhawkLogs = true;
+
     [ShowIf("writeBizhawkLogs")]
     [Foldout("Debug")]
     [ReadOnly, SerializeField] string bizhawkLogLocation;
 
     [Foldout("Debug")]
-    public string savestatesOutputPath;
+    TextureFormat textureFormat = TextureFormat.BGRA32;
 
-    private TextureFormat textureFormat = TextureFormat.BGRA32;
-    private RenderTextureFormat renderTextureFormat = RenderTextureFormat.BGRA32;
+    RenderTextureFormat renderTextureFormat = RenderTextureFormat.BGRA32;
 
     Process _emuhawk;
 
@@ -145,6 +151,7 @@ public partial class Emulator : MonoBehaviour
     /// a set of all the called methods
     readonly HashSet<string> _invokedLuaCallbacks = new();
 
+    /// buffer to share audio
     SharedAudioBuffer _sharedAudioBuffer;
 
     /// buffer to receive lua callbacks from bizhawk
@@ -204,15 +211,16 @@ public partial class Emulator : MonoBehaviour
     ///// MonoBehaviour lifecycle
     ///
 #if UNITY_EDITOR
-    void OnValidate() {
-	    if (!config) {
-		    config = AssetDatabase.LoadAssetAtPath<UnityHawkConfig>(
-				AssetDatabase.GUIDToAssetPath(
-					// get some config
-					AssetDatabase.FindAssets("glob:Packages/UnityHawk/UnityHawkConfigDefault").Last()
-				)
-			);
-	    }
+    void OnValidate()
+    {
+	    if (config) return;
+
+	    config = AssetDatabase.LoadAssetAtPath<UnityHawkConfig>(
+		    AssetDatabase.GUIDToAssetPath(
+			    // get some config
+			    AssetDatabase.FindAssets("glob:Packages/UnityHawk/UnityHawkConfigDefault").Last()
+		    )
+	    );
     }
 #endif
 
@@ -246,8 +254,11 @@ public partial class Emulator : MonoBehaviour
     }
 
     ////// Core methods
+    bool TryInitialize()
+    {
+        // get a random number to identify the buffers
+        var guid = new System.Random().Next();
 
-    bool TryInitialize() {
         // Debug.Log("Emulator Initialize");
         if (!customRenderTexture) renderTexture = null; // Clear texture so that it's forced to be reinitialized
 
@@ -299,7 +310,16 @@ public partial class Emulator : MonoBehaviour
             ? Paths.GetAssetPath(configFile)
             : Path.GetFullPath(Paths.defaultConfigPath);
 
-        args.Add($"--config={configPath}");
+        var bizConfig = BizHawkConfigExt.Load(configPath);
+
+        // create a temporary file for this config
+        configPath = Path.GetFullPath($"Temp/config-{guid}.ini");
+
+	    SetConfigDefaults(ref bizConfig);
+
+	    bizConfig.Save(configPath);
+
+	    args.Add($"--config={configPath}");
 
         // add save state path
         if (saveStateFile) {
@@ -348,21 +368,18 @@ public partial class Emulator : MonoBehaviour
         }
 
         // add buffers
-        // get a random number to identify the buffers
-        var randomNumber = new System.Random().Next();
-
         // create & register sharedTextureBuffer
-        var sharedTextureBufferName = $"unityhawk-texture-{randomNumber}";
+        var sharedTextureBufferName = $"unityhawk-texture-{guid}";
         args.Add($"--write-texture-to-shared-buffer={sharedTextureBufferName}");
         _sharedTextureBuffer = new SharedTextureBuffer(sharedTextureBufferName);
 
         // create & register lua callbacks rpc
-        var luaCallbacksRpcBufferName = $"unityhawk-callmethod-{randomNumber}";
+        var luaCallbacksRpcBufferName = $"unityhawk-callmethod-{guid}";
         args.Add($"--unity-call-method-buffer={luaCallbacksRpcBufferName}");
         _luaCallbacksRpcBuffer = new CallMethodRpcBuffer(luaCallbacksRpcBufferName, CallRegisteredLuaCallback);
 
         // create & register api call buffer
-        var apiCallBufferName = $"unityhawk-apicall-{randomNumber}";
+        var apiCallBufferName = $"unityhawk-apicall-{guid}";
         args.Add($"--api-call-method-buffer={apiCallBufferName}");
         _apiCallBuffer = new ApiCallBuffer(apiCallBufferName);
 
@@ -371,7 +388,7 @@ public partial class Emulator : MonoBehaviour
             if (runInEditMode && !Application.isPlaying) {
                 Debug.LogWarning("captureEmulatorAudio is enabled but emulator audio cannot be captured in edit mode");
             } else {
-                var sharedAudioBufferName = $"unityhawk-audio-{randomNumber}";
+                var sharedAudioBufferName = $"unityhawk-audio-{guid}";
                 args.Add($"--share-audio-over-rpc-buffer={sharedAudioBufferName}");
                 _sharedAudioBuffer = new SharedAudioBuffer(sharedAudioBufferName);
 
@@ -385,11 +402,11 @@ public partial class Emulator : MonoBehaviour
         // create & register input buffers
         if (Application.isPlaying) {
             if (passInputFromUnity) {
-                var sharedKeyInputBufferName = $"unityhawk-key-input-{randomNumber}";
+                var sharedKeyInputBufferName = $"unityhawk-key-input-{guid}";
                 args.Add($"--read-key-input-from-shared-buffer={sharedKeyInputBufferName}");
                 _sharedKeyInputBuffer = new SharedKeyInputBuffer(sharedKeyInputBufferName);
 
-                var sharedAnalogInputBufferName = $"unityhawk-analog-input-{randomNumber}";
+                var sharedAnalogInputBufferName = $"unityhawk-analog-input-{guid}";
                 args.Add($"--read-analog-input-from-shared-buffer={sharedAnalogInputBufferName}");
                 _sharedAnalogInputBuffer = new SharedAnalogInputBuffer(sharedAnalogInputBufferName);
 
@@ -409,7 +426,6 @@ public partial class Emulator : MonoBehaviour
             }
         }
 
-
         if (suppressBizhawkPopups) {
             args.Add("--suppress-popups"); // Don't pop up windows for messages/exceptions (they will still appear in the logs)
         }
@@ -417,7 +433,7 @@ public partial class Emulator : MonoBehaviour
         if (writeBizhawkLogs) {
             // Redirect bizhawk output + error into a log file
             var logFileName = $"{name}-{GetInstanceID()}.log";
-            var logPath = config.LogsPath;
+            var logPath = config.BizHawkLogsPath;
             Directory.CreateDirectory (logPath);
             bizhawkLogLocation = Path.Combine(logPath, logFileName);
 
@@ -444,6 +460,13 @@ public partial class Emulator : MonoBehaviour
         return true;
     }
 
+    /// sets the config default values
+    void SetConfigDefaults(ref BizHawkConfig bizConfig)
+    {
+	    bizConfig.SoundVolume = volume;
+	    bizConfig.SoundEnabled = !isMuted;
+    }
+
     void _Update() {
         if (!Equals(_currentBizhawkArgs, MakeBizhawkArgs())) {
             // Params set in inspector have changed since the bizhawk process was started, needs restart
@@ -457,8 +480,7 @@ public partial class Emulator : MonoBehaviour
             return;
         }
 
-        if (!_initialized && !TryInitialize())
-        {
+        if (!_initialized && !TryInitialize()) {
             return;
         }
 
@@ -652,9 +674,8 @@ public partial class Emulator : MonoBehaviour
         if (exists) {
             returnString = callback(argString);
         }
-
         // add to set of called methods to not spam this warning
-        if (!exists && !_invokedLuaCallbacks.Contains(callbackName)){
+		else if (!_invokedLuaCallbacks.Contains(callbackName)){
             Debug.LogWarning($"Tried to call a method named {callbackName} from lua but none was registered");
         }
 
@@ -689,5 +710,34 @@ public partial class Emulator : MonoBehaviour
             showBizhawkGui = showBizhawkGui
         };
     }
+}
+
+public static class BizHawkConfigExt
+{
+	public static BizHawkConfig Load(string path)
+	{
+	    var settings = new JsonSerializerSettings()
+	    {
+		    Error = (sender, error) => error.ErrorContext.Handled = true,
+		    MissingMemberHandling = MissingMemberHandling.Ignore,
+		    TypeNameHandling = TypeNameHandling.Auto,
+		    ConstructorHandling = ConstructorHandling.Default,
+		    ObjectCreationHandling = ObjectCreationHandling.Replace,
+		    ContractResolver = (IContractResolver) new DefaultContractResolver()
+		    {
+			    DefaultMembersSearchFlags = (BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic)
+		    }
+	    };
+
+	    var serializer = JsonSerializer.Create(settings);
+	    ConfigService.SetSerializer(serializer);
+
+	    return ConfigService.Load<BizHawkConfig>(path);
+	}
+
+	public static void Save(this BizHawkConfig config, string path)
+	{
+	    ConfigService.Save(path, config);
+	}
 }
 }
