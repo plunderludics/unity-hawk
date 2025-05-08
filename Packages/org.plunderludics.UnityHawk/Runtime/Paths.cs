@@ -48,6 +48,7 @@ public static class Paths
         BizHawkAssetsDirForBuild;
 #endif
 
+    public static readonly string FirmwarePath = Path.Combine(Application.streamingAssetsPath, "Firmware");
     public static readonly string RamWatchPath = _bizHawkAssetsDir;
     public static readonly object SavestatesOutputPath = _bizHawkAssetsDir;
 
