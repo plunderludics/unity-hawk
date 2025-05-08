@@ -3,16 +3,7 @@ guid: 1e98f0c32c4b9ba42a802fccb13ff791
 MonoImporter:
   externalObjects: {}
   serializedVersion: 2
-  defaultReferences:
-  - targetRenderer: {instanceID: 0}
-  - renderTexture: {instanceID: 0}
-  - inputProvider: {instanceID: 0}
-  - romFile: {instanceID: 0}
-  - saveStateFile: {instanceID: 0}
-  - configFile: {instanceID: 0}
-  - luaScriptFile: {instanceID: 0}
-  - ramWatchFile: {instanceID: 0}
-  - config: {fileID: 11400000, guid: 9fa2e33569d57e04898072f8638bc5dd, type: 2}
+  defaultReferences: []
   executionOrder: 0
   icon: {instanceID: 0}
   userData: 

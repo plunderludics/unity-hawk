@@ -5,11 +5,8 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Diagnostics;
-using System.Linq;
-using System.Reflection;
 using System.Runtime.InteropServices;
 using Debug = UnityEngine.Debug;
-using BizHawkConfig = BizHawk.Client.Common.Config;
 
 #if UNITY_EDITOR
 using UnityEditor;
@@ -73,11 +70,8 @@ public partial class Emulator : MonoBehaviour
     public bool forceCopyFilesToBuild = false;
 
     [Header("Development")]
-    [Tooltip("if the bizhawk gui should be visible")]
     public bool showBizhawkGui = false;
-
     [ReadOnlyWhenPlaying]
-    [Tooltip("whether bizhawk should run when in edit mode")]
     public new bool runInEditMode = false;
     [ShowIf("runInEditMode")]
     [ReadOnlyWhenPlaying]
@@ -104,7 +98,6 @@ public partial class Emulator : MonoBehaviour
     // Options for using hardcoded filenames instead of Assets
 
     [Foldout("Debug")]
-    [SerializeField] UnityHawkConfig config;
     [Tooltip("Prevent BizHawk from popping up windows for warnings and errors; these will still appear in logs")]
     public bool suppressBizhawkPopups = true;
     [Foldout("Debug")]
@@ -112,10 +105,12 @@ public partial class Emulator : MonoBehaviour
     [ShowIf("writeBizhawkLogs")]
     [Foldout("Debug")]
     [ReadOnly, SerializeField] string bizhawkLogLocation;
-
+    
     [Foldout("Debug")]
+    [Tooltip("if left blank, defaults to initial romFile directory")]
     public string savestatesOutputPath;
 
+    private static string bizhawkLogDirectory = "BizHawkLogs";
     private TextureFormat textureFormat = TextureFormat.BGRA32;
     private RenderTextureFormat renderTextureFormat = RenderTextureFormat.BGRA32;
 
@@ -202,19 +197,6 @@ public partial class Emulator : MonoBehaviour
     }
 #endif
     ///// MonoBehaviour lifecycle
-    ///
-#if UNITY_EDITOR
-    void OnValidate() {
-	    if (!config) {
-		    config = AssetDatabase.LoadAssetAtPath<UnityHawkConfig>(
-				AssetDatabase.GUIDToAssetPath(
-					// get some config
-					AssetDatabase.FindAssets("glob:Packages/UnityHawk/UnityHawkConfigDefault").Last()
-				)
-			);
-	    }
-    }
-#endif
 
     // (These methods are public only for convenient testing)
     public void OnEnable()
@@ -270,8 +252,9 @@ public partial class Emulator : MonoBehaviour
         // If using referenced assets then first map those assets to filenames
         // (Bizhawk requires a path to a real file on disk)
 
+
         // Start EmuHawk.exe w args
-        var exePath = Path.GetFullPath(Paths.emuhawkExePath);
+        string exePath = Path.GetFullPath(Paths.emuhawkExePath);
         _emuhawk = new Process();
         _emuhawk.StartInfo.UseShellExecute = false;
         var args = _emuhawk.StartInfo.ArgumentList;
@@ -319,8 +302,7 @@ public partial class Emulator : MonoBehaviour
         // Save savestates with extension .savestate instead of .State, this is because Unity treats .State as some other kind of asset
         args.Add($"--savestate-extension={_savestateExtension}");
 
-        // set savestates output dir
-        var saveStatesOutputPath = Paths.GetFullPath(config.SavestatesOutputPath);
+        var saveStatesOutputPath = Paths.GetFullPath(savestatesOutputPath);
         if (!Directory.Exists(saveStatesOutputPath)) {
             Directory.CreateDirectory(saveStatesOutputPath);
         }
@@ -328,18 +310,16 @@ public partial class Emulator : MonoBehaviour
         if (string.IsNullOrEmpty(saveStatesOutputPath)) {
             saveStatesOutputPath = Path.GetDirectoryName(romPath);
         }
+
         args.Add($"--savestates={saveStatesOutputPath}");
 
         // add firmware
-        args.Add($"--firmware={Path.Combine(Application.streamingAssetsPath, config.FirmwarePath)}");
+        args.Add($"--firmware={Paths.FirmwarePath}");
 
-        // set ramwatch output dir
-        var ramWatchOutputDirPath = config.RamWatchOutputPath;
-        // use rom directory as default ramwatch output path
-        if (string.IsNullOrEmpty(ramWatchOutputDirPath)) {
-            ramWatchOutputDirPath = Path.GetDirectoryName(romPath);
-        }
-        args.Add($"--save-ram-watch={ramWatchOutputDirPath}");
+        // Save ram watch files to parent folder of rom
+        string ramWatchOutputDirFullPath = Path.GetDirectoryName(romPath);
+        args.Add($"--save-ram-watch={ramWatchOutputDirFullPath}");
+
 
         if (!showBizhawkGui) {
             args.Add("--headless");
@@ -393,6 +373,7 @@ public partial class Emulator : MonoBehaviour
                 args.Add($"--read-analog-input-from-shared-buffer={sharedAnalogInputBufferName}");
                 _sharedAnalogInputBuffer = new SharedAnalogInputBuffer(sharedAnalogInputBufferName);
 
+
                 // default to BasicInputProvider (maps keys directly from keyboard)
                 if (inputProvider == null) {
                     if (!(inputProvider = GetComponent<InputProvider>())) {
@@ -416,18 +397,16 @@ public partial class Emulator : MonoBehaviour
 
         if (writeBizhawkLogs) {
             // Redirect bizhawk output + error into a log file
-            var logFileName = $"{name}-{GetInstanceID()}.log";
-            var logPath = config.LogsPath;
-            Directory.CreateDirectory (logPath);
-            bizhawkLogLocation = Path.Combine(logPath, logFileName);
-
-            _bizHawkLogWriter?.Dispose();
+            string logFileName = $"{this.name}-{GetInstanceID()}.log";
+            Directory.CreateDirectory (bizhawkLogDirectory);
+            bizhawkLogLocation = Path.Combine(bizhawkLogDirectory, logFileName);
+            if (_bizHawkLogWriter != null) _bizHawkLogWriter.Dispose();
             _bizHawkLogWriter = new(bizhawkLogLocation);
 
             _emuhawk.StartInfo.RedirectStandardOutput = true;
             _emuhawk.StartInfo.RedirectStandardError = true;
-            _emuhawk.OutputDataReceived += (sender, e) => LogBizHawk(sender, e, false);
-            _emuhawk.ErrorDataReceived += (sender, e) => LogBizHawk(sender, e, true);
+            _emuhawk.OutputDataReceived += new DataReceivedEventHandler((sender, e) => LogBizHawk(sender, e, false));
+            _emuhawk.ErrorDataReceived += new DataReceivedEventHandler((sender, e) => LogBizHawk(sender, e, true));
         }
 
         Debug.Log($"[unity-hawk] {exePath} {string.Join(' ', args)}");

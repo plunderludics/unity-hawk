@@ -722,6 +722,7 @@ MonoBehaviour:
   configFile: {fileID: 0}
   luaScriptFile: {fileID: 5022602860645237092, guid: 434efe047eaa4ae4f95d2d4dce245843, type: 3}
   ramWatchFile: {fileID: 0}
+  SavestatesOutputPath: 
   _isEnabled: 1
   forceCopyFilesToBuild: 0
   showBizhawkGui: 0
@@ -731,17 +732,9 @@ MonoBehaviour:
   _status: 0
   _currentFrame: 2288
   _textureSize: {x: 256, y: 224}
-  config: {fileID: 11400000, guid: 9fa2e33569d57e04898072f8638bc5dd, type: 2}
   suppressBizhawkPopups: 1
   writeBizhawkLogs: 1
   bizhawkLogLocation: BizHawkLogs\Emulator-26394.log
-  savestatesOutputPath: 
-  _audioResampler:
-    idealBufferSize: 4096
-    movingAverageN: 1024
-    excessPressureFactor: 0.01
-    rawBufferCount: 0
-    resampleRatio: 1
 --- !u!82 &734294843
 AudioSource:
   m_ObjectHideFlags: 0
