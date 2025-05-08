@@ -319,17 +319,18 @@ public partial class Emulator : MonoBehaviour
         // Save savestates with extension .savestate instead of .State, this is because Unity treats .State as some other kind of asset
         args.Add($"--savestate-extension={_savestateExtension}");
 
-        // set savestates output dir
-        var saveStatesOutputPath = Paths.GetFullPath(config.SavestatesOutputPath);
-        if (!Directory.Exists(saveStatesOutputPath)) {
-            Directory.CreateDirectory(saveStatesOutputPath);
-        }
         // use rom directory as default savestates output path
-        if (string.IsNullOrEmpty(saveStatesOutputPath)) {
-            saveStatesOutputPath = Path.GetDirectoryName(romPath);
+        if (string.IsNullOrEmpty(savestatesOutputPath)) {
+            savestatesOutputPath = Path.GetDirectoryName(romPath);
         }
-        args.Add($"--savestates={saveStatesOutputPath}");
 
+        // Create directory if doesn't exist
+        var fullSavestatesOutputPath = Paths.GetFullPath(savestatesOutputPath);
+        if (!Directory.Exists(fullSavestatesOutputPath)) {
+            Directory.CreateDirectory(fullSavestatesOutputPath);
+        }
+
+        args.Add($"--savestates={fullSavestatesOutputPath}");
         // add firmware
         args.Add($"--firmware={Path.Combine(Application.streamingAssetsPath, config.FirmwarePath)}");
 
