@@ -9,7 +9,6 @@ using System.Linq;
 using System.Reflection;
 using System.Runtime.InteropServices;
 using Debug = UnityEngine.Debug;
-using BizHawkConfig = BizHawk.Client.Common.Config;
 
 #if UNITY_EDITOR
 using UnityEditor;
@@ -206,7 +205,7 @@ public partial class Emulator : MonoBehaviour
 #if UNITY_EDITOR
     void OnValidate() {
 	    if (!config) {
-		    config = (UnityHawkConfig)AssetDatabase.LoadAssetAtPath("Packages/org.plunderludics.UnityHawk/Runtime/UnityHawkConfigDefault.asset", typeof(UnityHawkConfig));
+		    config = (UnityHawkConfig)AssetDatabase.LoadAssetAtPath(Paths.defaultUnityHawkConfigPath, typeof(UnityHawkConfig));
             if (config == null) {
                 Debug.LogError("UnityHawkConfigDefault.asset not found");
             }
@@ -295,7 +294,7 @@ public partial class Emulator : MonoBehaviour
         // add config path
         var configPath = configFile
             ? Paths.GetAssetPath(configFile)
-            : Path.GetFullPath(Paths.defaultConfigPath);
+            : Path.GetFullPath(Paths.defaultBizhawkConfigPath);
 
         args.Add($"--config={configPath}");
 
