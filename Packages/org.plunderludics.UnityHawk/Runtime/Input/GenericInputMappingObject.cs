@@ -7,7 +7,7 @@ using UnityEngine.InputSystem;
 
 namespace UnityHawk {
 
-[CreateAssetMenu(fileName = "GenericInputMapping", menuName = "plunderludics/new generic input mapping", order = 0)]
+[CreateAssetMenu(fileName = "GenericInputMapping", menuName = "Plunderludics/UnityHawk/GenericInputMapping", order = 0)]
 public class GenericInputMappingObject : ScriptableObject {
 #if ENABLE_INPUT_SYSTEM
     [FormerlySerializedAs("mappings")]
