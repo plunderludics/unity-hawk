@@ -9,7 +9,6 @@ using System.Linq;
 using System.Reflection;
 using System.Runtime.InteropServices;
 using Debug = UnityEngine.Debug;
-using BizHawkConfig = BizHawk.Client.Common.Config;
 
 #if UNITY_EDITOR
 using UnityEditor;
@@ -206,13 +205,11 @@ public partial class Emulator : MonoBehaviour
 #if UNITY_EDITOR
     void OnValidate() {
 	    if (!config) {
-		    config = AssetDatabase.LoadAssetAtPath<UnityHawkConfig>(
-				AssetDatabase.GUIDToAssetPath(
-					// get some config
-					AssetDatabase.FindAssets("glob:Packages/UnityHawk/UnityHawkConfigDefault").Last()
-				)
-			);
-	    }
+		    config = (UnityHawkConfig)AssetDatabase.LoadAssetAtPath("Packages/org.plunderludics.UnityHawk/Runtime/UnityHawkConfigDefault.asset", typeof(UnityHawkConfig));
+            if (config == null) {
+                Debug.LogError("UnityHawkConfigDefault.asset not found");
+            }
+        }
     }
 #endif
 
