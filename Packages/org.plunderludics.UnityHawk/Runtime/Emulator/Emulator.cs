@@ -9,6 +9,7 @@ using System.Linq;
 using System.Reflection;
 using System.Runtime.InteropServices;
 using Debug = UnityEngine.Debug;
+using BizHawkConfig = BizHawk.Client.Common.Config;
 
 #if UNITY_EDITOR
 using UnityEditor;
@@ -317,15 +318,13 @@ public partial class Emulator : MonoBehaviour
         args.Add($"--savestate-extension={_savestateExtension}");
 
         // set savestates output dir
-        var saveStatesOutputPath = Paths.GetFullPath(config.SavestatesOutputPath);
-        if (!Directory.Exists(saveStatesOutputPath)) {
-            Directory.CreateDirectory(saveStatesOutputPath);
+        // (default to rom parent directory when not provided)
+        var savestatesOutputPath = string.IsNullOrEmpty(config.SavestatesOutputPath) ? Path.GetDirectoryName(romPath) : config.SavestatesOutputPath;
+        var fullSavestatesOutputPath = Paths.GetFullPath(savestatesOutputPath);
+        if (!Directory.Exists(fullSavestatesOutputPath)) {
+            Directory.CreateDirectory(fullSavestatesOutputPath);
         }
-        // use rom directory as default savestates output path
-        if (string.IsNullOrEmpty(saveStatesOutputPath)) {
-            saveStatesOutputPath = Path.GetDirectoryName(romPath);
-        }
-        args.Add($"--savestates={saveStatesOutputPath}");
+        args.Add($"--savestates={fullSavestatesOutputPath}");
 
         // add firmware
         args.Add($"--firmware={Path.Combine(Application.streamingAssetsPath, config.FirmwarePath)}");

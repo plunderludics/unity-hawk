@@ -54,10 +54,10 @@ public class GenericInputProvider : InputProvider {
 
     [HideIf("useMappingObject")]
     [Tooltip("the unity input to bizhawk keyboard mapping")]
-    [SerializeField] List<Action2Key> keyMappings;
+    [SerializeField] public List<Action2Key> keyMappings;
     [HideIf("useMappingObject")]
     [Tooltip("the unity input to bizhawk analog input mapping")]
-    [SerializeField] List<Action2Axis> axisMappings;
+    [SerializeField] public List<Action2Axis> axisMappings;
 
     [ShowIf("useMappingObject")]
     [SerializeField] GenericInputMappingObject mappingObject;
