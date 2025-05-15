@@ -98,6 +98,8 @@ public partial class Emulator : MonoBehaviour
     [Foldout("Debug")]
     [SerializeField] bool showBizhawkGuiInBuild = false;
     [Foldout("Debug")]
+    [SerializeField] bool muteBizhawkInEditMode = true;
+    [Foldout("Debug")]
     [SerializeField] UnityHawkConfig config;
     [Tooltip("Prevent BizHawk from popping up windows for warnings and errors; these will still appear in logs")]
     public bool suppressBizhawkPopups = true;
@@ -375,6 +377,10 @@ public partial class Emulator : MonoBehaviour
             }
         }
 
+        if (muteBizhawkInEditMode && !Application.isPlaying) {
+            args.Add("--mute=true");
+        }
+
         // create & register input buffers
         if (Application.isPlaying) {
             if (passInputFromUnity) {
@@ -393,13 +399,11 @@ public partial class Emulator : MonoBehaviour
                     }
                 }
             } else {
-                // Always accept background input in play mode if not getting input from unity
-                args.Add($"--accept-background-input");
+                // Always accept background input in play mode if not getting input from unity (otherwise would be no input at all)
+                args.Add($"--accept-background-input=true");
             }
         } else if (runInEditMode) {
-            if (acceptBackgroundInput) {
-                args.Add($"--accept-background-input");
-            }
+            args.Add($"--accept-background-input={(acceptBackgroundInput ? "true" : "false")}");
         }
 
 
