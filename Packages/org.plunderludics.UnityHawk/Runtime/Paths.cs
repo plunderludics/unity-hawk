@@ -32,7 +32,8 @@ public static class Paths
 
     public static readonly string emuhawkExePath = Path.Combine(BizHawkDir, _emuhawkExeName);
 
-    public static readonly string defaultConfigPath = Path.Combine(BizHawkDir, "config.ini");
+    public static readonly string defaultBizhawkConfigPath = Path.Combine(BizHawkDir, "config.ini");
+    public static readonly string defaultUnityHawkConfigPath = Path.Combine("Packages", packageName, "/Runtime/UnityHawkConfigDefault.asset");
 
     public static readonly string dllDir = Path.Combine(BizHawkDir, "dll");
 
@@ -48,7 +49,6 @@ public static class Paths
         BizHawkAssetsDirForBuild;
 #endif
 
-    public static readonly string FirmwarePath = Path.Combine(Application.streamingAssetsPath, "Firmware");
     public static readonly string RamWatchPath = _bizHawkAssetsDir;
     public static readonly object SavestatesOutputPath = _bizHawkAssetsDir;
 
