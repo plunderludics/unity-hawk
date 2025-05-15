@@ -107,7 +107,12 @@ public partial class Emulator
     /// </summary>
     /// <param name="sample"></param>
     public void LoadState(Savestate sample) {
-        LoadState(Paths.GetAssetPath(sample));
+        string path = Paths.GetAssetPath(sample);
+        if (path == null) {
+            Debug.LogError($"Savestate {sample} not found");
+            return;
+        }
+        LoadState(path);
     }
 
     /// <summary>
