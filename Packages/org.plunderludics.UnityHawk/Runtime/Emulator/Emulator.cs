@@ -64,13 +64,6 @@ public partial class Emulator : MonoBehaviour
     public LuaScript luaScriptFile;
     public RamWatch ramWatchFile;
 
-    [SerializeField, HideInInspector]
-    bool _isEnabled = false; // hack to only show the forceCopyFilesToBuild field when component is inactive
-
-    [HideIf("_isEnabled")]
-    [Tooltip("Copy files into build even though Emulator is not active")]
-    public bool forceCopyFilesToBuild = false;
-
     [Header("Development")]
     [Tooltip("if the bizhawk gui should be visible")]
     public bool showBizhawkGui = false;
@@ -216,7 +209,6 @@ public partial class Emulator : MonoBehaviour
     // (These methods are public only for convenient testing)
     public void OnEnable()
     {
-        _isEnabled = true;
 #if UNITY_EDITOR && UNITY_2022_2_OR_NEWER
         if (Undo.isProcessing) return; // OnEnable gets called after undo/redo, but ignore it
 #endif
@@ -233,7 +225,6 @@ public partial class Emulator : MonoBehaviour
 
     public void OnDisable() {
         // Debug.Log($"Emulator OnDisable");
-        _isEnabled = false;
 #if UNITY_EDITOR && UNITY_2022_2_OR_NEWER
         if (Undo.isProcessing) return; // OnDisable gets called after undo/redo, but ignore it
 #endif
