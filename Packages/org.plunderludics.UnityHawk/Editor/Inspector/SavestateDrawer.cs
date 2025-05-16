@@ -20,71 +20,65 @@ public class SavestateDrawer : PropertyDrawer
             // (so that we can filter the savestates by rom)
             var romProperty = property.serializedObject.FindProperty("romFile");
             Rom rom = romProperty?.objectReferenceValue as Rom;
-            if (rom == null)
+            float buttonWidth = 20f;
+            // First draw greyed out object picker
+            var savestateRect = new Rect(position.x, position.y, position.width - buttonWidth, EditorGUIUtility.singleLineHeight);
+            GUI.enabled = false;
+            EditorGUI.ObjectField(savestateRect, property, label);
+            GUI.enabled = true;
+
+            // Dropdown UI:
+            // First find all savestates for the current rom
+            var savestates = AssetDatabase.FindAssets("t:savestate")
+                .Select(guid => AssetDatabase.LoadAssetAtPath<Savestate>(AssetDatabase.GUIDToAssetPath(guid)))
+                .Where(savestate => savestate?.RomInfo.Name == rom?.name);
+            savestates = savestates.Prepend(null); // Add a null option to the list
+            var savestateNames = savestates.Select(savestate => savestate != null ? savestate.name : "None");
+            int currentIndex = savestates.ToList().IndexOf(property.objectReferenceValue as Savestate);
+
+            // Create a dropdown menu with the savestates
+            EditorGUI.BeginChangeCheck();
+            var popupRect = new Rect(position.x + position.width - buttonWidth, position.y, buttonWidth, EditorGUIUtility.singleLineHeight);
+            int selectedIndex = EditorGUI.Popup(popupRect, currentIndex, savestateNames.ToArray());
+            if (EditorGUI.EndChangeCheck())
             {
-                EditorGUI.LabelField(position, "Select rom first");
+                // Set the property to the selected savestate
+                var selectedSavestate = savestates.ElementAt(selectedIndex);
+                property.objectReferenceValue = selectedSavestate;
+                property.serializedObject.ApplyModifiedProperties();
             }
-            else
-            {
-                float buttonWidth = 20f;
-                // First draw greyed out object picker
-                var savestateRect = new Rect(position.x, position.y, position.width - buttonWidth, EditorGUIUtility.singleLineHeight);
-                GUI.enabled = false;
-                EditorGUI.ObjectField(savestateRect, property, label);
-                GUI.enabled = true;
 
-                // Dropdown UI:
-                // First find all savestates for the current rom
-                var savestates = AssetDatabase.FindAssets("t:savestate")
-                    .Select(guid => AssetDatabase.LoadAssetAtPath<Savestate>(AssetDatabase.GUIDToAssetPath(guid)))
-                    .Where(savestate => savestate?.RomInfo.Name == rom.name);
-                var savestateNames = savestates.Select(savestate => savestate.name);
-                int currentIndex = savestates.ToList().IndexOf(property.objectReferenceValue as Savestate);
+            // ShowPicker UI:
+            // // Then draw the button
+            // var buttonRect = new Rect(position.x + position.width - buttonWidth, position.y, buttonWidth, EditorGUIUtility.singleLineHeight);
+            // if (GUI.Button(buttonRect, "⊙"))
+            // {
+            //     // Open search picker
+            //     var context = SearchService.CreateContext("t:savestate");
 
-                // Create a dropdown menu with the savestates
-                EditorGUI.BeginChangeCheck();
-                var popupRect = new Rect(position.x + position.width - buttonWidth, position.y, buttonWidth, EditorGUIUtility.singleLineHeight);
-                int selectedIndex = EditorGUI.Popup(popupRect, currentIndex, savestateNames.ToArray());
-                if (EditorGUI.EndChangeCheck())
-                {
-                    // Set the property to the selected savestate
-                    var selectedSavestate = savestates.ElementAt(selectedIndex);
-                    property.objectReferenceValue = selectedSavestate;
-                    property.serializedObject.ApplyModifiedProperties();
-                }
+            //     // This sucks, there's no way to pass SearchViewFlags.HideSearchBar with this method,
+            //     // and the alternative ShowPicker(ViewState) doesn't take a filterHandler argument
+            //     // Best thing is probably to implement a custom SearchProvider that does the filtering but what a pain..
+            //     // This works ok for now anyway, just annoying that the search bar is visible
 
-                // ShowPicker UI:
-                // // Then draw the button
-                // var buttonRect = new Rect(position.x + position.width - buttonWidth, position.y, buttonWidth, EditorGUIUtility.singleLineHeight);
-                // if (GUI.Button(buttonRect, "⊙"))
-                // {
-                //     // Open search picker
-                //     var context = SearchService.CreateContext("t:savestate");
-
-                //     // This sucks, there's no way to pass SearchViewFlags.HideSearchBar with this method,
-                //     // and the alternative ShowPicker(ViewState) doesn't take a filterHandler argument
-                //     // Best thing is probably to implement a custom SearchProvider that does the filtering but what a pain..
-                //     // This works ok for now anyway, just annoying that the search bar is visible
-
-                //     SearchService.ShowPicker(context,
-                //         selectHandler: (SearchItem item, bool canceled) =>
-                //         {
-                //             if (canceled) return;
-                //             // Set the property to the selected savestate
-                //             property.objectReferenceValue = item?.ToObject() as Savestate;
-                //             property.serializedObject.ApplyModifiedProperties();
-                //         },
-                //         filterHandler: (SearchItem item) =>
-                //         {
-                //             // Attempt to get the Savestate object from the item's id or a custom property
-                //             var savestate = item?.ToObject() as Savestate;
-                //             // Check if the savestate belongs to the same rom
-                //             // TODO: should check hash here instead
-                //             return savestate?.RomInfo.Name == rom.name;
-                //         }
-                //     );
-                // }
-            }
+            //     SearchService.ShowPicker(context,
+            //         selectHandler: (SearchItem item, bool canceled) =>
+            //         {
+            //             if (canceled) return;
+            //             // Set the property to the selected savestate
+            //             property.objectReferenceValue = item?.ToObject() as Savestate;
+            //             property.serializedObject.ApplyModifiedProperties();
+            //         },
+            //         filterHandler: (SearchItem item) =>
+            //         {
+            //             // Attempt to get the Savestate object from the item's id or a custom property
+            //             var savestate = item?.ToObject() as Savestate;
+            //             // Check if the savestate belongs to the same rom
+            //             // TODO: should check hash here instead
+            //             return savestate?.RomInfo.Name == rom.name;
+            //         }
+            //     );
+            // }
 
             EditorGUI.EndProperty();
         }
