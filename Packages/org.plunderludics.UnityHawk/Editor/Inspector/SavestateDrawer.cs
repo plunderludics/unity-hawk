@@ -2,6 +2,7 @@ using UnityEngine;
 using UnityEditor;
 using UnityEditor.Search;
 using UnityEngine.Search;
+using System.Linq;
 
 namespace UnityHawk.Editor
 {
@@ -32,36 +33,57 @@ public class SavestateDrawer : PropertyDrawer
                 EditorGUI.ObjectField(savestateRect, property, label);
                 GUI.enabled = true;
 
-                // Then draw the button
-                var buttonRect = new Rect(position.x + position.width - buttonWidth, position.y, buttonWidth, EditorGUIUtility.singleLineHeight);
-                if (GUI.Button(buttonRect, "⊙"))
+                // Dropdown UI:
+                // First find all savestates for the current rom
+                var savestates = AssetDatabase.FindAssets("t:savestate")
+                    .Select(guid => AssetDatabase.LoadAssetAtPath<Savestate>(AssetDatabase.GUIDToAssetPath(guid)))
+                    .Where(savestate => savestate?.RomInfo.Name == rom.name);
+                var savestateNames = savestates.Select(savestate => savestate.name);
+                int currentIndex = savestates.ToList().IndexOf(property.objectReferenceValue as Savestate);
+
+                // Create a dropdown menu with the savestates
+                EditorGUI.BeginChangeCheck();
+                var popupRect = new Rect(position.x + position.width - buttonWidth, position.y, buttonWidth, EditorGUIUtility.singleLineHeight);
+                int selectedIndex = EditorGUI.Popup(popupRect, currentIndex, savestateNames.ToArray());
+                if (EditorGUI.EndChangeCheck())
                 {
-                    // Open search picker
-                    var context = SearchService.CreateContext("t:savestate");
-
-                    // This sucks, there's no way to pass SearchViewFlags.HideSearchBar with this method,
-                    // and the alternative ShowPicker(ViewState) doesn't take a filterHandler argument
-                    // Best thing is probably to implement a custom SearchProvider that does the filtering but what a pain..
-                    // This works ok for now anyway, just annoying that the search bar is visible
-
-                    SearchService.ShowPicker(context,
-                        selectHandler: (SearchItem item, bool canceled) =>
-                        {
-                            if (canceled) return;
-                            // Set the property to the selected savestate
-                            property.objectReferenceValue = item?.ToObject() as Savestate;
-                            property.serializedObject.ApplyModifiedProperties();
-                        },
-                        filterHandler: (SearchItem item) =>
-                        {
-                            // Attempt to get the Savestate object from the item's id or a custom property
-                            var savestate = item?.ToObject() as Savestate;
-                            // Check if the savestate belongs to the same rom
-                            // TODO: should check hash here instead
-                            return savestate?.RomInfo.Name == rom.name;
-                        }
-                    );
+                    // Set the property to the selected savestate
+                    var selectedSavestate = savestates.ElementAt(selectedIndex);
+                    property.objectReferenceValue = selectedSavestate;
+                    property.serializedObject.ApplyModifiedProperties();
                 }
+
+                // ShowPicker UI:
+                // // Then draw the button
+                // var buttonRect = new Rect(position.x + position.width - buttonWidth, position.y, buttonWidth, EditorGUIUtility.singleLineHeight);
+                // if (GUI.Button(buttonRect, "⊙"))
+                // {
+                //     // Open search picker
+                //     var context = SearchService.CreateContext("t:savestate");
+
+                //     // This sucks, there's no way to pass SearchViewFlags.HideSearchBar with this method,
+                //     // and the alternative ShowPicker(ViewState) doesn't take a filterHandler argument
+                //     // Best thing is probably to implement a custom SearchProvider that does the filtering but what a pain..
+                //     // This works ok for now anyway, just annoying that the search bar is visible
+
+                //     SearchService.ShowPicker(context,
+                //         selectHandler: (SearchItem item, bool canceled) =>
+                //         {
+                //             if (canceled) return;
+                //             // Set the property to the selected savestate
+                //             property.objectReferenceValue = item?.ToObject() as Savestate;
+                //             property.serializedObject.ApplyModifiedProperties();
+                //         },
+                //         filterHandler: (SearchItem item) =>
+                //         {
+                //             // Attempt to get the Savestate object from the item's id or a custom property
+                //             var savestate = item?.ToObject() as Savestate;
+                //             // Check if the savestate belongs to the same rom
+                //             // TODO: should check hash here instead
+                //             return savestate?.RomInfo.Name == rom.name;
+                //         }
+                //     );
+                // }
             }
 
             EditorGUI.EndProperty();
