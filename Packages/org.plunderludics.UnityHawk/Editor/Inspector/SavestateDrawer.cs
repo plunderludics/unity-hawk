@@ -21,14 +21,16 @@ public class SavestateDrawer : PropertyDrawer
             var romProperty = property.serializedObject.FindProperty("romFile");
             Rom rom = romProperty?.objectReferenceValue as Rom;
             float buttonWidth = 20f;
-            // First draw greyed out object picker
+            // First draw object picker
+            // (Could be grey/disabled - but this way you can pick a non-matching savestate if you need to)
             var savestateRect = new Rect(position.x, position.y, position.width - buttonWidth, EditorGUIUtility.singleLineHeight);
-            GUI.enabled = false;
+            // GUI.enabled = false;
             EditorGUI.ObjectField(savestateRect, property, label);
-            GUI.enabled = true;
+            // GUI.enabled = true;
 
             // Dropdown UI:
             // First find all savestates for the current rom
+            // (Shouldn't really do this every frame, but it doesn't seem to be too bad)
             var savestates = AssetDatabase.FindAssets("t:savestate")
                 .Select(guid => AssetDatabase.LoadAssetAtPath<Savestate>(AssetDatabase.GUIDToAssetPath(guid)))
                 .Where(savestate => savestate?.RomInfo.Name == rom?.name);
