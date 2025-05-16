@@ -70,9 +70,10 @@ public partial class Emulator
     }
 
     /// <summary>
-    /// unpauses the emulator
+    /// set volume
     /// </summary>
-    public void SetVolume(float volume) {
+    /// <param name="volume">0-100</param>
+    public void SetVolume(int volume) {
         _apiCallBuffer.CallMethod("SetVolume", $"{volume}");
     }
 
@@ -148,5 +149,22 @@ public partial class Emulator
     public void FrameAdvance() {
         _apiCallBuffer.CallMethod("FrameAdvance", null);
     }
+    
+    /// <summary>
+    /// Memory writing methods
+    /// </summary>
+    /// <param name="addr"></param>
+    /// <param name="value"></param>
+    /// <param name="domain"></param>
+    /// 
+    void WriteFloat(long addr, double value, string domain = null);
+    void WriteS8(long addr, int value, string domain = null);
+    void WriteS16(long addr, int value, string domain = null);
+    void WriteS24(long addr, int value, string domain = null);
+    void WriteS32(long addr, int value, string domain = null);
+    void WriteU8(long addr, uint value, string domain = null);
+    void WriteU16(long addr, uint value, string domain = null);
+    void WriteU24(long addr, uint value, string domain = null);
+    void WriteU32(long addr, uint value, string domain = null);
 }
 }
