@@ -12,20 +12,23 @@ using JetBrains.Annotations;
 using BizHawkConfig = BizHawk.Client.Common.Config;
 using NaughtyAttributes;
 using UnityEngine;
+using Debug = UnityEngine.Debug;
+
 #if UNITY_EDITOR
 using UnityEditor;
 #endif
-using UnityEngine.Serialization;
-using Debug = UnityEngine.Debug;
-using Plunderludics;
+
 using Newtonsoft.Json;
 using Newtonsoft.Json.Serialization;
+
+using Plunderludics;
+using UnityEngine.Serialization;
 
 namespace UnityHawk {
 
 [ExecuteInEditMode]
-public partial class Emulator : MonoBehaviour
-{
+public partial class Emulator : MonoBehaviour {
+    static readonly int _shader_MainTex = Shader.PropertyToID("_MainTex");
 	const bool _targetMac =
 #if UNITY_EDITOR_OSX || UNITY_STANDALONE_OSX
         true;
@@ -219,14 +222,15 @@ public partial class Emulator : MonoBehaviour
 
 #if UNITY_EDITOR
     void OnValidate() {
-	    if (config) return;
+	    if (!config) {
+		    config = (UnityHawkConfig)AssetDatabase.LoadAssetAtPath(
+			    Paths.defaultUnityHawkConfigPath,
+			    typeof(UnityHawkConfig));
 
-	    config = AssetDatabase.LoadAssetAtPath<UnityHawkConfig>(
-		    AssetDatabase.GUIDToAssetPath(
-			    // get some config
-			    AssetDatabase.FindAssets("glob:Packages/UnityHawk/UnityHawkConfigDefault").Last()
-		    )
-	    );
+            if (!config) {
+                Debug.LogError("UnityHawkConfigDefault.asset not found");
+            }
+        }
     }
 #endif
 
@@ -322,7 +326,10 @@ public partial class Emulator : MonoBehaviour
         }
 
         // add config path
-        var configPath = Path.GetFullPath(Paths.defaultConfigPath);
+        var configPath = configFile
+            ? Paths.GetAssetPath(configFile)
+            : Path.GetFullPath(Paths.defaultBizhawkConfigPath);
+
         if (configFile) {
 	        configPath = Paths.GetAssetPath(configFile);
 	        Debug.Log($"[emulator] found config at {configPath}");
@@ -361,14 +368,15 @@ public partial class Emulator : MonoBehaviour
         args.Add($"--savestate-extension={_savestateExtension}");
 
         // set savestates output dir
-        var saveStatesOutputPath = NewFilesPath(config.SavestatesOutputPath) ?? workingDir;
+        // (default to rom parent directory when not provided)
+        var saveStatesOutputPath = CreateNewPath(config.SavestatesOutputPath) ?? workingDir;
         args.Add($"--savestates={saveStatesOutputPath}");
 
         // add firmware
         args.Add($"--firmware={Path.Combine(Application.streamingAssetsPath, config.FirmwarePath)}");
 
         // set ramwatch output dir
-        var ramWatchOutputDirPath = NewFilesPath(config.RamWatchOutputPath) ?? workingDir;
+        var ramWatchOutputDirPath = CreateNewPath(config.RamWatchOutputPath) ?? workingDir;
         args.Add($"--save-ram-watch={ramWatchOutputDirPath}");
 
         if (!showBizhawkGui) {
@@ -470,8 +478,9 @@ public partial class Emulator : MonoBehaviour
 
         return;
 
+        /// created a folder on the specified path, if any
         [CanBeNull]
-        string NewFilesPath(string path) {
+        static string CreateNewPath(string path) {
 	        var s = path;
 	        if (string.IsNullOrEmpty(s)) {
 				return null;
@@ -503,6 +512,7 @@ public partial class Emulator : MonoBehaviour
 	        if (_shouldInitialize) {
 				_Initialize();
 	        }
+
             return;
         }
 
@@ -617,7 +627,7 @@ public partial class Emulator : MonoBehaviour
             InitTextures(width, height);
         }
 
-        var bSize = _bufferTexture.width * _bufferTexture.height;
+        var bSize = _bufferTexture!.width * _bufferTexture.height;
         if (bSize == 0) {
 	        return;
         }
@@ -652,7 +662,7 @@ public partial class Emulator : MonoBehaviour
 
         Status = EmulatorStatus.Inactive;
 
-        foreach (ISharedBuffer buf in new ISharedBuffer[] {
+        foreach (var buf in new ISharedBuffer[] {
             _sharedTextureBuffer,
             _sharedAudioBuffer,
             _luaCallbacksRpcBuffer,
@@ -678,7 +688,7 @@ public partial class Emulator : MonoBehaviour
         }
 
         if (targetRenderer) {
-	        _materialProperties.SetTexture("_MainTex", renderTexture);
+	        _materialProperties.SetTexture(_shader_MainTex, renderTexture);
 			targetRenderer.SetPropertyBlock(_materialProperties);
         }
     }
