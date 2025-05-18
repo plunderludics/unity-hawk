@@ -2,7 +2,6 @@
 // Including methods for interfacing with the BizHawk API (loading/saving states, etc)
 
 using System;
-using System.Diagnostics.CodeAnalysis;
 using UnityEngine;
 
 using NaughtyAttributes;
