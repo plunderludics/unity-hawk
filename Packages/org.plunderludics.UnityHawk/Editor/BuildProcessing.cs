@@ -22,12 +22,13 @@ namespace UnityHawk {
 //       below in OnPreprocessBuild
 
 public class BuildProcessing : IPreprocessBuildWithReport, IProcessSceneWithReport, IPostprocessBuildWithReport {
+	/// if the scene was processed or not
     bool _didProcessScene = false;
 
-	// -- IOrderedCallback --
+	///// IOrderedCallback
     public int callbackOrder => 0;
 
-    // -- IPreprocessBuildWithReport --
+    ///// IPreprocessBuildWithReport
     public void OnPreprocessBuild(BuildReport report) {
         // This is so dumb, but it seems like OnProcessScene only gets called for the first build after a scene is saved
         // (because incremental build means a scene won't get re-built if it hasn't changed)
@@ -47,7 +48,7 @@ public class BuildProcessing : IPreprocessBuildWithReport, IProcessSceneWithRepo
         }
     }
 
-    // -- IProcessSceneWithReport --
+    ///// IProcessSceneWithReport
     public void OnProcessScene(Scene scene, BuildReport report) {
         if (BuildPipeline.isBuildingPlayer) {
             ProcessScene(scene, report.summary.outputPath);
@@ -55,7 +56,7 @@ public class BuildProcessing : IPreprocessBuildWithReport, IProcessSceneWithRepo
         }
     }
 
-    // -- IPostprocessBuildWithReport --
+    ///// IPostprocessBuildWithReport
     public void OnPostprocessBuild(BuildReport report) {
         Debug.Log("OnPostprocessBuild");
         if (!_didProcessScene) {
@@ -72,7 +73,7 @@ public class BuildProcessing : IPreprocessBuildWithReport, IProcessSceneWithRepo
         FileUtil.ReplaceDirectory(Path.GetFullPath(Paths.BizHawkDir), Path.GetFullPath(targetDir)); // [only works with full paths for some reason]
     }
 
-    // -- commands --
+    ///// commands
     static void ProcessScene(Scene scene, string exePath) {
         // Need to create the build dir in advance so we can copy files in there before the build actually happens
         var bizhawkAssetsPath = Path.Combine(GetBuildDataDir(exePath), Paths.BizHawkAssetsDirName);
@@ -148,7 +149,7 @@ public class BuildProcessing : IPreprocessBuildWithReport, IProcessSceneWithRepo
         }
     }
 
-    // -- queries --
+    ///// queries
     static string GetBuildDataDir(string exePath) {
         return Path.Combine(Path.GetDirectoryName(exePath)!, $"{Path.GetFileNameWithoutExtension(exePath)}_Data");
     }

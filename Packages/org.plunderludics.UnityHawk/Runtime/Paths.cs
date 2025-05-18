@@ -6,9 +6,8 @@ using UnityEngine;
 namespace UnityHawk {
 
 // TODO: make a bunch of these paths configurable in some config file
-public static class Paths
-{
-    // -- exe --
+public static class Paths {
+    ///// exe
     private static readonly string packageName = "org.plunderludics.UnityHawk";
     public static readonly string BizhawkDirRelative = Path.Combine(packageName, "BizHawk~");
     private static readonly string _bizhawkDirForEditor = Path.Combine("Packages", BizhawkDirRelative);
@@ -37,7 +36,7 @@ public static class Paths
 
     public static readonly string dllDir = Path.Combine(BizHawkDir, "dll");
 
-    // -- assets --
+    ///// assets
     public const string BizHawkAssetsDirName = "BizhawkAssets";
     private static readonly string _bizhawkAssetsDirForEditor = Application.dataPath;
     public static readonly string BizHawkAssetsDirForBuild = Path.Combine(Application.dataPath, BizHawkAssetsDirName);

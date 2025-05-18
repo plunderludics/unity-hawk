@@ -134,7 +134,7 @@ public partial class Emulator : MonoBehaviour {
 
     Process _emuhawk;
 
-    // Basically these are the params which, if changed, we want to reset the bizhawk process
+    /// Basically these are the params which, if changed, we want to reset the bizhawk process
     // Don't include the path params here, because then the process gets reset for every character typed/deleted
     struct BizhawkArgs {
 #if UNITY_EDITOR
@@ -379,6 +379,7 @@ public partial class Emulator : MonoBehaviour {
         var ramWatchOutputDirPath = CreateNewPath(config.RamWatchOutputPath) ?? workingDir;
         args.Add($"--save-ram-watch={ramWatchOutputDirPath}");
 
+        // headless mode
         if (!showBizhawkGui) {
             args.Add("--headless");
             _emuhawk.StartInfo.CreateNoWindow = true;
@@ -478,8 +479,8 @@ public partial class Emulator : MonoBehaviour {
 
         return;
 
-        /// created a folder on the specified path, if any
         [CanBeNull]
+        // creates a folder on the specified path, if any
         static string CreateNewPath(string path) {
 	        var s = path;
 	        if (string.IsNullOrEmpty(s)) {

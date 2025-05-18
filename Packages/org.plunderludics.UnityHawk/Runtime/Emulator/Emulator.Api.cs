@@ -115,7 +115,7 @@ public partial class Emulator {
         RegisterLuaCallback(methodName, luaCallback);
     }
 
-    // -- Bizhawk API methods --
+    ///// Bizhawk API methods
     // For LoadState/SaveState/LoadRom, path should be relative to StreamingAssets (same as for rom/savestate/lua params in the inspector)
     // can also pass absolute path (but this will most likely break in build!)
 
