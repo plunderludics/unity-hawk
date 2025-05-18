@@ -337,6 +337,17 @@
                 },
                 {
                     "name": "",
+                    "id": "9d816da3-9c21-4183-b6ef-f75ec5309a3d",
+                    "path": "<Keyboard>/space",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "A",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
                     "id": "d0a89752-c95b-40be-bb0f-71c0b1318d6e",
                     "path": "<Keyboard>/s",
                     "interactions": "",

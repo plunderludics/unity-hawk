@@ -29,14 +29,17 @@ public class GenericInputProvider : InputProvider {
 
     [Serializable]
     public class Action2Key {
-        public InputActionReference action;
+        [FormerlySerializedAs("name")]
+        [FormerlySerializedAs("inputName")]
         [FormerlySerializedAs("keyName")]
         [Tooltip("Name of key/axis on the Bizhawk side")]
-        public string inputName;
+        public string Name;
+
+        public InputActionReference action;
         public bool enabled = true;
         public Action2Key(Action2Key other) {
             action = other.action;
-            inputName = other.inputName;
+            Name = other.Name;
             enabled = other.enabled;
         }
     }
@@ -91,7 +94,7 @@ public class GenericInputProvider : InputProvider {
         foreach (var a2k in keyMappings) {
             // Add press/release callbacks for key mappings
             if (a2k.action.action.type != InputActionType.Button) {
-                Debug.LogWarning($"Mapping from {a2k.action.action.name} to {a2k.inputName} is type {a2k.action.action.type}, should probably be Button for key events");
+                Debug.LogWarning($"Mapping from {a2k.action.action.name} to {a2k.Name} is type {a2k.action.action.type}, should probably be Button for key events");
             }
 
             // [I don't get why you have to manually enable all the actions, but ok]
@@ -111,7 +114,7 @@ public class GenericInputProvider : InputProvider {
                     return;
                 }
                 pressed.Add(new InputEvent {
-                    keyName = mappingsDict[ctx.action.id].inputName,
+                    keyName = mappingsDict[ctx.action.id].Name,
                     isPressed = true
                 });
             };
@@ -125,7 +128,7 @@ public class GenericInputProvider : InputProvider {
                     return;
                 }
                 pressed.Add(new InputEvent {
-                    keyName = mappingsDict[ctx.action.id].inputName,
+                    keyName = mappingsDict[ctx.action.id].Name,
                     isPressed = false
                 });
             };
@@ -136,7 +139,7 @@ public class GenericInputProvider : InputProvider {
             a2a.action.action.Enable();
         }
     }
-    
+
     public override List<InputEvent> InputForFrame() {
         // flush input event list
         // maybe this is bad?
@@ -145,7 +148,7 @@ public class GenericInputProvider : InputProvider {
         // Debug.Log($"GenericInputProvider returning: {flush.Count} events");
         return flush.Concat(base.InputForFrame()).ToList(); ;
     }
-    
+
     public override Dictionary<string, int> AxisValuesForFrame()
     {
         var axisValues = new Dictionary<string, int>();
@@ -155,10 +158,10 @@ public class GenericInputProvider : InputProvider {
             if (!a2k.enabled) continue;
 
             if (a2k.action.action.type == InputActionType.Button) {
-                Debug.LogWarning($"Mapping from {a2k.action.action.name} to {a2k.inputName} is type {a2k.action.action.type}, should probably be PassThrough or Value for analog inputs");
+                Debug.LogWarning($"Mapping from {a2k.action.action.name} to {a2k.Name} is type {a2k.action.action.type}, should probably be PassThrough or Value for analog inputs");
             }
 
-            axisValues[a2k.inputName] = (int)(axisScale*a2k.scale*a2k.action.action.ReadValue<float>());
+            axisValues[a2k.Name] = (int)(axisScale*a2k.scale*a2k.action.action.ReadValue<float>());
         }
 
         // axisValues["X1 LeftThumbX Axis"] = 9999; // this seems to be roughly the max value for bizhawk (at least for n64)
@@ -215,7 +218,7 @@ public class GenericInputProvider : InputProvider {
     void Start() {
         Debug.LogError("GenericInputProvider will not work because the new input system is not enabled.");
     }
-    
+
     // Still need a dummy implementation of the interface:
     public override List<InputEvent> InputForFrame() {return new();}
     public override Dictionary<string, int> AxisValuesForFrame() {return new();}

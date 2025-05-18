@@ -15,6 +15,9 @@
 **/BizHawk~/EmuHawkMono.sh
 **/BizHawk~/FormBase.cs
 **/BizHawk~/OpenTK.dll.config
+**/BizHawk~/**/*.SaveRAM
+**/BizHawk~/**/*.SaveRAM.bak
+
 
 # Ignore the dlls - these should be copied from BizHawk/output/dlls
 /Assets/Plugins/

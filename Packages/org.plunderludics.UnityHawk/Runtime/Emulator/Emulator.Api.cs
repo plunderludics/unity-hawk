@@ -2,48 +2,78 @@
 // Including methods for interfacing with the BizHawk API (loading/saving states, etc)
 
 using System;
+using System.Diagnostics.CodeAnalysis;
 using UnityEngine;
-using Plunderludics;
-using System.IO;
-using System.Linq;
+
 using NaughtyAttributes;
+using BizHawkConfig = BizHawk.Client.Common.Config;
 
 namespace UnityHawk {
 
-public partial class Emulator
-{
-	[Tooltip("the the volume of the emulator, 0-100")]
-	[OnValueChanged(nameof(SetVolume))]
+public partial class Emulator {
+	[Header("api")]
+	[OnValueChanged(nameof(OnSetVolume))]
 	[Range(0, 100)]
+	[Tooltip("the the volume of the emulator, 0-100")]
 	[SerializeField] int volume = 100;
 
 	/// the volume of the emulator, 0-100
-	public int Volume
-	{
+	public int Volume {
 		get => volume;
-		set => SetVolume(value);
+		set {
+			volume = value;
+			OnSetVolume();
+		}
 	}
 
+	[OnValueChanged(nameof(OnSetIsMuted))]
 	[Tooltip("if the emulator is muted")]
-	[OnValueChanged(nameof(SetIsMuted))]
 	[SerializeField] bool isMuted;
 
 	/// if the emulator is muted
-	public bool IsMuted
-	{
+	public bool IsMuted {
 		get => isMuted;
-		set => SetIsMuted(value);
+		set {
+			isMuted = value;
+			OnSetIsMuted();
+		}
 	}
 
-    public RenderTexture Texture => renderTexture;
-    public bool IsRunning => Status == EmulatorStatus.Running; // is the emuhawk.exe process running? (best guess, might be wrong)
+	[OnValueChanged(nameof(OnSetIsPaused))]
+	[Tooltip("if the emulator is paused")]
+	[SerializeField] bool isPaused;
 
+	/// if the emulator is paused
+	public bool IsPaused {
+		get => isPaused;
+		set {
+			isPaused = value;
+			OnSetIsPaused();
+		}
+	}
+
+	/// the internal render texture
+	public RenderTexture Texture => renderTexture;
+
+	/// is the emuhawk.exe process started? (best guess, might be wrong)
+    public bool IsStarted => Status == EmulatorStatus.Started;
+
+	/// is the emuhawk.exe process running a game? (best guess, might be wrong)
+    public bool IsRunning => Status == EmulatorStatus.Running;
+
+    /// the current status of the emulator
     public enum EmulatorStatus {
+	    /// BizHawk hasn't started yet
         Inactive,
-        Started, // Underlying bizhawk has been started, but not rendering yet
-        Running  // Bizhawk is running and sending textures [technically gets set when shared texture channel is open]
+
+        /// BizHawk has been started, but not rendering yet
+        Started,
+
+        /// Bizhawk is running and sending textures [technically gets set when shared texture channel is open]
+        Running
     }
 
+    /// the current status of the emulator
     public EmulatorStatus Status {
         get => _status;
         private set {
@@ -60,9 +90,18 @@ public partial class Emulator
         }
     }
 
+    /// sets the config default values
+    void SetConfigDefaults(ref BizHawkConfig bizConfig) {
+	    bizConfig.SoundVolume = volume;
+	    bizConfig.StartPaused = IsPaused;
+	    bizConfig.SoundEnabled = !isMuted;
+    }
+
+    /// .
     public int CurrentFrame => _currentFrame;
 
-    /// TODO: string-to-string only rn but some automatic de/serialization for different types would be nice
+    /// delegate for registering lua callbacks
+    // TODO: string-to-string only rn but some automatic de/serialization for different types would be nice
     public delegate string LuaCallback(string arg);
 
     /// Register a callback that can be called via `unityhawk.callmethod('MethodName')` in BizHawk lua
@@ -76,57 +115,57 @@ public partial class Emulator
         RegisterLuaCallback(methodName, luaCallback);
     }
 
-    ///// Bizhawk API methods
+    // -- Bizhawk API methods --
     // For LoadState/SaveState/LoadRom, path should be relative to StreamingAssets (same as for rom/savestate/lua params in the inspector)
     // can also pass absolute path (but this will most likely break in build!)
 
-    /// <summary>
-    /// pauses the emulator
-    /// </summary>
-    public void Pause() {
-        _apiCallBuffer.CallMethod("Pause", null);
+    /// calls the emulator api to pause/unpause
+    void OnSetIsPaused() {
+	    var method = IsPaused ? "Pause" : "Unpause";
+		_apiCallBuffer.CallMethod(method, null);
     }
 
-    /// <summary>
+    /// pauses the emulator
+    public void Pause() {
+		IsPaused = true;
+    }
+
     /// unpauses the emulator
-    /// </summary>
     public void Unpause() {
         _apiCallBuffer.CallMethod("Unpause", null);
     }
 
-    /// <summary>
-    /// sets the emulator volume, 0-100
-    /// </summary>
+    [Obsolete("use Volume setter instead")]
     public void SetVolume(int volume) {
-        _apiCallBuffer.CallMethod("SetVolume", $"{volume}");
-        this.volume = volume;
+	    Volume = volume;
     }
 
-    /// <summary>
-    /// sets the emulator volume
-    /// </summary>
-    public void SetIsMuted(bool isMuted) {
+    /// calls the emulator api to set volume
+    void OnSetVolume() {
+		_apiCallBuffer.CallMethod("SetVolume", $"{volume}");
+    }
+
+    /// calls the emulator api to set sound on/off
+    void OnSetIsMuted() {
         _apiCallBuffer.CallMethod("SetSoundOn", $"{!isMuted}");
-        this.isMuted = isMuted;
     }
 
-    /// <summary>
     /// saves a state to a given path
-    /// </summary>
     /// <param name="path"></param>
     /// TODO: how can this return a savestate object?
-    public void SaveState(string path) {
+    public string SaveState(string path) {
         path = Paths.GetFullPath(path);
         if (!path.Contains(".savestate"))
         {
             path += ".savestate";
         }
         _apiCallBuffer.CallMethod("SaveState", path);
+
+        // TODO: create savestate asset here, async?
+        return path;
     }
 
-    /// <summary>
     /// loads a state from a given path
-    /// </summary>
     /// <param name="path"></param>
     public void LoadState(string path) {
         // TODO: set emulator savestateFile?
@@ -136,30 +175,31 @@ public partial class Emulator
         _apiCallBuffer.CallMethod("LoadState", path);
     }
 
-    /// <summary>
     /// loads a state from a Savestate asset
-    /// </summary>
     /// <param name="sample"></param>
     public void LoadState(Savestate sample) {
         LoadState(Paths.GetAssetPath(sample));
     }
 
-    /// <summary>
     /// reloads the current state
-    /// </summary>
     /// <param name="path"></param>
     public void ReloadState() {
         LoadState(saveStateFile);
     }
 
-    /// <summary>
     /// loads a rom from a given path
-    /// </summary>
     /// <param name="path"></param>
     public void LoadRom(string path) {
         path = Paths.GetFullPath(path);
 
-        if (_status == EmulatorStatus.Inactive) return;
+        if (string.IsNullOrEmpty(path)) {
+	        Debug.LogWarning("[emulator] attempting to load rom with invalid path, ignoring...");
+	        return;
+        }
+
+        if (_status == EmulatorStatus.Inactive) {
+	        return;
+        }
 
         // TODO: set emulator romFile?
         _apiCallBuffer.CallMethod("LoadRom", path);
@@ -168,19 +208,26 @@ public partial class Emulator
         _status = EmulatorStatus.Started; // Not ready until new texture buffer is set up
     }
 
-    /// <summary>
     /// loads a rom from a Rom asset
-    /// </summary>
     /// <param name="rom"></param>
     public void LoadRom(Rom rom) {
         LoadRom(Paths.GetAssetPath(rom));
     }
 
-    /// <summary>
     /// advances a frame on the emulator
-    /// </summary>
     public void FrameAdvance() {
-        _apiCallBuffer.CallMethod("FrameAdvance", null);
+        _apiCallBuffer.CallMethod("FrameAdvance");
     }
+
+	/// initializes the emulator
+	public void Initialize() {
+		Debug.Log("initialiazing!", this);
+		if (_initialized) {
+			Debug.LogWarning("attempting to initialize already initialized emulator", this);
+			return;
+		}
+
+		_Initialize();
+	}
 }
 }

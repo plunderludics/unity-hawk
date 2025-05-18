@@ -26,13 +26,7 @@ public class SavestateImporter : BizHawkAssetImporter<Savestate> {
 
         var savestate = ScriptableObject.CreateInstance<Savestate>();
         savestate.Location = Path.GetRelativePath(Application.dataPath, ctx.assetPath);
-
-        savestate.RomInfo.Name = gameInfo.Name;
-        savestate.RomInfo.Hash = gameInfo.Hash;
-        savestate.RomInfo.Region = gameInfo.Region;
-        savestate.RomInfo.System = gameInfo.System;
-        savestate.RomInfo.NotInDatabase = gameInfo.NotInDatabase;
-        savestate.RomInfo.Core = gameInfo.ForcedCore;
+        savestate.RomInfo = new RomInfo(gameInfo);
 
         ctx.AddObjectToAsset("main obj", savestate);
         ctx.SetMainObject(savestate);
