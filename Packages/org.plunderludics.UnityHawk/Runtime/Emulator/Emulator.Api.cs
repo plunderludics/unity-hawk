@@ -59,21 +59,21 @@ public partial class Emulator
     /// pauses the emulator
     /// </summary>
     public void Pause() {
-        _apiCallBuffer.CallMethod("Pause", null);
+        _apiCommandBuffer.CallMethod("Pause", null);
     }
 
     /// <summary>
     /// unpauses the emulator
     /// </summary>
     public void Unpause() {
-        _apiCallBuffer.CallMethod("Unpause", null);
+        _apiCommandBuffer.CallMethod("Unpause", null);
     }
 
     /// <summary>
     /// unpauses the emulator
     /// </summary>
     public void SetVolume(float volume) {
-        _apiCallBuffer.CallMethod("SetVolume", $"{volume}");
+        _apiCommandBuffer.CallMethod("SetVolume", $"{volume}");
     }
 
     /// <summary>
@@ -87,7 +87,7 @@ public partial class Emulator
         {
             path += ".savestate";
         }
-        _apiCallBuffer.CallMethod("SaveState", path);
+        _apiCommandBuffer.CallMethod("SaveState", path);
     }
 
     /// <summary>
@@ -99,7 +99,7 @@ public partial class Emulator
         path = Paths.GetFullPath(path);
 
         if (_status == EmulatorStatus.Inactive) return;
-        _apiCallBuffer.CallMethod("LoadState", path);
+        _apiCommandBuffer.CallMethod("LoadState", path);
     }
 
     /// <summary>
@@ -128,7 +128,7 @@ public partial class Emulator
         if (_status == EmulatorStatus.Inactive) return;
 
         // TODO: set emulator romFile?
-        _apiCallBuffer.CallMethod("LoadRom", path);
+        _apiCommandBuffer.CallMethod("LoadRom", path);
         // Need to update texture buffer size in case platform has changed:
         _sharedTextureBuffer.UpdateSize();
         _status = EmulatorStatus.Started; // Not ready until new texture buffer is set up
@@ -146,7 +146,14 @@ public partial class Emulator
     /// advances a frame on the emulator
     /// </summary>
     public void FrameAdvance() {
-        _apiCallBuffer.CallMethod("FrameAdvance", null);
+        _apiCommandBuffer.CallMethod("FrameAdvance", null);
+    }
+
+    /// get platform of currently loaded rom, or "NULL"
+    /// Warning: Can block for a long time is rom is not open
+    /// TODO: async version..?
+    public string GetSystemId() {
+        return _apiCallRpcBuffer.CallMethod("GetSystemId");
     }
 }
 }

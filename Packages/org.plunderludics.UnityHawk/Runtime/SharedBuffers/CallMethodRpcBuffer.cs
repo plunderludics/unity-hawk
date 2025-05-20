@@ -1,8 +1,10 @@
+// This is for BizHawk lua to call methods in Unity
+
 using UnityEngine;
 using System;
 using SharedMemory;
 
-namespace Plunderludics {
+namespace UnityHawk {
 
 public class CallMethodRpcBuffer : ISharedBuffer {
     /// the buffer name

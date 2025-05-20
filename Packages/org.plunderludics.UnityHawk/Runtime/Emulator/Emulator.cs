@@ -149,8 +149,11 @@ public partial class Emulator : MonoBehaviour
     /// buffer to receive lua callbacks from bizhawk
     CallMethodRpcBuffer _luaCallbacksRpcBuffer;
 
-    /// buffer to call the bizhawk api
-    ApiCallBuffer _apiCallBuffer;
+    /// buffer for main-thread write-only bizhawk api calls
+    ApiCommandBuffer _apiCommandBuffer;
+
+    /// buffer for read/write non-main-thread bizhawk api calls
+    ApiCallRpcBuffer _apiCallRpcBuffer;
 
     /// buffer to send keyInputs to bizhawk
     SharedInputBuffer _sharedInputBuffer;
@@ -338,6 +341,8 @@ public partial class Emulator : MonoBehaviour
             _emuhawk.StartInfo.CreateNoWindow = true;
             _emuhawk.StartInfo.WindowStyle = ProcessWindowStyle.Hidden;
         }
+        
+        List<string> userData = new(); // Userdata args get used by UnityHawk external tool
 
         // add buffers
         // get a random number to identify the buffers
@@ -357,9 +362,13 @@ public partial class Emulator : MonoBehaviour
 
         // create & register api call buffer
         // TODO
-        // var apiCallBufferName = $"unityhawk-apicall-{randomNumber}";
-        // args.Add($"--api-call-method-buffer={apiCallBufferName}");
-        // _apiCallBuffer = new ApiCallBuffer(apiCallBufferName);
+        // var apiCommandBufferName = $"unityhawk-apicall-{randomNumber}";
+        // args.Add($"--api-call-method-buffer={apiCommandBufferName}");
+        // _apiCommandBuffer = new ApiCommandBuffer(apiCommandBufferName);
+
+        var apiCallRpcBufferName = $"api-call-rpc-{randomNumber}";
+        userData.Add($"unityhawk-api-call-rpc:{apiCallRpcBufferName}");
+        _apiCallRpcBuffer = new ApiCallRpcBuffer(apiCallRpcBufferName);
 
         // create & register audio buffer
         // TODO
@@ -378,12 +387,10 @@ public partial class Emulator : MonoBehaviour
         //     }
         // }
 
-        List<string> userData = new();
-
         // create & register input buffers
         if (Application.isPlaying) {
             if (passInputFromUnity) {
-                var sharedInputBufferName = $"unityhawk-key-input-{randomNumber}";
+                var sharedInputBufferName = $"input-{randomNumber}";
                 // args.Add($"--read-input-from-shared-buffer={sharedKeyInputBufferName}");
                 userData.Add($"unityhawk-input-buffer:{sharedInputBufferName}");
                 _sharedInputBuffer = new SharedInputBuffer(sharedInputBufferName);
@@ -477,12 +484,12 @@ public partial class Emulator : MonoBehaviour
             }
         }
 
-        if (_sharedTextureBuffer.IsOpen()) {
-            Status = EmulatorStatus.Running;
-            UpdateTextureFromBuffer();
-        } else {
-            AttemptOpenBuffer(_sharedTextureBuffer);
-        }
+        // if (_sharedTextureBuffer.IsOpen()) {
+        //     Status = EmulatorStatus.Running;
+        //     UpdateTextureFromBuffer();
+        // } else {
+        //     AttemptOpenBuffer(_sharedTextureBuffer);
+        // }
 
         if (passInputFromUnity && Application.isPlaying) {
             List<InputEvent> inputEvents = inputProvider.InputForFrame();
@@ -493,27 +500,30 @@ public partial class Emulator : MonoBehaviour
             }
         }
 
-        if (!_luaCallbacksRpcBuffer.IsOpen()) {
-            AttemptOpenBuffer(_luaCallbacksRpcBuffer);
-        }
-        if (!_apiCallBuffer.IsOpen()) {
-            AttemptOpenBuffer(_apiCallBuffer);
-        }
-        if (!_apiCallBuffer.IsOpen()) {
-            AttemptOpenBuffer(_apiCallBuffer);
+        // if (!_luaCallbacksRpcBuffer.IsOpen()) {
+        //     AttemptOpenBuffer(_luaCallbacksRpcBuffer);
+        // }
+        // if (!_apiCommandBuffer.IsOpen()) {
+        //     AttemptOpenBuffer(_apiCommandBuffer);
+        // }
+        // if (!_apiCommandBuffer.IsOpen()) {
+        //     AttemptOpenBuffer(_apiCommandBuffer);
+        // }
+        if (!_apiCallRpcBuffer.IsOpen()) {
+            AttemptOpenBuffer(_apiCallRpcBuffer);
         }
 
-        if (captureEmulatorAudio && Application.isPlaying) {
-            if (_sharedAudioBuffer.IsOpen()) {
-                if (Status == EmulatorStatus.Running) {
-                    short[] samples = _sharedAudioBuffer.GetSamples();
-                    // Updating audio before the emulator is actually running messes up the resampling algorithm
-                    _audioResampler.PushSamples(samples);
-                }
-            } else {
-                AttemptOpenBuffer(_sharedAudioBuffer);
-            }
-        }
+        // if (captureEmulatorAudio && Application.isPlaying) {
+        //     if (_sharedAudioBuffer.IsOpen()) {
+        //         if (Status == EmulatorStatus.Running) {
+        //             short[] samples = _sharedAudioBuffer.GetSamples();
+        //             // Updating audio before the emulator is actually running messes up the resampling algorithm
+        //             _audioResampler.PushSamples(samples);
+        //         }
+        //     } else {
+        //         AttemptOpenBuffer(_sharedAudioBuffer);
+        //     }
+        // }
 
         if (_emuhawk != null && _emuhawk.HasExited) {
             Debug.LogWarning("EmuHawk process was unexpectedly killed");
@@ -523,7 +533,7 @@ public partial class Emulator : MonoBehaviour
 
     void WriteInputToBuffer(List<InputEvent> inputEvents) {
         // Get input from inputProvider, serialize and write to the shared memory
-        foreach (InputEvent ie in inputEvents) {
+        foreach (UnityHawk.InputEvent ie in inputEvents) {
             // Convert Unity InputEvent to BizHawk InputEvent
             // [for now only supporting keys, no gamepad]
             var bie = ConvertInput.ToBizHawk(ie);
@@ -577,7 +587,8 @@ public partial class Emulator : MonoBehaviour
             _sharedTextureBuffer,
             _sharedAudioBuffer,
             _luaCallbacksRpcBuffer,
-            _apiCallBuffer
+            _apiCommandBuffer,
+            _apiCallRpcBuffer
         }) {
             if (buf != null && buf.IsOpen()) {
                 buf.Close();

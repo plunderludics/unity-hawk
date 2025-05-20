@@ -14,8 +14,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   mappings:
   - Key: 273
-    Control: A Up
+    Control: DPad U
   - Key: 274
-    Control: A Down
+    Control: DPad D
   - Key: 13
     Control: Start
