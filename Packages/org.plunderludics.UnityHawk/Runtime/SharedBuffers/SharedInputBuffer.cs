@@ -2,10 +2,10 @@ using UnityEngine;
 using SharedMemory;
 using Plunderludics.UnityHawk;
 
-public class SharedKeyInputBuffer : ISharedBuffer {
+public class SharedInputBuffer : ISharedBuffer {
     private string _name;
     private CircularBuffer _buffer;
-    public SharedKeyInputBuffer(string name) {
+    public SharedInputBuffer(string name) {
         _name = name;
     }
 

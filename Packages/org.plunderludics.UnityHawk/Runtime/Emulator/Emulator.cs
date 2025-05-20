@@ -153,10 +153,7 @@ public partial class Emulator : MonoBehaviour
     ApiCallBuffer _apiCallBuffer;
 
     /// buffer to send keyInputs to bizhawk
-    SharedKeyInputBuffer _sharedKeyInputBuffer;
-
-    /// buffer to send analog input to bizhawk
-    SharedAnalogInputBuffer _sharedAnalogInputBuffer;
+    SharedInputBuffer _sharedInputBuffer;
 
     /// buffer to receive screen texture from bizhawk
     SharedTextureBuffer _sharedTextureBuffer;
@@ -347,48 +344,49 @@ public partial class Emulator : MonoBehaviour
         var randomNumber = new System.Random().Next();
 
         // create & register sharedTextureBuffer
-        var sharedTextureBufferName = $"unityhawk-texture-{randomNumber}";
-        args.Add($"--write-texture-to-shared-buffer={sharedTextureBufferName}");
-        _sharedTextureBuffer = new SharedTextureBuffer(sharedTextureBufferName);
+        // TODO
+        // var sharedTextureBufferName = $"unityhawk-texture-{randomNumber}";
+        // args.Add($"--write-texture-to-shared-buffer={sharedTextureBufferName}");
+        // _sharedTextureBuffer = new SharedTextureBuffer(sharedTextureBufferName);
 
         // create & register lua callbacks rpc
-        var luaCallbacksRpcBufferName = $"unityhawk-callmethod-{randomNumber}";
-        args.Add($"--unity-call-method-buffer={luaCallbacksRpcBufferName}");
-        _luaCallbacksRpcBuffer = new CallMethodRpcBuffer(luaCallbacksRpcBufferName, CallRegisteredLuaCallback);
+        // TODO
+        // var luaCallbacksRpcBufferName = $"unityhawk-callmethod-{randomNumber}";
+        // args.Add($"--unity-call-method-buffer={luaCallbacksRpcBufferName}");
+        // _luaCallbacksRpcBuffer = new CallMethodRpcBuffer(luaCallbacksRpcBufferName, CallRegisteredLuaCallback);
 
         // create & register api call buffer
-        var apiCallBufferName = $"unityhawk-apicall-{randomNumber}";
-        args.Add($"--api-call-method-buffer={apiCallBufferName}");
-        _apiCallBuffer = new ApiCallBuffer(apiCallBufferName);
+        // TODO
+        // var apiCallBufferName = $"unityhawk-apicall-{randomNumber}";
+        // args.Add($"--api-call-method-buffer={apiCallBufferName}");
+        // _apiCallBuffer = new ApiCallBuffer(apiCallBufferName);
 
         // create & register audio buffer
-        if (captureEmulatorAudio) {
-            if (runInEditMode && !Application.isPlaying) {
-                Debug.LogWarning("captureEmulatorAudio is enabled but emulator audio cannot be captured in edit mode");
-            } else {
-                var sharedAudioBufferName = $"unityhawk-audio-{randomNumber}";
-                args.Add($"--share-audio-over-rpc-buffer={sharedAudioBufferName}");
-                _sharedAudioBuffer = new SharedAudioBuffer(sharedAudioBufferName);
+        // TODO
+        // if (captureEmulatorAudio) {
+        //     if (runInEditMode && !Application.isPlaying) {
+        //         Debug.LogWarning("captureEmulatorAudio is enabled but emulator audio cannot be captured in edit mode");
+        //     } else {
+        //         var sharedAudioBufferName = $"unityhawk-audio-{randomNumber}";
+        //         args.Add($"--share-audio-over-rpc-buffer={sharedAudioBufferName}");
+        //         _sharedAudioBuffer = new SharedAudioBuffer(sharedAudioBufferName);
 
-                if (_audioResampler == null) {
-                    _audioResampler = new();
-                }
-                _audioResampler.Init(BizhawkSampleRate/AudioSettings.outputSampleRate);
-            }
-        }
+        //         if (_audioResampler == null) {
+        //             _audioResampler = new();
+        //         }
+        //         _audioResampler.Init(BizhawkSampleRate/AudioSettings.outputSampleRate);
+        //     }
+        // }
+
+        List<string> userData = new();
 
         // create & register input buffers
         if (Application.isPlaying) {
             if (passInputFromUnity) {
-                var sharedKeyInputBufferName = $"unityhawk-key-input-{randomNumber}";
-                // args.Add($"--read-key-input-from-shared-buffer={sharedKeyInputBufferName}");
-                // TODO: everything needs to go into userdata like this:
-                args.Add($"--userdata=unityhawk-key-input-buffer:{sharedKeyInputBufferName}");
-                _sharedKeyInputBuffer = new SharedKeyInputBuffer(sharedKeyInputBufferName);
-
-                var sharedAnalogInputBufferName = $"unityhawk-analog-input-{randomNumber}";
-                args.Add($"--read-analog-input-from-shared-buffer={sharedAnalogInputBufferName}");
-                _sharedAnalogInputBuffer = new SharedAnalogInputBuffer(sharedAnalogInputBufferName);
+                var sharedInputBufferName = $"unityhawk-key-input-{randomNumber}";
+                // args.Add($"--read-input-from-shared-buffer={sharedKeyInputBufferName}");
+                userData.Add($"unityhawk-input-buffer:{sharedInputBufferName}");
+                _sharedInputBuffer = new SharedInputBuffer(sharedInputBufferName);
 
                 // default to BasicInputProvider (maps keys directly from keyboard)
                 if (inputProvider == null) {
@@ -398,21 +396,18 @@ public partial class Emulator : MonoBehaviour
                 }
                 args.Add($"--accept-background-input=false");
             } else {
-                // Always accept background input in play mode if not getting input from unity
+                // Always accept background input in play mode if not getting input from unity (otherwise would be no input at all)
                 args.Add($"--accept-background-input=true");
             }
         } else if (runInEditMode) {
-            if (acceptBackgroundInput) {
-                // TODO clean this up
-                args.Add($"--accept-background-input=true");
-            } else {
-                args.Add($"--accept-background-input=false");
-            }
+            args.Add($"--accept-background-input={(acceptBackgroundInput ? "true" : "false")}");
         }
 
         if (suppressBizhawkPopups) {
             args.Add("--suppress-popups"); // Don't pop up windows for messages/exceptions (they will still appear in the logs)
         }
+
+        if (userData.Count > 0) args.Add($"--userdata={string.Join(";", userData)}"); // Userdata args get used by UnityHawk external tool
 
         args.Add("--open-ext-tool-dll=UnityHawk"); // Open unityhawk external tool
         args.Add($"--ext-tools-dir={Path.GetFullPath(Paths.externalToolsDir)}"); // Has to be set since not running from the bizhawk directory
@@ -491,17 +486,11 @@ public partial class Emulator : MonoBehaviour
 
         if (passInputFromUnity && Application.isPlaying) {
             List<InputEvent> inputEvents = inputProvider.InputForFrame();
-            if (_sharedKeyInputBuffer.IsOpen()) {
+            if (_sharedInputBuffer.IsOpen()) {
                 WriteInputToBuffer(inputEvents);
             } else {
-                AttemptOpenBuffer(_sharedKeyInputBuffer);
+                AttemptOpenBuffer(_sharedInputBuffer);
             }
-
-            // if (_sharedAnalogInputBuffer.IsOpen()) {
-            //     WriteAxisValuesToBuffer(inputProvider.AxisValuesForFrame());
-            // } else {
-            //     AttemptOpenBuffer(_sharedAnalogInputBuffer);
-            // }
         }
 
         if (!_luaCallbacksRpcBuffer.IsOpen()) {
@@ -538,12 +527,9 @@ public partial class Emulator : MonoBehaviour
             // Convert Unity InputEvent to BizHawk InputEvent
             // [for now only supporting keys, no gamepad]
             var bie = ConvertInput.ToBizHawk(ie);
-            _sharedKeyInputBuffer.Write(bie);
+            _sharedInputBuffer.Write(bie);
         }
     }
-    // void WriteAxisValuesToBuffer(Dictionary<string, int> axisValues) {
-    //     _sharedAnalogInputBuffer.Write(axisValues);
-    // }
 
     void UpdateTextureFromBuffer() {
         // Get the texture buffer and dimensions from BizHawk via the shared memory file
