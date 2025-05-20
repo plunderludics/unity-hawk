@@ -30,26 +30,10 @@ public class CallMethodRpcBuffer : ISharedBuffer {
                 try { // Because this runs outside the main threads, we have to catch all exceptions to force them to display in the console
                     // Debug.Log($"callmethod rpc request {string.Join(", ", payload)}");
 
-                    // deserialize payload into method name and args (separated by 0)
-                    // [could/should use MethodCall struct here + generic deserialization instead]
-                    int methodNameLength = System.Array.IndexOf(payload, (byte)0);
-                    byte[] methodNameBytes = new byte[methodNameLength];
-                    byte[] argBytes = new byte[payload.Length - methodNameLength - 1];
-                    Array.Copy(
-                        sourceArray: payload,
-                        sourceIndex: 0,
-                        destinationArray: methodNameBytes,
-                        destinationIndex: 0,
-                        length: methodNameLength);
-                    Array.Copy(
-                        sourceArray: payload,
-                        sourceIndex: methodNameLength + 1,
-                        destinationArray: argBytes,
-                        destinationIndex: 0,
-                        length: argBytes.Length);
-
-                    string methodName = System.Text.Encoding.ASCII.GetString(methodNameBytes);
-                    string argString = System.Text.Encoding.ASCII.GetString(argBytes);
+                    // Deserialize the payload to a MethodCall struct
+                    MethodCall methodCall = Serialization.RawDeserialize<MethodCall>(payload);
+                    string methodName = methodCall.MethodName;
+                    string argString = methodCall.Argument;
 
                     var exists = _callRegisteredMethod(methodName, argString, out returnString);
 

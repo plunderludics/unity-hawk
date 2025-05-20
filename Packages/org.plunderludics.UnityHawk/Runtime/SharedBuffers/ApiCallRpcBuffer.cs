@@ -1,0 +1,60 @@
+// This is for calls to Bizhawk that require a return value
+// Warning: runs at an arbitrary time in a non-main thread
+// Use ApiCommandBuffer for simple calls that don't require a return value - those will run in the main thread at the beginning of each frame
+
+using System;
+using System.Collections.Generic;
+using System.Collections.Concurrent;
+using System.Text;
+
+using Plunderludics.UnityHawk;
+using UnityEngine;
+using SharedMemory;
+
+namespace UnityHawk {
+public class ApiCallRpcBuffer : ISharedBuffer {
+    string _name;
+    RpcBuffer _apiCallRpc;
+
+    public ApiCallRpcBuffer(string bufferName) {
+        _name = bufferName;
+    }
+
+    public void Open() {
+        _apiCallRpc = new RpcBuffer(name: _name);
+    }
+
+    public string CallMethod(string methodName, string arg = null) {
+        // serialize (methodName, input) into a MethodCall struct
+        MethodCall methodCall = new MethodCall {
+            MethodName = methodName,
+            Argument = arg
+        };
+        byte[] bytes = Serialization.Serialize(methodCall);
+
+        // Debug.Log($"Sending callmethod RPC request to Bizhawk ({methodName}, {args})");
+        // TODO async version of this?
+        var response = _apiCallRpc.RemoteRequest(bytes);
+        if (response == null) {
+            Debug.LogWarning($"Tried to call method {methodName} but Bizhawk didn't respond");
+            return null;
+        }
+        if (!response.Success) {
+            Debug.LogWarning($"Bizhawk failed to return a value for callmethod ({methodName})");
+            return null;
+        }
+        string responseString = System.Text.Encoding.ASCII.GetString(response.Data);
+        return responseString;
+    }
+
+    public bool IsOpen() {
+        return _apiCallRpc != null;
+    }
+
+    
+    public void Close() {
+        _apiCallRpc.Dispose();
+        _apiCallRpc = null;
+    }	    
+}
+}
