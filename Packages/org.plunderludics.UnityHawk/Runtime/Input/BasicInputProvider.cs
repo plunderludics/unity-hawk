@@ -75,11 +75,14 @@ public class BasicInputProvider : InputProvider {
             }
             keyName = System.Enum.GetName(typeof(KeyCode), k);
 #endif
+            // TODO need to map keyname to a controller button
             if (interaction) {
                 // Debug.Log($"key event: {k} {isPressed}");
                 pressedThisFrame.Add(new InputEvent {
-                    keyName = keyName,
-                    isPressed = isPressed
+                    name = keyName,
+                    value = isPressed ? 1 : 0,
+                    controller = 1, // TODO: support multiple controllers ?
+                    isAnalog = false
                 });
             }
         }

@@ -4,11 +4,13 @@ using UnityEngine;
 namespace UnityHawk {
 
 // input in Unity format
-// [currently only keyboard, no gamepad/mouse support yet]
+// (basically same as InputEvent in BizHawk, but keep decoupled in case)
 public struct InputEvent {
-    public string keyName; // should match the enum name here [https://docs.unity3d.com/ScriptReference/KeyCode.html]
-                           // hopefully equivalent to new inputsystem as well
-    public bool isPressed; // either pressed or released this frame
+    public string name; // Must correspond to emulator button/axis name E.g. "P1 A"
+    public int value;  // 0 or 1 for buttons, -INT_MAX - INT_MAX for analog (?)
+    public int controller; // Starts from 1
+    public bool isAnalog;
+    public override string ToString() => $"{name}:{value}";
 }
 
 // Generic base class for providing input
@@ -27,19 +29,19 @@ public abstract class InputProvider : MonoBehaviour {
         return toReturn;
     }
 
-    public virtual Dictionary<string, int> AxisValuesForFrame() {
-        var toReturn = new Dictionary<string, int>(_addedAxisInputs);
-        _addedAxisInputs.Clear();
-        return toReturn;
-    }
+    // public virtual Dictionary<string, int> AxisValuesForFrame() {
+    //     var toReturn = new Dictionary<string, int>(_addedAxisInputs);
+    //     _addedAxisInputs.Clear();
+    //     return toReturn;
+    // }
 
     public void AddInputEvent(InputEvent ie) {
         _addedInputs.Add(ie);
     }
 
-    public void AddAxisInputEvent(string axis, int value) {
-        _addedAxisInputs.Add(axis, value);
-    }
+    // public void AddAxisInputEvent(string axis, int value) {
+    //     _addedAxisInputs.Add(axis, value);
+    // }
 }
 
 }

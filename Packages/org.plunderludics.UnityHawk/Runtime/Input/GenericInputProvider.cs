@@ -111,8 +111,10 @@ public class GenericInputProvider : InputProvider {
                     return;
                 }
                 pressed.Add(new InputEvent {
-                    keyName = mappingsDict[ctx.action.id].inputName,
-                    isPressed = true
+                    name = mappingsDict[ctx.action.id].inputName,
+                    value = 1,
+                    isAnalog = false,
+                    controller = 1 // TODO: support multiple controllers ?
                 });
             };
             // release
@@ -125,8 +127,10 @@ public class GenericInputProvider : InputProvider {
                     return;
                 }
                 pressed.Add(new InputEvent {
-                    keyName = mappingsDict[ctx.action.id].inputName,
-                    isPressed = false
+                    name = mappingsDict[ctx.action.id].inputName,
+                    value = 0,
+                    isAnalog = false,
+                    controller = 1 // TODO: support multiple controllers ?
                 });
             };
         }
@@ -145,25 +149,6 @@ public class GenericInputProvider : InputProvider {
         // Debug.Log($"GenericInputProvider returning: {flush.Count} events");
         return flush.Concat(base.InputForFrame()).ToList(); ;
     }
-    
-    public override Dictionary<string, int> AxisValuesForFrame()
-    {
-        var axisValues = new Dictionary<string, int>();
-
-        // Send latest values for actions of type Value or PassThrough (not Button)
-        foreach (var a2k in axisMappings) {
-            if (!a2k.enabled) continue;
-
-            if (a2k.action.action.type == InputActionType.Button) {
-                Debug.LogWarning($"Mapping from {a2k.action.action.name} to {a2k.inputName} is type {a2k.action.action.type}, should probably be PassThrough or Value for analog inputs");
-            }
-
-            axisValues[a2k.inputName] = (int)(axisScale*a2k.scale*a2k.action.action.ReadValue<float>());
-        }
-
-        // axisValues["X1 LeftThumbX Axis"] = 9999; // this seems to be roughly the max value for bizhawk (at least for n64)
-        return axisValues;
-    }
 
     void Update() {
         // Minor hack so the mapping list is populated from the mapping object when unticking 'use mapping object' in edit mode
@@ -173,7 +158,7 @@ public class GenericInputProvider : InputProvider {
     }
 
     // queries
-    public int GamepadIndex{
+    public int GamepadIndex {
         get {
             return gamepadIndex;
         }

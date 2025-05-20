@@ -36,6 +36,7 @@ public static class Paths
     public static readonly string defaultUnityHawkConfigPath = Path.Combine("Packages", packageName, "Runtime/UnityHawkConfigDefault.asset");
 
     public static readonly string dllDir = Path.Combine(BizHawkDir, "dll");
+    public static readonly string externalToolsDir = Path.Combine(BizHawkDir, "ExternalTools");
 
     // -- assets --
     public const string BizHawkAssetsDirName = "BizhawkAssets";

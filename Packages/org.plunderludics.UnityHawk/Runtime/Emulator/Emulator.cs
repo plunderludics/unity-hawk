@@ -381,7 +381,9 @@ public partial class Emulator : MonoBehaviour
         if (Application.isPlaying) {
             if (passInputFromUnity) {
                 var sharedKeyInputBufferName = $"unityhawk-key-input-{randomNumber}";
-                args.Add($"--read-key-input-from-shared-buffer={sharedKeyInputBufferName}");
+                // args.Add($"--read-key-input-from-shared-buffer={sharedKeyInputBufferName}");
+                // TODO: everything needs to go into userdata like this:
+                args.Add($"--userdata=unityhawk-key-input-buffer:{sharedKeyInputBufferName}");
                 _sharedKeyInputBuffer = new SharedKeyInputBuffer(sharedKeyInputBufferName);
 
                 var sharedAnalogInputBufferName = $"unityhawk-analog-input-{randomNumber}";
@@ -394,20 +396,26 @@ public partial class Emulator : MonoBehaviour
                         inputProvider = gameObject.AddComponent<BasicInputProvider>();
                     }
                 }
+                args.Add($"--accept-background-input=false");
             } else {
                 // Always accept background input in play mode if not getting input from unity
-                args.Add($"--accept-background-input");
+                args.Add($"--accept-background-input=true");
             }
         } else if (runInEditMode) {
             if (acceptBackgroundInput) {
-                args.Add($"--accept-background-input");
+                // TODO clean this up
+                args.Add($"--accept-background-input=true");
+            } else {
+                args.Add($"--accept-background-input=false");
             }
         }
-
 
         if (suppressBizhawkPopups) {
             args.Add("--suppress-popups"); // Don't pop up windows for messages/exceptions (they will still appear in the logs)
         }
+
+        args.Add("--open-ext-tool-dll=UnityHawk"); // Open unityhawk external tool
+        args.Add($"--ext-tools-dir={Path.GetFullPath(Paths.externalToolsDir)}"); // Has to be set since not running from the bizhawk directory
 
         if (writeBizhawkLogs) {
             // Redirect bizhawk output + error into a log file
@@ -489,11 +497,11 @@ public partial class Emulator : MonoBehaviour
                 AttemptOpenBuffer(_sharedKeyInputBuffer);
             }
 
-            if (_sharedAnalogInputBuffer.IsOpen()) {
-                WriteAxisValuesToBuffer(inputProvider.AxisValuesForFrame());
-            } else {
-                AttemptOpenBuffer(_sharedAnalogInputBuffer);
-            }
+            // if (_sharedAnalogInputBuffer.IsOpen()) {
+            //     WriteAxisValuesToBuffer(inputProvider.AxisValuesForFrame());
+            // } else {
+            //     AttemptOpenBuffer(_sharedAnalogInputBuffer);
+            // }
         }
 
         if (!_luaCallbacksRpcBuffer.IsOpen()) {
@@ -533,9 +541,9 @@ public partial class Emulator : MonoBehaviour
             _sharedKeyInputBuffer.Write(bie);
         }
     }
-    void WriteAxisValuesToBuffer(Dictionary<string, int> axisValues) {
-        _sharedAnalogInputBuffer.Write(axisValues);
-    }
+    // void WriteAxisValuesToBuffer(Dictionary<string, int> axisValues) {
+    //     _sharedAnalogInputBuffer.Write(axisValues);
+    // }
 
     void UpdateTextureFromBuffer() {
         // Get the texture buffer and dimensions from BizHawk via the shared memory file
