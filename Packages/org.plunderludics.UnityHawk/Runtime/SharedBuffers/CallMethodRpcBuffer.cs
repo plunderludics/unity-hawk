@@ -4,6 +4,8 @@ using UnityEngine;
 using System;
 using SharedMemory;
 
+using Plunderludics.UnityHawk;
+
 namespace UnityHawk {
 
 public class CallMethodRpcBuffer : ISharedBuffer {
