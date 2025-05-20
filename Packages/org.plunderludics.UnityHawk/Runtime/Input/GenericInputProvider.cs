@@ -1,3 +1,7 @@
+// TODO: consider if this should be replaced by Controls entirely
+// I think yes but I guess Controls needs an option to support InputActions too
+// also TODO this is untested with new unityhawk input system
+
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -147,6 +151,25 @@ public class GenericInputProvider : InputProvider {
         var flush = new List<InputEvent>(pressed);
         pressed.Clear(); // Not ideal because will break if multiple clients use the same InputProvider, should clear at the end of the frame
         // Debug.Log($"GenericInputProvider returning: {flush.Count} events");
+
+        // Send latest values for actions of type Value or PassThrough (not Button)
+        // TODO: should probably have some kind of onChanged callback instead of polling every input every frame
+        foreach (var a2k in axisMappings) {
+            if (!a2k.enabled) continue;
+
+            if (a2k.action.action.type == InputActionType.Button) {
+                Debug.LogWarning($"Mapping from {a2k.action.action.name} to {a2k.inputName} is type {a2k.action.action.type}, should probably be PassThrough or Value for analog inputs");
+            }
+
+            int value = (int)(axisScale*a2k.scale*a2k.action.action.ReadValue<float>());
+            flush.Add(new InputEvent {
+                name = a2k.inputName,
+                value = value,
+                isAnalog = true,
+                controller = 1 // TODO: support multiple controllers ?
+            });
+        }
+
         return flush.Concat(base.InputForFrame()).ToList(); ;
     }
 
