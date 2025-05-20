@@ -349,7 +349,7 @@ public partial class Emulator : MonoBehaviour
         var randomNumber = new System.Random().Next();
 
         // create & register sharedTextureBuffer
-        var sharedTextureBufferName = $"unityhawk-texture-{randomNumber}";
+        var sharedTextureBufferName = $"texture-{randomNumber}";
         userData.Add($"unityhawk-texture-buffer:{sharedTextureBufferName}");
         _sharedTextureBuffer = new SharedTextureBuffer(sharedTextureBufferName);
 
@@ -359,7 +359,7 @@ public partial class Emulator : MonoBehaviour
         // args.Add($"--unity-call-method-buffer={luaCallbacksRpcBufferName}");
         // _luaCallbacksRpcBuffer = new CallMethodRpcBuffer(luaCallbacksRpcBufferName, CallRegisteredLuaCallback);
 
-        // create & register api call buffer
+        // create & register api call buffers
         // TODO
         // var apiCommandBufferName = $"unityhawk-apicall-{randomNumber}";
         // args.Add($"--api-call-method-buffer={apiCommandBufferName}");
@@ -370,21 +370,20 @@ public partial class Emulator : MonoBehaviour
         _apiCallRpcBuffer = new ApiCallRpcBuffer(apiCallRpcBufferName);
 
         // create & register audio buffer
-        // TODO
-        // if (captureEmulatorAudio) {
-        //     if (runInEditMode && !Application.isPlaying) {
-        //         Debug.LogWarning("captureEmulatorAudio is enabled but emulator audio cannot be captured in edit mode");
-        //     } else {
-        //         var sharedAudioBufferName = $"unityhawk-audio-{randomNumber}";
-        //         args.Add($"--share-audio-over-rpc-buffer={sharedAudioBufferName}");
-        //         _sharedAudioBuffer = new SharedAudioBuffer(sharedAudioBufferName);
+        if (captureEmulatorAudio) {
+            if (runInEditMode && !Application.isPlaying) {
+                Debug.LogWarning("captureEmulatorAudio is enabled but emulator audio cannot be captured in edit mode");
+            } else {
+                var sharedAudioBufferName = $"audio-{randomNumber}";
+                userData.Add($"unityhawk-audio-buffer:{sharedAudioBufferName}");
+                _sharedAudioBuffer = new SharedAudioBuffer(sharedAudioBufferName);
 
-        //         if (_audioResampler == null) {
-        //             _audioResampler = new();
-        //         }
-        //         _audioResampler.Init(BizhawkSampleRate/AudioSettings.outputSampleRate);
-        //     }
-        // }
+                if (_audioResampler == null) {
+                    _audioResampler = new();
+                }
+                _audioResampler.Init(BizhawkSampleRate/AudioSettings.outputSampleRate);
+            }
+        }
 
         // create & register input buffers
         if (Application.isPlaying) {
@@ -513,17 +512,17 @@ public partial class Emulator : MonoBehaviour
             AttemptOpenBuffer(_apiCallRpcBuffer);
         }
 
-        // if (captureEmulatorAudio && Application.isPlaying) {
-        //     if (_sharedAudioBuffer.IsOpen()) {
-        //         if (Status == EmulatorStatus.Running) {
-        //             short[] samples = _sharedAudioBuffer.GetSamples();
-        //             // Updating audio before the emulator is actually running messes up the resampling algorithm
-        //             _audioResampler.PushSamples(samples);
-        //         }
-        //     } else {
-        //         AttemptOpenBuffer(_sharedAudioBuffer);
-        //     }
-        // }
+        if (captureEmulatorAudio && Application.isPlaying) {
+            if (_sharedAudioBuffer.IsOpen()) {
+                if (Status == EmulatorStatus.Running) {
+                    short[] samples = _sharedAudioBuffer.GetSamples();
+                    // Updating audio before the emulator is actually running messes up the resampling algorithm
+                    _audioResampler.PushSamples(samples);
+                }
+            } else {
+                AttemptOpenBuffer(_sharedAudioBuffer);
+            }
+        }
 
         if (_emuhawk != null && _emuhawk.HasExited) {
             Debug.LogWarning("EmuHawk process was unexpectedly killed");
