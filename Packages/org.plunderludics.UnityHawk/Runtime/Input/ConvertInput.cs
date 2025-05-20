@@ -7,13 +7,13 @@ namespace UnityHawk {
 
 // Convert from Unity input format to BizHawk input format
 public static class ConvertInput {
-    public static Plunderludics.UnityHawk.InputEvent ToBizHawk(UnityHawk.InputEvent ke) {
-        // Right now formats are the same, conversion is straightforward
+    public static Plunderludics.UnityHawk.InputEvent ToBizHawk(UnityHawk.InputEvent ie) {
+        // Right now formats are the same, conversion is straightforward (should we just use the bizhawk class directly?)
         return new Plunderludics.UnityHawk.InputEvent {
-            name = ke.name,
-            value = ke.value,
-            controller = ke.controller,
-            isAnalog = ke.isAnalog
+            name = ie.name,
+            value = ie.value,
+            controller = ie.controller,
+            isAnalog = ie.isAnalog
         };
     }
     // private static string UnityKeyNameToBizHawkKeyName(string key) {

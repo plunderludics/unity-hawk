@@ -10,16 +10,14 @@ namespace UnityHawk {
 // Just gets key events directly from Unity
 [DefaultExecutionOrder(-1000)] // Kinda hacky but this has to run before Emulator or there will be a 1-frame input delay.
 public class BasicInputProvider : InputProvider {
-    System.Array _allKeyCodes;
+    public Controls controls; // TODO by default set this automatically based on platform
+
+    KeyCode[] _allKeyCodes;
     List<InputEvent> pressedThisFrame;
 
     void OnEnable() {
         pressedThisFrame = new();
-#if ENABLE_INPUT_SYSTEM
-        _allKeyCodes = System.Enum.GetValues(typeof(Key)); // for new inputsystem
-#else
-        _allKeyCodes = System.Enum.GetValues(typeof(KeyCode)); // for old inputsystem
-#endif
+        _allKeyCodes = (KeyCode[])System.Enum.GetValues(typeof(KeyCode)); // for old inputsystem
     }
 
     // Poll for events in Update / FixedUpdate rather than in InputForFrame directly,
@@ -45,45 +43,47 @@ public class BasicInputProvider : InputProvider {
     void Poll() {
         // Grab Unity input and add to the queue.
         // [assuming/hoping that the key codes are ~same between old and new inputsystem]
-        foreach(var k in _allKeyCodes)
+        foreach(var kc in _allKeyCodes)
         {
             bool interaction = false;
             bool isPressed = false;
             string keyName = null;
 
 #if ENABLE_INPUT_SYSTEM
-            if ((Key)k == Key.None || (Key)k == Key.IMESelected) continue;
-            if (Keyboard.current[(Key)k].wasPressedThisFrame) {
+            Key key = KeyCodeToKey(kc);
+            if (key == Key.None || key == Key.IMESelected) continue;
+            if (Keyboard.current[key].wasPressedThisFrame) {
                 interaction = true;
                 isPressed = true;
             }
-            if (Keyboard.current[(Key)k].wasReleasedThisFrame) {
+            if (Keyboard.current[key].wasReleasedThisFrame) {
                 interaction = true;
                 isPressed = false;
             }
-            keyName = System.Enum.GetName(typeof(Key), k);
 #else
-            if (Input.GetKeyDown((KeyCode)k)) {
+            if (Input.GetKeyDown(kc)) {
                 // Debug.Log("key down: " + k);
                 interaction = true;
                 isPressed = true;
             }
-            if (Input.GetKeyUp((KeyCode)k)) {
+            if (Input.GetKeyUp(kc)) {
                 // Debug.Log("key up: " + k);
                 interaction = true;
                 isPressed = false;
             }
-            keyName = System.Enum.GetName(typeof(KeyCode), k);
 #endif
-            // TODO need to map keyname to a controller button
+            // keyName = System.Enum.GetName(typeof(KeyCode), kc);
             if (interaction) {
-                // Debug.Log($"key event: {k} {isPressed}");
-                pressedThisFrame.Add(new InputEvent {
-                    name = keyName,
-                    value = isPressed ? 1 : 0,
-                    controller = 1, // TODO: support multiple controllers ?
-                    isAnalog = false
-                });
+                var controlNames = controls[kc];
+                if (controlNames == null) return;
+                foreach (string controlName in controlNames) {
+                    pressedThisFrame.Add(new InputEvent {
+                        name = controlName,
+                        value = isPressed ? 1 : 0,
+                        controller = 1, // TODO: support multiple controllers ?
+                        isAnalog = false
+                    });
+                }
             }
         }
     }
@@ -93,6 +93,20 @@ public class BasicInputProvider : InputProvider {
         pressedThisFrame.Clear(); // Not ideal because will break if multiple clients use the same InputProvider, should clear at the end of the frame
         return toReturn.Concat(base.InputForFrame()).ToList();
     }
+
+#if ENABLE_INPUT_SYSTEM
+    Key KeyCodeToKey(KeyCode kc) {
+        // Pretty ugly but works for most keys... TODO better solution
+        string name = System.Enum.GetName(typeof(KeyCode), kc);        
+        try {
+            if (name == "Return") name = "Enter"; // Urgh
+            return (Key)System.Enum.Parse(typeof(Key), name);
+        } catch (System.ArgumentException e) {
+            // Debug.LogWarning($"KeyCode {kc} not found in Key enum: {e}");
+            return Key.None;
+        }
+    }
+#endif
 }
 
 }
