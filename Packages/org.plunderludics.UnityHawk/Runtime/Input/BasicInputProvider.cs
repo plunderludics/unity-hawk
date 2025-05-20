@@ -1,8 +1,15 @@
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
+using NaughtyAttributes;
+
 #if ENABLE_INPUT_SYSTEM
 using UnityEngine.InputSystem;
+#endif
+
+#if UNITY_EDITOR
+using UnityEditor;
+using System.IO;
 #endif
 
 namespace UnityHawk {
@@ -10,14 +17,51 @@ namespace UnityHawk {
 // Just gets key events directly from Unity
 [DefaultExecutionOrder(-1000)] // Kinda hacky but this has to run before Emulator or there will be a 1-frame input delay.
 public class BasicInputProvider : InputProvider {
-    public Controls controls; // TODO by default set this automatically based on platform
+    public bool useDefaultControls = true;
 
+    [DisableIf("useDefaultControls")]
+    public Controls controls;
+
+    // TODO allow editing controls directly in inspector (as in GenericInputProvider)
+
+    [ShowIf("useDefaultControls")]
+    [Tooltip("Emulator to use. If null, will look for attached Emulator")]
+    public Emulator emulator;
+
+    [SerializeField /*, HideInInspector*/] List<(string, Controls)> _defaultControlsForPlatform;
+    
     KeyCode[] _allKeyCodes;
     List<InputEvent> pressedThisFrame;
 
     void OnEnable() {
         pressedThisFrame = new();
         _allKeyCodes = (KeyCode[])System.Enum.GetValues(typeof(KeyCode)); // for old inputsystem
+    
+        if (!emulator) {
+            emulator = GetComponent<Emulator>();
+            if (!emulator) {
+                Debug.LogWarning("BasicInputProvider has no specified or attached Emulator, will not be able to set controls correctly");
+                return;
+            }
+        }
+        emulator.OnRunning += OnNewRom;
+        if (emulator.IsRunning) {
+            // Already running, set controls now
+            OnNewRom();
+        }
+    }
+
+    // Runs when emulator starts or changes rom
+    void OnNewRom() {
+        if (!useDefaultControls) return;
+
+        // Debug.Log("Setting controls for platform");
+        string systemId = emulator.GetSystemId();
+        controls = _defaultControlsForPlatform.FirstOrDefault(x => x.Item1 == systemId).Item2;
+        if (controls == null) {
+            Debug.LogError($"No default controls found for platform {systemId}, controls will not work");
+        }
+       //  Debug.Log($"Setting controls to {controls} for system {systemId}");
     }
 
     // Poll for events in Update / FixedUpdate rather than in InputForFrame directly,
@@ -41,6 +85,7 @@ public class BasicInputProvider : InputProvider {
     }
 
     void Poll() {
+        if (controls == null) return;
         // Grab Unity input and add to the queue.
         // [assuming/hoping that the key codes are ~same between old and new inputsystem]
         foreach(var kc in _allKeyCodes)
@@ -107,6 +152,22 @@ public class BasicInputProvider : InputProvider {
         }
     }
 #endif
+
+
+#if UNITY_EDITOR
+    // Automatically initialize default controls on validate (they get serialized so should be preserved in build)
+    void OnValidate() {
+        _defaultControlsForPlatform = new () {
+            ( "N64", LoadControls("N64.asset") ),
+            ( "PSX", LoadControls("PSX.asset") )
+        };
+    }
+
+    Controls LoadControls(string assetName) {
+        return AssetDatabase.LoadAssetAtPath<Controls>(Path.Join(Paths.defaultControlsDir, assetName));
+    }
+#endif
+
 }
 
 }

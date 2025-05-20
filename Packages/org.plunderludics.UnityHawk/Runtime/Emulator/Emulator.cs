@@ -486,6 +486,7 @@ public partial class Emulator : MonoBehaviour
 
         // if (_sharedTextureBuffer.IsOpen()) {
         //     Status = EmulatorStatus.Running;
+        //     // TODO: Maybe should be after first texture data is received, not immediately after texture buffer is open?
         //     UpdateTextureFromBuffer();
         // } else {
         //     AttemptOpenBuffer(_sharedTextureBuffer);
@@ -494,6 +495,7 @@ public partial class Emulator : MonoBehaviour
         if (passInputFromUnity && Application.isPlaying) {
             List<InputEvent> inputEvents = inputProvider.InputForFrame();
             if (_sharedInputBuffer.IsOpen()) {
+                Status = EmulatorStatus.Running; // TODO: should happen when texture buffer is open (not that it really matters probably)
                 WriteInputToBuffer(inputEvents);
             } else {
                 AttemptOpenBuffer(_sharedInputBuffer);
@@ -599,7 +601,7 @@ public partial class Emulator : MonoBehaviour
     // Init/re-init the textures for rendering the screen - has to be done whenever the source dimensions change (which happens often on PSX for some reason)
     void InitTextures(int width, int height) {
         _textureSize = new Vector2Int(width, height);
-        _bufferTexture = new         Texture2D(width, height, textureFormat, false);
+        _bufferTexture = new Texture2D(width, height, textureFormat, false);
 
         if (!customRenderTexture)
         {
