@@ -83,10 +83,6 @@ public partial class Emulator
     /// TODO: how can this return a savestate object?
     public void SaveState(string path) {
         path = Paths.GetFullPath(path);
-        if (!path.Contains(".savestate"))
-        {
-            path += ".savestate";
-        }
         _apiCommandBuffer.CallMethod("SaveState", path);
     }
 
@@ -108,6 +104,7 @@ public partial class Emulator
     /// <param name="sample"></param>
     public void LoadState(Savestate sample) {
         LoadState(Paths.GetAssetPath(sample));
+        // TODO would be nice if there was some calllback or way to know when state is loaded
     }
 
     /// <summary>

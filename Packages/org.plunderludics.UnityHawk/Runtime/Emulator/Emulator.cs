@@ -354,16 +354,14 @@ public partial class Emulator : MonoBehaviour
         _sharedTextureBuffer = new SharedTextureBuffer(sharedTextureBufferName);
 
         // create & register lua callbacks rpc
-        // TODO
-        // var luaCallbacksRpcBufferName = $"unityhawk-callmethod-{randomNumber}";
-        // args.Add($"--unity-call-method-buffer={luaCallbacksRpcBufferName}");
-        // _luaCallbacksRpcBuffer = new CallMethodRpcBuffer(luaCallbacksRpcBufferName, CallRegisteredLuaCallback);
+        var luaCallbacksBufferName = $"lua-callbacks-{randomNumber}";
+        userData.Add($"unityhawk-lua-callbacks-buffer:{luaCallbacksBufferName}");
+        _luaCallbacksRpcBuffer = new CallMethodRpcBuffer(luaCallbacksBufferName, CallRegisteredLuaCallback);
 
         // create & register api call buffers
-        // TODO
-        // var apiCommandBufferName = $"unityhawk-apicall-{randomNumber}";
-        // args.Add($"--api-call-method-buffer={apiCommandBufferName}");
-        // _apiCommandBuffer = new ApiCommandBuffer(apiCommandBufferName);
+        var apiCommandBufferName = $"api-command-{randomNumber}";
+        userData.Add($"unityhawk-api-command-buffer:{apiCommandBufferName}");
+        _apiCommandBuffer = new ApiCommandBuffer(apiCommandBufferName);
 
         var apiCallRpcBufferName = $"api-call-rpc-{randomNumber}";
         userData.Add($"unityhawk-api-call-rpc:{apiCallRpcBufferName}");
@@ -499,15 +497,15 @@ public partial class Emulator : MonoBehaviour
             }
         }
 
-        // if (!_luaCallbacksRpcBuffer.IsOpen()) {
-        //     AttemptOpenBuffer(_luaCallbacksRpcBuffer);
-        // }
-        // if (!_apiCommandBuffer.IsOpen()) {
-        //     AttemptOpenBuffer(_apiCommandBuffer);
-        // }
-        // if (!_apiCommandBuffer.IsOpen()) {
-        //     AttemptOpenBuffer(_apiCommandBuffer);
-        // }
+        if (!_luaCallbacksRpcBuffer.IsOpen()) {
+            AttemptOpenBuffer(_luaCallbacksRpcBuffer);
+        }
+        if (!_apiCommandBuffer.IsOpen()) {
+            AttemptOpenBuffer(_apiCommandBuffer);
+        }
+        if (!_apiCommandBuffer.IsOpen()) {
+            AttemptOpenBuffer(_apiCommandBuffer);
+        }
         if (!_apiCallRpcBuffer.IsOpen()) {
             AttemptOpenBuffer(_apiCallRpcBuffer);
         }
