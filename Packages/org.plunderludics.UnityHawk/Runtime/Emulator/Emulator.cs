@@ -349,10 +349,9 @@ public partial class Emulator : MonoBehaviour
         var randomNumber = new System.Random().Next();
 
         // create & register sharedTextureBuffer
-        // TODO
-        // var sharedTextureBufferName = $"unityhawk-texture-{randomNumber}";
-        // args.Add($"--write-texture-to-shared-buffer={sharedTextureBufferName}");
-        // _sharedTextureBuffer = new SharedTextureBuffer(sharedTextureBufferName);
+        var sharedTextureBufferName = $"unityhawk-texture-{randomNumber}";
+        userData.Add($"unityhawk-texture-buffer:{sharedTextureBufferName}");
+        _sharedTextureBuffer = new SharedTextureBuffer(sharedTextureBufferName);
 
         // create & register lua callbacks rpc
         // TODO
@@ -484,18 +483,17 @@ public partial class Emulator : MonoBehaviour
             }
         }
 
-        // if (_sharedTextureBuffer.IsOpen()) {
-        //     Status = EmulatorStatus.Running;
-        //     // TODO: Maybe should be after first texture data is received, not immediately after texture buffer is open?
-        //     UpdateTextureFromBuffer();
-        // } else {
-        //     AttemptOpenBuffer(_sharedTextureBuffer);
-        // }
+        if (_sharedTextureBuffer.IsOpen()) {
+            Status = EmulatorStatus.Running;
+            // TODO: Maybe should be after first texture data is received, not immediately after texture buffer is open?
+            UpdateTextureFromBuffer();
+        } else {
+            AttemptOpenBuffer(_sharedTextureBuffer);
+        }
 
         if (passInputFromUnity && Application.isPlaying) {
             List<InputEvent> inputEvents = inputProvider.InputForFrame();
             if (_sharedInputBuffer.IsOpen()) {
-                Status = EmulatorStatus.Running; // TODO: should happen when texture buffer is open (not that it really matters probably)
                 WriteInputToBuffer(inputEvents);
             } else {
                 AttemptOpenBuffer(_sharedInputBuffer);
