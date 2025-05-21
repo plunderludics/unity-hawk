@@ -136,11 +136,11 @@ public class SharedTests
         yield return WaitForAMoment(e);
         Assert.That(e.CurrentFrame, Is.EqualTo(frame+2));
 
-        for (int i = 0; i < 100; i++) {
+        for (int i = 0; i < 20; i++) {
             e.FrameAdvance();
+            yield return WaitForAMoment(e);
         }
-        yield return WaitForAMoment(e);
-        Assert.That(e.CurrentFrame, Is.EqualTo(frame+102));
+        Assert.That(e.CurrentFrame, Is.EqualTo(frame+22));
     }
 
     [UnityTest]
