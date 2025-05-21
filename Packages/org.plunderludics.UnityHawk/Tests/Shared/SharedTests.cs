@@ -176,7 +176,38 @@ public class SharedTests
         Assert.That(e.Texture.width, Is.EqualTo(320));
     }
 
-    private string _submittedResult;
+    [UnityTest]
+    public IEnumerator TestReadMemory()
+    {
+        yield return WaitForAWhile(e);
+        AssertEmulatorIsRunning(e);
+
+        // Meaningless/arbitrary bits of memory cause i'm lazy, but these seem to be static at the beginning of the elite rom, so should be fine
+        Assert.That(e.ReadUnsigned(0x00E2, 1, true), Is.EqualTo(96));
+        Assert.That(e.ReadSigned(0x00A2, 4, false), Is.EqualTo(-16580608));
+        Assert.That(e.ReadFloat(0x00E2, false), Is.EqualTo(3.306212e-39f));
+    }
+
+    [UnityTest]
+    public IEnumerator TestWriteMemory()
+    {
+        yield return WaitForAWhile(e);
+        AssertEmulatorIsRunning(e);
+
+        // Again, just random chunks of memory, on the elite title screen we seem to be able to write them without them changing 
+        e.WriteUnsigned(0x00E2, value: 99, size: 1, isBigEndian: true);
+        yield return WaitForAMoment(e);
+        Assert.That(e.ReadUnsigned(0x00E2, 1, true), Is.EqualTo(99));
+
+        e.WriteSigned(0x003C, value: -99, size: 4, isBigEndian: false);
+        yield return WaitForAMoment(e);
+        Assert.That(e.ReadSigned(0x003C, 4, false), Is.EqualTo(-99));
+
+        e.WriteFloat(0x003C, value: 123.4f, isBigEndian: false);
+        yield return WaitForAMoment(e);
+        Assert.That(e.ReadFloat(0x003C, false), Is.EqualTo(123.4f));
+    }
+
     [UnityTest]
     public IEnumerator TestLuaCallbacks()
     {
@@ -188,6 +219,8 @@ public class SharedTests
             Array.Reverse(cs);
             return new string(cs);
         });
+        
+        string _submittedResult = null;
         e.RegisterLuaCallback("submitResult", (arg) => {
             Debug.Log("submitResult");
             _submittedResult = arg;

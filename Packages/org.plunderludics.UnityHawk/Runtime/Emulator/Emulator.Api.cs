@@ -152,5 +152,67 @@ public partial class Emulator
     public string GetSystemId() {
         return _apiCallRpcBuffer.CallMethod("GetSystemId");
     }
+
+    ///// RAM read/write
+    /// For all methods, domain defaults to main memory if not specified
+    
+    public uint? ReadUnsigned(int address, int size, bool isBigEndian, string domain = null) {
+        string args = $"{address},{size},{isBigEndian}";
+        if (domain != null) {
+            args += $",{domain}";
+        }
+        string v = _apiCallRpcBuffer.CallMethod("ReadUnsigned", args);
+        return (v == null) ? null : uint.Parse(v);
+    }
+    public int? ReadSigned(int address, int size, bool isBigEndian, string domain = null) {
+        string args = $"{address},{size},{isBigEndian}";
+        if (domain != null) {
+            args += $",{domain}";
+        }
+        string v = _apiCallRpcBuffer.CallMethod("ReadSigned", args);
+        return (v == null) ? null : int.Parse(v);
+    }
+    public float? ReadFloat(int address, bool isBigEndian, string domain = null) {
+        string args = $"{address},{isBigEndian}";
+        if (domain != null) {
+            args += $",{domain}";
+        }
+        string v = _apiCallRpcBuffer.CallMethod("ReadFloat", args);
+        return (v == null) ? null : float.Parse(v);
+    }
+
+    // // Sets a memory address to a given value (for a single frame - to freeze the address, use FreezeBytes)
+    // public void WriteFloat(int address, float value, bool isBigEndian);
+    public void WriteUnsigned(int address, uint value, int size, bool isBigEndian, string domain = null) {
+        string args = $"{address},{value},{size},{isBigEndian}";
+        if (domain != null) {
+            args += $",{domain}";
+        }
+        _apiCommandBuffer.CallMethod("WriteUnsigned", args);
+    }
+    public void WriteSigned(int address, int value, int size, bool isBigEndian, string domain = null) {
+        string args = $"{address},{value},{size},{isBigEndian}";
+        if (domain != null) {
+            args += $",{domain}";
+        }
+        _apiCommandBuffer.CallMethod("WriteSigned", args);
+    }
+    public void WriteFloat(int address, float value, bool isBigEndian, string domain = null) {
+        string args = $"{address},{value},{isBigEndian}";
+        if (domain != null) {
+            args += $",{domain}";
+        }
+        _apiCommandBuffer.CallMethod("WriteFloat", args);
+    }
+
+    // void SetBytesFrozen(int address, int length, bool frozen);
+
+    // public void FreezeBytes(int address, int length) => SetBytesFrozen(address, length, true);
+    // public void FreezeFloat(int address) => SetBytesFrozen(address, sizeof(float), true);
+    // public void FreezeInteger(int address, int size) => SetBytesFrozen(address, size, true);
+
+    // public void UnfreezeBytes(int address, int length) => SetBytesFrozen(address, length, false);
+    // public void UnfreezeFloat(int address) => SetBytesFrozen(address, sizeof(float), false);
+    // public void UnfreezeInteger(int address, int size);
 }
 }
