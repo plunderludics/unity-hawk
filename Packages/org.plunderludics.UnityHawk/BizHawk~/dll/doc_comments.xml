@@ -4396,7 +4396,7 @@
             <typeparam name="T">Type of tool you want to load</typeparam>
             <returns>An instantiated <see cref="T:BizHawk.Client.Common.IToolForm"/></returns>
         </member>
-        <member name="M:BizHawk.Client.EmuHawk.ToolManager.LoadExternalToolForm(System.String,System.String,System.Boolean,System.Boolean)">
+        <member name="M:BizHawk.Client.EmuHawk.ToolManager.LoadExternalToolForm(System.String,System.String,System.Boolean,System.Boolean,System.Boolean)">
             <summary>Loads the external tool's entry form.</summary>
         </member>
         <member name="M:BizHawk.Client.EmuHawk.ToolManager.IsLoaded``1">
