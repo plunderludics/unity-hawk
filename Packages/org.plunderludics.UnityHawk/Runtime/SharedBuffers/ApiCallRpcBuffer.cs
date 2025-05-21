@@ -16,6 +16,8 @@ public class ApiCallRpcBuffer : ISharedBuffer {
     string _name;
     RpcBuffer _apiCallRpc;
 
+    const int TimeoutMs = 1000; // No point waiting more than a second I feel like
+
     public ApiCallRpcBuffer(string bufferName) {
         _name = bufferName;
     }
@@ -25,6 +27,10 @@ public class ApiCallRpcBuffer : ISharedBuffer {
     }
 
     public string CallMethod(string methodName, string arg = null) {
+        if (_apiCallRpc == null) {
+            Debug.LogWarning($"Tried to call method {methodName} but the api call buffer is not yet open");
+            return null;
+        }
         // serialize (methodName, input) into a MethodCall struct
         MethodCall methodCall = new MethodCall {
             MethodName = methodName,
@@ -34,7 +40,7 @@ public class ApiCallRpcBuffer : ISharedBuffer {
 
         // Debug.Log($"Sending callmethod RPC request to Bizhawk ({methodName}, {args})");
         // TODO async version of this?
-        var response = _apiCallRpc.RemoteRequest(bytes);
+        var response = _apiCallRpc.RemoteRequest(bytes, TimeoutMs);
         if (response == null) {
             Debug.LogWarning($"Tried to call method {methodName} but Bizhawk didn't respond");
             return null;
