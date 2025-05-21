@@ -6,10 +6,9 @@ using Plunderludics.UnityHawk.Shared;
 namespace UnityHawk {
 
 // Convert from Unity input format to BizHawk input format
-// [Is this even necessary?]
+// (The classes are actually identical but seems best to keep decoupled just in case)
 public static class ConvertInput {
     public static Plunderludics.UnityHawk.Shared.InputEvent ToBizHawk(UnityHawk.InputEvent ie) {
-        // Right now formats are the same, conversion is straightforward (should we just use the bizhawk class directly?)
         return new Plunderludics.UnityHawk.Shared.InputEvent {
             name = ie.name,
             value = ie.value,
@@ -17,23 +16,5 @@ public static class ConvertInput {
             isAnalog = ie.isAnalog
         };
     }
-    // private static string UnityKeyNameToBizHawkKeyName(string key) {
-    //     // Unity and BizHawk naming conventions are slightly different so have to convert some
-    //     // TODO figure out a more robust way of doing this
-    //     if (key == "Return") {
-    //         return "Enter";
-    //     } else if (key == "UpArrow") {
-    //         return "Up";
-    //     } else if (key == "DownArrow") {
-    //         return "Down";
-    //     } else if (key == "RightArrow") {
-    //         return "Right";
-    //     } else if (key == "LeftArrow") {
-    //         return "Left";
-    //     } else {
-    //         return key;
-    //     }
-    // }
 }
-
 }
