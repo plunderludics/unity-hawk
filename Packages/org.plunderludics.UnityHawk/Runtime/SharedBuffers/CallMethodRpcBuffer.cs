@@ -4,7 +4,7 @@ using UnityEngine;
 using System;
 using SharedMemory;
 
-using Plunderludics.UnityHawk;
+using Plunderludics.UnityHawk.Shared;
 
 namespace UnityHawk {
 

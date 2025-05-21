@@ -1,6 +1,6 @@
 using UnityEngine;
 using SharedMemory;
-using Plunderludics.UnityHawk;
+using Plunderludics.UnityHawk.Shared;
 
 namespace UnityHawk {
 public class SharedInputBuffer : ISharedBuffer {
@@ -23,7 +23,7 @@ public class SharedInputBuffer : ISharedBuffer {
         _buffer = null;
     }
 
-    public void Write(Plunderludics.UnityHawk.InputEvent bie) {
+    public void Write(Plunderludics.UnityHawk.Shared.InputEvent bie) {
         byte[] serialized = Serialization.Serialize(bie);
         // Debug.Log($"[unity-hawk] Writing buffer: {bie}");
         int amount = _buffer.Write(serialized, timeout: 0);

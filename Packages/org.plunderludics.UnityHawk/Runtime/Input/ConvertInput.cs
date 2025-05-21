@@ -1,15 +1,16 @@
 using System.Linq;
 using UnityEngine;
 using System.Collections.Generic;
-using Plunderludics.UnityHawk;
+using Plunderludics.UnityHawk.Shared;
 
 namespace UnityHawk {
 
 // Convert from Unity input format to BizHawk input format
+// [Is this even necessary?]
 public static class ConvertInput {
-    public static Plunderludics.UnityHawk.InputEvent ToBizHawk(UnityHawk.InputEvent ie) {
+    public static Plunderludics.UnityHawk.Shared.InputEvent ToBizHawk(UnityHawk.InputEvent ie) {
         // Right now formats are the same, conversion is straightforward (should we just use the bizhawk class directly?)
-        return new Plunderludics.UnityHawk.InputEvent {
+        return new Plunderludics.UnityHawk.Shared.InputEvent {
             name = ie.name,
             value = ie.value,
             controller = ie.controller,

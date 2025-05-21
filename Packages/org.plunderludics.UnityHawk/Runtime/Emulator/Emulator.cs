@@ -528,12 +528,12 @@ public partial class Emulator : MonoBehaviour
         }
     }
 
-    void WriteInputToBuffer(List<InputEvent> inputEvents) {
+    void WriteInputToBuffer(List<UnityHawk.InputEvent> inputEvents) {
         // Get input from inputProvider, serialize and write to the shared memory
         foreach (UnityHawk.InputEvent ie in inputEvents) {
             // Convert Unity InputEvent to BizHawk InputEvent
             // [for now only supporting keys, no gamepad]
-            var bie = ConvertInput.ToBizHawk(ie);
+            Plunderludics.UnityHawk.Shared.InputEvent bie = ConvertInput.ToBizHawk(ie);
             _sharedInputBuffer.Write(bie);
         }
     }

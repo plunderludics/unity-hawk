@@ -7,7 +7,7 @@ using System.Collections.Generic;
 using System.Collections.Concurrent;
 using System.Text;
 
-using Plunderludics.UnityHawk;
+using Plunderludics.UnityHawk.Shared;
 using UnityEngine;
 using SharedMemory;
 
