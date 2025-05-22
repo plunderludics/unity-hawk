@@ -27,8 +27,6 @@ public class BasicInputProvider : InputProvider {
     [ShowIf("useDefaultControls")]
     [Tooltip("Emulator to use. If null, will look for attached Emulator")]
     public Emulator emulator;
-
-    [SerializeField /*, HideInInspector*/] List<(string, Controls)> _defaultControlsForPlatform;
     
     KeyCode[] _allKeyCodes;
     List<InputEvent> pressedThisFrame;
@@ -57,7 +55,7 @@ public class BasicInputProvider : InputProvider {
 
         // Debug.Log("Setting controls for platform");
         string systemId = emulator.GetSystemId();
-        controls = _defaultControlsForPlatform.FirstOrDefault(x => x.Item1 == systemId).Item2;
+        controls = Controls.LoadDefaultControlsForSystem(systemId);
         if (controls == null) {
             Debug.LogError($"No default controls found for platform {systemId}, controls will not work");
         }
@@ -150,24 +148,6 @@ public class BasicInputProvider : InputProvider {
             // Debug.LogWarning($"KeyCode {kc} not found in Key enum: {e}");
             return Key.None;
         }
-    }
-#endif
-
-
-#if UNITY_EDITOR
-    // Automatically initialize default controls on validate (they get serialized so should be preserved in build)
-    // BUG... TODO just realized these won't get serialized because BasicInputProvider
-    // Could move into Resources/? Idk
-    void OnValidate() {
-        _defaultControlsForPlatform = new () {
-            ( "N64", LoadControls("N64.asset") ),
-            ( "PSX", LoadControls("PSX.asset") ),
-            ( "NES", LoadControls("NES.asset") )
-        };
-    }
-
-    Controls LoadControls(string assetName) {
-        return AssetDatabase.LoadAssetAtPath<Controls>(Path.Join(Paths.defaultControlsDir, assetName));
     }
 #endif
 

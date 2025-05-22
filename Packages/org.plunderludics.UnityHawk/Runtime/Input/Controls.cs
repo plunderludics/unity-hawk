@@ -4,7 +4,9 @@
 
 using UnityEngine;
 using System.Collections.Generic;
-
+using System.Linq;
+using System.IO;
+using BizHawk.Common.CollectionExtensions;
 
 namespace UnityHawk {
 [CreateAssetMenu(fileName = "Controls", menuName = "Plunderludics/UnityHawk/Controls", order = 0)]
@@ -30,6 +32,35 @@ public class Controls: ScriptableObject {
             }
             return result;
         }
+    }
+
+    static readonly List<(string System, string Filename)> _DefaultControlsForSystem = new () {
+        // These files are in Resources/Controls/
+        // ".asset" extension gets added automatically so this looks kind of stupid but just to be explicit about the filenames:
+        ( "N64", "N64" ),
+        ( "PSX", "PSX" ),
+        ( "NES", "NES" )
+        // TODO other platforms
+    };
+    public static Controls LoadDefaultControlsForSystem(string systemId) {
+        string assetName = _DefaultControlsForSystem.FirstOrNull(x => x.System == systemId)?.Filename;
+        if (string.IsNullOrEmpty(assetName)) {
+            Debug.LogError($"No controls configured for system {systemId}, controls will not work");
+            return null;
+        }
+
+        string path = Path.Combine(Paths.defaultControlsResourceDir, assetName);
+        Controls controls = Resources.Load<Controls>(path);
+        
+        // (Using Resources.Load isn't really ideal cause it means all the Controls assets get included in build
+        //  - TODO maybe figure out a more elegant way to auto-include whatever is needed)
+
+        if (controls == null) {
+            Debug.LogError($"Could not load controls for system {systemId} from {assetName}");
+            return null;
+        }
+
+        return controls;
     }
 }
 }
