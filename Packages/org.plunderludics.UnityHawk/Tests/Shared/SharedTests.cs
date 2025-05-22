@@ -209,6 +209,38 @@ public class SharedTests
     }
 
     [UnityTest]
+    public IEnumerator TestFreezeMemory()
+    {
+        yield return WaitForAWhile(e);
+        AssertEmulatorIsRunning(e);
+
+        long addr = 0x0063; // This address changes constantly on the elite title screen so we can try to freeze this
+
+        uint value = e.ReadUnsigned(addr, 1, true).Value;
+        yield return WaitForAMoment(e);
+
+        bool allSame = true;
+        for (int i = 0; i < 10; i++) {
+            uint newValue = e.ReadUnsigned(addr, 1, true).Value;
+            allSame &= (newValue == value);
+            yield return WaitForAMoment(e);
+        }
+        Assert.That(allSame, Is.False); // Haven't frozen yet, value should be different at least most of the time
+
+        e.Freeze(addr, size: 1);
+        yield return WaitForAMoment(e);
+
+        value = e.ReadUnsigned(addr, 1, true).Value;
+        yield return WaitForAMoment(e);
+
+        for (int i = 0; i < 10; i++) {
+            uint newValue = e.ReadUnsigned(addr, 1, true).Value;
+            yield return WaitForAMoment(e);
+            Assert.That(newValue, Is.EqualTo(value)); // Should be the same every time
+        }
+    }
+
+    [UnityTest]
     public IEnumerator TestLuaCallbacks()
     {
         e.luaScriptFile = testCallbacksLua;

@@ -156,7 +156,7 @@ public partial class Emulator
     ///// RAM read/write
     /// For all methods, domain defaults to main memory if not specified
     
-    public uint? ReadUnsigned(int address, int size, bool isBigEndian, string domain = null) {
+    public uint? ReadUnsigned(long address, int size, bool isBigEndian, string domain = null) {
         string args = $"{address},{size},{isBigEndian}";
         if (domain != null) {
             args += $",{domain}";
@@ -164,7 +164,7 @@ public partial class Emulator
         string v = _apiCallRpcBuffer.CallMethod("ReadUnsigned", args);
         return (v == null) ? null : uint.Parse(v);
     }
-    public int? ReadSigned(int address, int size, bool isBigEndian, string domain = null) {
+    public int? ReadSigned(long address, int size, bool isBigEndian, string domain = null) {
         string args = $"{address},{size},{isBigEndian}";
         if (domain != null) {
             args += $",{domain}";
@@ -172,7 +172,7 @@ public partial class Emulator
         string v = _apiCallRpcBuffer.CallMethod("ReadSigned", args);
         return (v == null) ? null : int.Parse(v);
     }
-    public float? ReadFloat(int address, bool isBigEndian, string domain = null) {
+    public float? ReadFloat(long address, bool isBigEndian, string domain = null) {
         string args = $"{address},{isBigEndian}";
         if (domain != null) {
             args += $",{domain}";
@@ -182,22 +182,21 @@ public partial class Emulator
     }
 
     // // Sets a memory address to a given value (for a single frame - to freeze the address, use FreezeBytes)
-    // public void WriteFloat(int address, float value, bool isBigEndian);
-    public void WriteUnsigned(int address, uint value, int size, bool isBigEndian, string domain = null) {
+    public void WriteUnsigned(long address, uint value, int size, bool isBigEndian, string domain = null) {
         string args = $"{address},{value},{size},{isBigEndian}";
         if (domain != null) {
             args += $",{domain}";
         }
         _apiCommandBuffer.CallMethod("WriteUnsigned", args);
     }
-    public void WriteSigned(int address, int value, int size, bool isBigEndian, string domain = null) {
+    public void WriteSigned(long address, int value, int size, bool isBigEndian, string domain = null) {
         string args = $"{address},{value},{size},{isBigEndian}";
         if (domain != null) {
             args += $",{domain}";
         }
         _apiCommandBuffer.CallMethod("WriteSigned", args);
     }
-    public void WriteFloat(int address, float value, bool isBigEndian, string domain = null) {
+    public void WriteFloat(long address, float value, bool isBigEndian, string domain = null) {
         string args = $"{address},{value},{isBigEndian}";
         if (domain != null) {
             args += $",{domain}";
@@ -205,14 +204,26 @@ public partial class Emulator
         _apiCommandBuffer.CallMethod("WriteFloat", args);
     }
 
-    // void SetBytesFrozen(int address, int length, bool frozen);
+    /// Freezes a memory address for a given size (1, 2, or 4 bytes)
+    public void Freeze(long address, int size, string domain = null) {
+        if (size != 1 && size != 2 && size != 4)
+            throw new ArgumentException("Size must be 1, 2, or 4 bytes.", nameof(size));
+        string args = $"{address},{size}";
+        if (domain != null) {
+            args += $",{domain}";
+        }
+        _apiCommandBuffer.CallMethod("Freeze", args);
+    }
 
-    // public void FreezeBytes(int address, int length) => SetBytesFrozen(address, length, true);
-    // public void FreezeFloat(int address) => SetBytesFrozen(address, sizeof(float), true);
-    // public void FreezeInteger(int address, int size) => SetBytesFrozen(address, size, true);
+    /// Unfreezes a memory address that was previously frozen
+    public void Unfreeze(long address, int size, string domain = null) {
+        string args = $"{address},{size}";
+        if (domain != null) {
+            args += $",{domain}";
+        }
+        _apiCommandBuffer.CallMethod("Unfreeze", args);
+    }
 
-    // public void UnfreezeBytes(int address, int length) => SetBytesFrozen(address, length, false);
-    // public void UnfreezeFloat(int address) => SetBytesFrozen(address, sizeof(float), false);
-    // public void UnfreezeInteger(int address, int size);
+    // public void UnfreezeBytes(long address, int size, string domain = null);
 }
 }
