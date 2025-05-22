@@ -156,10 +156,13 @@ public class BasicInputProvider : InputProvider {
 
 #if UNITY_EDITOR
     // Automatically initialize default controls on validate (they get serialized so should be preserved in build)
+    // BUG... TODO just realized these won't get serialized because BasicInputProvider
+    // Could move into Resources/? Idk
     void OnValidate() {
         _defaultControlsForPlatform = new () {
             ( "N64", LoadControls("N64.asset") ),
-            ( "PSX", LoadControls("PSX.asset") )
+            ( "PSX", LoadControls("PSX.asset") ),
+            ( "NES", LoadControls("NES.asset") )
         };
     }
 
