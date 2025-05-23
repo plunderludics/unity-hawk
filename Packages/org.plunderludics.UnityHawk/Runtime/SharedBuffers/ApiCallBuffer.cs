@@ -6,9 +6,9 @@ using SharedMemory;
 using Plunderludics.UnityHawk;
 
 public class ApiCallBuffer : ISharedBuffer {
-	readonly string _name;
+    readonly string _name;
 
-	// [should this be ReadWriteBuffer instead?]
+    // [should this be ReadWriteBuffer instead?]
     CircularBuffer _buffer;
 
     public ApiCallBuffer(string name) {

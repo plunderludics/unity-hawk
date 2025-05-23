@@ -1,8 +1,6 @@
-﻿using UnityEngine;
-
-namespace UnityHawk {
+﻿namespace UnityHawk {
 
 public class Rom : BizhawkAsset {
-	public RomInfo RomInfo;
+    public RomInfo RomInfo;
 }
 }

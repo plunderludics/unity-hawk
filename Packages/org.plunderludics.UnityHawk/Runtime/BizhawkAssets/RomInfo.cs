@@ -17,12 +17,12 @@ namespace UnityHawk {
         public string Core;
 
         public RomInfo(GameInfo gameInfo) {
-			Name = gameInfo.Name;
-			Hash = gameInfo.Hash;
-			Region = gameInfo.Region;
-			System = gameInfo.System;
-			NotInDatabase = gameInfo.NotInDatabase;
-			Core = gameInfo.ForcedCore;
+            Name = gameInfo.Name;
+            Hash = gameInfo.Hash;
+            Region = gameInfo.Region;
+            System = gameInfo.System;
+            NotInDatabase = gameInfo.NotInDatabase;
+            Core = gameInfo.ForcedCore;
         }
     }
 }

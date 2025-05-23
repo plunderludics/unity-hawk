@@ -4,7 +4,6 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Diagnostics;
-using System.Linq;
 using System.Reflection;
 using System.Runtime.InteropServices;
 using BizHawk.Client.Common;
@@ -29,18 +28,18 @@ namespace UnityHawk {
 [ExecuteInEditMode]
 public partial class Emulator : MonoBehaviour {
     static readonly int _shader_MainTex = Shader.PropertyToID("_MainTex");
-	const bool _targetMac =
+    const bool _targetMac =
 #if UNITY_EDITOR_OSX || UNITY_STANDALONE_OSX
-        true;
+    true;
 #else
-		false;
+        false;
 #endif
 
-	[Header("config")]
-	[Tooltip("if the emulator launches on start")]
+    [Header("config")]
+    [Tooltip("if the emulator launches on start")]
     public bool runOnAwake = true;
 
-	[Tooltip("if the emulator should use its attached renderer")]
+    [Tooltip("if the emulator should use its attached renderer")]
     public bool useAttachedRenderer = true;
 
     [HideIf("useAttachedRenderer")]
@@ -101,7 +100,7 @@ public partial class Emulator : MonoBehaviour {
     [Foldout("Debug")]
     [ReadOnly, SerializeField] bool _initialized;
 
-	[Foldout("Debug")]
+    [Foldout("Debug")]
     [ReadOnly, SerializeField] bool _shouldInitialize;
 
     [Foldout("Debug")]
@@ -137,13 +136,13 @@ public partial class Emulator : MonoBehaviour {
     /// Basically these are the params which, if changed, we want to reset the bizhawk process
     // Don't include the path params here, because then the process gets reset for every character typed/deleted
     struct BizhawkArgs {
-#if UNITY_EDITOR
+        #if UNITY_EDITOR
         public Rom romFile;
         public Savestate saveStateFile;
         public Config configFile;
         public LuaScript luaScriptFile;
         public RamWatch ramWatchFile;
-#endif
+        #endif
         public bool passInputFromUnity;
         public bool captureEmulatorAudio;
         public bool acceptBackgroundInput;
@@ -207,12 +206,12 @@ public partial class Emulator : MonoBehaviour {
     [DllImport("user32.dll")]
     static extern IntPtr GetForegroundWindow();
 
-#if UNITY_EDITOR
+    #if UNITY_EDITOR
     [Button]
     void ShowBizhawkLogInOS() {
         EditorUtility.RevealInFinder(bizhawkLogLocation);
     }
-#endif
+    #endif
     ///// MonoBehaviour lifecycle
     [Button]
     public void Reset() {
@@ -220,32 +219,32 @@ public partial class Emulator : MonoBehaviour {
         // Will be reactivated in Update on next frame
     }
 
-#if UNITY_EDITOR
+    #if UNITY_EDITOR
     void OnValidate() {
-	    if (!config) {
-		    config = (UnityHawkConfig)AssetDatabase.LoadAssetAtPath(
-			    Paths.defaultUnityHawkConfigPath,
-			    typeof(UnityHawkConfig));
+        if (!config) {
+            config = (UnityHawkConfig)AssetDatabase.LoadAssetAtPath(
+                Paths.defaultUnityHawkConfigPath,
+                typeof(UnityHawkConfig));
 
             if (!config) {
                 Debug.LogError("UnityHawkConfigDefault.asset not found");
             }
         }
     }
-#endif
+    #endif
 
     // (These methods are public only for convenient testing)
     public void OnEnable() {
         _isEnabled = true;
-#if UNITY_EDITOR && UNITY_2022_2_OR_NEWER
+        #if UNITY_EDITOR && UNITY_2022_2_OR_NEWER
         if (Undo.isProcessing) return; // OnEnable gets called after undo/redo, but ignore it
-#endif
+        #endif
         _initialized = false;
 
         if (!runInEditMode && (!Application.isPlaying || !romFile)) return;
 
         if (runOnAwake) {
-			_Initialize();
+            _Initialize();
         }
     }
 
@@ -256,21 +255,21 @@ public partial class Emulator : MonoBehaviour {
     public void OnDisable() {
         // Debug.Log($"Emulator OnDisable");
         _isEnabled = false;
-#if UNITY_EDITOR && UNITY_2022_2_OR_NEWER
+        #if UNITY_EDITOR && UNITY_2022_2_OR_NEWER
         if (Undo.isProcessing) return; // OnDisable gets called after undo/redo, but ignore it
-#endif
+        #endif
         if (_initialized) {
             Deactivate();
         }
     }
 
     void Awake() {
-	    _materialProperties = new MaterialPropertyBlock();
+        _materialProperties = new MaterialPropertyBlock();
     }
 
     ////// Core methods
     void _Initialize() {
-	    _shouldInitialize = true;
+        _shouldInitialize = true;
 
         // get a random number to identify the buffers
         var guid = new System.Random().Next();
@@ -320,9 +319,9 @@ public partial class Emulator : MonoBehaviour {
 
         // add rom path
         if (romFile) {
-			var romPath = Paths.GetAssetPath(romFile);
-			args.Add(romPath);
-			workingDir = Path.GetDirectoryName(romPath);
+            var romPath = Paths.GetAssetPath(romFile);
+            args.Add(romPath);
+            workingDir = Path.GetDirectoryName(romPath);
         }
 
         // add config path
@@ -331,10 +330,10 @@ public partial class Emulator : MonoBehaviour {
             : Path.GetFullPath(Paths.defaultBizhawkConfigPath);
 
         if (configFile) {
-	        configPath = Paths.GetAssetPath(configFile);
-	        Debug.Log($"[emulator] found config at {configPath}");
+            configPath = Paths.GetAssetPath(configFile);
+            Debug.Log($"[emulator] found config at {configPath}");
         } else {
-	        Debug.Log($"[emulator] {name} using default config file at {configPath}");
+            Debug.Log($"[emulator] {name} using default config file at {configPath}");
         }
 
         var bizConfig = BizHawkConfigExt.Load(configPath);
@@ -343,11 +342,11 @@ public partial class Emulator : MonoBehaviour {
         // TODO: better path
         configPath = Path.GetFullPath($"{Application.persistentDataPath}/config-{guid}.ini");
 
-	    SetConfigDefaults(ref bizConfig);
+        SetConfigDefaults(ref bizConfig);
 
-	    bizConfig.Save(configPath);
+        bizConfig.Save(configPath);
 
-	    args.Add($"--config={configPath}");
+        args.Add($"--config={configPath}");
 
         // add save state path
         if (saveStateFile) {
@@ -482,17 +481,17 @@ public partial class Emulator : MonoBehaviour {
         [CanBeNull]
         // creates a folder on the specified path, if any
         static string CreateNewPath(string path) {
-	        var s = path;
-	        if (string.IsNullOrEmpty(s)) {
-				return null;
-	        }
+            var s = path;
+            if (string.IsNullOrEmpty(s)) {
+                return null;
+            }
 
-	        s = Paths.GetFullPath(s);
-	        if (!Directory.Exists(s)) {
-		        Directory.CreateDirectory(s);
-	        }
+            s = Paths.GetFullPath(s);
+            if (!Directory.Exists(s)) {
+                Directory.CreateDirectory(s);
+            }
 
-	        return s;
+            return s;
         }
     }
 
@@ -510,9 +509,9 @@ public partial class Emulator : MonoBehaviour {
         }
 
         if (!_initialized) {
-	        if (_shouldInitialize) {
-				_Initialize();
-	        }
+            if (_shouldInitialize) {
+                _Initialize();
+            }
 
             return;
         }
@@ -599,9 +598,9 @@ public partial class Emulator : MonoBehaviour {
     }
 
     void UpdateTextureFromBuffer() {
-	    if (_localTextureBuffer == null || _localTextureBuffer.Length != _sharedTextureBuffer.Length) {
-			_localTextureBuffer = new int[_sharedTextureBuffer.Length];
-	    }
+        if (_localTextureBuffer == null || _localTextureBuffer.Length != _sharedTextureBuffer.Length) {
+            _localTextureBuffer = new int[_sharedTextureBuffer.Length];
+        }
 
         // Get the texture buffer and dimensions from BizHawk via the shared memory file
         // protocol has to match MainForm.cs in BizHawk
@@ -619,8 +618,8 @@ public partial class Emulator : MonoBehaviour {
         var bHeight = _bufferTexture?.height ?? 0;
         var newDimensions = width != 0 && height != 0 && (bWidth != width || bHeight != height);
 
-	    if (newDimensions) {
-	        Debug.Log($"new width and height received : {width} x {height} (was {bWidth}x{bHeight})");
+        if (newDimensions) {
+            Debug.Log($"new width and height received : {width} x {height} (was {bWidth}x{bHeight})");
         }
 
         // resize textures if necessary
@@ -630,22 +629,22 @@ public partial class Emulator : MonoBehaviour {
 
         var bSize = _bufferTexture!.width * _bufferTexture.height;
         if (bSize == 0) {
-	        return;
+            return;
         }
 
         if (bSize > size) {
-	        Debug.LogWarning($"buffer bigger than received size {bSize} > {size}");
-	        return;
+            Debug.LogWarning($"buffer bigger than received size {bSize} > {size}");
+            return;
         }
 
         try {
-			_bufferTexture.SetPixelData(_localTextureBuffer[..^10], 0);
-			_bufferTexture.Apply(/*updateMipmaps: false*/);
+            _bufferTexture.SetPixelData(_localTextureBuffer[..^10], 0);
+            _bufferTexture.Apply(/*updateMipmaps: false*/);
         } catch (Exception e) {
-	        Debug.Log($"{e}");
+            Debug.Log($"{e}");
         }
-		// Correct issues with the texture by applying a shader and blitting to a separate render texture:
-		Graphics.Blit(_bufferTexture, renderTexture, _textureCorrectionMat, 0);
+        // Correct issues with the texture by applying a shader and blitting to a separate render texture:
+        Graphics.Blit(_bufferTexture, renderTexture, _textureCorrectionMat, 0);
     }
 
     void Deactivate() {
@@ -664,11 +663,11 @@ public partial class Emulator : MonoBehaviour {
         Status = EmulatorStatus.Inactive;
 
         foreach (var buf in new ISharedBuffer[] {
-            _sharedTextureBuffer,
-            _sharedAudioBuffer,
-            _luaCallbacksRpcBuffer,
-            _apiCallBuffer
-        }) {
+                     _sharedTextureBuffer,
+                     _sharedAudioBuffer,
+                     _luaCallbacksRpcBuffer,
+                     _apiCallBuffer
+                 }) {
             if (buf != null && buf.IsOpen()) {
                 buf.Close();
             }
@@ -677,9 +676,9 @@ public partial class Emulator : MonoBehaviour {
 
     /// Init/re-init the textures for rendering the screen - has to be done whenever the source dimensions change (which happens often on PSX for some reason)
     void InitTextures(int width, int height) {
-	    Debug.Log($"[emulator] creating new textures with dimensions {width}x{height}");
+        Debug.Log($"[emulator] creating new textures with dimensions {width}x{height}");
 
-	    // TODO: cache texutres
+        // TODO: cache texutres
         _textureSize = new Vector2Int(width, height);
         _bufferTexture = new Texture2D(width, height, textureFormat, false);
 
@@ -689,8 +688,8 @@ public partial class Emulator : MonoBehaviour {
         }
 
         if (targetRenderer) {
-	        _materialProperties.SetTexture(_shader_MainTex, renderTexture);
-			targetRenderer.SetPropertyBlock(_materialProperties);
+            _materialProperties.SetTexture(_shader_MainTex, renderTexture);
+            targetRenderer.SetPropertyBlock(_materialProperties);
         }
     }
 
@@ -723,7 +722,7 @@ public partial class Emulator : MonoBehaviour {
             returnString = callback(argString);
         }
         // add to set of called methods to not spam this warning
-		else if (!_invokedLuaCallbacks.Contains(callbackName)){
+        else if (!_invokedLuaCallbacks.Contains(callbackName)){
             Debug.LogWarning($"Tried to call a method named {callbackName} from lua but none was registered");
         }
 
@@ -748,12 +747,12 @@ public partial class Emulator : MonoBehaviour {
     /// create bizhawk args from fields
     BizhawkArgs MakeBizhawkArgs() {
         return new BizhawkArgs {
-#if UNITY_EDITOR
+            #if UNITY_EDITOR
             romFile = romFile,
             saveStateFile = saveStateFile,
             configFile = configFile,
             luaScriptFile = luaScriptFile,
-#endif
+            #endif
             passInputFromUnity = passInputFromUnity,
             captureEmulatorAudio = captureEmulatorAudio,
             acceptBackgroundInput = acceptBackgroundInput,
@@ -763,26 +762,26 @@ public partial class Emulator : MonoBehaviour {
 }
 
 public static class BizHawkConfigExt {
-	public static BizHawkConfig Load(string path) {
-	    var settings = new JsonSerializerSettings() {
-		    Error = (sender, error) => error.ErrorContext.Handled = true,
-		    MissingMemberHandling = MissingMemberHandling.Ignore,
-		    TypeNameHandling = TypeNameHandling.Auto,
-		    ConstructorHandling = ConstructorHandling.Default,
-		    ObjectCreationHandling = ObjectCreationHandling.Replace,
-		    ContractResolver = new DefaultContractResolver {
-			    DefaultMembersSearchFlags = (BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic)
-		    }
-	    };
+    public static BizHawkConfig Load(string path) {
+        var settings = new JsonSerializerSettings() {
+            Error = (sender, error) => error.ErrorContext.Handled = true,
+            MissingMemberHandling = MissingMemberHandling.Ignore,
+            TypeNameHandling = TypeNameHandling.Auto,
+            ConstructorHandling = ConstructorHandling.Default,
+            ObjectCreationHandling = ObjectCreationHandling.Replace,
+            ContractResolver = new DefaultContractResolver {
+                DefaultMembersSearchFlags = (BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic)
+            }
+        };
 
-	    var serializer = JsonSerializer.Create(settings);
-	    ConfigService.SetSerializer(serializer);
+        var serializer = JsonSerializer.Create(settings);
+        ConfigService.SetSerializer(serializer);
 
-	    return ConfigService.Load<BizHawkConfig>(path);
-	}
+        return ConfigService.Load<BizHawkConfig>(path);
+    }
 
-	public static void Save(this BizHawkConfig config, string path) {
-	    ConfigService.Save(path, config);
-	}
+    public static void Save(this BizHawkConfig config, string path) {
+        ConfigService.Save(path, config);
+    }
 }
 }

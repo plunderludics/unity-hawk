@@ -1,9 +1,5 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 using NaughtyAttributes;
-
-using UnityHawk;
 
 namespace UnityHawk {
 
@@ -25,19 +21,19 @@ public class ApiControls : MonoBehaviour
     [SerializeField] Emulator emulator;
 
     void OnVolumeChanged() {
-	    emulator.Volume = Volume;
+        emulator.Volume = Volume;
     }
 
     void OnValidate() {
-	    if (emulator) {
-		    return;
-	    }
+        if (emulator) {
+            return;
+        }
 
-	    emulator = GetComponent<Emulator>();
+        emulator = GetComponent<Emulator>();
 
-	    if (!emulator) {
-		    Debug.LogWarning("ApiControls: no emulator target set");
-	    }
+        if (!emulator) {
+            Debug.LogWarning("ApiControls: no emulator target set");
+        }
     }
 
 #if UNITY_EDITOR

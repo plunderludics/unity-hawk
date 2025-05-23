@@ -22,10 +22,10 @@ namespace UnityHawk {
 //       below in OnPreprocessBuild
 
 public class BuildProcessing : IPreprocessBuildWithReport, IProcessSceneWithReport, IPostprocessBuildWithReport {
-	/// if the scene was processed or not
+    /// if the scene was processed or not
     bool _didProcessScene = false;
 
-	///// IOrderedCallback
+    ///// IOrderedCallback
     public int callbackOrder => 0;
 
     ///// IPreprocessBuildWithReport
@@ -120,32 +120,32 @@ public class BuildProcessing : IPreprocessBuildWithReport, IProcessSceneWithRepo
         }
 
         var inExt = Path.GetExtension(inPath).ToLowerInvariant();
-		// This is annoying, but some roms (e.g. for PSX) are .cue files, and those point to other file dependencies,
-		// so we need to copy those files over as well (without renaming)
-		// [if there are other special cases we have to handle like this we should probably rethink this whole approach tbh - too much work]
-		// [definitely at least need an alternative in case this has issues (one way would be to just use StreamingAssets)]
-		// this cuefile resolver seems to basically find files with similar names and correct extensions in the same directory
+        // This is annoying, but some roms (e.g. for PSX) are .cue files, and those point to other file dependencies,
+        // so we need to copy those files over as well (without renaming)
+        // [if there are other special cases we have to handle like this we should probably rethink this whole approach tbh - too much work]
+        // [definitely at least need an alternative in case this has issues (one way would be to just use StreamingAssets)]
+        // this cuefile resolver seems to basically find files with similar names and correct extensions in the same directory
         if (inExt is ".cue" or ".ccd") {
-			var inNoExt = Path.GetFileNameWithoutExtension(inPath);
+            var inNoExt = Path.GetFileNameWithoutExtension(inPath);
 
-			var fileInfos = new FileInfo(inPath).Directory?.GetFiles();
-	        foreach (var other in fileInfos!) {
-		        var otherExt = Path.GetExtension(other.FullName).ToLowerInvariant();
+            var fileInfos = new FileInfo(inPath).Directory?.GetFiles();
+            foreach (var other in fileInfos!) {
+                var otherExt = Path.GetExtension(other.FullName).ToLowerInvariant();
 
-		        // ignore self, archives and unity meta files
-		        if (otherExt is ".cue" or ".ccd" or ".meta" or ".7z" or ".rar" or ".zip" or ".bz2" or ".gz") {
-			        continue;
-		        }
+                // ignore self, archives and unity meta files
+                if (otherExt is ".cue" or ".ccd" or ".meta" or ".7z" or ".rar" or ".zip" or ".bz2" or ".gz") {
+                    continue;
+                }
 
-		        var otherNoExt = Path.GetFileNameWithoutExtension(other.FullName);
-		        if (string.Equals(otherNoExt, inNoExt, StringComparison.InvariantCultureIgnoreCase)) {
-					var otherOutPath = Path.Combine(outDir, other.Name);
-					Debug.Log($"Copy from: {other.FullName} to {otherOutPath}");
-					if (!File.Exists(otherOutPath)) {
-						File.Copy(other.FullName, otherOutPath, overwrite: true);
-					}
-		        }
-	        }
+                var otherNoExt = Path.GetFileNameWithoutExtension(other.FullName);
+                if (string.Equals(otherNoExt, inNoExt, StringComparison.InvariantCultureIgnoreCase)) {
+                    var otherOutPath = Path.Combine(outDir, other.Name);
+                    Debug.Log($"Copy from: {other.FullName} to {otherOutPath}");
+                    if (!File.Exists(otherOutPath)) {
+                        File.Copy(other.FullName, otherOutPath, overwrite: true);
+                    }
+                }
+            }
         }
     }
 

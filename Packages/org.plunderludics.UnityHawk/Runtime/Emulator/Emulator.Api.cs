@@ -8,61 +8,60 @@ using NaughtyAttributes;
 using BizHawkConfig = BizHawk.Client.Common.Config;
 
 namespace UnityHawk {
-
 public partial class Emulator {
-	[Header("api")]
-	[OnValueChanged(nameof(OnSetVolume))]
-	[Range(0, 100)]
-	[Tooltip("the the volume of the emulator, 0-100")]
-	[SerializeField] int volume = 100;
+    [Header("api")]
+    [OnValueChanged(nameof(OnSetVolume))]
+    [Range(0, 100)]
+    [Tooltip("the the volume of the emulator, 0-100")]
+    [SerializeField] int volume = 100;
 
-	/// the volume of the emulator, 0-100
-	public int Volume {
-		get => volume;
-		set {
-			volume = value;
-			OnSetVolume();
-		}
-	}
+    /// the volume of the emulator, 0-100
+    public int Volume {
+        get => volume;
+        set {
+            volume = value;
+            OnSetVolume();
+        }
+    }
 
-	[OnValueChanged(nameof(OnSetIsMuted))]
-	[Tooltip("if the emulator is muted")]
-	[SerializeField] bool isMuted;
+    [OnValueChanged(nameof(OnSetIsMuted))]
+    [Tooltip("if the emulator is muted")]
+    [SerializeField] bool isMuted;
 
-	/// if the emulator is muted
-	public bool IsMuted {
-		get => isMuted;
-		set {
-			isMuted = value;
-			OnSetIsMuted();
-		}
-	}
+    /// if the emulator is muted
+    public bool IsMuted {
+        get => isMuted;
+        set {
+            isMuted = value;
+            OnSetIsMuted();
+        }
+    }
 
-	[OnValueChanged(nameof(OnSetIsPaused))]
-	[Tooltip("if the emulator is paused")]
-	[SerializeField] bool isPaused;
+    [OnValueChanged(nameof(OnSetIsPaused))]
+    [Tooltip("if the emulator is paused")]
+    [SerializeField] bool isPaused;
 
-	/// if the emulator is paused
-	public bool IsPaused {
-		get => isPaused;
-		set {
-			isPaused = value;
-			OnSetIsPaused();
-		}
-	}
+    /// if the emulator is paused
+    public bool IsPaused {
+        get => isPaused;
+        set {
+            isPaused = value;
+            OnSetIsPaused();
+        }
+    }
 
-	/// the internal render texture
-	public RenderTexture Texture => renderTexture;
+    /// the internal render texture
+    public RenderTexture Texture => renderTexture;
 
-	/// is the emuhawk.exe process started? (best guess, might be wrong)
+    /// is the emuhawk.exe process started? (best guess, might be wrong)
     public bool IsStarted => Status == EmulatorStatus.Started;
 
-	/// is the emuhawk.exe process running a game? (best guess, might be wrong)
+    /// is the emuhawk.exe process running a game? (best guess, might be wrong)
     public bool IsRunning => Status == EmulatorStatus.Running;
 
     /// the current status of the emulator
     public enum EmulatorStatus {
-	    /// BizHawk hasn't started yet
+        /// BizHawk hasn't started yet
         Inactive,
 
         /// BizHawk has been started, but not rendering yet
@@ -91,9 +90,9 @@ public partial class Emulator {
 
     /// sets the config default values
     void SetConfigDefaults(ref BizHawkConfig bizConfig) {
-	    bizConfig.SoundVolume = volume;
-	    bizConfig.StartPaused = IsPaused;
-	    bizConfig.SoundEnabled = !isMuted;
+        bizConfig.SoundVolume = volume;
+        bizConfig.StartPaused = IsPaused;
+        bizConfig.SoundEnabled = !isMuted;
     }
 
     /// .
@@ -120,13 +119,13 @@ public partial class Emulator {
 
     /// calls the emulator api to pause/unpause
     void OnSetIsPaused() {
-	    var method = IsPaused ? "Pause" : "Unpause";
-		_apiCallBuffer.CallMethod(method, null);
+        var method = IsPaused ? "Pause" : "Unpause";
+        _apiCallBuffer.CallMethod(method, null);
     }
 
     /// pauses the emulator
     public void Pause() {
-		IsPaused = true;
+        IsPaused = true;
     }
 
     /// unpauses the emulator
@@ -136,12 +135,12 @@ public partial class Emulator {
 
     [Obsolete("use Volume setter instead")]
     public void SetVolume(int volume) {
-	    Volume = volume;
+        Volume = volume;
     }
 
     /// calls the emulator api to set volume
     void OnSetVolume() {
-		_apiCallBuffer.CallMethod("SetVolume", $"{volume}");
+        _apiCallBuffer.CallMethod("SetVolume", $"{volume}");
     }
 
     /// calls the emulator api to set sound on/off
@@ -192,12 +191,12 @@ public partial class Emulator {
         path = Paths.GetFullPath(path);
 
         if (string.IsNullOrEmpty(path)) {
-	        Debug.LogWarning("[emulator] attempting to load rom with invalid path, ignoring...");
-	        return;
+            Debug.LogWarning("[emulator] attempting to load rom with invalid path, ignoring...");
+            return;
         }
 
         if (_status == EmulatorStatus.Inactive) {
-	        return;
+            return;
         }
 
         // TODO: set emulator romFile?
@@ -218,15 +217,15 @@ public partial class Emulator {
         _apiCallBuffer.CallMethod("FrameAdvance");
     }
 
-	/// initializes the emulator
-	public void Initialize() {
-		Debug.Log("initialiazing!", this);
-		if (_initialized) {
-			Debug.LogWarning("attempting to initialize already initialized emulator", this);
-			return;
-		}
+    /// initializes the emulator
+    public void Initialize() {
+        Debug.Log("initialiazing!", this);
+        if (_initialized) {
+            Debug.LogWarning("attempting to initialize already initialized emulator", this);
+            return;
+        }
 
-		_Initialize();
-	}
+        _Initialize();
+    }
 }
 }
