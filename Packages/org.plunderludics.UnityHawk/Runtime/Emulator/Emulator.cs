@@ -53,8 +53,13 @@ public partial class Emulator : MonoBehaviour
     public bool captureEmulatorAudio = false;
 
     [Header("Files")]
+    [DisableIf("autoSelectRomFile")]
     public Rom romFile;
     public Savestate saveStateFile;
+    bool SaveStateFileIsNull => saveStateFile is null;
+    [HideIf("SaveStateFileIsNull")]
+    public bool autoSelectRomFile = true;
+
     public Config configFile;
     public LuaScript luaScriptFile;
     public RamWatch ramWatchFile;
@@ -442,7 +447,7 @@ public partial class Emulator : MonoBehaviour
 
         Debug.Log($"[unity-hawk] {exePath} {string.Join(' ', args)}");
 
-        _emuhawk.Start();
+        _emuhawk.Start(); // [This seems to block for ~20s sometimes, not sure why. Should maybe run in a separate thread?]
         _emuhawk.BeginOutputReadLine();
         _emuhawk.BeginErrorReadLine();
         Status = EmulatorStatus.Started;
@@ -459,6 +464,25 @@ public partial class Emulator : MonoBehaviour
                 // Params set in inspector have changed since the bizhawk process was started, needs restart
                 Deactivate();
             }
+
+#if UNITY_EDITOR
+        if (autoSelectRomFile && saveStateFile != null) {
+            // Select rom file automatically based on save state (if possible)
+            var roms = AssetDatabase.FindAssets("t:rom")
+                .Select(guid => AssetDatabase.LoadAssetAtPath<Rom>(AssetDatabase.GUIDToAssetPath(guid)))
+                .Where(rom => saveStateFile.MatchesRom(rom));
+            
+            if (roms.Any()) {
+                var rom = roms.First();
+                if (roms.Count() > 1) {
+                    Debug.LogWarning($"Multiple roms found matching savestate {saveStateFile.name}, using first match: {rom}");
+                }
+                romFile = rom;
+            } else {
+                Debug.LogWarning($"No rom found matching savestate {saveStateFile.name}");
+            }
+        }
+#endif
 
         if (!Application.isPlaying && !runInEditMode) {
             if (Status != EmulatorStatus.Inactive) {
