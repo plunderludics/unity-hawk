@@ -102,15 +102,15 @@ public class SharedTests
         AssertEmulatorIsRunning(e);
 
         e.Pause();
-        yield return WaitForAWhile(e); // Takes some time for the Pause message to reach the emulator
+        yield return WaitForAMoment(e); // Takes some time for the Pause message to reach the emulator
         int frame = e.CurrentFrame;
         Assert.That(frame, Is.GreaterThan(1));
         
-        yield return WaitForAWhile(e);
+        yield return WaitForAMoment(e);
         Assert.That(e.CurrentFrame, Is.EqualTo(frame));
         e.Unpause();
 
-        yield return WaitForAWhile(e);
+        yield return WaitForAMoment(e);
         Assert.That(e.CurrentFrame, Is.GreaterThan(frame));
     }
 
@@ -151,11 +151,11 @@ public class SharedTests
 
         // Checking frame count is a hacky way of checking if the rom really got loaded
         e.LoadState(eliteSavestate5000);
-        yield return WaitForAWhile(e);
+        yield return WaitForAMoment(e);
         Assert.That(e.CurrentFrame, Is.GreaterThan(5000));
         
         e.LoadState(eliteSavestate2000);
-        yield return WaitForAWhile(e);
+        yield return WaitForAMoment(e);
         Assert.That(e.CurrentFrame, Is.GreaterThan(2000));
         Assert.That(e.CurrentFrame, Is.LessThan(5000));
     }
@@ -176,69 +176,91 @@ public class SharedTests
         Assert.That(e.Texture.width, Is.EqualTo(320));
     }
 
-    // [UnityTest]
-    // public IEnumerator TestReadMemory()
-    // {
-    //     yield return WaitForAWhile(e);
-    //     AssertEmulatorIsRunning(e);
+    [UnityTest]
+    public IEnumerator TestRamWatch()
+    {
+        yield return WaitForAWhile(e);
+        AssertEmulatorIsRunning(e);
 
-    //     // Meaningless/arbitrary bits of memory cause i'm lazy, but these seem to be static at the beginning of the elite rom, so should be fine
-    //     Assert.That(e.ReadUnsigned(0x00E2, 1, true), Is.EqualTo(96));
-    //     Assert.That(e.ReadSigned(0x00A2, 4, false), Is.EqualTo(-16580608));
-    //     Assert.That(e.ReadFloat(0x00E2, false), Is.EqualTo(3.306212e-39f));
-    // }
+        uint u = 0;
+        int s = 0;
+        float f = 0f;
 
-    // [UnityTest]
-    // public IEnumerator TestWriteMemory()
-    // {
-    //     yield return WaitForAWhile(e);
-    //     AssertEmulatorIsRunning(e);
+        // Meaningless/arbitrary bits of memory cause i'm lazy, but these seem to be static at the beginning of the elite rom, so should be fine for testing
+        e.WatchUnsigned(0x00E2, 1, true, domain: null, (value) => u = value);
+        e.WatchSigned(0x00A2, 4, false, domain: null, (value) => s = value);
+        e.WatchFloat(0x00E2, false, domain: null, (value) => f = value);
 
-    //     // Again, just random chunks of memory, on the elite title screen we seem to be able to write them without them changing 
-    //     e.WriteUnsigned(0x00E2, value: 99, size: 1, isBigEndian: true);
-    //     yield return WaitForAMoment(e);
-    //     Assert.That(e.ReadUnsigned(0x00E2, 1, true), Is.EqualTo(99));
+        yield return WaitForAMoment(e);
 
-    //     e.WriteSigned(0x003C, value: -99, size: 4, isBigEndian: false);
-    //     yield return WaitForAMoment(e);
-    //     Assert.That(e.ReadSigned(0x003C, 4, false), Is.EqualTo(-99));
+        Assert.That(u, Is.EqualTo(96));
+        Assert.That(s, Is.EqualTo(-16580608));
+        Assert.That(f, Is.EqualTo(3.306212e-39f));
+    }
 
-    //     e.WriteFloat(0x003C, value: 123.4f, isBigEndian: false);
-    //     yield return WaitForAMoment(e);
-    //     Assert.That(e.ReadFloat(0x003C, false), Is.EqualTo(123.4f));
-    // }
+    [UnityTest]
+    public IEnumerator TestRamWrite()
+    {
+        yield return WaitForAWhile(e);
+        AssertEmulatorIsRunning(e);
 
-    // [UnityTest]
-    // public IEnumerator TestFreezeMemory()
-    // {
-    //     yield return WaitForAWhile(e);
-    //     AssertEmulatorIsRunning(e);
+        uint u = 0;
+        int s = 0;
+        float f = 0f;
 
-    //     long addr = 0x0063; // This address changes constantly on the elite title screen so we can try to freeze this
+        // Again, just random chunks of memory, on the elite title screen we seem to be able to write them without them changing 
+        e.WatchUnsigned(0x00E2, 1, true, domain: null, (value) => u = value);
+        e.WatchSigned(0x003C, 4, false, domain: null, (value) => s = value);
+        e.WatchFloat(0x003C, false, domain: null, (value) => f = value);
+        yield return WaitForAMoment(e);
 
-    //     uint value = e.ReadUnsigned(addr, 1, true).Value;
-    //     yield return WaitForAMoment(e);
+        e.WriteUnsigned(0x00E2, value: 99, size: 1, isBigEndian: true);
+        yield return WaitForAMoment(e);
+        Assert.That(u, Is.EqualTo(99));
 
-    //     bool allSame = true;
-    //     for (int i = 0; i < 10; i++) {
-    //         uint newValue = e.ReadUnsigned(addr, 1, true).Value;
-    //         allSame &= (newValue == value);
-    //         yield return WaitForAMoment(e);
-    //     }
-    //     Assert.That(allSame, Is.False); // Haven't frozen yet, value should be different at least most of the time
+        e.WriteSigned(0x003C, value: -99, size: 4, isBigEndian: false);
+        yield return WaitForAMoment(e);
+        Assert.That(s, Is.EqualTo(-99));
 
-    //     e.Freeze(addr, size: 1);
-    //     yield return WaitForAMoment(e);
+        e.WriteFloat(0x003C, value: 123.4f, isBigEndian: false);
+        yield return WaitForAMoment(e);
+        Assert.That(f, Is.EqualTo(123.4f));
+    }
 
-    //     value = e.ReadUnsigned(addr, 1, true).Value;
-    //     yield return WaitForAMoment(e);
+    [UnityTest]
+    public IEnumerator TestRamFreeze()
+    {
+        yield return WaitForAWhile(e);
+        AssertEmulatorIsRunning(e);
 
-    //     for (int i = 0; i < 10; i++) {
-    //         uint newValue = e.ReadUnsigned(addr, 1, true).Value;
-    //         yield return WaitForAMoment(e);
-    //         Assert.That(newValue, Is.EqualTo(value)); // Should be the same every time
-    //     }
-    // }
+        long addr = 0x0063; // This address changes constantly on the elite title screen so we can try to freeze this
+
+        uint v = 0;
+        e.WatchUnsigned(addr, 1, true, domain: null, (value) => v = value);
+        yield return WaitForAMoment(e);
+        uint initialValue = v;
+        yield return WaitForAMoment(e);
+
+        bool allSame = true;
+        for (int i = 0; i < 10; i++) {
+            uint newValue = v;
+            allSame &= (newValue == initialValue);
+            yield return WaitForAMoment(e);
+        }
+        Assert.That(allSame, Is.False); // Haven't frozen yet, value should be different at least some of the time
+
+        e.Freeze(addr, size: 1);
+        yield return WaitForAMoment(e);
+
+        initialValue = v;
+        yield return WaitForAMoment(e);
+
+        for (int i = 0; i < 10; i++) {
+            uint newValue = v;
+            yield return WaitForAMoment(e);
+            Assert.That(newValue, Is.EqualTo(initialValue)); // Should be the same every time
+        }
+    }
 
     [UnityTest]
     public IEnumerator TestLuaCallbacks()
