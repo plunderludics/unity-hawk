@@ -39,6 +39,8 @@ MonoBehaviour:
     Control: ON
   - Key: 13
     Control: ENTER
+  - Key: 271
+    Control: ENTER
   - Key: 274
     Control: DOWN
   - Key: 273
