@@ -16,12 +16,12 @@ public class CallMethodRpcBuffer : ISharedBuffer {
     RpcBuffer _rpcBuffer;
 
     /// the callback for this rpc
-    public delegate bool CallRegisteredMethod(string methodName, string argString, out string output);
-    CallRegisteredMethod _callRegisteredMethod;
+    public delegate void Callback(string methodName, string argString, out string output);
+    Callback _callback;
 
-    public CallMethodRpcBuffer(string name, CallRegisteredMethod callRegisteredMethod) {
+    public CallMethodRpcBuffer(string name, Callback callRegisteredMethod) {
         _name = name;
-        _callRegisteredMethod = callRegisteredMethod;
+        _callback = callRegisteredMethod;
     }
 
     public void Open() {
@@ -37,7 +37,7 @@ public class CallMethodRpcBuffer : ISharedBuffer {
                     string methodName = methodCall.MethodName;
                     string argString = methodCall.Argument;
 
-                    var exists = _callRegisteredMethod(methodName, argString, out returnString);
+                    _callback(methodName, argString, out returnString);
 
                     // [messy hack] don't allow returning null because it seems to break things on the other side of the RPC
                     if (returnString == null) {

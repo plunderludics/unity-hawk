@@ -22,6 +22,8 @@ using Unity.Profiling;
 using Plunderludics;
 using UnityEngine.Events;
 using UnityEngine.Serialization;
+using Plunderludics.UnityHawk.Shared;
+using UnityEngine.InputSystem;
 
 namespace UnityHawk {
 
@@ -144,16 +146,20 @@ public partial class Emulator : MonoBehaviour
     /// a set of all the called methods
     readonly HashSet<string> _invokedLuaCallbacks = new();
 
+    /// Dictionaries to store callbacks for watched memory
+    Dictionary<int, ((long Addr, int Size, bool IsBigEndian, WatchType Type, string Domain) Key, Action<string> Callback)> _watchCallbacks = new(); // The actual key is the hashcode of Key (for opaque retrieval)
+
+    /// buffer to send audio data to bizhawk
     SharedAudioBuffer _sharedAudioBuffer;
 
     /// buffer to receive lua callbacks from bizhawk
-    CallMethodRpcBuffer _luaCallbacksRpcBuffer;
+    CallMethodRpcBuffer _callMethodRpcBuffer;
 
     /// buffer for main-thread write-only bizhawk api calls
     ApiCommandBuffer _apiCommandBuffer;
 
     /// buffer for read/write non-main-thread bizhawk api calls
-    ApiCallRpcBuffer _apiCallRpcBuffer;
+    // ApiCallRpcBuffer _apiCallRpcBuffer;
 
     /// buffer to send keyInputs to bizhawk
     SharedInputBuffer _sharedInputBuffer;
@@ -350,22 +356,22 @@ public partial class Emulator : MonoBehaviour
 
         // create & register sharedTextureBuffer
         var sharedTextureBufferName = $"texture-{randomNumber}";
-        userData.Add($"unityhawk-texture-buffer:{sharedTextureBufferName}");
+        userData.Add($"{Args.TextureBuffer}:{sharedTextureBufferName}");
         _sharedTextureBuffer = new SharedTextureBuffer(sharedTextureBufferName);
 
-        // create & register lua callbacks rpc
-        var luaCallbacksBufferName = $"lua-callbacks-{randomNumber}";
-        userData.Add($"unityhawk-lua-callbacks-buffer:{luaCallbacksBufferName}");
-        _luaCallbacksRpcBuffer = new CallMethodRpcBuffer(luaCallbacksBufferName, CallRegisteredLuaCallback);
+        // create & register callbacks rpc (used for lua callbacks and also the Watch memory api)
+        var callMethodRpcBufferName = $"call-method-{randomNumber}";
+        userData.Add($"{Args.CallMethodRpc}:{callMethodRpcBufferName}");
+        _callMethodRpcBuffer = new CallMethodRpcBuffer(callMethodRpcBufferName, ProcessRpcCallback);
 
         // create & register api call buffers
         var apiCommandBufferName = $"api-command-{randomNumber}";
-        userData.Add($"unityhawk-api-command-buffer:{apiCommandBufferName}");
+        userData.Add($"{Args.ApiCommandBuffer}:{apiCommandBufferName}");
         _apiCommandBuffer = new ApiCommandBuffer(apiCommandBufferName);
 
-        var apiCallRpcBufferName = $"api-call-rpc-{randomNumber}";
-        userData.Add($"unityhawk-api-call-rpc:{apiCallRpcBufferName}");
-        _apiCallRpcBuffer = new ApiCallRpcBuffer(apiCallRpcBufferName);
+        // var apiCallRpcBufferName = $"api-call-rpc-{randomNumber}";
+        // userData.Add($"{Args.ApiCallRpc}:{apiCallRpcBufferName}");
+        // _apiCallRpcBuffer = new ApiCallRpcBuffer(apiCallRpcBufferName);
 
         // create & register audio buffer
         if (captureEmulatorAudio) {
@@ -373,7 +379,7 @@ public partial class Emulator : MonoBehaviour
                 Debug.LogWarning("captureEmulatorAudio is enabled but emulator audio cannot be captured in edit mode");
             } else {
                 var sharedAudioBufferName = $"audio-{randomNumber}";
-                userData.Add($"unityhawk-audio-buffer:{sharedAudioBufferName}");
+                userData.Add($"{Args.AudioRpc}:{sharedAudioBufferName}");
                 _sharedAudioBuffer = new SharedAudioBuffer(sharedAudioBufferName);
 
                 if (_audioResampler == null) {
@@ -388,7 +394,7 @@ public partial class Emulator : MonoBehaviour
             if (passInputFromUnity) {
                 var sharedInputBufferName = $"input-{randomNumber}";
                 // args.Add($"--read-input-from-shared-buffer={sharedKeyInputBufferName}");
-                userData.Add($"unityhawk-input-buffer:{sharedInputBufferName}");
+                userData.Add($"{Args.InputBuffer}:{sharedInputBufferName}");
                 _sharedInputBuffer = new SharedInputBuffer(sharedInputBufferName);
 
                 // default to BasicInputProvider (maps keys directly from keyboard)
@@ -497,8 +503,8 @@ public partial class Emulator : MonoBehaviour
             }
         }
 
-        if (!_luaCallbacksRpcBuffer.IsOpen()) {
-            AttemptOpenBuffer(_luaCallbacksRpcBuffer);
+        if (!_callMethodRpcBuffer.IsOpen()) {
+            AttemptOpenBuffer(_callMethodRpcBuffer);
         }
         if (!_apiCommandBuffer.IsOpen()) {
             AttemptOpenBuffer(_apiCommandBuffer);
@@ -506,9 +512,9 @@ public partial class Emulator : MonoBehaviour
         if (!_apiCommandBuffer.IsOpen()) {
             AttemptOpenBuffer(_apiCommandBuffer);
         }
-        if (!_apiCallRpcBuffer.IsOpen()) {
-            AttemptOpenBuffer(_apiCallRpcBuffer);
-        }
+        // if (!_apiCallRpcBuffer.IsOpen()) {
+        //     AttemptOpenBuffer(_apiCallRpcBuffer);
+        // }
 
         if (captureEmulatorAudio && Application.isPlaying) {
             if (_sharedAudioBuffer.IsOpen()) {
@@ -583,9 +589,9 @@ public partial class Emulator : MonoBehaviour
         foreach (ISharedBuffer buf in new ISharedBuffer[] {
             _sharedTextureBuffer,
             _sharedAudioBuffer,
-            _luaCallbacksRpcBuffer,
+            _callMethodRpcBuffer,
             _apiCommandBuffer,
-            _apiCallRpcBuffer
+            // _apiCallRpcBuffer
         }) {
             if (buf != null && buf.IsOpen()) {
                 buf.Close();
@@ -642,22 +648,59 @@ public partial class Emulator : MonoBehaviour
         }
     }
 
-    bool CallRegisteredLuaCallback(string callbackName, string argString, out string returnString) {
-        // call corresponding method
-        returnString = "";
-        var exists = _registeredLuaCallbacks.TryGetValue(callbackName, out var callback);
-        if (exists) {
-            returnString = callback(argString);
+    void ProcessRpcCallback(string callbackName, string argString, out string returnString) {
+        // Debug.Log($"Rpc callback from bizhawk: {callbackName}({argString})");
+
+        // This is either a lua callback, or a 'special' bizhawk->unity call
+        // (Should probably use a separate buffer but they share one for now)
+        if (SpecialCommands.All.Contains(callbackName)) {
+            returnString = ""; // Ignored on bizhawk side anyway
+            switch (callbackName) {
+                case SpecialCommands.ReceiveWatchedValue:
+                    // args format: $"{addr},{size},{isBigEndian},{type},{domain},{value}";
+                    var args = argString.Split(',');
+                    if (args.Length != 6)
+                    {
+                        Debug.LogWarning($"Expected 6 arguments for callback '{callbackName}', but got {args.Length}: {argString}");
+                        returnString = "";
+                        break;
+                    }
+                    long addr = long.Parse(args[0]);
+                    int size = int.Parse(args[1]);
+                    bool isBigEndian = bool.Parse(args[2]);
+                    WatchType type = Enum.Parse<WatchType>(args[3]);
+                    string domain = args[4].Length > 0 ? args[4] : null; // domain is optional
+                    string value = args[5];
+
+                    var key = (addr, size, isBigEndian, type, domain);
+                    var id = key.GetHashCode();
+                    if (_watchCallbacks.TryGetValue(id, out var v)) {
+                        var callback = v.Callback;
+                        v.Callback(value);
+                    } else {
+                        Debug.LogWarning($"Bizhawk tried to call a watch callback for key {key} but no callback was registered");
+                    }
+                    break;
+                default:
+                    Debug.LogWarning($"Bizhawk tried to call unknown special method {callbackName}");
+                    break;
+            }
+        } else {
+            // This is a lua callback
+            // call corresponding method
+            returnString = "";
+            var exists = _registeredLuaCallbacks.TryGetValue(callbackName, out var callback);
+            if (exists) {
+                returnString = callback(argString);
+            }
+
+            // add to set of called methods to not spam this warning every frame
+            if (!exists && !_invokedLuaCallbacks.Contains(callbackName)){
+                Debug.LogWarning($"Tried to call a method named {callbackName} from lua but none was registered");
+            }
+
+            _invokedLuaCallbacks.Add(callbackName);
         }
-
-        // add to set of called methods to not spam this warning
-        if (!exists && !_invokedLuaCallbacks.Contains(callbackName)){
-            Debug.LogWarning($"Tried to call a method named {callbackName} from lua but none was registered");
-        }
-
-        _invokedLuaCallbacks.Add(callbackName);
-
-        return exists;
     }
 
     void LogBizHawk(object sender, DataReceivedEventArgs e, bool isError) {

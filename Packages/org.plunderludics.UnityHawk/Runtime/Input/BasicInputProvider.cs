@@ -55,12 +55,13 @@ public class BasicInputProvider : InputProvider {
     void OnNewRom() {
         if (!useDefaultControls) return;
 
-        // Debug.Log("Setting controls for platform");
-        string systemId = emulator.GetSystemId();
-        controls = _defaultControlsForPlatform.FirstOrDefault(x => x.Item1 == systemId).Item2;
-        if (controls == null) {
-            Debug.LogError($"No default controls found for platform {systemId}, controls will not work");
-        }
+        // TODO reimplement
+        // // Debug.Log("Setting controls for platform");
+        // string systemId = emulator.GetSystemId();
+        // controls = _defaultControlsForPlatform.FirstOrDefault(x => x.Item1 == systemId).Item2;
+        // if (controls == null) {
+        //     Debug.LogError($"No default controls found for platform {systemId}, controls will not work");
+        // }
        //  Debug.Log($"Setting controls to {controls} for system {systemId}");
     }
 
