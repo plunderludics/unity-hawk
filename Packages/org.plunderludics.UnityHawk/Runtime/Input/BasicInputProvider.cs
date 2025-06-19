@@ -53,10 +53,11 @@ public class BasicInputProvider : InputProvider {
 
     // Runs when emulator starts or changes rom
     void OnNewRom() {
+        Debug.Log("BasicInputProvider: New rom started, setting controls");
         if (!useDefaultControls) return;
 
         string systemId = emulator.SystemId;
-        controls = _defaultControlsForPlatform.FirstOrDefault(x => x.Item1 == systemId).Item2;
+        controls = Controls.GetDefaultControls(systemId);
         if (controls == null) {
             Debug.LogError($"No default controls found for platform {systemId}, controls will not work");
         }
@@ -91,7 +92,6 @@ public class BasicInputProvider : InputProvider {
         {
             bool interaction = false;
             bool isPressed = false;
-            string keyName = null;
 
 #if ENABLE_INPUT_SYSTEM
             Key key = KeyCodeToKey(kc);
@@ -152,20 +152,19 @@ public class BasicInputProvider : InputProvider {
     }
 #endif
 
+// #if UNITY_EDITOR
+//     // Automatically initialize default controls on validate (they get serialized so all of these should be included in build)
+//     void OnValidate() {
+//         // _defaultControlsForPlatform = new () {
+//         //     ( "N64", LoadControls("N64.asset") ),
+//         //     ( "PSX", LoadControls("PSX.asset") )
+//         // };
+//     }
 
-#if UNITY_EDITOR
-    // Automatically initialize default controls on validate (they get serialized so all of these should be included in build)
-    void OnValidate() {
-        _defaultControlsForPlatform = new () {
-            ( "N64", LoadControls("N64.asset") ),
-            ( "PSX", LoadControls("PSX.asset") )
-        };
-    }
-
-    Controls LoadControls(string assetName) {
-        return AssetDatabase.LoadAssetAtPath<Controls>(Path.Join(Paths.defaultControlsDir, assetName));
-    }
-#endif
+//     Controls LoadControls(string assetName) {
+//         return AssetDatabase.LoadAssetAtPath<Controls>(Path.Join(Paths.defaultControlsDir, assetName));
+//     }
+// #endif
 
 }
 

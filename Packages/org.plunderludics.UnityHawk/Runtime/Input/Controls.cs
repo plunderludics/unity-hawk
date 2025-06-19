@@ -12,6 +12,9 @@ public class Controls: ScriptableObject {
     public class KeyCode2Control {
         public KeyCode Key; // Keyboard key name e.g. "Z"
         public string Control; // Bizhawk control name e.g. "D-Pad Up"
+        // TODO:
+        // bool enabled = true;
+        // int controller = 1; // 1-based
     }
 
     // Mappings from keyname to bizhawk console button name (can be many-to-many)
@@ -29,6 +32,10 @@ public class Controls: ScriptableObject {
             }
             return result;
         }
+    }
+
+    public static Controls GetDefaultControls(string systemId) {
+        return Resources.Load<Controls>($"DefaultControls/{systemId}");
     }
 }
 }

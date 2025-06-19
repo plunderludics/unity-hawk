@@ -197,6 +197,8 @@ public partial class Emulator : MonoBehaviour
     [DllImport("user32.dll")]
     private static extern IntPtr GetForegroundWindow();
 
+    Action _deferredForMainThread = null; // Pretty ugly solution for rpc handlers to get stuff to run on the main thread
+
     [Button]
     public void Reset() {
         Deactivate();
@@ -530,6 +532,10 @@ public partial class Emulator : MonoBehaviour
             }
         }
 
+        if (_deferredForMainThread != null) {
+            _deferredForMainThread();
+        }
+
         if (_emuhawk != null && _emuhawk.HasExited) {
             Debug.LogWarning("EmuHawk process was unexpectedly killed");
             Deactivate();
@@ -686,7 +692,7 @@ public partial class Emulator : MonoBehaviour
                 case SpecialCommands.OnRomLoaded:
                     // args: $"{systemID}"
                     _systemId = argString;
-                    Status = EmulatorStatus.Running; // This is where the emulator is considered running
+                    _deferredForMainThread += () => Status = EmulatorStatus.Running; // This is where the emulator is considered running
                     // (At this point I think we can be confident all the buffers should be open)
                     break;
                 default:
