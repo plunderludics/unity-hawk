@@ -8,19 +8,13 @@ using BizHawk.Common.BufferExtensions;
 namespace UnityHawk.Editor {
 
 [ScriptedImporter(1, new [] {
-    // TODO: support `.bin` for Atari 2600, Atari 7800, IntelliVision, Sega Genesis, Sony Playstation
-    // TODO: support `.po` for Apple II
-    // TODO: support `.xml` for NES
-    // TODO: support `.md` for Sega Genesis
-    // TODO: support `.wav` for ZX Spectrum
-
     /* Amstrad CPC: */ "cdt", "dsk",
     /* Atari 2600: */ "a26",
     /* Atari 7800: */ "a78",
     /* Atari Jaguar: */ "j64", "jag",
     /* Atari Lynx: */ "lnx",
     /* Apple II: */ "dsk", "do", //
-    /* Arcade: */ "zip", "7z", "chd",
+    /* Arcade: */ /*"zip", "7z", */"chd", // Ignore zipped files
     /* ColecoVision: */ "col",
     /* Commodore 64: */ "prg", "d64", "g64", "crt", "tap",
     /* Commodore 64 Music File: */ "sid",
