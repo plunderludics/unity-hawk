@@ -17,6 +17,7 @@ public partial class Emulator
 {
     public RenderTexture Texture => renderTexture;
     public bool IsRunning => Status == EmulatorStatus.Running; // is the emuhawk.exe process running? (best guess, might be wrong)
+    public string SystemId => _systemId; // (Will be null if no core currently running)
 
     public enum EmulatorStatus {
         Inactive,
@@ -136,7 +137,7 @@ public partial class Emulator
         _apiCommandBuffer.CallMethod(ApiCommands.LoadRom, path);
         // Need to update texture buffer size in case platform has changed:
         _sharedTextureBuffer.UpdateSize();
-        _status = EmulatorStatus.Started; // Not ready until new texture buffer is set up
+        Status = EmulatorStatus.Started; // Not ready until new texture buffer is set up
     }
 
     /// <summary>
@@ -152,14 +153,6 @@ public partial class Emulator
     /// </summary>
     public void FrameAdvance() {
         _apiCommandBuffer.CallMethod(ApiCommands.FrameAdvance, null);
-    }
-
-    /// get platform of currently loaded rom, or "NULL"
-    /// Warning: Can block for a long time is rom is not open
-    /// TODO: async version..?
-    public string GetSystemId() {
-        throw new NotImplementedException(); // TODO
-        // return _apiCallRpcBuffer.CallMethod("GetSystemId");
     }
 
     ///// RAM read/write

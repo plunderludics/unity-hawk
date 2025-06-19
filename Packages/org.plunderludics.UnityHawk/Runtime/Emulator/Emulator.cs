@@ -98,6 +98,9 @@ public partial class Emulator : MonoBehaviour
     [Foldout("Debug")]
     [ReadOnly, SerializeField] int _currentFrame; // The frame index of the most-recently grabbed texture
 
+    [Foldout("Debug")]
+    [ReadOnly, SerializeField] string _systemId; // The system ID of the current core (e.g. "N64", "PSX", etc.)
+
     // Just for convenient reading from inspector:
     [Foldout("Debug")]
     [ReadOnly, SerializeField] Vector2Int _textureSize;
@@ -116,6 +119,11 @@ public partial class Emulator : MonoBehaviour
 
     [Foldout("Debug")]
     public string savestatesOutputPath;
+
+    [Foldout("Debug")]
+    [ShowIf("captureEmulatorAudio")]
+    [SerializeField]
+    AudioResampler _audioResampler;
 
     private TextureFormat textureFormat = TextureFormat.BGRA32;
     private RenderTextureFormat renderTextureFormat = RenderTextureFormat.BGRA32;
@@ -147,7 +155,7 @@ public partial class Emulator : MonoBehaviour
     readonly HashSet<string> _invokedLuaCallbacks = new();
 
     /// Dictionaries to store callbacks for watched memory
-    Dictionary<int, ((long Addr, int Size, bool IsBigEndian, WatchType Type, string Domain) Key, Action<string> Callback)> _watchCallbacks = new(); // The actual key is the hashcode of Key (for opaque retrieval)
+    readonly Dictionary<int, ((long Addr, int Size, bool IsBigEndian, WatchType Type, string Domain) Key, Action<string> Callback)> _watchCallbacks = new(); // The actual key is the hashcode of Key (for opaque retrieval)
 
     /// buffer to send audio data to bizhawk
     SharedAudioBuffer _sharedAudioBuffer;
@@ -175,11 +183,6 @@ public partial class Emulator : MonoBehaviour
     Material _renderMaterial; // just used for rendering in edit mode
 
     StreamWriter _bizHawkLogWriter;
-
-    [SerializeField]
-    [Foldout("Debug")]
-    [ShowIf("captureEmulatorAudio")]
-    AudioResampler _audioResampler;
 
     float _startedTime;
 
@@ -255,6 +258,7 @@ public partial class Emulator : MonoBehaviour
         if (!customRenderTexture) renderTexture = null; // Clear texture so that it's forced to be reinitialized
 
         Status = EmulatorStatus.Inactive;
+        _systemId = null;
 
         _textureCorrectionMat = new Material(Resources.Load<Shader>(textureCorrectionShaderName));
 
@@ -487,8 +491,6 @@ public partial class Emulator : MonoBehaviour
         }
 
         if (_sharedTextureBuffer.IsOpen()) {
-            Status = EmulatorStatus.Running;
-            // TODO: Maybe should be after first texture data is received, not immediately after texture buffer is open?
             UpdateTextureFromBuffer();
         } else {
             AttemptOpenBuffer(_sharedTextureBuffer);
@@ -680,6 +682,12 @@ public partial class Emulator : MonoBehaviour
                     } else {
                         Debug.LogWarning($"Bizhawk tried to call a watch callback for key {key} but no callback was registered");
                     }
+                    break;
+                case SpecialCommands.OnRomLoaded:
+                    // args: $"{systemID}"
+                    _systemId = argString;
+                    Status = EmulatorStatus.Running; // This is where the emulator is considered running
+                    // (At this point I think we can be confident all the buffers should be open)
                     break;
                 default:
                     Debug.LogWarning($"Bizhawk tried to call unknown special method {callbackName}");

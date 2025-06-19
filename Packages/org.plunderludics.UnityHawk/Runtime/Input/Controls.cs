@@ -5,7 +5,6 @@
 using UnityEngine;
 using System.Collections.Generic;
 
-
 namespace UnityHawk {
 [CreateAssetMenu(fileName = "Controls", menuName = "Plunderludics/UnityHawk/Controls", order = 0)]
 public class Controls: ScriptableObject {

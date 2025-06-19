@@ -55,14 +55,12 @@ public class BasicInputProvider : InputProvider {
     void OnNewRom() {
         if (!useDefaultControls) return;
 
-        // TODO reimplement
-        // // Debug.Log("Setting controls for platform");
-        // string systemId = emulator.GetSystemId();
-        // controls = _defaultControlsForPlatform.FirstOrDefault(x => x.Item1 == systemId).Item2;
-        // if (controls == null) {
-        //     Debug.LogError($"No default controls found for platform {systemId}, controls will not work");
-        // }
-       //  Debug.Log($"Setting controls to {controls} for system {systemId}");
+        string systemId = emulator.SystemId;
+        controls = _defaultControlsForPlatform.FirstOrDefault(x => x.Item1 == systemId).Item2;
+        if (controls == null) {
+            Debug.LogError($"No default controls found for platform {systemId}, controls will not work");
+        }
+        // Debug.Log($"Setting controls to {controls} for system {systemId}");
     }
 
     // Poll for events in Update / FixedUpdate rather than in InputForFrame directly,
@@ -156,7 +154,7 @@ public class BasicInputProvider : InputProvider {
 
 
 #if UNITY_EDITOR
-    // Automatically initialize default controls on validate (they get serialized so should be preserved in build)
+    // Automatically initialize default controls on validate (they get serialized so all of these should be included in build)
     void OnValidate() {
         _defaultControlsForPlatform = new () {
             ( "N64", LoadControls("N64.asset") ),
