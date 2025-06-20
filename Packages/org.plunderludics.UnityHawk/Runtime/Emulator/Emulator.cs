@@ -64,16 +64,9 @@ public partial class Emulator : MonoBehaviour
     public LuaScript luaScriptFile;
     public RamWatch ramWatchFile;
 
-    [SerializeField, HideInInspector]
-    bool _isEnabled = false; // hack to only show the forceCopyFilesToBuild field when component is inactive
-
-    [HideIf("_isEnabled")]
-    [Tooltip("Copy files into build even though Emulator is not active")]
-    public bool forceCopyFilesToBuild = false;
-
     [Header("Development")]
-    [Tooltip("if the bizhawk gui should be visible")]
-    public bool showBizhawkGui = false;
+    [Tooltip("if the bizhawk gui should be visible while running in unity editor")]
+    public bool showBizhawkGuiInEditor = false;
 
     [ReadOnlyWhenPlaying]
     [Tooltip("whether bizhawk should run when in edit mode")]
@@ -102,6 +95,10 @@ public partial class Emulator : MonoBehaviour
 
     // Options for using hardcoded filenames instead of Assets
 
+    [Foldout("Debug")]
+    [SerializeField] bool showBizhawkGuiInBuild = false;
+    [Foldout("Debug")]
+    [SerializeField] bool muteBizhawkInEditMode = true;
     [Foldout("Debug")]
     [SerializeField] UnityHawkConfig config;
     [Tooltip("Prevent BizHawk from popping up windows for warnings and errors; these will still appear in logs")]
@@ -135,6 +132,8 @@ public partial class Emulator : MonoBehaviour
         public bool acceptBackgroundInput;
         public bool showBizhawkGui;
     }
+
+    bool _showBizhawkGui; // Either showBizhawkGuiInEditor or showBizhawkGuiInBuild, depending on the context
 
     BizhawkArgs _currentBizhawkArgs; // remember the params corresponding to the currently running process
 
@@ -216,7 +215,6 @@ public partial class Emulator : MonoBehaviour
     // (These methods are public only for convenient testing)
     public void OnEnable()
     {
-        _isEnabled = true;
 #if UNITY_EDITOR && UNITY_2022_2_OR_NEWER
         if (Undo.isProcessing) return; // OnEnable gets called after undo/redo, but ignore it
 #endif
@@ -233,7 +231,6 @@ public partial class Emulator : MonoBehaviour
 
     public void OnDisable() {
         // Debug.Log($"Emulator OnDisable");
-        _isEnabled = false;
 #if UNITY_EDITOR && UNITY_2022_2_OR_NEWER
         if (Undo.isProcessing) return; // OnDisable gets called after undo/redo, but ignore it
 #endif
@@ -245,6 +242,9 @@ public partial class Emulator : MonoBehaviour
     ////// Core methods
 
     bool TryInitialize() {
+        SetShowBizhawkGui();
+        _currentBizhawkArgs = MakeBizhawkArgs();
+
         // Debug.Log("Emulator Initialize");
         if (!customRenderTexture) renderTexture = null; // Clear texture so that it's forced to be reinitialized
 
@@ -277,7 +277,7 @@ public partial class Emulator : MonoBehaviour
             _emuhawk.StartInfo.EnvironmentVariables["LD_LIBRARY_PATH"] = Paths.dllDir;
             _emuhawk.StartInfo.EnvironmentVariables["MONO_PATH"] = Paths.dllDir;
             _emuhawk.StartInfo.FileName = "/Library/Frameworks/Mono.framework/Versions/Current/Commands/mono";
-            if (showBizhawkGui) {
+            if (_showBizhawkGui) {
                 Debug.LogWarning("'Show Bizhawk Gui' is not supported on Mac'");
             }
             args.Add(exePath);
@@ -336,7 +336,7 @@ public partial class Emulator : MonoBehaviour
         }
         args.Add($"--save-ram-watch={ramWatchOutputDirPath}");
 
-        if (!showBizhawkGui) {
+        if (!_showBizhawkGui) {
             args.Add("--headless");
             _emuhawk.StartInfo.CreateNoWindow = true;
             _emuhawk.StartInfo.WindowStyle = ProcessWindowStyle.Hidden;
@@ -377,6 +377,10 @@ public partial class Emulator : MonoBehaviour
             }
         }
 
+        if (muteBizhawkInEditMode && !Application.isPlaying) {
+            args.Add("--mute=true");
+        }
+
         // create & register input buffers
         if (Application.isPlaying) {
             if (passInputFromUnity) {
@@ -395,13 +399,11 @@ public partial class Emulator : MonoBehaviour
                     }
                 }
             } else {
-                // Always accept background input in play mode if not getting input from unity
-                args.Add($"--accept-background-input");
+                // Always accept background input in play mode if not getting input from unity (otherwise would be no input at all)
+                args.Add($"--accept-background-input=true");
             }
         } else if (runInEditMode) {
-            if (acceptBackgroundInput) {
-                args.Add($"--accept-background-input");
-            }
+            args.Add($"--accept-background-input={(acceptBackgroundInput ? "true" : "false")}");
         }
 
 
@@ -433,17 +435,17 @@ public partial class Emulator : MonoBehaviour
         Status = EmulatorStatus.Started;
         _startedTime = Time.realtimeSinceStartup;
 
-        _currentBizhawkArgs = MakeBizhawkArgs();
-
         _initialized = true;
         return true;
     }
 
     void _Update() {
-        if (!Equals(_currentBizhawkArgs, MakeBizhawkArgs())) {
-            // Params set in inspector have changed since the bizhawk process was started, needs restart
-            Deactivate();
-        }
+        SetShowBizhawkGui();
+        if (!Equals(_currentBizhawkArgs, MakeBizhawkArgs()))
+            {
+                // Params set in inspector have changed since the bizhawk process was started, needs restart
+                Deactivate();
+            }
 
         if (!Application.isPlaying && !runInEditMode) {
             if (Status != EmulatorStatus.Inactive) {
@@ -462,7 +464,7 @@ public partial class Emulator : MonoBehaviour
         //  - fortunately for some reason it doesn't steal focus when clicking into a different application]
         // [Except this has a nasty side effect, in the editor in play mode if you try to open a unity modal window
         //  (e.g. the game view aspect ratio config) it gets closed. To avoid this only do the check in the first 5 seconds after starting up]
-        if (Time.realtimeSinceStartup - _startedTime < 5f && Application.isPlaying && !_targetMac && !showBizhawkGui && _emuhawk != null) {
+        if (Time.realtimeSinceStartup - _startedTime < 5f && Application.isPlaying && !_targetMac && !_showBizhawkGui && _emuhawk != null) {
             IntPtr unityWindow = Process.GetCurrentProcess().MainWindowHandle;
             IntPtr bizhawkWindow = _emuhawk.MainWindowHandle;
             IntPtr focusedWindow = GetForegroundWindow();
@@ -670,6 +672,15 @@ public partial class Emulator : MonoBehaviour
         }
     }
 
+    void SetShowBizhawkGui()
+    {
+#if UNITY_EDITOR
+        _showBizhawkGui = showBizhawkGuiInEditor;
+#else
+        _showBizhawkGui = showBizhawkGuiInBuild;
+#endif
+    }
+
     BizhawkArgs MakeBizhawkArgs() {
         return new BizhawkArgs {
 #if UNITY_EDITOR
@@ -681,7 +692,7 @@ public partial class Emulator : MonoBehaviour
             passInputFromUnity = passInputFromUnity,
             captureEmulatorAudio = captureEmulatorAudio,
             acceptBackgroundInput = acceptBackgroundInput,
-            showBizhawkGui = showBizhawkGui
+            showBizhawkGui = _showBizhawkGui
         };
     }
 }
