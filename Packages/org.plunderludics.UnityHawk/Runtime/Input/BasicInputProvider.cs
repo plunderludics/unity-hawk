@@ -59,7 +59,7 @@ public class BasicInputProvider : InputProvider {
         string systemId = emulator.SystemId;
         controls = Controls.GetDefaultControls(systemId);
         if (controls == null) {
-            Debug.LogError($"No default controls found for platform {systemId}, controls will not work");
+            Debug.LogError($"No default controls found for platform '{systemId}', controls will not work");
         }
         // Debug.Log($"Setting controls to {controls} for system {systemId}");
     }

@@ -228,7 +228,7 @@ public partial class Emulator
         if (_watchCallbacks.ContainsKey(hashCode)) {
             Debug.LogWarning($"Overwriting existing watch for key {key}");
         }
-        _watchCallbacks.Add(hashCode, (key, callback));
+        _watchCallbacks[hashCode] = (key, callback);
         return hashCode;
     }
 
