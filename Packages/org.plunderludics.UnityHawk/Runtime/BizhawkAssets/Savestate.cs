@@ -10,10 +10,10 @@ public class Savestate : BizhawkAsset {
     public RomInfo RomInfo;
 
     // TODO: get the rom associated with this game using gamedb
-    public Rom Rom;
+    // public Rom Rom;
 
-    public string Name {
-        get => RomInfo.Name != "NULL" ? RomInfo.Name : name;
-    }
+    // public string Name {
+    //     get => RomInfo.Name != "NULL" ? RomInfo.Name : name;
+    // }
 }
 }
