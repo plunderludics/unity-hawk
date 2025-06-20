@@ -27,8 +27,6 @@ public class BasicInputProvider : InputProvider {
     [ShowIf("useDefaultControls")]
     [Tooltip("Emulator to use. If null, will look for attached Emulator")]
     public Emulator emulator;
-
-    [SerializeField /*, HideInInspector*/] List<(string, Controls)> _defaultControlsForPlatform;
     
     KeyCode[] _allKeyCodes;
     List<InputEvent> pressedThisFrame;
@@ -152,6 +150,7 @@ public class BasicInputProvider : InputProvider {
     }
 #endif
 
+<<<<<<< HEAD
 // #if UNITY_EDITOR
 //     // Automatically initialize default controls on validate (they get serialized so all of these should be included in build)
 //     void OnValidate() {
@@ -166,6 +165,8 @@ public class BasicInputProvider : InputProvider {
 //     }
 // #endif
 
+=======
+>>>>>>> unity-hawk-ext-tool
 }
 
 }

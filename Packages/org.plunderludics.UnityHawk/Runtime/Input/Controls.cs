@@ -4,6 +4,13 @@
 
 using UnityEngine;
 using System.Collections.Generic;
+using System.IO;
+<<<<<<< HEAD
+=======
+using System.Linq;
+using System.IO;
+using BizHawk.Common.CollectionExtensions;
+>>>>>>> unity-hawk-ext-tool
 
 namespace UnityHawk {
 [CreateAssetMenu(fileName = "Controls", menuName = "Plunderludics/UnityHawk/Controls", order = 0)]
@@ -35,7 +42,7 @@ public class Controls: ScriptableObject {
     }
 
     public static Controls GetDefaultControls(string systemId) {
-        return Resources.Load<Controls>($"DefaultControls/{systemId}");
+        return Resources.Load<Controls>(Path.Join(Paths.defaultControlsResourceDir, systemId));
     }
 }
 }
