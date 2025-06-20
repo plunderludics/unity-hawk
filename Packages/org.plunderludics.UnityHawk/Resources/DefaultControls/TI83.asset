@@ -1,0 +1,117 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 772afa63a3b742a4f9d18e203df20db3, type: 3}
+  m_Name: TI83
+  m_EditorClassIdentifier: 
+  mappings:
+  - Key: 256
+    Control: 0
+  - Key: 257
+    Control: 1
+  - Key: 258
+    Control: 2
+  - Key: 259
+    Control: 3
+  - Key: 260
+    Control: 4
+  - Key: 261
+    Control: 5
+  - Key: 262
+    Control: 6
+  - Key: 263
+    Control: 7
+  - Key: 264
+    Control: 8
+  - Key: 265
+    Control: 9
+  - Key: 266
+    Control: DOT
+  - Key: 32
+    Control: ON
+  - Key: 13
+    Control: ENTER
+  - Key: 271
+    Control: ENTER
+  - Key: 274
+    Control: DOWN
+  - Key: 273
+    Control: UP
+  - Key: 276
+    Control: LEFT
+  - Key: 275
+    Control: RIGHT
+  - Key: 270
+    Control: PLUS
+  - Key: 269
+    Control: MINUS
+  - Key: 268
+    Control: MULTIPLY
+  - Key: 267
+    Control: DIVIDE
+  - Key: 27
+    Control: CLEAR
+  - Key: 54
+    Control: EXP
+  - Key: 45
+    Control: DASH
+  - Key: 48
+    Control: PARACLOSE
+  - Key: 116
+    Control: TAN
+  - Key: 118
+    Control: VARS
+  - Key: 57
+    Control: PARAOPEN
+  - Key: 99
+    Control: COS
+  - Key: 114
+    Control: PRGM
+  - Key: 115
+    Control: STAT
+  - Key: 46
+    Control: SIN
+  - Key: 91
+    Control: MATRIX
+  - Key: 120
+    Control: X
+  - Key: 277
+    Control: STO
+  - Key: 108
+    Control: LN
+  - Key: 111
+    Control: LOG
+  - Key: 50
+    Control: SQUARED
+  - Key: 49
+    Control: NEG1
+  - Key: 109
+    Control: MATH
+  - Key: 97
+    Control: ALPHA
+  - Key: 103
+    Control: GRAPH
+  - Key: 278
+    Control: TRACE
+  - Key: 122
+    Control: ZOOM
+  - Key: 119
+    Control: WINDOW
+  - Key: 121
+    Control: Y
+  - Key: 47
+    Control: SECOND
+  - Key: 92
+    Control: MODE
+  - Key: 127
+    Control: DEL
+  - Key: 44
+    Control: COMMA

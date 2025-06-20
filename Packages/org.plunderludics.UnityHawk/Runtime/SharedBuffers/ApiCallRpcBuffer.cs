@@ -42,11 +42,15 @@ public class ApiCallRpcBuffer : ISharedBuffer {
         // TODO async version of this?
         var response = _apiCallRpc.RemoteRequest(bytes, TimeoutMs);
         if (response == null) {
-            Debug.LogWarning($"Tried to call method {methodName} but Bizhawk didn't respond");
+            Debug.LogWarning($"Tried to call method {methodCall} but Bizhawk didn't respond");
             return null;
         }
         if (!response.Success) {
-            Debug.LogWarning($"Bizhawk failed to return a value for callmethod ({methodName})");
+            Debug.LogWarning($"Bizhawk failed to return a value for callmethod {methodCall}");
+            return null;
+        }
+        if (response.Data == null) {
+            Debug.LogWarning($"Bizhawk returned an empty response for callmethod {methodCall}");
             return null;
         }
         string responseString = System.Text.Encoding.ASCII.GetString(response.Data);

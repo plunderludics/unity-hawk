@@ -51,15 +51,15 @@ public class BasicInputProvider : InputProvider {
 
     // Runs when emulator starts or changes rom
     void OnNewRom() {
+        Debug.Log("BasicInputProvider: New rom started, setting controls");
         if (!useDefaultControls) return;
 
-        // Debug.Log("Setting controls for platform");
-        string systemId = emulator.GetSystemId();
-        controls = Controls.LoadDefaultControlsForSystem(systemId);
+        string systemId = emulator.SystemId;
+        controls = Controls.GetDefaultControls(systemId);
         if (controls == null) {
-            Debug.LogError($"No default controls found for platform {systemId}, controls will not work");
+            Debug.LogError($"No default controls found for platform '{systemId}', controls will not work");
         }
-       //  Debug.Log($"Setting controls to {controls} for system {systemId}");
+        // Debug.Log($"Setting controls to {controls} for system {systemId}");
     }
 
     // Poll for events in Update / FixedUpdate rather than in InputForFrame directly,
@@ -90,7 +90,6 @@ public class BasicInputProvider : InputProvider {
         {
             bool interaction = false;
             bool isPressed = false;
-            string keyName = null;
 
 #if ENABLE_INPUT_SYSTEM
             Key key = KeyCodeToKey(kc);
@@ -150,7 +149,6 @@ public class BasicInputProvider : InputProvider {
         }
     }
 #endif
-
 }
 
 }
