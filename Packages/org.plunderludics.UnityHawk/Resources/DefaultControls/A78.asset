@@ -13,19 +13,59 @@ MonoBehaviour:
   m_Name: A78
   m_EditorClassIdentifier: 
   mappings:
-  - Key: 100
+  - Enabled: 1
+    Key: 100
     Control: Reset
-  - Key: 115
+    Controller: 0
+  - Enabled: 1
+    Key: 115
     Control: Select
-  - Key: 273
+    Controller: 0
+  - Enabled: 1
+    Key: 273
     Control: Up
-  - Key: 274
+    Controller: 1
+  - Enabled: 1
+    Key: 274
     Control: Down
-  - Key: 276
+    Controller: 1
+  - Enabled: 1
+    Key: 276
     Control: Left
-  - Key: 275
+    Controller: 1
+  - Enabled: 1
+    Key: 275
     Control: Right
-  - Key: 122
+    Controller: 1
+  - Enabled: 1
+    Key: 122
     Control: Trigger
-  - Key: 120
+    Controller: 1
+  - Enabled: 1
+    Key: 120
     Control: Trigger 2
+    Controller: 1
+  - Enabled: 1
+    Key: 264
+    Control: Up
+    Controller: 2
+  - Enabled: 1
+    Key: 258
+    Control: Down
+    Controller: 2
+  - Enabled: 1
+    Key: 260
+    Control: Left
+    Controller: 2
+  - Enabled: 1
+    Key: 262
+    Control: Right
+    Controller: 2
+  - Enabled: 1
+    Key: 257
+    Control: Trigger
+    Controller: 2
+  - Enabled: 1
+    Key: 259
+    Control: Trigger 2
+    Controller: 2

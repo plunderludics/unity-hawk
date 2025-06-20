@@ -13,21 +13,39 @@ MonoBehaviour:
   m_Name: Lynx
   m_EditorClassIdentifier: 
   mappings:
-  - Key: 273
+  - Enabled: 1
+    Key: 273
     Control: Up
-  - Key: 274
+    Controller: 0
+  - Enabled: 1
+    Key: 274
     Control: Down
-  - Key: 276
+    Controller: 0
+  - Enabled: 1
+    Key: 276
     Control: Left
-  - Key: 275
+    Controller: 0
+  - Enabled: 1
+    Key: 275
     Control: Right
-  - Key: 120
+    Controller: 0
+  - Enabled: 1
+    Key: 120
     Control: A
-  - Key: 122
+    Controller: 0
+  - Enabled: 1
+    Key: 122
     Control: B
-  - Key: 97
+    Controller: 0
+  - Enabled: 1
+    Key: 97
     Control: Option 1
-  - Key: 115
+    Controller: 0
+  - Enabled: 1
+    Key: 115
     Control: Option 2
-  - Key: 13
+    Controller: 0
+  - Enabled: 1
+    Key: 13
     Control: Pause
+    Controller: 0

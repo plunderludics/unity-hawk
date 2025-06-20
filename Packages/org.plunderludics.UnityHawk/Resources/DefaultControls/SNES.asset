@@ -13,31 +13,75 @@ MonoBehaviour:
   m_Name: SNES
   m_EditorClassIdentifier: 
   mappings:
-  - Key: 273
+  - Enabled: 1
+    Key: 273
     Control: Up
-  - Key: 274
+    Controller: 1
+  - Enabled: 1
+    Key: 274
     Control: Down
-  - Key: 276
+    Controller: 1
+  - Enabled: 1
+    Key: 276
     Control: Left
-  - Key: 275
+    Controller: 1
+  - Enabled: 1
+    Key: 275
     Control: Right
-  - Key: 32
+    Controller: 1
+  - Enabled: 1
+    Key: 32
     Control: Select
-  - Key: 13
+    Controller: 1
+  - Enabled: 1
+    Key: 13
     Control: Start
-  - Key: 97
+    Controller: 1
+  - Enabled: 1
+    Key: 97
     Control: Y
-  - Key: 115
+    Controller: 1
+  - Enabled: 1
+    Key: 115
     Control: X
-  - Key: 122
+    Controller: 1
+  - Enabled: 1
+    Key: 122
     Control: B
-  - Key: 120
+    Controller: 1
+  - Enabled: 1
+    Key: 120
     Control: A
-  - Key: 119
+    Controller: 1
+  - Enabled: 1
+    Key: 119
     Control: L
-  - Key: 101
+    Controller: 1
+  - Enabled: 1
+    Key: 101
     Control: R
-  - Key: 122
+    Controller: 1
+  - Enabled: 1
+    Key: 122
     Control: Mouse Left
-  - Key: 120
+    Controller: 1
+  - Enabled: 1
+    Key: 120
     Control: Mouse Right
+    Controller: 1
+  - Enabled: 1
+    Key: 122
+    Control: Trigger
+    Controller: 2
+  - Enabled: 1
+    Key: 120
+    Control: Cursor
+    Controller: 2
+  - Enabled: 1
+    Key: 97
+    Control: Turbo
+    Controller: 2
+  - Enabled: 1
+    Key: 115
+    Control: Pause
+    Controller: 2

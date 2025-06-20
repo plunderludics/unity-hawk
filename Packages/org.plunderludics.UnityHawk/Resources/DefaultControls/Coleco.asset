@@ -13,39 +13,75 @@ MonoBehaviour:
   m_Name: Coleco
   m_EditorClassIdentifier: 
   mappings:
-  - Key: 273
+  - Enabled: 1
+    Key: 273
     Control: Up
-  - Key: 274
+    Controller: 1
+  - Enabled: 1
+    Key: 274
     Control: Down
-  - Key: 276
+    Controller: 1
+  - Enabled: 1
+    Key: 276
     Control: Left
-  - Key: 275
+    Controller: 1
+  - Enabled: 1
+    Key: 275
     Control: Right
-  - Key: 122
+    Controller: 1
+  - Enabled: 1
+    Key: 122
     Control: L
-  - Key: 120
+    Controller: 1
+  - Enabled: 1
+    Key: 120
     Control: R
-  - Key: 257
+    Controller: 1
+  - Enabled: 1
+    Key: 257
     Control: Key 1
-  - Key: 258
+    Controller: 1
+  - Enabled: 1
+    Key: 258
     Control: Key 2
-  - Key: 259
+    Controller: 1
+  - Enabled: 1
+    Key: 259
     Control: Key 3
-  - Key: 260
+    Controller: 1
+  - Enabled: 1
+    Key: 260
     Control: Key 4
-  - Key: 261
+    Controller: 1
+  - Enabled: 1
+    Key: 261
     Control: Key 5
-  - Key: 262
+    Controller: 1
+  - Enabled: 1
+    Key: 262
     Control: Key 6
-  - Key: 263
+    Controller: 1
+  - Enabled: 1
+    Key: 263
     Control: Key 7
-  - Key: 264
+    Controller: 1
+  - Enabled: 1
+    Key: 264
     Control: Key 8
-  - Key: 265
+    Controller: 1
+  - Enabled: 1
+    Key: 265
     Control: Key 9
-  - Key: 271
+    Controller: 1
+  - Enabled: 1
+    Key: 271
     Control: Star
-  - Key: 256
+    Controller: 1
+  - Enabled: 1
+    Key: 256
     Control: Key 0
-  - Key: 266
+    Controller: 1
+  - Enabled: 1
+    Key: 266
     Control: Pound
+    Controller: 1

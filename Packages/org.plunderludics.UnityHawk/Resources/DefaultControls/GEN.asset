@@ -13,27 +13,59 @@ MonoBehaviour:
   m_Name: GEN
   m_EditorClassIdentifier: 
   mappings:
-  - Key: 273
+  - Enabled: 1
+    Key: 273
     Control: Up
-  - Key: 274
+    Controller: 1
+  - Enabled: 1
+    Key: 274
     Control: Down
-  - Key: 276
+    Controller: 1
+  - Enabled: 1
+    Key: 276
     Control: Left
-  - Key: 275
+    Controller: 1
+  - Enabled: 1
+    Key: 275
     Control: Right
-  - Key: 122
+    Controller: 1
+  - Enabled: 1
+    Key: 122
     Control: A
-  - Key: 120
+    Controller: 1
+  - Enabled: 1
+    Key: 120
     Control: B
-  - Key: 99
+    Controller: 1
+  - Enabled: 1
+    Key: 99
     Control: C
-  - Key: 13
+    Controller: 1
+  - Enabled: 1
+    Key: 13
     Control: Start
-  - Key: 97
+    Controller: 1
+  - Enabled: 1
+    Key: 97
     Control: X
-  - Key: 115
+    Controller: 1
+  - Enabled: 1
+    Key: 115
     Control: Y
-  - Key: 100
+    Controller: 1
+  - Enabled: 1
+    Key: 100
     Control: Z
-  - Key: 101
+    Controller: 1
+  - Enabled: 1
+    Key: 101
     Control: Mode
+    Controller: 1
+  - Enabled: 1
+    Key: 261
+    Control: Lightgun Start
+    Controller: 2
+  - Enabled: 1
+    Key: 261
+    Control: Mouse Start
+    Controller: 2

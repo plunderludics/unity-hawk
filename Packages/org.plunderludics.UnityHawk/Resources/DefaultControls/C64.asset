@@ -13,13 +13,23 @@ MonoBehaviour:
   m_Name: C64
   m_EditorClassIdentifier: 
   mappings:
-  - Key: 264
+  - Enabled: 1
+    Key: 264
     Control: Up
-  - Key: 258
+    Controller: 1
+  - Enabled: 1
+    Key: 258
     Control: Down
-  - Key: 260
+    Controller: 1
+  - Enabled: 1
+    Key: 260
     Control: Left
-  - Key: 262
+    Controller: 1
+  - Enabled: 1
+    Key: 262
     Control: Right
-  - Key: 257
+    Controller: 1
+  - Enabled: 1
+    Key: 257
     Control: Button
+    Controller: 1

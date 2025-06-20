@@ -13,15 +13,27 @@ MonoBehaviour:
   m_Name: SMS
   m_EditorClassIdentifier: 
   mappings:
-  - Key: 273
+  - Enabled: 1
+    Key: 273
     Control: Up
-  - Key: 274
+    Controller: 1
+  - Enabled: 1
+    Key: 274
     Control: Down
-  - Key: 276
+    Controller: 1
+  - Enabled: 1
+    Key: 276
     Control: Left
-  - Key: 275
+    Controller: 1
+  - Enabled: 1
+    Key: 275
     Control: Right
-  - Key: 122
+    Controller: 1
+  - Enabled: 1
+    Key: 122
     Control: B1
-  - Key: 120
+    Controller: 1
+  - Enabled: 1
+    Key: 120
     Control: B2
+    Controller: 1

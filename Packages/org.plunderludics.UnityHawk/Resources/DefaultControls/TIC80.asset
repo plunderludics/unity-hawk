@@ -13,25 +13,47 @@ MonoBehaviour:
   m_Name: TIC80
   m_EditorClassIdentifier: 
   mappings:
-  - Key: 273
+  - Enabled: 1
+    Key: 273
     Control: Up
-  - Key: 274
+    Controller: 1
+  - Enabled: 1
+    Key: 274
     Control: Down
-  - Key: 276
+    Controller: 1
+  - Enabled: 1
+    Key: 276
     Control: Left
-  - Key: 275
+    Controller: 1
+  - Enabled: 1
+    Key: 275
     Control: Right
-  - Key: 120
+    Controller: 1
+  - Enabled: 1
+    Key: 120
     Control: A
-  - Key: 122
+    Controller: 1
+  - Enabled: 1
+    Key: 122
     Control: B
-  - Key: 115
+    Controller: 1
+  - Enabled: 1
+    Key: 115
     Control: X
-  - Key: 97
+    Controller: 1
+  - Enabled: 1
+    Key: 97
     Control: Y
-  - Key: 122
+    Controller: 1
+  - Enabled: 1
+    Key: 122
     Control: Mouse Left Click
-  - Key: 120
+    Controller: 0
+  - Enabled: 1
+    Key: 120
     Control: Mouse Middle Click
-  - Key: 99
+    Controller: 0
+  - Enabled: 1
+    Key: 99
     Control: Mouse Right Click
+    Controller: 0

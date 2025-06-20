@@ -13,105 +13,207 @@ MonoBehaviour:
   m_Name: TI83
   m_EditorClassIdentifier: 
   mappings:
-  - Key: 256
+  - Enabled: 1
+    Key: 256
     Control: 0
-  - Key: 257
+    Controller: 0
+  - Enabled: 1
+    Key: 257
     Control: 1
-  - Key: 258
+    Controller: 0
+  - Enabled: 1
+    Key: 258
     Control: 2
-  - Key: 259
+    Controller: 0
+  - Enabled: 1
+    Key: 259
     Control: 3
-  - Key: 260
+    Controller: 0
+  - Enabled: 1
+    Key: 260
     Control: 4
-  - Key: 261
+    Controller: 0
+  - Enabled: 1
+    Key: 261
     Control: 5
-  - Key: 262
+    Controller: 0
+  - Enabled: 1
+    Key: 262
     Control: 6
-  - Key: 263
+    Controller: 0
+  - Enabled: 1
+    Key: 263
     Control: 7
-  - Key: 264
+    Controller: 0
+  - Enabled: 1
+    Key: 264
     Control: 8
-  - Key: 265
+    Controller: 0
+  - Enabled: 1
+    Key: 265
     Control: 9
-  - Key: 266
+    Controller: 0
+  - Enabled: 1
+    Key: 266
     Control: DOT
-  - Key: 32
+    Controller: 0
+  - Enabled: 1
+    Key: 32
     Control: ON
-  - Key: 13
+    Controller: 0
+  - Enabled: 1
+    Key: 13
     Control: ENTER
-  - Key: 271
+    Controller: 0
+  - Enabled: 1
+    Key: 271
     Control: ENTER
-  - Key: 274
+    Controller: 0
+  - Enabled: 1
+    Key: 274
     Control: DOWN
-  - Key: 273
+    Controller: 0
+  - Enabled: 1
+    Key: 273
     Control: UP
-  - Key: 276
+    Controller: 0
+  - Enabled: 1
+    Key: 276
     Control: LEFT
-  - Key: 275
+    Controller: 0
+  - Enabled: 1
+    Key: 275
     Control: RIGHT
-  - Key: 270
+    Controller: 0
+  - Enabled: 1
+    Key: 270
     Control: PLUS
-  - Key: 269
+    Controller: 0
+  - Enabled: 1
+    Key: 269
     Control: MINUS
-  - Key: 268
+    Controller: 0
+  - Enabled: 1
+    Key: 268
     Control: MULTIPLY
-  - Key: 267
+    Controller: 0
+  - Enabled: 1
+    Key: 267
     Control: DIVIDE
-  - Key: 27
+    Controller: 0
+  - Enabled: 1
+    Key: 27
     Control: CLEAR
-  - Key: 54
+    Controller: 0
+  - Enabled: 1
+    Key: 54
     Control: EXP
-  - Key: 45
+    Controller: 0
+  - Enabled: 1
+    Key: 45
     Control: DASH
-  - Key: 48
+    Controller: 0
+  - Enabled: 1
+    Key: 48
     Control: PARACLOSE
-  - Key: 116
+    Controller: 0
+  - Enabled: 1
+    Key: 116
     Control: TAN
-  - Key: 118
+    Controller: 0
+  - Enabled: 1
+    Key: 118
     Control: VARS
-  - Key: 57
+    Controller: 0
+  - Enabled: 1
+    Key: 57
     Control: PARAOPEN
-  - Key: 99
+    Controller: 0
+  - Enabled: 1
+    Key: 99
     Control: COS
-  - Key: 114
+    Controller: 0
+  - Enabled: 1
+    Key: 114
     Control: PRGM
-  - Key: 115
+    Controller: 0
+  - Enabled: 1
+    Key: 115
     Control: STAT
-  - Key: 46
+    Controller: 0
+  - Enabled: 1
+    Key: 46
     Control: SIN
-  - Key: 91
+    Controller: 0
+  - Enabled: 1
+    Key: 91
     Control: MATRIX
-  - Key: 120
+    Controller: 0
+  - Enabled: 1
+    Key: 120
     Control: X
-  - Key: 277
+    Controller: 0
+  - Enabled: 1
+    Key: 277
     Control: STO
-  - Key: 108
+    Controller: 0
+  - Enabled: 1
+    Key: 108
     Control: LN
-  - Key: 111
+    Controller: 0
+  - Enabled: 1
+    Key: 111
     Control: LOG
-  - Key: 50
+    Controller: 0
+  - Enabled: 1
+    Key: 50
     Control: SQUARED
-  - Key: 49
+    Controller: 0
+  - Enabled: 1
+    Key: 49
     Control: NEG1
-  - Key: 109
+    Controller: 0
+  - Enabled: 1
+    Key: 109
     Control: MATH
-  - Key: 97
+    Controller: 0
+  - Enabled: 1
+    Key: 97
     Control: ALPHA
-  - Key: 103
+    Controller: 0
+  - Enabled: 1
+    Key: 103
     Control: GRAPH
-  - Key: 278
+    Controller: 0
+  - Enabled: 1
+    Key: 278
     Control: TRACE
-  - Key: 122
+    Controller: 0
+  - Enabled: 1
+    Key: 122
     Control: ZOOM
-  - Key: 119
+    Controller: 0
+  - Enabled: 1
+    Key: 119
     Control: WINDOW
-  - Key: 121
+    Controller: 0
+  - Enabled: 1
+    Key: 121
     Control: Y
-  - Key: 47
+    Controller: 0
+  - Enabled: 1
+    Key: 47
     Control: SECOND
-  - Key: 92
+    Controller: 0
+  - Enabled: 1
+    Key: 92
     Control: MODE
-  - Key: 127
+    Controller: 0
+  - Enabled: 1
+    Key: 127
     Control: DEL
-  - Key: 44
+    Controller: 0
+  - Enabled: 1
+    Key: 44
     Control: COMMA
+    Controller: 0

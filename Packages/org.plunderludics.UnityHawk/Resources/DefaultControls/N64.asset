@@ -13,31 +13,59 @@ MonoBehaviour:
   m_Name: N64
   m_EditorClassIdentifier: 
   mappings:
-  - Key: 273
+  - Enabled: 1
+    Key: 273
     Control: A Up
-  - Key: 274
+    Controller: 1
+  - Enabled: 1
+    Key: 274
     Control: A Down
-  - Key: 276
+    Controller: 1
+  - Enabled: 1
+    Key: 276
     Control: A Left
-  - Key: 275
+    Controller: 1
+  - Enabled: 1
+    Key: 275
     Control: A Right
-  - Key: 100
+    Controller: 1
+  - Enabled: 1
+    Key: 100
     Control: Z
-  - Key: 115
+    Controller: 1
+  - Enabled: 1
+    Key: 115
     Control: B
-  - Key: 97
+    Controller: 1
+  - Enabled: 1
+    Key: 97
     Control: A
-  - Key: 105
+    Controller: 1
+  - Enabled: 1
+    Key: 105
     Control: C Up
-  - Key: 107
+    Controller: 1
+  - Enabled: 1
+    Key: 107
     Control: C Down
-  - Key: 106
+    Controller: 1
+  - Enabled: 1
+    Key: 106
     Control: C Left
-  - Key: 108
+    Controller: 1
+  - Enabled: 1
+    Key: 108
     Control: C Right
-  - Key: 113
+    Controller: 1
+  - Enabled: 1
+    Key: 113
     Control: L
-  - Key: 119
+    Controller: 1
+  - Enabled: 1
+    Key: 119
     Control: R
-  - Key: 13
+    Controller: 1
+  - Enabled: 1
+    Key: 13
     Control: Start
+    Controller: 1

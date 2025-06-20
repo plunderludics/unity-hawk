@@ -13,23 +13,43 @@ MonoBehaviour:
   m_Name: GBA
   m_EditorClassIdentifier: 
   mappings:
-  - Key: 273
+  - Enabled: 1
+    Key: 273
     Control: Up
-  - Key: 274
+    Controller: 0
+  - Enabled: 1
+    Key: 274
     Control: Down
-  - Key: 276
+    Controller: 0
+  - Enabled: 1
+    Key: 276
     Control: Left
-  - Key: 275
+    Controller: 0
+  - Enabled: 1
+    Key: 275
     Control: Right
-  - Key: 13
+    Controller: 0
+  - Enabled: 1
+    Key: 13
     Control: Start
-  - Key: 32
+    Controller: 0
+  - Enabled: 1
+    Key: 32
     Control: Select
-  - Key: 122
+    Controller: 0
+  - Enabled: 1
+    Key: 122
     Control: B
-  - Key: 120
+    Controller: 0
+  - Enabled: 1
+    Key: 120
     Control: A
-  - Key: 119
+    Controller: 0
+  - Enabled: 1
+    Key: 119
     Control: L
-  - Key: 101
+    Controller: 0
+  - Enabled: 1
+    Key: 101
     Control: R
+    Controller: 0

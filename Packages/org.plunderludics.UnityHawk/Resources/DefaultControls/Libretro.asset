@@ -13,27 +13,51 @@ MonoBehaviour:
   m_Name: Libretro
   m_EditorClassIdentifier: 
   mappings:
-  - Key: 273
+  - Enabled: 1
+    Key: 273
     Control: RetroPad Up
-  - Key: 274
+    Controller: 1
+  - Enabled: 1
+    Key: 274
     Control: RetroPad Down
-  - Key: 276
+    Controller: 1
+  - Enabled: 1
+    Key: 276
     Control: RetroPad Left
-  - Key: 275
+    Controller: 1
+  - Enabled: 1
+    Key: 275
     Control: RetroPad Right
-  - Key: 32
+    Controller: 1
+  - Enabled: 1
+    Key: 32
     Control: RetroPad Select
-  - Key: 13
+    Controller: 1
+  - Enabled: 1
+    Key: 13
     Control: RetroPad Start
-  - Key: 97
+    Controller: 1
+  - Enabled: 1
+    Key: 97
     Control: RetroPad Y
-  - Key: 122
+    Controller: 1
+  - Enabled: 1
+    Key: 122
     Control: RetroPad B
-  - Key: 115
+    Controller: 1
+  - Enabled: 1
+    Key: 115
     Control: RetroPad X
-  - Key: 120
+    Controller: 1
+  - Enabled: 1
+    Key: 120
     Control: RetroPad A
-  - Key: 119
+    Controller: 1
+  - Enabled: 1
+    Key: 119
     Control: RetroPad L
-  - Key: 101
+    Controller: 1
+  - Enabled: 1
+    Key: 101
     Control: RetroPad R
+    Controller: 1

@@ -13,19 +13,67 @@ MonoBehaviour:
   m_Name: DGB
   m_EditorClassIdentifier: 
   mappings:
-  - Key: 273
+  - Enabled: 1
+    Key: 273
     Control: Up
-  - Key: 274
+    Controller: 1
+  - Enabled: 1
+    Key: 274
     Control: Down
-  - Key: 276
+    Controller: 1
+  - Enabled: 1
+    Key: 276
     Control: Left
-  - Key: 275
+    Controller: 1
+  - Enabled: 1
+    Key: 275
     Control: Right
-  - Key: 13
+    Controller: 1
+  - Enabled: 1
+    Key: 13
     Control: Start
-  - Key: 32
+    Controller: 1
+  - Enabled: 1
+    Key: 32
     Control: Select
-  - Key: 122
+    Controller: 1
+  - Enabled: 1
+    Key: 122
     Control: B
-  - Key: 120
+    Controller: 1
+  - Enabled: 1
+    Key: 120
     Control: A
+    Controller: 1
+  - Enabled: 1
+    Key: 264
+    Control: Up
+    Controller: 2
+  - Enabled: 1
+    Key: 258
+    Control: Down
+    Controller: 2
+  - Enabled: 1
+    Key: 260
+    Control: Left
+    Controller: 2
+  - Enabled: 1
+    Key: 262
+    Control: Right
+    Controller: 2
+  - Enabled: 1
+    Key: 93
+    Control: Start
+    Controller: 2
+  - Enabled: 1
+    Key: 91
+    Control: Select
+    Controller: 2
+  - Enabled: 1
+    Key: 99
+    Control: B
+    Controller: 2
+  - Enabled: 1
+    Key: 118
+    Control: A
+    Controller: 2

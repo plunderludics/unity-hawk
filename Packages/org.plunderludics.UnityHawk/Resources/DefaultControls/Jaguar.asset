@@ -13,45 +13,87 @@ MonoBehaviour:
   m_Name: Jaguar
   m_EditorClassIdentifier: 
   mappings:
-  - Key: 273
+  - Enabled: 1
+    Key: 273
     Control: Up
-  - Key: 274
+    Controller: 1
+  - Enabled: 1
+    Key: 274
     Control: Down
-  - Key: 276
+    Controller: 1
+  - Enabled: 1
+    Key: 276
     Control: Left
-  - Key: 275
+    Controller: 1
+  - Enabled: 1
+    Key: 275
     Control: Right
-  - Key: 99
+    Controller: 1
+  - Enabled: 1
+    Key: 99
     Control: A
-  - Key: 120
+    Controller: 1
+  - Enabled: 1
+    Key: 120
     Control: B
-  - Key: 122
+    Controller: 1
+  - Enabled: 1
+    Key: 122
     Control: C
-  - Key: 32
+    Controller: 1
+  - Enabled: 1
+    Key: 32
     Control: Option
-  - Key: 13
+    Controller: 1
+  - Enabled: 1
+    Key: 13
     Control: Pause
-  - Key: 256
+    Controller: 1
+  - Enabled: 1
+    Key: 256
     Control: 0
-  - Key: 257
+    Controller: 1
+  - Enabled: 1
+    Key: 257
     Control: 1
-  - Key: 258
+    Controller: 1
+  - Enabled: 1
+    Key: 258
     Control: 2
-  - Key: 259
+    Controller: 1
+  - Enabled: 1
+    Key: 259
     Control: 3
-  - Key: 260
+    Controller: 1
+  - Enabled: 1
+    Key: 260
     Control: 4
-  - Key: 261
+    Controller: 1
+  - Enabled: 1
+    Key: 261
     Control: 5
-  - Key: 262
+    Controller: 1
+  - Enabled: 1
+    Key: 262
     Control: 6
-  - Key: 263
+    Controller: 1
+  - Enabled: 1
+    Key: 263
     Control: 7
-  - Key: 264
+    Controller: 1
+  - Enabled: 1
+    Key: 264
     Control: 8
-  - Key: 265
+    Controller: 1
+  - Enabled: 1
+    Key: 265
     Control: 9
-  - Key: 268
+    Controller: 1
+  - Enabled: 1
+    Key: 268
     Control: Asterisk
-  - Key: 267
+    Controller: 1
+  - Enabled: 1
+    Key: 267
     Control: Pound
+    Controller: 1

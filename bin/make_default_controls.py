@@ -189,9 +189,13 @@ def mapping_to_yaml(system_id, mapping):
         "  mappings:"
     ]
     for k, v in mapping.items():
-        if k.startswith("P2 ") or k.startswith("P3 ") or k.startswith("P4 "):
-            print(f"Warning: skipping P2/P3/P4 control '{k}' in {system_id}")
-            continue
+        # Strip "P1"/"P2"/etc prefix if it exists, set controller as int
+        if k.startswith("P") and len(k) > 2 and k[1].isdigit() and k[2] == " ":
+            controller = int(k[1])
+            k = k[3:]
+        else:
+            controller = 0 # None
+
         keys = v.split(",")
         for key in keys:
             key = key.strip()
@@ -201,8 +205,10 @@ def mapping_to_yaml(system_id, mapping):
                 print(f"Warning: Key '{key}' not found in key_name_to_code, skipping.")
                 # print(system_id,k,v)
                 continue
-            yaml_lines.append(f"  - Key: {keycode}")
-            yaml_lines.append(f"    Control: {k.replace("P1 ", "")}")
+            yaml_lines.append(f"  - Enabled: 1")
+            yaml_lines.append(f"    Key: {keycode}")
+            yaml_lines.append(f"    Control: {k}")
+            yaml_lines.append(f"    Controller: {controller}")
     return "\n".join(yaml_lines)
 
 def main():

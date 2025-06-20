@@ -13,31 +13,59 @@ MonoBehaviour:
   m_Name: VB
   m_EditorClassIdentifier: 
   mappings:
-  - Key: 273
+  - Enabled: 1
+    Key: 273
     Control: L_Up
-  - Key: 274
+    Controller: 1
+  - Enabled: 1
+    Key: 274
     Control: L_Down
-  - Key: 276
+    Controller: 1
+  - Enabled: 1
+    Key: 276
     Control: L_Left
-  - Key: 275
+    Controller: 1
+  - Enabled: 1
+    Key: 275
     Control: L_Right
-  - Key: 264
+    Controller: 1
+  - Enabled: 1
+    Key: 264
     Control: R_Up
-  - Key: 258
+    Controller: 1
+  - Enabled: 1
+    Key: 258
     Control: R_Down
-  - Key: 260
+    Controller: 1
+  - Enabled: 1
+    Key: 260
     Control: R_Left
-  - Key: 262
+    Controller: 1
+  - Enabled: 1
+    Key: 262
     Control: R_Right
-  - Key: 122
+    Controller: 1
+  - Enabled: 1
+    Key: 122
     Control: B
-  - Key: 120
+    Controller: 1
+  - Enabled: 1
+    Key: 120
     Control: A
-  - Key: 119
+    Controller: 1
+  - Enabled: 1
+    Key: 119
     Control: R
-  - Key: 101
+    Controller: 1
+  - Enabled: 1
+    Key: 101
     Control: L
-  - Key: 32
+    Controller: 1
+  - Enabled: 1
+    Key: 32
     Control: Select
-  - Key: 13
+    Controller: 1
+  - Enabled: 1
+    Key: 13
     Control: Start
+    Controller: 1

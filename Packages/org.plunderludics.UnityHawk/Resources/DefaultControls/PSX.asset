@@ -13,39 +13,71 @@ MonoBehaviour:
   m_Name: PSX
   m_EditorClassIdentifier: 
   mappings:
-  - Key: 273
+  - Enabled: 1
+    Key: 273
     Control: D-Pad Up
-  - Key: 274
+    Controller: 1
+  - Enabled: 1
+    Key: 274
     Control: D-Pad Down
-  - Key: 276
+    Controller: 1
+  - Enabled: 1
+    Key: 276
     Control: D-Pad Left
-  - Key: 275
+    Controller: 1
+  - Enabled: 1
+    Key: 275
     Control: D-Pad Right
-  - Key: 32
+    Controller: 1
+  - Enabled: 1
+    Key: 32
     Control: Select
-  - Key: 13
+    Controller: 1
+  - Enabled: 1
+    Key: 13
     Control: Start
-  - Key: 13
-    Control: Start
-  - Key: 115
+    Controller: 1
+  - Enabled: 1
+    Key: 115
     Control: "\u25B3"
-  - Key: 122
+    Controller: 1
+  - Enabled: 1
+    Key: 122
     Control: X
-  - Key: 97
+    Controller: 1
+  - Enabled: 1
+    Key: 97
     Control: "\u25A1"
-  - Key: 120
+    Controller: 1
+  - Enabled: 1
+    Key: 120
     Control: "\u25CB"
-  - Key: 113
+    Controller: 1
+  - Enabled: 1
+    Key: 113
     Control: L1
-  - Key: 101
+    Controller: 1
+  - Enabled: 1
+    Key: 101
     Control: L2
-  - Key: 119
+    Controller: 1
+  - Enabled: 1
+    Key: 119
     Control: R1
-  - Key: 114
+    Controller: 1
+  - Enabled: 1
+    Key: 114
     Control: R2
-  - Key: 116
+    Controller: 1
+  - Enabled: 1
+    Key: 116
     Control: Left Stick, Button
-  - Key: 121
+    Controller: 1
+  - Enabled: 1
+    Key: 121
     Control: Right Stick, Button
-  - Key: 100
+    Controller: 1
+  - Enabled: 1
+    Key: 100
     Control: Analog
+    Controller: 1
