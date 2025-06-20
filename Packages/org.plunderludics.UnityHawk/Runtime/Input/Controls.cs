@@ -5,12 +5,8 @@
 using UnityEngine;
 using System.Collections.Generic;
 using System.IO;
-<<<<<<< HEAD
-=======
 using System.Linq;
-using System.IO;
 using BizHawk.Common.CollectionExtensions;
->>>>>>> unity-hawk-ext-tool
 
 namespace UnityHawk {
 [CreateAssetMenu(fileName = "Controls", menuName = "Plunderludics/UnityHawk/Controls", order = 0)]

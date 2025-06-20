@@ -149,24 +149,6 @@ public class BasicInputProvider : InputProvider {
         }
     }
 #endif
-
-<<<<<<< HEAD
-// #if UNITY_EDITOR
-//     // Automatically initialize default controls on validate (they get serialized so all of these should be included in build)
-//     void OnValidate() {
-//         // _defaultControlsForPlatform = new () {
-//         //     ( "N64", LoadControls("N64.asset") ),
-//         //     ( "PSX", LoadControls("PSX.asset") )
-//         // };
-//     }
-
-//     Controls LoadControls(string assetName) {
-//         return AssetDatabase.LoadAssetAtPath<Controls>(Path.Join(Paths.defaultControlsDir, assetName));
-//     }
-// #endif
-
-=======
->>>>>>> unity-hawk-ext-tool
 }
 
 }
