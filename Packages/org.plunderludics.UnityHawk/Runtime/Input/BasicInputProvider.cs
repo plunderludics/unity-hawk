@@ -12,6 +12,7 @@ using UnityEngine.InputSystem;
 #if UNITY_EDITOR
 using UnityEditor;
 using System.IO;
+using UnityEditor.EditorTools;
 #endif
 
 namespace UnityHawk {
@@ -19,16 +20,21 @@ namespace UnityHawk {
 // Just gets key events directly from Unity
 [DefaultExecutionOrder(-1000)] // Kinda hacky but this has to run before Emulator or there will be a 1-frame input delay.
 public class BasicInputProvider : InputProvider {
-    public bool useDefaultControls = true;
-
-    [DisableIf("useDefaultControls")]
-    public Controls controls;
-
-    // TODO allow editing controls directly in inspector (as in GenericInputProvider)
-
-    [ShowIf("useDefaultControls")]
     [Tooltip("Emulator to use. If null, will look for attached Emulator")]
     public Emulator emulator;
+
+    [Tooltip("Whether to use built-in default controls for the current system (will load once emulator is running)")]
+    public bool useDefaultControls = true;
+    
+    [HideIf("useDefaultControls")]
+    public bool useControlsObject = true;
+
+    [DisableIf("useDefaultControls")]
+    [ShowIf("useControlsObject")]
+    public ControlsObject controlsObject;
+
+    [HideIf("useControlsObject")]
+    public Controls controls;
     
     KeyCode[] _allKeyCodes;
     List<InputEvent> pressedThisFrame;
@@ -53,12 +59,12 @@ public class BasicInputProvider : InputProvider {
 
     // Runs when emulator starts or changes rom
     void OnNewRom() {
-        Debug.Log("BasicInputProvider: New rom started, setting controls");
+        // Debug.Log("BasicInputProvider: New rom started, setting controls");
         if (!useDefaultControls) return;
 
         string systemId = emulator.SystemId;
-        controls = Controls.GetDefaultControls(systemId);
-        if (controls == null) {
+        controlsObject = Controls.GetDefaultControlsObject(systemId);
+        if (controlsObject == null) {
             Debug.LogError($"No default controls found for platform '{systemId}', controls will not work");
         }
         // Debug.Log($"Setting controls to {controls} for system {systemId}");
@@ -84,7 +90,16 @@ public class BasicInputProvider : InputProvider {
 #endif
     }
 
+    void OnValidate() {
+        if (useDefaultControls) useControlsObject = true;
+        if (useControlsObject && controlsObject != null) {
+            controls = new(controlsObject.Controls); // Keep mapping synced so that we get pre-populated controls if we untick 'use controls object'
+            // CopyMappingFromMappingObject();
+        }
+    }
+
     void Poll() {
+        if (useControlsObject || useDefaultControls) controls = controlsObject?.Controls;
         if (controls == null) return;
         // Grab Unity input and add to the queue.
         // [assuming/hoping that the key codes are ~same between old and new inputsystem]

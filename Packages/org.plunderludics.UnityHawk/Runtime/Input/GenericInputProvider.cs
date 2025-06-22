@@ -1,233 +1,236 @@
-// TODO: consider if this should be replaced by Controls entirely
-// I think yes but I guess Controls needs an option to support InputActions too
-// also TODO this is untested with new unityhawk input system
+// BasicInputProvider now does what this used to do
+// with the exception that it doesn't have support for InputActions, only keypresses atm
 
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using NaughtyAttributes;
-using UnityEngine;
-using UnityEngine.Serialization;
+// // TODO: consider if this should be replaced by Controls entirely
+// // I think yes but I guess Controls needs an option to support InputActions too
+// // also TODO this is untested with new unityhawk input system
 
-#if ENABLE_INPUT_SYSTEM
-using UnityEngine.InputSystem;
-#endif
+// using System;
+// using System.Collections.Generic;
+// using System.Linq;
+// using NaughtyAttributes;
+// using UnityEngine;
+// using UnityEngine.Serialization;
 
-namespace UnityHawk {
+// #if ENABLE_INPUT_SYSTEM
+// using UnityEngine.InputSystem;
+// #endif
 
-// Map from InputSystem input actions to bizhawk keys according to user-specified mapping
-// [Currently has to be a single key for each action, but no reason to have that constraint in theory]
-// [See https://learn.microsoft.com/en-us/dotnet/api/system.linq.lookup-2]
+// namespace UnityHawk {
 
-// TODO currently doesn't work for any extra inputs added after Start() gets called, but it should
-[ExecuteInEditMode]
-public class GenericInputProvider : InputProvider {
-// Most of this class is only compiled when new input system is available:
-#if ENABLE_INPUT_SYSTEM
-    const string KEYBOARD_NAME = "Keyboard";
+// // Map from InputSystem input actions to bizhawk keys according to user-specified mapping
+// // [Currently has to be a single key for each action, but no reason to have that constraint in theory]
+// // [See https://learn.microsoft.com/en-us/dotnet/api/system.linq.lookup-2]
 
-    enum Source {
-        Keyboard,
-        Gamepad
-    }
+// // TODO currently doesn't work for any extra inputs added after Start() gets called, but it should
+// [ExecuteInEditMode]
+// public class GenericInputProvider : InputProvider {
+// // Most of this class is only compiled when new input system is available:
+// #if ENABLE_INPUT_SYSTEM
+//     const string KEYBOARD_NAME = "Keyboard";
 
-    [Serializable]
-    public class Action2Key {
-        public InputActionReference action;
-        [FormerlySerializedAs("keyName")]
-        [Tooltip("Name of key/axis on the Bizhawk side")]
-        public string inputName;
-        public bool enabled = true;
-        public Action2Key(Action2Key other) {
-            action = other.action;
-            inputName = other.inputName;
-            enabled = other.enabled;
-        }
-    }
-    [Serializable]
-    public class Action2Axis : Action2Key {
-        public float scale = 1f;
-        public Action2Axis(Action2Axis other) : base(other) {
-            scale = other.scale;
-        }
-    }
+//     enum Source {
+//         Keyboard,
+//         Gamepad
+//     }
 
-    [Header("Mappings")]
-    [Tooltip("whether to use a separate scriptable object or define the mapping directly in this component")]
-    [SerializeField] bool useMappingObject;
+//     [Serializable]
+//     public class Action2Key {
+//         public InputActionReference action;
+//         [FormerlySerializedAs("keyName")]
+//         [Tooltip("Name of key/axis on the Bizhawk side")]
+//         public string inputName;
+//         public bool enabled = true;
+//         public Action2Key(Action2Key other) {
+//             action = other.action;
+//             inputName = other.inputName;
+//             enabled = other.enabled;
+//         }
+//     }
+//     [Serializable]
+//     public class Action2Axis : Action2Key {
+//         public float scale = 1f;
+//         public Action2Axis(Action2Axis other) : base(other) {
+//             scale = other.scale;
+//         }
+//     }
 
-    [HideIf("useMappingObject")]
-    [Tooltip("the unity input to bizhawk keyboard mapping")]
-    [SerializeField] public List<Action2Key> keyMappings;
-    [HideIf("useMappingObject")]
-    [Tooltip("the unity input to bizhawk analog input mapping")]
-    [SerializeField] public List<Action2Axis> axisMappings;
+//     [Header("Mappings")]
+//     [Tooltip("whether to use a separate scriptable object or define the mapping directly in this component")]
+//     [SerializeField] bool useMappingObject;
 
-    [ShowIf("useMappingObject")]
-    [SerializeField] GenericInputMappingObject mappingObject;
+//     [HideIf("useMappingObject")]
+//     [Tooltip("the unity input to bizhawk keyboard mapping")]
+//     [SerializeField] public List<Action2Key> keyMappings;
+//     [HideIf("useMappingObject")]
+//     [Tooltip("the unity input to bizhawk analog input mapping")]
+//     [SerializeField] public List<Action2Axis> axisMappings;
 
-    [Tooltip("Max value of axis input")]
-    [SerializeField] float axisScale = 10000; // [Idk about this but 10000 seems to be ~right for N64 at least]
+//     [ShowIf("useMappingObject")]
+//     [SerializeField] GenericInputMappingObject mappingObject;
 
-    [Header("Sources")]
-    [Tooltip("can the input come from any source?")]
-    [SerializeField] bool anySource = true;
+//     [Tooltip("Max value of axis input")]
+//     [SerializeField] float axisScale = 10000; // [Idk about this but 10000 seems to be ~right for N64 at least]
 
-    [HideIf("anySource")]
-    [Tooltip("if not, what kind of source can the input come from?")]
-    [SerializeField] Source source = Source.Keyboard;
+//     [Header("Sources")]
+//     [Tooltip("can the input come from any source?")]
+//     [SerializeField] bool anySource = true;
 
-    bool showGamePadIndex => !anySource && source == Source.Gamepad;
-    [ShowIf("showGamePadIndex")]
-    [Tooltip("if gamepad, whats the index?")]
-    [SerializeField] int gamepadIndex = 0;
+//     [HideIf("anySource")]
+//     [Tooltip("if not, what kind of source can the input come from?")]
+//     [SerializeField] Source source = Source.Keyboard;
 
-    List<InputEvent> pressed = new();
-    public virtual void Start() {
-        if (useMappingObject) {
-            CopyMappingFromMappingObject();
-        }
+//     bool showGamePadIndex => !anySource && source == Source.Gamepad;
+//     [ShowIf("showGamePadIndex")]
+//     [Tooltip("if gamepad, whats the index?")]
+//     [SerializeField] int gamepadIndex = 0;
 
-        var mappingsDict = keyMappings.ToDictionary(
-            m => m.action.action.id,
-            m => m
-        );
-        foreach (var a2k in keyMappings) {
-            // Add press/release callbacks for key mappings
-            if (a2k.action.action.type != InputActionType.Button) {
-                Debug.LogWarning($"Mapping from {a2k.action.action.name} to {a2k.inputName} is type {a2k.action.action.type}, should probably be Button for key events");
-            }
+//     List<InputEvent> pressed = new();
+//     public virtual void Start() {
+//         if (useMappingObject) {
+//             CopyMappingFromMappingObject();
+//         }
 
-            // [I don't get why you have to manually enable all the actions, but ok]
-            a2k.action.action.Enable();
+//         var mappingsDict = keyMappings.ToDictionary(
+//             m => m.action.action.id,
+//             m => m
+//         );
+//         foreach (var a2k in keyMappings) {
+//             // Add press/release callbacks for key mappings
+//             if (a2k.action.action.type != InputActionType.Button) {
+//                 Debug.LogWarning($"Mapping from {a2k.action.action.name} to {a2k.inputName} is type {a2k.action.action.type}, should probably be Button for key events");
+//             }
 
-            // NOTE from mut: i think this is a MAJOR hack to avoid using the player feature
-            // unity has by default, where it manages creating new players for devices
-            // unfortunately, i couldn't find a way to get the device when polling,
-            // so had to change this to use events and flush on read
-            // press
-            a2k.action.action.started += ctx => {
-                // Debug.Log($"[unity-hawk] pressed {ctx.action.name} {ctx.control.device.name}");
-                if(ctx.control.device != targetDevice) {
-                    return;
-                }
-                if (!mappingsDict[ctx.action.id].enabled) {
-                    return;
-                }
-                pressed.Add(new InputEvent {
-                    name = mappingsDict[ctx.action.id].inputName,
-                    value = 1,
-                    isAnalog = false,
-                    controller = Controller.P1 // TODO: support multiple controllers ?
-                });
-            };
-            // release
-            a2k.action.action.canceled += ctx => {
-                // Debug.Log($"pressed {ctx.action.name} {ctx.control.device.name}");
-                if(ctx.control.device != targetDevice) {
-                    return;
-                }
-                if (!mappingsDict[ctx.action.id].enabled) {
-                    return;
-                }
-                pressed.Add(new InputEvent {
-                    name = mappingsDict[ctx.action.id].inputName,
-                    value = 0,
-                    isAnalog = false,
-                    controller = Controller.P1 // TODO: support multiple controllers ?
-                });
-            };
-        }
+//             // [I don't get why you have to manually enable all the actions, but ok]
+//             a2k.action.action.Enable();
 
-        // Also have to enable all the axis mappings
-        foreach (var a2a in axisMappings) {
-            a2a.action.action.Enable();
-        }
-    }
+//             // NOTE from mut: i think this is a MAJOR hack to avoid using the player feature
+//             // unity has by default, where it manages creating new players for devices
+//             // unfortunately, i couldn't find a way to get the device when polling,
+//             // so had to change this to use events and flush on read
+//             // press
+//             a2k.action.action.started += ctx => {
+//                 // Debug.Log($"[unity-hawk] pressed {ctx.action.name} {ctx.control.device.name}");
+//                 if(ctx.control.device != targetDevice) {
+//                     return;
+//                 }
+//                 if (!mappingsDict[ctx.action.id].enabled) {
+//                     return;
+//                 }
+//                 pressed.Add(new InputEvent {
+//                     name = mappingsDict[ctx.action.id].inputName,
+//                     value = 1,
+//                     isAnalog = false,
+//                     controller = Controller.P1 // TODO: support multiple controllers ?
+//                 });
+//             };
+//             // release
+//             a2k.action.action.canceled += ctx => {
+//                 // Debug.Log($"pressed {ctx.action.name} {ctx.control.device.name}");
+//                 if(ctx.control.device != targetDevice) {
+//                     return;
+//                 }
+//                 if (!mappingsDict[ctx.action.id].enabled) {
+//                     return;
+//                 }
+//                 pressed.Add(new InputEvent {
+//                     name = mappingsDict[ctx.action.id].inputName,
+//                     value = 0,
+//                     isAnalog = false,
+//                     controller = Controller.P1 // TODO: support multiple controllers ?
+//                 });
+//             };
+//         }
+
+//         // Also have to enable all the axis mappings
+//         foreach (var a2a in axisMappings) {
+//             a2a.action.action.Enable();
+//         }
+//     }
     
-    public override List<InputEvent> InputForFrame() {
-        // flush input event list
-        // maybe this is bad?
-        var flush = new List<InputEvent>(pressed);
-        pressed.Clear(); // Not ideal because will break if multiple clients use the same InputProvider, should clear at the end of the frame
-        // Debug.Log($"GenericInputProvider returning: {flush.Count} events");
+//     public override List<InputEvent> InputForFrame() {
+//         // flush input event list
+//         // maybe this is bad?
+//         var flush = new List<InputEvent>(pressed);
+//         pressed.Clear(); // Not ideal because will break if multiple clients use the same InputProvider, should clear at the end of the frame
+//         // Debug.Log($"GenericInputProvider returning: {flush.Count} events");
 
-        // Send latest values for actions of type Value or PassThrough (not Button)
-        // TODO: should probably have some kind of onChanged callback instead of polling every input every frame
-        foreach (var a2k in axisMappings) {
-            if (!a2k.enabled) continue;
+//         // Send latest values for actions of type Value or PassThrough (not Button)
+//         // TODO: should probably have some kind of onChanged callback instead of polling every input every frame
+//         foreach (var a2k in axisMappings) {
+//             if (!a2k.enabled) continue;
 
-            if (a2k.action.action.type == InputActionType.Button) {
-                Debug.LogWarning($"Mapping from {a2k.action.action.name} to {a2k.inputName} is type {a2k.action.action.type}, should probably be PassThrough or Value for analog inputs");
-            }
+//             if (a2k.action.action.type == InputActionType.Button) {
+//                 Debug.LogWarning($"Mapping from {a2k.action.action.name} to {a2k.inputName} is type {a2k.action.action.type}, should probably be PassThrough or Value for analog inputs");
+//             }
 
-            int value = (int)(axisScale*a2k.scale*a2k.action.action.ReadValue<float>());
-            flush.Add(new InputEvent {
-                name = a2k.inputName,
-                value = value,
-                isAnalog = true,
-                controller = Controller.P1 // TODO: support multiple controllers ?
-            });
-        }
+//             int value = (int)(axisScale*a2k.scale*a2k.action.action.ReadValue<float>());
+//             flush.Add(new InputEvent {
+//                 name = a2k.inputName,
+//                 value = value,
+//                 isAnalog = true,
+//                 controller = Controller.P1 // TODO: support multiple controllers ?
+//             });
+//         }
 
-        return flush.Concat(base.InputForFrame()).ToList(); ;
-    }
+//         return flush.Concat(base.InputForFrame()).ToList(); ;
+//     }
 
-    void Update() {
-        // Minor hack so the mapping list is populated from the mapping object when unticking 'use mapping object' in edit mode
-        if (useMappingObject) {
-            CopyMappingFromMappingObject();
-        }
-    }
+//     void Update() {
+//         // Minor hack so the mapping list is populated from the mapping object when unticking 'use mapping object' in edit mode
+//         if (useMappingObject) {
+//             CopyMappingFromMappingObject();
+//         }
+//     }
 
-    // queries
-    public int GamepadIndex {
-        get {
-            return gamepadIndex;
-        }
-        set {
-            gamepadIndex = value;
-        }
-    }
+//     // queries
+//     public int GamepadIndex {
+//         get {
+//             return gamepadIndex;
+//         }
+//         set {
+//             gamepadIndex = value;
+//         }
+//     }
 
-    private InputDevice targetDevice {
-        // TODO: maybe cache this and update only when detecting new input
-        get {
-            try {
-                return source switch {
-                    // TODO: multiple keyboards?
-                    Source.Keyboard => InputSystem.GetDevice<Keyboard>(),
-                    Source.Gamepad => Gamepad.all[gamepadIndex],
-                    _ => null
-                };
-            } catch (ArgumentOutOfRangeException) {
-                Debug.LogWarning($"[unity-hawk] gamepad #{gamepadIndex} out of range");
-                return null;
-            }
-        }
-    }
+//     private InputDevice targetDevice {
+//         // TODO: maybe cache this and update only when detecting new input
+//         get {
+//             try {
+//                 return source switch {
+//                     // TODO: multiple keyboards?
+//                     Source.Keyboard => InputSystem.GetDevice<Keyboard>(),
+//                     Source.Gamepad => Gamepad.all[gamepadIndex],
+//                     _ => null
+//                 };
+//             } catch (ArgumentOutOfRangeException) {
+//                 Debug.LogWarning($"[unity-hawk] gamepad #{gamepadIndex} out of range");
+//                 return null;
+//             }
+//         }
+//     }
 
-    private void CopyMappingFromMappingObject() {
-        // So that we can copy from the mappingObject into the mapping
-        // and then make changes without affecting the original
-        keyMappings = mappingObject.keyMappings.Select((Action2Key a2k) => {
-            return new Action2Key(a2k);
-        }).ToList();
+//     private void CopyMappingFromMappingObject() {
+//         // So that we can copy from the mappingObject into the mapping
+//         // and then make changes without affecting the original
+//         keyMappings = mappingObject.keyMappings.Select((Action2Key a2k) => {
+//             return new Action2Key(a2k);
+//         }).ToList();
 
-        axisMappings = mappingObject.axisMappings.Select((Action2Axis a2a) => {
-            return new Action2Axis(a2a);
-        }).ToList();
-    }
-#else
-    // Input system not enabled, just log an error on start
-    void Start() {
-        Debug.LogError("GenericInputProvider will not work because the new input system is not enabled.");
-    }
+//         axisMappings = mappingObject.axisMappings.Select((Action2Axis a2a) => {
+//             return new Action2Axis(a2a);
+//         }).ToList();
+//     }
+// #else
+//     // Input system not enabled, just log an error on start
+//     void Start() {
+//         Debug.LogError("GenericInputProvider will not work because the new input system is not enabled.");
+//     }
     
-    // Still need a dummy implementation of the interface:
-    public override List<InputEvent> InputForFrame() {return new();}
-    public override Dictionary<string, int> AxisValuesForFrame() {return new();}
-#endif
-    }
+//     // Still need a dummy implementation of the interface:
+//     public override List<InputEvent> InputForFrame() {return new();}
+//     public override Dictionary<string, int> AxisValuesForFrame() {return new();}
+// #endif
+//     }
 
-}
+// }

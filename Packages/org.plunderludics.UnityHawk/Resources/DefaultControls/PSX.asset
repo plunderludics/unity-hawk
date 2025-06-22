@@ -9,75 +9,132 @@ MonoBehaviour:
   m_GameObject: {fileID: 0}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 772afa63a3b742a4f9d18e203df20db3, type: 3}
+  m_Script: {fileID: 11500000, guid: 729dea1219b49c34bbc47a69e0423b35, type: 3}
   m_Name: PSX
   m_EditorClassIdentifier: 
-  mappings:
-  - Enabled: 1
-    Key: 273
-    Control: D-Pad Up
-    Controller: 1
-  - Enabled: 1
-    Key: 274
-    Control: D-Pad Down
-    Controller: 1
-  - Enabled: 1
-    Key: 276
-    Control: D-Pad Left
-    Controller: 1
-  - Enabled: 1
-    Key: 275
-    Control: D-Pad Right
-    Controller: 1
-  - Enabled: 1
-    Key: 32
-    Control: Select
-    Controller: 1
-  - Enabled: 1
-    Key: 13
-    Control: Start
-    Controller: 1
-  - Enabled: 1
-    Key: 115
-    Control: "\u25B3"
-    Controller: 1
-  - Enabled: 1
-    Key: 122
-    Control: X
-    Controller: 1
-  - Enabled: 1
-    Key: 97
-    Control: "\u25A1"
-    Controller: 1
-  - Enabled: 1
-    Key: 120
-    Control: "\u25CB"
-    Controller: 1
-  - Enabled: 1
-    Key: 113
-    Control: L1
-    Controller: 1
-  - Enabled: 1
-    Key: 101
-    Control: L2
-    Controller: 1
-  - Enabled: 1
-    Key: 119
-    Control: R1
-    Controller: 1
-  - Enabled: 1
-    Key: 114
-    Control: R2
-    Controller: 1
-  - Enabled: 1
-    Key: 116
-    Control: Left Stick, Button
-    Controller: 1
-  - Enabled: 1
-    Key: 121
-    Control: Right Stick, Button
-    Controller: 1
-  - Enabled: 1
-    Key: 100
-    Control: Analog
-    Controller: 1
+  Controls:
+    mappings:
+    - Enabled: 1
+      Key: 273
+      Control: Up
+      Controller: 1
+    - Enabled: 1
+      Key: 273
+      Control: D-Pad Up
+      Controller: 1
+    - Enabled: 1
+      Key: 273
+      Control: Thumbstick Up
+      Controller: 1
+    - Enabled: 1
+      Key: 274
+      Control: Down
+      Controller: 1
+    - Enabled: 1
+      Key: 274
+      Control: D-Pad Down
+      Controller: 1
+    - Enabled: 1
+      Key: 274
+      Control: Thumbstick Down
+      Controller: 1
+    - Enabled: 1
+      Key: 276
+      Control: Left
+      Controller: 1
+    - Enabled: 1
+      Key: 276
+      Control: D-Pad Left
+      Controller: 1
+    - Enabled: 1
+      Key: 276
+      Control: Thumbstick Left
+      Controller: 1
+    - Enabled: 1
+      Key: 275
+      Control: Right
+      Controller: 1
+    - Enabled: 1
+      Key: 275
+      Control: D-Pad Right
+      Controller: 1
+    - Enabled: 1
+      Key: 275
+      Control: Thumbstick Right
+      Controller: 1
+    - Enabled: 1
+      Key: 32
+      Control: Select
+      Controller: 1
+    - Enabled: 1
+      Key: 13
+      Control: Start
+      Controller: 1
+    - Enabled: 1
+      Key: 97
+      Control: Square
+      Controller: 1
+    - Enabled: 1
+      Key: 97
+      Control: "\u25A1"
+      Controller: 1
+    - Enabled: 1
+      Key: 115
+      Control: Triangle
+      Controller: 1
+    - Enabled: 1
+      Key: 115
+      Control: "\u25B3"
+      Controller: 1
+    - Enabled: 1
+      Key: 120
+      Control: Circle
+      Controller: 1
+    - Enabled: 1
+      Key: 120
+      Control: "\u25CB"
+      Controller: 1
+    - Enabled: 1
+      Key: 122
+      Control: Cross
+      Controller: 1
+    - Enabled: 1
+      Key: 122
+      Control: X
+      Controller: 1
+    - Enabled: 1
+      Key: 113
+      Control: L1
+      Controller: 1
+    - Enabled: 1
+      Key: 119
+      Control: R1
+      Controller: 1
+    - Enabled: 1
+      Key: 101
+      Control: L2
+      Controller: 1
+    - Enabled: 1
+      Key: 114
+      Control: R2
+      Controller: 1
+    - Enabled: 1
+      Key: 116
+      Control: L3
+      Controller: 1
+    - Enabled: 1
+      Key: 116
+      Control: Left Stick, Button
+      Controller: 1
+    - Enabled: 1
+      Key: 121
+      Control: R3
+      Controller: 1
+    - Enabled: 1
+      Key: 121
+      Control: Right Stick, Button
+      Controller: 1
+    - Enabled: 1
+      Key: 100
+      Control: Analog
+      Controller: 1

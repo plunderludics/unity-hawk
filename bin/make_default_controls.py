@@ -9,7 +9,7 @@ config_file = "Packages/org.plunderludics.UnityHawk/BizHawk~/config.ini"
 controls_dir = "Packages/org.plunderludics.UnityHawk/Resources/DefaultControls"
 
 skip_systems = {
-    "PSX" # Default config has some weird duplicate stuff in there (e.g both "Triangle" and "△"), just use the one we already created for now
+    #"PSX" # Default config has some weird duplicate stuff in there (e.g both "Triangle" and "△"), just use the one we already created for now
 }
 
 name_to_system_id = {
@@ -183,10 +183,11 @@ def mapping_to_yaml(system_id, mapping):
         "  m_GameObject: {fileID: 0}",
         "  m_Enabled: 1",
         "  m_EditorHideFlags: 0",
-        "  m_Script: {fileID: 11500000, guid: 772afa63a3b742a4f9d18e203df20db3, type: 3}",
+        "  m_Script: {fileID: 11500000, guid: 729dea1219b49c34bbc47a69e0423b35, type: 3}",
         f"  m_Name: {system_id}",
         "  m_EditorClassIdentifier: ",
-        "  mappings:"
+        "  Controls:"
+        "    mappings:"
     ]
     for k, v in mapping.items():
         # Strip "P1"/"P2"/etc prefix if it exists, set controller as int
