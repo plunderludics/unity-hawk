@@ -3,12 +3,25 @@ using UnityEngine;
 
 namespace UnityHawk {
 
+public enum Controller {
+    None = 0,
+    P1 = 1,
+    P2 = 2,
+    P3 = 3,
+    P4 = 4,
+    P5 = 5,
+    P6 = 6,
+    P7 = 7,
+    P8 = 8
+} // (Could just be an int but this is convenient for inspector dropdown)
+
+
 // input in Unity format
 // (basically same as InputEvent in BizHawk, but keep decoupled in case)
 public struct InputEvent {
     public string name; // Must correspond to emulator button/axis name E.g. "P1 A"
     public int value;  // 0 or 1 for buttons, -INT_MAX - INT_MAX for analog (?)
-    public int controller; // Starts from 1
+    public Controller controller;
     public bool isAnalog;
     public override string ToString() => $"{name}:{value}";
 }
@@ -18,7 +31,6 @@ public struct InputEvent {
 // or programmatically generating input for plunderludic purposes)
 public abstract class InputProvider : MonoBehaviour {
     // (derive from monobehaviour so params can be easily tweaked in inspector)
-
     List<InputEvent> _addedInputs = new();
     Dictionary<string, int> _addedAxisInputs = new();
 

@@ -12,7 +12,7 @@ public static class ConvertInput {
         return new Plunderludics.UnityHawk.Shared.InputEvent {
             name = ie.name,
             value = ie.value,
-            controller = ie.controller,
+            controller = (int)ie.controller,
             isAnalog = ie.isAnalog
         };
     }

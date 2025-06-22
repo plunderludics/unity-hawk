@@ -118,7 +118,7 @@ public class GenericInputProvider : InputProvider {
                     name = mappingsDict[ctx.action.id].inputName,
                     value = 1,
                     isAnalog = false,
-                    controller = 1 // TODO: support multiple controllers ?
+                    controller = Controller.P1 // TODO: support multiple controllers ?
                 });
             };
             // release
@@ -134,7 +134,7 @@ public class GenericInputProvider : InputProvider {
                     name = mappingsDict[ctx.action.id].inputName,
                     value = 0,
                     isAnalog = false,
-                    controller = 1 // TODO: support multiple controllers ?
+                    controller = Controller.P1 // TODO: support multiple controllers ?
                 });
             };
         }
@@ -166,7 +166,7 @@ public class GenericInputProvider : InputProvider {
                 name = a2k.inputName,
                 value = value,
                 isAnalog = true,
-                controller = 1 // TODO: support multiple controllers ?
+                controller = Controller.P1 // TODO: support multiple controllers ?
             });
         }
 

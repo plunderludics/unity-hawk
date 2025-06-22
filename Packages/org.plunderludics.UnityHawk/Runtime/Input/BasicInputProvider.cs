@@ -1,3 +1,5 @@
+// TODO some analog input support would be nice
+
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
@@ -116,13 +118,13 @@ public class BasicInputProvider : InputProvider {
 #endif
             // keyName = System.Enum.GetName(typeof(KeyCode), kc);
             if (interaction) {
-                var controlNames = controls[kc];
+                List<(string, Controller)> controlNames = controls[kc];
                 if (controlNames == null) return;
-                foreach (string controlName in controlNames) {
+                foreach ((string name, Controller controller) in controlNames) {
                     pressedThisFrame.Add(new InputEvent {
-                        name = controlName,
+                        name = name,
                         value = isPressed ? 1 : 0,
-                        controller = 1, // TODO: support multiple controllers ?
+                        controller = controller,
                         isAnalog = false
                     });
                 }
