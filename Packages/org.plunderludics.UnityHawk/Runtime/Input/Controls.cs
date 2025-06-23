@@ -1,4 +1,4 @@
-// Set of mappings that maps from keynames to BizHawk buttons
+// Set of mappings that maps from Unity keycodes to BizHawk buttons
 // [Do we want another version of this that supports inputsystem actions? Idk]
 // TODO would be nice to have a slightly nicer editor too
 

@@ -41,7 +41,7 @@ public class BasicInputProvider : InputProvider {
 
     void OnEnable() {
         pressedThisFrame = new();
-        _allKeyCodes = (KeyCode[])System.Enum.GetValues(typeof(KeyCode)); // for old inputsystem
+        _allKeyCodes = (KeyCode[])System.Enum.GetValues(typeof(KeyCode));
     
         if (!emulator) {
             emulator = GetComponent<Emulator>();
