@@ -1,6 +1,6 @@
 // Set of mappings that maps from Unity keycodes to BizHawk buttons
-// [Do we want another version of this that supports inputsystem actions? Idk]
-// TODO would be nice to have a slightly nicer editor too
+// Currently only used by BasicInputProvider
+// TODO: Support for analog inputs? Support for InputSystem actions or legacy input manager axes?
 
 using UnityEngine;
 using System.Collections.Generic;
