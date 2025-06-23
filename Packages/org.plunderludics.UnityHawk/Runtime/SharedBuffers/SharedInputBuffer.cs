@@ -28,7 +28,7 @@ public class SharedInputBuffer : ISharedBuffer {
         // Debug.Log($"[unity-hawk] Writing buffer: {bie}");
         int amount = _buffer.Write(serialized, timeout: 0);
         if (amount <= 0) {
-            Debug.LogWarning("Failed to write key event to shared buffer");
+            Debug.LogWarning("Failed to write input event to shared buffer");
         }
     }
 }

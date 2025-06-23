@@ -94,7 +94,6 @@ public class BasicInputProvider : InputProvider {
         if (useDefaultControls) useControlsObject = true;
         if (useControlsObject && controlsObject != null) {
             controls = new(controlsObject.Controls); // Keep mapping synced so that we get pre-populated controls if we untick 'use controls object'
-            // CopyMappingFromMappingObject();
         }
     }
 
@@ -148,9 +147,10 @@ public class BasicInputProvider : InputProvider {
     }
 
     public override List<InputEvent> InputForFrame() {
-        var toReturn = new List<InputEvent>(pressedThisFrame);
-        pressedThisFrame.Clear(); // Not ideal because will break if multiple clients use the same InputProvider, should clear at the end of the frame
-        return toReturn.Concat(base.InputForFrame()).ToList();
+        var baseInputs = base.InputForFrame();
+        var myInputs = new List<InputEvent>(pressedThisFrame);
+        pressedThisFrame.Clear(); // TODO: Not ideal because will break if multiple clients use the same InputProvider, should clear at the end of the frame
+        return baseInputs.Concat(myInputs).ToList();
     }
 
 #if ENABLE_INPUT_SYSTEM

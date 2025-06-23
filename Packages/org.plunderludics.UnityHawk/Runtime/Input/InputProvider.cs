@@ -40,20 +40,9 @@ public abstract class InputProvider : MonoBehaviour {
         _addedInputs.Clear(); // Not ideal because will break if multiple clients use the same InputProvider, should clear at the end of the frame
         return toReturn;
     }
-
-    // public virtual Dictionary<string, int> AxisValuesForFrame() {
-    //     var toReturn = new Dictionary<string, int>(_addedAxisInputs);
-    //     _addedAxisInputs.Clear();
-    //     return toReturn;
-    // }
-
     public void AddInputEvent(InputEvent ie) {
         _addedInputs.Add(ie);
     }
-
-    // public void AddAxisInputEvent(string axis, int value) {
-    //     _addedAxisInputs.Add(axis, value);
-    // }
 }
 
 }

@@ -16,7 +16,7 @@ public class Controls {
     public struct KeyCode2Control {
         public bool Enabled;
         public KeyCode Key; // Keyboard key name e.g. "Z"
-        public string Control; // Bizhawk control name e.g. "D-Pad Up" (Don't include "P1 " prefix!))
+        public string Control; // Bizhawk control name e.g. "D-Pad Up" (Don't include "P1 " prefix!)
         public Controller Controller; // Which controller this key is for (can be None)
     }
 
