@@ -67,7 +67,7 @@ public class SharedTests
         e.runInEditMode = true;
         e.passInputFromUnity = _passInputFromUnity;
         e.captureEmulatorAudio = _captureEmulatorAudio;
-        e.showBizhawkGui = _showBizhawkGui;
+        e.showBizhawkGuiInEditor = _showBizhawkGui;
     }
     
     [TearDown]

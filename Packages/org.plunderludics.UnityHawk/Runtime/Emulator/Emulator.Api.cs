@@ -112,8 +112,13 @@ public partial class Emulator
     /// </summary>
     /// <param name="sample"></param>
     public void LoadState(Savestate sample) {
-        LoadState(Paths.GetAssetPath(sample));
-        // TODO would be nice if there was some calllback or way to know when state is loaded
+        string path = Paths.GetAssetPath(sample);
+        if (path == null) {
+            Debug.LogError($"Savestate {sample} not found");
+            return;
+        }
+        LoadState(path);
+        // TODO would be nice if there was some callback or way to know when state is loaded
     }
 
     /// <summary>

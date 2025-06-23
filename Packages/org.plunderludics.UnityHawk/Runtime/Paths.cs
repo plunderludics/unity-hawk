@@ -66,14 +66,24 @@ public static class Paths
     }
 
     // this uses the fact that Paths.cs treats absolute paths differently than relative
+    // Returns null if the asset is not found
     public static string GetAssetPath(BizhawkAsset asset) {
         #if UNITY_EDITOR
         // if we return an absolute path, in editor, we don't need any preprocessing
 
         // ignore asset path in editor, just get its location
-        return Path.GetFullPath(Path.Combine(Application.dataPath, "..", AssetDatabase.GetAssetPath(asset)));
+        string assetPath = AssetDatabase.GetAssetPath(asset);
+        if (string.IsNullOrEmpty(assetPath)) {
+            return null;
+        }
+        return Path.GetFullPath(Path.Combine(Application.dataPath, "..", assetPath));
         #endif
 
+        // For build:
+        if (asset == null || string.IsNullOrEmpty(asset.Location)) {
+            Debug.LogError($"Asset {asset} has no location");
+            return null;
+        }
         return Path.Combine(BizHawkAssetsDirForBuild, asset.Location);
     }
 }
