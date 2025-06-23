@@ -42,6 +42,10 @@ public class Controls {
         }
     }
     
+    // Note: Slightly problematic because control labels are specific to the core rather than the system,
+    // so e.g. Nymashock (PSX) uses "P1 △" where Octoshock (PSX) uses "P1 Triangle".
+    // Bizhawk Emulation api doesn't seem to have a nice way to get the current core, so we can either
+    // just hope the choice of core is consistent, or just include mappings for both labels in the default Controls object
     public static ControlsObject GetDefaultControlsObject(string systemId) {
         return Resources.Load<ControlsObject>(Path.Join(Paths.defaultControlsResourceDir, systemId));
     }

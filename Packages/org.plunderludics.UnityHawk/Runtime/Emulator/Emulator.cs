@@ -6,7 +6,6 @@ using System.Collections.Generic;
 using System.IO;
 using System.Diagnostics;
 using System.Linq;
-using System.Reflection;
 using System.Runtime.InteropServices;
 using Debug = UnityEngine.Debug;
 
@@ -17,13 +16,7 @@ using UnityEditor;
 using NaughtyAttributes;
 
 using UnityEngine;
-using Unity.Profiling;
-
-using Plunderludics;
-using UnityEngine.Events;
 using UnityEngine.Serialization;
-using Plunderludics.UnityHawk.Shared;
-using UnityEngine.InputSystem;
 
 namespace UnityHawk {
 
