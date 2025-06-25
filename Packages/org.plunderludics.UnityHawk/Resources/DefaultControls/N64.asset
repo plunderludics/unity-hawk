@@ -14,59 +14,59 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   Controls:
     mappings:
-  - Enabled: 1
-    Key: 273
-    Control: A Up
-    Controller: 1
-  - Enabled: 1
-    Key: 274
-    Control: A Down
-    Controller: 1
-  - Enabled: 1
-    Key: 276
-    Control: A Left
-    Controller: 1
-  - Enabled: 1
-    Key: 275
-    Control: A Right
-    Controller: 1
-  - Enabled: 1
-    Key: 100
-    Control: Z
-    Controller: 1
-  - Enabled: 1
-    Key: 115
-    Control: B
-    Controller: 1
-  - Enabled: 1
-    Key: 97
-    Control: A
-    Controller: 1
-  - Enabled: 1
-    Key: 105
-    Control: C Up
-    Controller: 1
-  - Enabled: 1
-    Key: 107
-    Control: C Down
-    Controller: 1
-  - Enabled: 1
-    Key: 106
-    Control: C Left
-    Controller: 1
-  - Enabled: 1
-    Key: 108
-    Control: C Right
-    Controller: 1
-  - Enabled: 1
-    Key: 113
-    Control: L
-    Controller: 1
-  - Enabled: 1
-    Key: 119
-    Control: R
-    Controller: 1
-  - Enabled: 1
-    Key: 13
-    Control: Start
-    Controller: 1
+    - Enabled: 1
+      Key: 273
+      Control: A Up
+      Controller: 1
+    - Enabled: 1
+      Key: 274
+      Control: A Down
+      Controller: 1
+    - Enabled: 1
+      Key: 276
+      Control: A Left
+      Controller: 1
+    - Enabled: 1
+      Key: 275
+      Control: A Right
+      Controller: 1
+    - Enabled: 1
+      Key: 100
+      Control: Z
+      Controller: 1
+    - Enabled: 1
+      Key: 115
+      Control: B
+      Controller: 1
+    - Enabled: 1
+      Key: 97
+      Control: A
+      Controller: 1
+    - Enabled: 1
+      Key: 105
+      Control: C Up
+      Controller: 1
+    - Enabled: 1
+      Key: 107
+      Control: C Down
+      Controller: 1
+    - Enabled: 1
+      Key: 106
+      Control: C Left
+      Controller: 1
+    - Enabled: 1
+      Key: 108
+      Control: C Right
+      Controller: 1
+    - Enabled: 1
+      Key: 113
+      Control: L
+      Controller: 1
+    - Enabled: 1
+      Key: 119
+      Control: R
+      Controller: 1
+    - Enabled: 1
+      Key: 13
+      Control: Start
+      Controller: 1

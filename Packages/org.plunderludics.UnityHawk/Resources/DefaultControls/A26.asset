@@ -14,51 +14,51 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   Controls:
     mappings:
-  - Enabled: 1
-    Key: 100
-    Control: Reset
-    Controller: 0
-  - Enabled: 1
-    Key: 115
-    Control: Select
-    Controller: 0
-  - Enabled: 1
-    Key: 273
-    Control: Up
-    Controller: 1
-  - Enabled: 1
-    Key: 274
-    Control: Down
-    Controller: 1
-  - Enabled: 1
-    Key: 276
-    Control: Left
-    Controller: 1
-  - Enabled: 1
-    Key: 275
-    Control: Right
-    Controller: 1
-  - Enabled: 1
-    Key: 122
-    Control: Button
-    Controller: 1
-  - Enabled: 1
-    Key: 264
-    Control: Up
-    Controller: 2
-  - Enabled: 1
-    Key: 258
-    Control: Down
-    Controller: 2
-  - Enabled: 1
-    Key: 260
-    Control: Left
-    Controller: 2
-  - Enabled: 1
-    Key: 262
-    Control: Right
-    Controller: 2
-  - Enabled: 1
-    Key: 257
-    Control: Button
-    Controller: 2
+    - Enabled: 1
+      Key: 100
+      Control: Reset
+      Controller: 0
+    - Enabled: 1
+      Key: 115
+      Control: Select
+      Controller: 0
+    - Enabled: 1
+      Key: 273
+      Control: Up
+      Controller: 1
+    - Enabled: 1
+      Key: 274
+      Control: Down
+      Controller: 1
+    - Enabled: 1
+      Key: 276
+      Control: Left
+      Controller: 1
+    - Enabled: 1
+      Key: 275
+      Control: Right
+      Controller: 1
+    - Enabled: 1
+      Key: 122
+      Control: Button
+      Controller: 1
+    - Enabled: 1
+      Key: 264
+      Control: Up
+      Controller: 2
+    - Enabled: 1
+      Key: 258
+      Control: Down
+      Controller: 2
+    - Enabled: 1
+      Key: 260
+      Control: Left
+      Controller: 2
+    - Enabled: 1
+      Key: 262
+      Control: Right
+      Controller: 2
+    - Enabled: 1
+      Key: 257
+      Control: Button
+      Controller: 2

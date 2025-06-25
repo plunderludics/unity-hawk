@@ -14,43 +14,43 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   Controls:
     mappings:
-  - Enabled: 1
-    Key: 273
-    Control: Up
-    Controller: 0
-  - Enabled: 1
-    Key: 274
-    Control: Down
-    Controller: 0
-  - Enabled: 1
-    Key: 276
-    Control: Left
-    Controller: 0
-  - Enabled: 1
-    Key: 275
-    Control: Right
-    Controller: 0
-  - Enabled: 1
-    Key: 13
-    Control: Start
-    Controller: 0
-  - Enabled: 1
-    Key: 32
-    Control: Select
-    Controller: 0
-  - Enabled: 1
-    Key: 122
-    Control: B
-    Controller: 0
-  - Enabled: 1
-    Key: 120
-    Control: A
-    Controller: 0
-  - Enabled: 1
-    Key: 119
-    Control: L
-    Controller: 0
-  - Enabled: 1
-    Key: 101
-    Control: R
-    Controller: 0
+    - Enabled: 1
+      Key: 273
+      Control: Up
+      Controller: 0
+    - Enabled: 1
+      Key: 274
+      Control: Down
+      Controller: 0
+    - Enabled: 1
+      Key: 276
+      Control: Left
+      Controller: 0
+    - Enabled: 1
+      Key: 275
+      Control: Right
+      Controller: 0
+    - Enabled: 1
+      Key: 13
+      Control: Start
+      Controller: 0
+    - Enabled: 1
+      Key: 32
+      Control: Select
+      Controller: 0
+    - Enabled: 1
+      Key: 122
+      Control: B
+      Controller: 0
+    - Enabled: 1
+      Key: 120
+      Control: A
+      Controller: 0
+    - Enabled: 1
+      Key: 119
+      Control: L
+      Controller: 0
+    - Enabled: 1
+      Key: 101
+      Control: R
+      Controller: 0

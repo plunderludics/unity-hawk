@@ -206,10 +206,10 @@ def mapping_to_yaml(system_id, mapping):
                 print(f"Warning: Key '{key}' not found in key_name_to_code, skipping.")
                 # print(system_id,k,v)
                 continue
-            yaml_lines.append(f"  - Enabled: 1")
-            yaml_lines.append(f"    Key: {keycode}")
-            yaml_lines.append(f"    Control: {k}")
-            yaml_lines.append(f"    Controller: {controller}")
+            yaml_lines.append(f"    - Enabled: 1")
+            yaml_lines.append(f"      Key: {keycode}")
+            yaml_lines.append(f"      Control: {k}")
+            yaml_lines.append(f"      Controller: {controller}")
     return "\n".join(yaml_lines)
 
 def main():

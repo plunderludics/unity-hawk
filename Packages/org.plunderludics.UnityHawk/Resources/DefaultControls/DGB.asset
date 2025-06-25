@@ -14,67 +14,67 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   Controls:
     mappings:
-  - Enabled: 1
-    Key: 273
-    Control: Up
-    Controller: 1
-  - Enabled: 1
-    Key: 274
-    Control: Down
-    Controller: 1
-  - Enabled: 1
-    Key: 276
-    Control: Left
-    Controller: 1
-  - Enabled: 1
-    Key: 275
-    Control: Right
-    Controller: 1
-  - Enabled: 1
-    Key: 13
-    Control: Start
-    Controller: 1
-  - Enabled: 1
-    Key: 32
-    Control: Select
-    Controller: 1
-  - Enabled: 1
-    Key: 122
-    Control: B
-    Controller: 1
-  - Enabled: 1
-    Key: 120
-    Control: A
-    Controller: 1
-  - Enabled: 1
-    Key: 264
-    Control: Up
-    Controller: 2
-  - Enabled: 1
-    Key: 258
-    Control: Down
-    Controller: 2
-  - Enabled: 1
-    Key: 260
-    Control: Left
-    Controller: 2
-  - Enabled: 1
-    Key: 262
-    Control: Right
-    Controller: 2
-  - Enabled: 1
-    Key: 93
-    Control: Start
-    Controller: 2
-  - Enabled: 1
-    Key: 91
-    Control: Select
-    Controller: 2
-  - Enabled: 1
-    Key: 99
-    Control: B
-    Controller: 2
-  - Enabled: 1
-    Key: 118
-    Control: A
-    Controller: 2
+    - Enabled: 1
+      Key: 273
+      Control: Up
+      Controller: 1
+    - Enabled: 1
+      Key: 274
+      Control: Down
+      Controller: 1
+    - Enabled: 1
+      Key: 276
+      Control: Left
+      Controller: 1
+    - Enabled: 1
+      Key: 275
+      Control: Right
+      Controller: 1
+    - Enabled: 1
+      Key: 13
+      Control: Start
+      Controller: 1
+    - Enabled: 1
+      Key: 32
+      Control: Select
+      Controller: 1
+    - Enabled: 1
+      Key: 122
+      Control: B
+      Controller: 1
+    - Enabled: 1
+      Key: 120
+      Control: A
+      Controller: 1
+    - Enabled: 1
+      Key: 264
+      Control: Up
+      Controller: 2
+    - Enabled: 1
+      Key: 258
+      Control: Down
+      Controller: 2
+    - Enabled: 1
+      Key: 260
+      Control: Left
+      Controller: 2
+    - Enabled: 1
+      Key: 262
+      Control: Right
+      Controller: 2
+    - Enabled: 1
+      Key: 93
+      Control: Start
+      Controller: 2
+    - Enabled: 1
+      Key: 91
+      Control: Select
+      Controller: 2
+    - Enabled: 1
+      Key: 99
+      Control: B
+      Controller: 2
+    - Enabled: 1
+      Key: 118
+      Control: A
+      Controller: 2

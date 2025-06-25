@@ -14,51 +14,51 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   Controls:
     mappings:
-  - Enabled: 1
-    Key: 273
-    Control: RetroPad Up
-    Controller: 1
-  - Enabled: 1
-    Key: 274
-    Control: RetroPad Down
-    Controller: 1
-  - Enabled: 1
-    Key: 276
-    Control: RetroPad Left
-    Controller: 1
-  - Enabled: 1
-    Key: 275
-    Control: RetroPad Right
-    Controller: 1
-  - Enabled: 1
-    Key: 32
-    Control: RetroPad Select
-    Controller: 1
-  - Enabled: 1
-    Key: 13
-    Control: RetroPad Start
-    Controller: 1
-  - Enabled: 1
-    Key: 97
-    Control: RetroPad Y
-    Controller: 1
-  - Enabled: 1
-    Key: 122
-    Control: RetroPad B
-    Controller: 1
-  - Enabled: 1
-    Key: 115
-    Control: RetroPad X
-    Controller: 1
-  - Enabled: 1
-    Key: 120
-    Control: RetroPad A
-    Controller: 1
-  - Enabled: 1
-    Key: 119
-    Control: RetroPad L
-    Controller: 1
-  - Enabled: 1
-    Key: 101
-    Control: RetroPad R
-    Controller: 1
+    - Enabled: 1
+      Key: 273
+      Control: RetroPad Up
+      Controller: 1
+    - Enabled: 1
+      Key: 274
+      Control: RetroPad Down
+      Controller: 1
+    - Enabled: 1
+      Key: 276
+      Control: RetroPad Left
+      Controller: 1
+    - Enabled: 1
+      Key: 275
+      Control: RetroPad Right
+      Controller: 1
+    - Enabled: 1
+      Key: 32
+      Control: RetroPad Select
+      Controller: 1
+    - Enabled: 1
+      Key: 13
+      Control: RetroPad Start
+      Controller: 1
+    - Enabled: 1
+      Key: 97
+      Control: RetroPad Y
+      Controller: 1
+    - Enabled: 1
+      Key: 122
+      Control: RetroPad B
+      Controller: 1
+    - Enabled: 1
+      Key: 115
+      Control: RetroPad X
+      Controller: 1
+    - Enabled: 1
+      Key: 120
+      Control: RetroPad A
+      Controller: 1
+    - Enabled: 1
+      Key: 119
+      Control: RetroPad L
+      Controller: 1
+    - Enabled: 1
+      Key: 101
+      Control: RetroPad R
+      Controller: 1

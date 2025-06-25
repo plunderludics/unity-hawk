@@ -14,59 +14,59 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   Controls:
     mappings:
-  - Enabled: 1
-    Key: 273
-    Control: Up
-    Controller: 1
-  - Enabled: 1
-    Key: 274
-    Control: Down
-    Controller: 1
-  - Enabled: 1
-    Key: 276
-    Control: Left
-    Controller: 1
-  - Enabled: 1
-    Key: 275
-    Control: Right
-    Controller: 1
-  - Enabled: 1
-    Key: 122
-    Control: A
-    Controller: 1
-  - Enabled: 1
-    Key: 120
-    Control: B
-    Controller: 1
-  - Enabled: 1
-    Key: 99
-    Control: C
-    Controller: 1
-  - Enabled: 1
-    Key: 13
-    Control: Start
-    Controller: 1
-  - Enabled: 1
-    Key: 97
-    Control: X
-    Controller: 1
-  - Enabled: 1
-    Key: 115
-    Control: Y
-    Controller: 1
-  - Enabled: 1
-    Key: 100
-    Control: Z
-    Controller: 1
-  - Enabled: 1
-    Key: 101
-    Control: Mode
-    Controller: 1
-  - Enabled: 1
-    Key: 261
-    Control: Lightgun Start
-    Controller: 2
-  - Enabled: 1
-    Key: 261
-    Control: Mouse Start
-    Controller: 2
+    - Enabled: 1
+      Key: 273
+      Control: Up
+      Controller: 1
+    - Enabled: 1
+      Key: 274
+      Control: Down
+      Controller: 1
+    - Enabled: 1
+      Key: 276
+      Control: Left
+      Controller: 1
+    - Enabled: 1
+      Key: 275
+      Control: Right
+      Controller: 1
+    - Enabled: 1
+      Key: 122
+      Control: A
+      Controller: 1
+    - Enabled: 1
+      Key: 120
+      Control: B
+      Controller: 1
+    - Enabled: 1
+      Key: 99
+      Control: C
+      Controller: 1
+    - Enabled: 1
+      Key: 13
+      Control: Start
+      Controller: 1
+    - Enabled: 1
+      Key: 97
+      Control: X
+      Controller: 1
+    - Enabled: 1
+      Key: 115
+      Control: Y
+      Controller: 1
+    - Enabled: 1
+      Key: 100
+      Control: Z
+      Controller: 1
+    - Enabled: 1
+      Key: 101
+      Control: Mode
+      Controller: 1
+    - Enabled: 1
+      Key: 261
+      Control: Lightgun Start
+      Controller: 2
+    - Enabled: 1
+      Key: 261
+      Control: Mouse Start
+      Controller: 2

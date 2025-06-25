@@ -14,75 +14,75 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   Controls:
     mappings:
-  - Enabled: 1
-    Key: 273
-    Control: X1
-    Controller: 1
-  - Enabled: 1
-    Key: 274
-    Control: X3
-    Controller: 1
-  - Enabled: 1
-    Key: 276
-    Control: X4
-    Controller: 1
-  - Enabled: 1
-    Key: 275
-    Control: X2
-    Controller: 1
-  - Enabled: 1
-    Key: 264
-    Control: Y1
-    Controller: 1
-  - Enabled: 1
-    Key: 258
-    Control: Y3
-    Controller: 1
-  - Enabled: 1
-    Key: 260
-    Control: Y4
-    Controller: 1
-  - Enabled: 1
-    Key: 262
-    Control: Y2
-    Controller: 1
-  - Enabled: 1
-    Key: 13
-    Control: Start
-    Controller: 1
-  - Enabled: 1
-    Key: 122
-    Control: B
-    Controller: 1
-  - Enabled: 1
-    Key: 120
-    Control: A
-    Controller: 1
-  - Enabled: 1
-    Key: 120
-    Control: X3
-    Controller: 2
-  - Enabled: 1
-    Key: 122
-    Control: X4
-    Controller: 2
-  - Enabled: 1
-    Key: 276
-    Control: Y1
-    Controller: 2
-  - Enabled: 1
-    Key: 275
-    Control: Y3
-    Controller: 2
-  - Enabled: 1
-    Key: 274
-    Control: Y4
-    Controller: 2
-  - Enabled: 1
-    Key: 273
-    Control: Y2
-    Controller: 2
-  - Enabled: 1
-    Key: 13
-    Control: Start
-    Controller: 2
+    - Enabled: 1
+      Key: 273
+      Control: X1
+      Controller: 1
+    - Enabled: 1
+      Key: 274
+      Control: X3
+      Controller: 1
+    - Enabled: 1
+      Key: 276
+      Control: X4
+      Controller: 1
+    - Enabled: 1
+      Key: 275
+      Control: X2
+      Controller: 1
+    - Enabled: 1
+      Key: 264
+      Control: Y1
+      Controller: 1
+    - Enabled: 1
+      Key: 258
+      Control: Y3
+      Controller: 1
+    - Enabled: 1
+      Key: 260
+      Control: Y4
+      Controller: 1
+    - Enabled: 1
+      Key: 262
+      Control: Y2
+      Controller: 1
+    - Enabled: 1
+      Key: 13
+      Control: Start
+      Controller: 1
+    - Enabled: 1
+      Key: 122
+      Control: B
+      Controller: 1
+    - Enabled: 1
+      Key: 120
+      Control: A
+      Controller: 1
+    - Enabled: 1
+      Key: 120
+      Control: X3
+      Controller: 2
+    - Enabled: 1
+      Key: 122
+      Control: X4
+      Controller: 2
+    - Enabled: 1
+      Key: 276
+      Control: Y1
+      Controller: 2
+    - Enabled: 1
+      Key: 275
+      Control: Y3
+      Controller: 2
+    - Enabled: 1
+      Key: 274
+      Control: Y4
+      Controller: 2
+    - Enabled: 1
+      Key: 273
+      Control: Y2
+      Controller: 2
+    - Enabled: 1
+      Key: 13
+      Control: Start
+      Controller: 2

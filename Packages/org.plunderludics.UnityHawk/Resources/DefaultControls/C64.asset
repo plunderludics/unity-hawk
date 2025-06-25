@@ -14,23 +14,23 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   Controls:
     mappings:
-  - Enabled: 1
-    Key: 264
-    Control: Up
-    Controller: 1
-  - Enabled: 1
-    Key: 258
-    Control: Down
-    Controller: 1
-  - Enabled: 1
-    Key: 260
-    Control: Left
-    Controller: 1
-  - Enabled: 1
-    Key: 262
-    Control: Right
-    Controller: 1
-  - Enabled: 1
-    Key: 257
-    Control: Button
-    Controller: 1
+    - Enabled: 1
+      Key: 264
+      Control: Up
+      Controller: 1
+    - Enabled: 1
+      Key: 258
+      Control: Down
+      Controller: 1
+    - Enabled: 1
+      Key: 260
+      Control: Left
+      Controller: 1
+    - Enabled: 1
+      Key: 262
+      Control: Right
+      Controller: 1
+    - Enabled: 1
+      Key: 257
+      Control: Button
+      Controller: 1
