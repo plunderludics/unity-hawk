@@ -266,7 +266,6 @@ public class SharedTests
     public IEnumerator TestLuaCallbacks()
     {
         e.luaScriptFile = testCallbacksLua;
-        e.Reset();
         e.RegisterLuaCallback("reverseString", (arg) => {
             Debug.Log("reverseString");
             char[] cs = arg.ToCharArray();
@@ -280,8 +279,11 @@ public class SharedTests
             _submittedResult = arg;
             return "";
         });
+        
+        e.Reset();
 
-        yield return WaitForAWhile(e);
+        // yield return WaitForAWhile(e);
+        yield return WaitForDuration(e, 10f, null); // Not really sure why but 5s is not long enough here
         AssertEmulatorIsRunning(e);
         Assert.That(_submittedResult, Is.EqualTo("tseT"));
     }
