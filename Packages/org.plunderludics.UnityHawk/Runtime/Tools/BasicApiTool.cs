@@ -1,14 +1,11 @@
+// Pretty janky editor interface to the bizhawk api, could be improved
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using NaughtyAttributes;
 
-using UnityHawk;
-
 namespace UnityHawk {
-
-// Pretty janky editor interface to the bizhawk api, could be improved
-public class ApiControls : MonoBehaviour
+public class BasicApiTool : MonoBehaviour
 {
     [Header("params")]
     [SerializeField] Rom Rom;
@@ -22,7 +19,7 @@ public class ApiControls : MonoBehaviour
         if (emulator == null) {
             emulator = GetComponent<Emulator>();
             if (emulator == null) {
-                Debug.LogWarning("ApiControls: no emulator target set");
+                Debug.LogWarning("BasicApiTool: no emulator target set");
             }
         }
     }

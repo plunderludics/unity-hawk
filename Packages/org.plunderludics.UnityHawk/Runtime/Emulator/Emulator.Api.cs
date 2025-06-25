@@ -190,6 +190,7 @@ public partial class Emulator
     // }
 
     // WatchXXX methods allow you to register a callback that will be called after each bizhawk frame with the value of the memory address
+    // These methods return an int id which can be used later with Unwatch(id)
     // (I guess in theory it could be that the callback only gets called when the value changes, but it's just every frame for now)
     public int WatchUnsigned(long address, int size, bool isBigEndian, string domain, Action<uint> callback) {
         return Watch(WatchType.Unsigned, address, size, isBigEndian, domain, value => {
@@ -220,7 +221,6 @@ public partial class Emulator
             }
         });
     }
-    
 
     private int Watch(WatchType type, long address, int size, bool isBigEndian, string domain, Action<string> callback) {
         string args = $"{address},{size},{isBigEndian},{type}";
@@ -253,7 +253,7 @@ public partial class Emulator
         }
     }
 
-    // // Sets a memory address to a given value (for a single frame - to freeze the address, use FreezeBytes)
+    /// Sets a memory address to a given value (for a single frame - to freeze the address, use FreezeBytes)
     public void WriteUnsigned(long address, uint value, int size, bool isBigEndian, string domain = null) {
         string args = $"{address},{value},{size},{isBigEndian}";
         if (domain != null) {

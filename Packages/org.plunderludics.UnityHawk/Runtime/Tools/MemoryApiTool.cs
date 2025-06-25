@@ -1,13 +1,13 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-using UnityHawk;
 using Plunderludics.UnityHawk.Shared;
 
 using NaughtyAttributes;
 
+namespace UnityHawk {
 [ExecuteInEditMode]
-public class MemoryControls : MonoBehaviour
+public class MemoryApiTool : MonoBehaviour
 {
     public Emulator emulator;
 
@@ -98,4 +98,5 @@ public class MemoryControls : MonoBehaviour
         emulator.Unfreeze(_address, size);
     }
 
+}
 }
