@@ -1,0 +1,99 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 729dea1219b49c34bbc47a69e0423b35, type: 3}
+  m_Name: Jaguar
+  m_EditorClassIdentifier: 
+  Controls:    mappings:
+  - Enabled: 1
+    Key: 273
+    Control: Up
+    Controller: 1
+  - Enabled: 1
+    Key: 274
+    Control: Down
+    Controller: 1
+  - Enabled: 1
+    Key: 276
+    Control: Left
+    Controller: 1
+  - Enabled: 1
+    Key: 275
+    Control: Right
+    Controller: 1
+  - Enabled: 1
+    Key: 99
+    Control: A
+    Controller: 1
+  - Enabled: 1
+    Key: 120
+    Control: B
+    Controller: 1
+  - Enabled: 1
+    Key: 122
+    Control: C
+    Controller: 1
+  - Enabled: 1
+    Key: 32
+    Control: Option
+    Controller: 1
+  - Enabled: 1
+    Key: 13
+    Control: Pause
+    Controller: 1
+  - Enabled: 1
+    Key: 256
+    Control: 0
+    Controller: 1
+  - Enabled: 1
+    Key: 257
+    Control: 1
+    Controller: 1
+  - Enabled: 1
+    Key: 258
+    Control: 2
+    Controller: 1
+  - Enabled: 1
+    Key: 259
+    Control: 3
+    Controller: 1
+  - Enabled: 1
+    Key: 260
+    Control: 4
+    Controller: 1
+  - Enabled: 1
+    Key: 261
+    Control: 5
+    Controller: 1
+  - Enabled: 1
+    Key: 262
+    Control: 6
+    Controller: 1
+  - Enabled: 1
+    Key: 263
+    Control: 7
+    Controller: 1
+  - Enabled: 1
+    Key: 264
+    Control: 8
+    Controller: 1
+  - Enabled: 1
+    Key: 265
+    Control: 9
+    Controller: 1
+  - Enabled: 1
+    Key: 268
+    Control: Asterisk
+    Controller: 1
+  - Enabled: 1
+    Key: 267
+    Control: Pound
+    Controller: 1

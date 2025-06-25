@@ -1,0 +1,87 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 729dea1219b49c34bbc47a69e0423b35, type: 3}
+  m_Name: WSWAN
+  m_EditorClassIdentifier: 
+  Controls:    mappings:
+  - Enabled: 1
+    Key: 273
+    Control: X1
+    Controller: 1
+  - Enabled: 1
+    Key: 274
+    Control: X3
+    Controller: 1
+  - Enabled: 1
+    Key: 276
+    Control: X4
+    Controller: 1
+  - Enabled: 1
+    Key: 275
+    Control: X2
+    Controller: 1
+  - Enabled: 1
+    Key: 264
+    Control: Y1
+    Controller: 1
+  - Enabled: 1
+    Key: 258
+    Control: Y3
+    Controller: 1
+  - Enabled: 1
+    Key: 260
+    Control: Y4
+    Controller: 1
+  - Enabled: 1
+    Key: 262
+    Control: Y2
+    Controller: 1
+  - Enabled: 1
+    Key: 13
+    Control: Start
+    Controller: 1
+  - Enabled: 1
+    Key: 122
+    Control: B
+    Controller: 1
+  - Enabled: 1
+    Key: 120
+    Control: A
+    Controller: 1
+  - Enabled: 1
+    Key: 120
+    Control: X3
+    Controller: 2
+  - Enabled: 1
+    Key: 122
+    Control: X4
+    Controller: 2
+  - Enabled: 1
+    Key: 276
+    Control: Y1
+    Controller: 2
+  - Enabled: 1
+    Key: 275
+    Control: Y3
+    Controller: 2
+  - Enabled: 1
+    Key: 274
+    Control: Y4
+    Controller: 2
+  - Enabled: 1
+    Key: 273
+    Control: Y2
+    Controller: 2
+  - Enabled: 1
+    Key: 13
+    Control: Start
+    Controller: 2

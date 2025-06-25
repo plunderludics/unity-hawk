@@ -34,10 +34,10 @@ public class SavestateDrawer : PropertyDrawer {
         var savestates = AssetDatabase.FindAssets("t:savestate")
             .Select(guid => AssetDatabase.LoadAssetAtPath<Savestate>(AssetDatabase.GUIDToAssetPath(guid)))
             .Where(savestate => 
-                (!string.IsNullOrEmpty(rom.Hash)
-                && rom.Hash == savestate.RomInfo.Hash)   // If both assets have a hash and they match
-             || (string.IsNullOrEmpty(rom.Hash)
-                && savestate.RomInfo.Name == rom.name)   // Fallback to name if rom has no hash
+                (!string.IsNullOrEmpty(rom?.Hash)
+                && rom?.Hash == savestate.RomInfo.Hash)   // If both assets have a hash and they match
+             || (string.IsNullOrEmpty(rom?.Hash)
+                && savestate.RomInfo.Name == rom?.name)   // Fallback to name if rom has no hash
              );
         
         savestates = savestates.Prepend(null); // Add a null option to the list

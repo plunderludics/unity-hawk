@@ -9,12 +9,14 @@
 **/BizHawk~/Shaders/
 **/BizHawk~/Tools/
 **/BizHawk~/overlay/
-**/BizHawk~/ExternalTools/
 **/BizHawk~/DiscoHawk*
 **/BizHawk~/defctrl.json
 **/BizHawk~/EmuHawkMono.sh
 **/BizHawk~/FormBase.cs
 **/BizHawk~/OpenTK.dll.config
+
+# Ignore Assets/Samples/ (actual Samples are in Packages/org.plunderludics.UnityHawk/Samples~/)
+/Assets/Samples/
 
 # Ignore the dlls - these should be copied from BizHawk/output/dlls
 /Assets/Plugins/

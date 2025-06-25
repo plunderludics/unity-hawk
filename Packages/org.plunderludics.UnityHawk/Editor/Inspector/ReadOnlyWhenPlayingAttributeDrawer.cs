@@ -2,6 +2,7 @@
 using UnityEngine;
 using UnityEditor;
 
+namespace UnityHawk.Editor {
 [CustomPropertyDrawer(typeof(ReadOnlyWhenPlayingAttribute))]
 public class ReadOnlyWhenPlayingAttributeDrawer : PropertyDrawer
 {
@@ -18,4 +19,5 @@ public class ReadOnlyWhenPlayingAttributeDrawer : PropertyDrawer
 		EditorGUI.PropertyField(position, property, label, true);
 		GUI.enabled = true;
 	}
+}
 }

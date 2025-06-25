@@ -245,8 +245,8 @@
         "dependencies": {
           "BizHawk.Bizware.BizwareGL": "1.0.0",
           "BizHawk.Emulation.Cores": "1.0.0",
-          "Plunderludics.UnityHawk": "1.0.0",
-          "SharedMemory": "2.3.2",
+          "Plunderludics.UnityHawk.Shared": "1.0.0",
+          "Plunderludics.UnityHawk.SharedBuffers": "1.0.0",
           "SharpCompress": "0.31.0"
         },
         "runtime": {
@@ -294,9 +294,18 @@
           "BizHawk.Emulation.DiscSystem.dll": {}
         }
       },
-      "Plunderludics.UnityHawk/1.0.0": {
+      "Plunderludics.UnityHawk.Shared/1.0.0": {
         "runtime": {
-          "Plunderludics.UnityHawk.dll": {}
+          "Plunderludics.UnityHawk.Shared.dll": {}
+        }
+      },
+      "Plunderludics.UnityHawk.SharedBuffers/1.0.0": {
+        "dependencies": {
+          "Plunderludics.UnityHawk.Shared": "1.0.0",
+          "SharedMemory": "2.3.2"
+        },
+        "runtime": {
+          "Plunderludics.UnityHawk.SharedBuffers.dll": {}
         }
       },
       "NLua/1.4.1.0": {
@@ -570,7 +579,12 @@
       "serviceable": false,
       "sha512": ""
     },
-    "Plunderludics.UnityHawk/1.0.0": {
+    "Plunderludics.UnityHawk.Shared/1.0.0": {
+      "type": "project",
+      "serviceable": false,
+      "sha512": ""
+    },
+    "Plunderludics.UnityHawk.SharedBuffers/1.0.0": {
       "type": "project",
       "serviceable": false,
       "sha512": ""
