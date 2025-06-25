@@ -12,7 +12,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 729dea1219b49c34bbc47a69e0423b35, type: 3}
   m_Name: Jaguar
   m_EditorClassIdentifier: 
-  Controls:    mappings:
+  Controls:
+    mappings:
   - Enabled: 1
     Key: 273
     Control: Up

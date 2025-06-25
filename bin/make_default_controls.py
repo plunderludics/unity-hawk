@@ -186,7 +186,7 @@ def mapping_to_yaml(system_id, mapping):
         "  m_Script: {fileID: 11500000, guid: 729dea1219b49c34bbc47a69e0423b35, type: 3}",
         f"  m_Name: {system_id}",
         "  m_EditorClassIdentifier: ",
-        "  Controls:"
+        "  Controls:",
         "    mappings:"
     ]
     for k, v in mapping.items():
