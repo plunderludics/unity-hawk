@@ -33,12 +33,7 @@ public class SavestateDrawer : PropertyDrawer {
         // (Some older savestates don't have rominfo at all, those will get hidden)
         var savestates = AssetDatabase.FindAssets("t:savestate")
             .Select(guid => AssetDatabase.LoadAssetAtPath<Savestate>(AssetDatabase.GUIDToAssetPath(guid)))
-            .Where(savestate => 
-                (!string.IsNullOrEmpty(rom?.Hash)
-                && rom?.Hash == savestate.RomInfo.Hash)   // If both assets have a hash and they match
-             || (string.IsNullOrEmpty(rom?.Hash)
-                && savestate.RomInfo.Name == rom?.name)   // Fallback to name if rom has no hash
-             );
+            .Where(savestate => savestate.MatchesRom(rom));
         
         savestates = savestates.Prepend(null); // Add a null option to the list
         var savestateNames = savestates.Select(savestate => savestate != null ? savestate.name : "None");
