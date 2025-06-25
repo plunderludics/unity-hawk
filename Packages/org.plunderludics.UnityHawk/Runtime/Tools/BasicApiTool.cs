@@ -10,7 +10,8 @@ public class BasicApiTool : MonoBehaviour
     [Header("params")]
     [SerializeField] Rom Rom;
     [SerializeField] Savestate Savestate;
-    [SerializeField] string SavePath;
+    [Tooltip("Used for save state path, volume or speed percentage")]
+    [SerializeField] string arg;
 
     [Header("refs")]
     [SerializeField] Emulator emulator;
@@ -37,7 +38,7 @@ public class BasicApiTool : MonoBehaviour
 
     [Button]
     private void SaveState() {
-        emulator.SaveState(SavePath);
+        emulator.SaveState(arg);
     }
 
     [Button]
@@ -53,6 +54,16 @@ public class BasicApiTool : MonoBehaviour
     [Button]
     private void FrameAdvance() {
         emulator.FrameAdvance();
+    }
+    
+    [Button]
+    private void SetVolume() {
+        emulator.SetVolume(float.Parse(arg));
+    }
+
+    [Button]
+    private void SetSpeed() {
+        emulator.SetSpeedPercent(int.Parse(arg));
     }
 #endif
 }
