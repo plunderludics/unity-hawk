@@ -79,13 +79,6 @@ public partial class Emulator
     }
 
     /// <summary>
-    /// unpauses the emulator
-    /// </summary>
-    public void SetVolume(float volume) {
-        _apiCommandBuffer.CallMethod(ApiCommands.SetVolume, $"{volume}");
-    }
-
-    /// <summary>
     /// saves a state to a given path
     /// </summary>
     /// <param name="path"></param>
@@ -158,6 +151,20 @@ public partial class Emulator
     /// </summary>
     public void FrameAdvance() {
         _apiCommandBuffer.CallMethod(ApiCommands.FrameAdvance, null);
+    }
+    
+    /// <summary>
+    /// unpauses the emulator
+    /// </summary>
+    public void SetVolume(float volume) {
+        _apiCommandBuffer.CallMethod(ApiCommands.SetVolume, $"{volume}");
+    }
+
+    /// <summary>
+    /// Sets the speed of the emulator as integer percentage
+    /// </summary>
+    public void SetSpeedPercent(int percent) {
+        _apiCommandBuffer.CallMethod(ApiCommands.SetSpeedPercent, $"{percent}");
     }
 
     ///// RAM read/write
