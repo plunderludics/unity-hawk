@@ -41,15 +41,15 @@ public static class Paths {
     private static readonly string _bizhawkAssetsDirForEditor = Application.dataPath;
     public static readonly string BizHawkAssetsDirForBuild = Path.Combine(Application.dataPath, BizHawkAssetsDirName);
 
-    static string _bizHawkAssetsDir =>
+    public static string BizHawkAssetsDir =>
 #if UNITY_EDITOR
         _bizhawkAssetsDirForEditor;
     #else
         BizHawkAssetsDirForBuild;
 #endif
 
-    public static readonly string RamWatchPath = _bizHawkAssetsDir;
-    public static readonly object SavestatesOutputPath = _bizHawkAssetsDir;
+    public static readonly string RamWatchPath = BizHawkAssetsDir;
+    public static readonly object SavestatesOutputPath = BizHawkAssetsDir;
 
     // Returns the path that will be loaded for a filename param (rom, lua, config, savestate)
     public static string GetFullPath(string path) {
@@ -58,7 +58,7 @@ public static class Paths {
             return path;
         }
 
-        return Path.Combine(_bizHawkAssetsDir, path);
+        return Path.Combine(BizHawkAssetsDir, path);
     }
 
     // this uses the fact that Paths.cs treats absolute paths differently than relative

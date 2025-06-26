@@ -759,6 +759,14 @@ public partial class Emulator : MonoBehaviour {
             showBizhawkGui = showBizhawkGui
         };
     }
+
+    /// sets the config default values
+    void SetConfigDefaults(ref BizHawkConfig bizConfig) {
+        bizConfig.SoundVolume = volume;
+        bizConfig.StartPaused = IsPaused;
+        bizConfig.SoundEnabled = !isMuted;
+    }
+
 }
 
 public static class BizHawkConfigExt {

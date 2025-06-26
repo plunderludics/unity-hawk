@@ -88,13 +88,6 @@ public partial class Emulator {
         }
     }
 
-    /// sets the config default values
-    void SetConfigDefaults(ref BizHawkConfig bizConfig) {
-        bizConfig.SoundVolume = volume;
-        bizConfig.StartPaused = IsPaused;
-        bizConfig.SoundEnabled = !isMuted;
-    }
-
     /// .
     public int CurrentFrame => _currentFrame;
 

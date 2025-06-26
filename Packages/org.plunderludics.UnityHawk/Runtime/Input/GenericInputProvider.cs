@@ -29,17 +29,17 @@ public class GenericInputProvider : InputProvider {
 
     [Serializable]
     public class Action2Key {
+        [FormerlySerializedAs("Name")]
         [FormerlySerializedAs("name")]
-        [FormerlySerializedAs("inputName")]
         [FormerlySerializedAs("keyName")]
         [Tooltip("Name of key/axis on the Bizhawk side")]
-        public string Name;
+        public string inputName;
 
         public InputActionReference action;
         public bool enabled = true;
         public Action2Key(Action2Key other) {
             action = other.action;
-            Name = other.Name;
+            inputName = other.inputName;
             enabled = other.enabled;
         }
     }
@@ -94,7 +94,7 @@ public class GenericInputProvider : InputProvider {
         foreach (var a2k in keyMappings) {
             // Add press/release callbacks for key mappings
             if (a2k.action.action.type != InputActionType.Button) {
-                Debug.LogWarning($"Mapping from {a2k.action.action.name} to {a2k.Name} is type {a2k.action.action.type}, should probably be Button for key events");
+                Debug.LogWarning($"Mapping from {a2k.action.action.name} to {a2k.inputName} is type {a2k.action.action.type}, should probably be Button for key events");
             }
 
             // [I don't get why you have to manually enable all the actions, but ok]
@@ -114,7 +114,7 @@ public class GenericInputProvider : InputProvider {
                     return;
                 }
                 pressed.Add(new InputEvent {
-                    keyName = mappingsDict[ctx.action.id].Name,
+                    keyName = mappingsDict[ctx.action.id].inputName,
                     isPressed = true
                 });
             };
@@ -128,7 +128,7 @@ public class GenericInputProvider : InputProvider {
                     return;
                 }
                 pressed.Add(new InputEvent {
-                    keyName = mappingsDict[ctx.action.id].Name,
+                    keyName = mappingsDict[ctx.action.id].inputName,
                     isPressed = false
                 });
             };
@@ -158,10 +158,10 @@ public class GenericInputProvider : InputProvider {
             if (!a2k.enabled) continue;
 
             if (a2k.action.action.type == InputActionType.Button) {
-                Debug.LogWarning($"Mapping from {a2k.action.action.name} to {a2k.Name} is type {a2k.action.action.type}, should probably be PassThrough or Value for analog inputs");
+                Debug.LogWarning($"Mapping from {a2k.action.action.name} to {a2k.inputName} is type {a2k.action.action.type}, should probably be PassThrough or Value for analog inputs");
             }
 
-            axisValues[a2k.Name] = (int)(axisScale*a2k.scale*a2k.action.action.ReadValue<float>());
+            axisValues[a2k.inputName] = (int)(axisScale*a2k.scale*a2k.action.action.ReadValue<float>());
         }
 
         // axisValues["X1 LeftThumbX Axis"] = 9999; // this seems to be roughly the max value for bizhawk (at least for n64)
