@@ -1,9 +1,9 @@
-﻿using UnityEngine;
-
-namespace UnityHawk {
+﻿namespace UnityHawk {
 
 public class Rom : BizhawkAsset {
-    public string Hash; // Store this to allow filtering savestate picker based on rom
-    public RomInfo RomInfo;
+    /// Store this to allow filtering savestate picker based on rom
+    /// TODO: should we find a way to store <see cref="RomInfo" /> here instead
+    public string Hash;
 }
+
 }

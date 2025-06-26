@@ -8,7 +8,6 @@ using System.Linq;
 using System.Reflection;
 using System.Runtime.InteropServices;
 using BizHawk.Client.Common;
-using JetBrains.Annotations;
 using BizHawkConfig = BizHawk.Client.Common.Config;
 using NaughtyAttributes;
 using UnityEngine;
@@ -247,6 +246,7 @@ public partial class Emulator : MonoBehaviour {
 
     // (These methods are public only for convenient testing)
     public void OnEnable() {
+        _materialProperties = new MaterialPropertyBlock();
 #if UNITY_EDITOR && UNITY_2022_2_OR_NEWER
         if (Undo.isProcessing) return; // OnEnable gets called after undo/redo, but ignore it
 #endif
@@ -273,12 +273,7 @@ public partial class Emulator : MonoBehaviour {
         }
     }
 
-    void Awake() {
-        _materialProperties = new MaterialPropertyBlock();
-    }
-
     ////// Core methods
-
     public void Initialize() {
         _shouldInitialize = true;
     }
@@ -317,7 +312,7 @@ public partial class Emulator : MonoBehaviour {
 
         // Start EmuHawk.exe w args
         var exePath = Path.GetFullPath(Paths.emuhawkExePath);
-        var workingDir = Path.GetDirectoryName(exePath);
+        var workingDir = Application.dataPath;
         _emuhawk = new Process();
         _emuhawk.StartInfo.UseShellExecute = false;
         var args = _emuhawk.StartInfo.ArgumentList;
@@ -359,7 +354,7 @@ public partial class Emulator : MonoBehaviour {
 
         // create a temporary file for this config
         // TODO: better path
-        configPath = Path.GetFullPath($"{Application.persistentDataPath}/config-{guid}.ini");
+        configPath = Path.GetFullPath($"{Path.GetTempPath()}/unityhawk-config-{guid}.ini");
 
         SetConfigDefaults(ref bizConfig);
 
@@ -386,15 +381,15 @@ public partial class Emulator : MonoBehaviour {
         args.Add($"--savestate-extension={_savestateExtension}");
 
         // set savestates output dir
-        // (default to rom parent directory when not provided)
-        var saveStatesOutputPath = CreateNewPath(config.SavestatesOutputPath) ?? workingDir;
+        // (default to application directory when not provided)
+        var saveStatesOutputPath = GetOrCreateDirectory(config.SavestatesOutputPath) ?? workingDir;
         args.Add($"--savestates={saveStatesOutputPath}");
 
         // add firmware
         args.Add($"--firmware={Path.Combine(Application.streamingAssetsPath, config.FirmwarePath)}");
 
         // set ramwatch output dir
-        var ramWatchOutputDirPath = CreateNewPath(config.RamWatchOutputPath) ?? workingDir;
+        var ramWatchOutputDirPath = GetOrCreateDirectory(config.RamWatchOutputPath) ?? workingDir;
         args.Add($"--save-ram-watch={ramWatchOutputDirPath}");
 
         if (!_showBizhawkGui) {
@@ -506,9 +501,8 @@ public partial class Emulator : MonoBehaviour {
 
         return;
 
-        [CanBeNull]
         // creates a folder on the specified path, if any
-        static string CreateNewPath(string path) {
+        static string GetOrCreateDirectory(string path) {
             var s = path;
             if (string.IsNullOrEmpty(s)) {
                 return null;
