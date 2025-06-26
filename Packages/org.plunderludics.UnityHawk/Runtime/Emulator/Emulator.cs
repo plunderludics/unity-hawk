@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Diagnostics;
 using System.Linq;
+using System.Reflection;
 using System.Runtime.InteropServices;
 using BizHawk.Client.Common;
 using JetBrains.Annotations;
