@@ -3,7 +3,9 @@ guid: 897a522fdf5f5435eb1f5348ed14bc77
 MonoImporter:
   externalObjects: {}
   serializedVersion: 2
-  defaultReferences: []
+  defaultReferences:
+  - emulator: {instanceID: 0}
+  - controls: {fileID: 11400000, guid: bf646b3a9db68ed40a95d9484c746018, type: 2}
   executionOrder: 0
   icon: {instanceID: 0}
   userData: 

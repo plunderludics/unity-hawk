@@ -35,14 +35,17 @@ You will probably also need to install the BizHawk prerequisites, which can be i
   
 ## Features
 - Enable 'Pass Input From Unity' to send keyboard input from Unity to Bizhawk (gamepad input not supported yet). If this isn't enabled Bizhawk will get input directly from the operating system.
-  - You can specify the component used to handle input under 'Input Provider'. If unspecified it will default to `BasicInputProvider`, use a `GenericInputProvider` instead if you need more flexibility.
+  - You can specify the component used to handle input under 'Input Provider'. If unspecified it will default to a `BasicInputProvider` with default controls according to the platform. If you want to configure controls, add your own `BasicInputProvider` component.
+  - Alternatively you can create your own component that inherits from `InputProvider`.
   - `InputProvider` also provides methods called `AddInputEvent` and `AddAxisInputEvent` which can be used to programmatically  add inputs.
-  - Alternatively you can also create your own component that inherits from `InputProvider`.
 - Enable 'Show Bizhawk Gui' to show the native Bizhawk window; useful for doing plunderludics development (finding save states, tweaking config & scripts, etc) without having to leave Unity
 - \[experimental\] Enable 'Capture Emulator Audio' to route emulator audio to an AudioSource, allowing you to use unity's positional audio system or add audio effects
-    - (unfortunately the current implementation creates some latency and sometimes distorted audio, especially with multiple emulators running concurrently)
+  - (unfortunately the current implementation creates some latency and sometimes distorted audio, especially with multiple emulators running concurrently)
 - The live emulator graphics can be grabbed in code via the `Emulator.Texture` property.
-- The `Emulator` component provides an interface to basic Bizhawk API methods: `Pause()`, `Unpause()`, `FrameAdvance()`, `LoadState(Savestate s)`, `SaveState(string path)`, `LoadRom(Rom r)`. Use the `ApiControls` component to use these methods directly from the Editor.
+- The `Emulator` component provides an interface to basic Bizhawk API methods.
+  - Basic emulator controls: `Pause()`, `Unpause()`, `FrameAdvance()`, `LoadState(Savestate s)`, `SaveState(string path)`, `LoadRom(Rom r)`, `SetVolume(float v)`, `SetSpeedPercent(int p)`. Use the `BasicApiTool` component to use these methods directly from the Editor.
+  - For interacting with console memory: `WatchUnsigned(long address, int size, bool isBigEndian, string domain, Action<uint> callback)` (+ similar methods for Signed and Float types), `WriteUnsigned(long address, uint value, int size, bool isBigEndian, string domain = null)` (+ similar methods for Signed and Float types), `Freeze(long address, int size, string domain = null)`, and `Unfreeze(long address, int size, string domain = null)`. Use the `MemoryApiTool` component to use these methods directly from the Editor.
+  - See `Emulator.Api.cs` for more info on the API methods.
 - Within a BizHawk Lua script, you can use the `unityhawk.callmethod(methodName, argString)` method to send and receive information from Unity. The method must be registered on the Unity side using `Emulator.RegisterLuaCallback`. See `RegisterMethodExample.lua` and `RegisterMethodExample` in the `Demo` sample for a brief example.
 
 

@@ -32,9 +32,12 @@ public static class Paths {
     public static readonly string emuhawkExePath = Path.Combine(BizHawkDir, _emuhawkExeName);
 
     public static readonly string defaultBizhawkConfigPath = Path.Combine(BizHawkDir, "config.ini");
+    // [Don't really like having to hardcode these paths for default assets, is there a better way?]
     public static readonly string defaultUnityHawkConfigPath = Path.Combine("Packages", packageName, "Runtime/UnityHawkConfigDefault.asset");
+    public static readonly string defaultControlsResourceDir = "DefaultControls/"; // Controls assets are inside Resources/DefaultControls but get loaded relative to Resources
 
     public static readonly string dllDir = Path.Combine(BizHawkDir, "dll");
+    public static readonly string externalToolsDir = Path.Combine(BizHawkDir, "ExternalTools");
 
     ///// assets
     public const string BizHawkAssetsDirName = "BizhawkAssets";
@@ -62,14 +65,24 @@ public static class Paths {
     }
 
     // this uses the fact that Paths.cs treats absolute paths differently than relative
+    // Returns null if the asset is not found
     public static string GetAssetPath(BizhawkAsset asset) {
         #if UNITY_EDITOR
         // if we return an absolute path, in editor, we don't need any preprocessing
 
         // ignore asset path in editor, just get its location
-        return Path.GetFullPath(Path.Combine(Application.dataPath, "..", AssetDatabase.GetAssetPath(asset)));
+        string assetPath = AssetDatabase.GetAssetPath(asset);
+        if (string.IsNullOrEmpty(assetPath)) {
+            return null;
+        }
+        return Path.GetFullPath(Path.Combine(Application.dataPath, "..", assetPath));
         #endif
 
+        // For build:
+        if (asset == null || string.IsNullOrEmpty(asset.Location)) {
+            Debug.LogError($"Asset {asset} has no location");
+            return null;
+        }
         return Path.Combine(BizHawkAssetsDirForBuild, asset.Location);
     }
 }

@@ -1,5 +1,6 @@
 using SharedMemory;
 
+namespace UnityHawk {
 public class SharedTextureBuffer : ISharedBuffer {
     private string _name;
     private string _trueName;
@@ -37,4 +38,5 @@ public class SharedTextureBuffer : ISharedBuffer {
             Close();
         }
     }
+}
 }

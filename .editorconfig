@@ -2,6 +2,11 @@ root = true
 
 [*]
 indent_style = space
+indent_size = 4
+
+# Microsoft .NET properties
+csharp_indent_braces = false
+csharp_new_line_before_open_brace = accessors,anonymous_methods,anonymous_types,control_blocks,events,indexers,lambdas,object_collection_array_initalizers,properties
 
 [*.cs]
 csharp_new_line_before_open_brace = all

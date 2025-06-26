@@ -5,11 +5,12 @@
 **/BizHawk~/N64/
 **/BizHawk~/NES/
 **/BizHawk~/PSX/
+**/BizHawk~/GBA/
+**/BizHawk~/C64/
 **/BizHawk~/Gameboy/
 **/BizHawk~/Shaders/
 **/BizHawk~/Tools/
 **/BizHawk~/overlay/
-**/BizHawk~/ExternalTools/
 **/BizHawk~/DiscoHawk*
 **/BizHawk~/defctrl.json
 **/BizHawk~/EmuHawkMono.sh
@@ -18,6 +19,9 @@
 **/BizHawk~/**/*.SaveRAM
 **/BizHawk~/**/*.SaveRAM.bak
 
+
+# Ignore Assets/Samples/ (actual Samples are in Packages/org.plunderludics.UnityHawk/Samples~/)
+/Assets/Samples/
 
 # Ignore the dlls - these should be copied from BizHawk/output/dlls
 /Assets/Plugins/

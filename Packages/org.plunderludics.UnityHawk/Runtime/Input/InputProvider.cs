@@ -3,12 +3,27 @@ using UnityEngine;
 
 namespace UnityHawk {
 
+public enum Controller {
+    None = 0,
+    P1 = 1,
+    P2 = 2,
+    P3 = 3,
+    P4 = 4,
+    P5 = 5,
+    P6 = 6,
+    P7 = 7,
+    P8 = 8
+} // (Could just be an int but this is convenient for inspector dropdown)
+
+
 // input in Unity format
-// [currently only keyboard, no gamepad/mouse support yet]
+// (basically same as InputEvent in BizHawk, but keep decoupled in case)
 public struct InputEvent {
-    public string keyName; // should match the enum name here [https://docs.unity3d.com/ScriptReference/KeyCode.html]
-                           // hopefully equivalent to new inputsystem as well
-    public bool isPressed; // either pressed or released this frame
+    public string name; // Must correspond to emulator button/axis name E.g. "P1 A"
+    public int value;  // 0 or 1 for buttons, -INT_MAX - INT_MAX for analog (?)
+    public Controller controller;
+    public bool isAnalog;
+    public override string ToString() => $"{name}:{value}";
 }
 
 // Generic base class for providing input
@@ -16,7 +31,6 @@ public struct InputEvent {
 // or programmatically generating input for plunderludic purposes)
 public abstract class InputProvider : MonoBehaviour {
     // (derive from monobehaviour so params can be easily tweaked in inspector)
-
     List<InputEvent> _addedInputs = new();
     Dictionary<string, int> _addedAxisInputs = new();
 
@@ -26,19 +40,8 @@ public abstract class InputProvider : MonoBehaviour {
         _addedInputs.Clear(); // Not ideal because will break if multiple clients use the same InputProvider, should clear at the end of the frame
         return toReturn;
     }
-
-    public virtual Dictionary<string, int> AxisValuesForFrame() {
-        var toReturn = new Dictionary<string, int>(_addedAxisInputs);
-        _addedAxisInputs.Clear();
-        return toReturn;
-    }
-
     public void AddInputEvent(InputEvent ie) {
         _addedInputs.Add(ie);
-    }
-
-    public void AddAxisInputEvent(string axis, int value) {
-        _addedAxisInputs.Add(axis, value);
     }
 }
 

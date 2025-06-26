@@ -6,36 +6,26 @@ using UnityEngine;
 
 using NaughtyAttributes;
 using BizHawkConfig = BizHawk.Client.Common.Config;
+using Plunderludics;
+using System.IO;
+using System.Linq;
+using System.Collections.Generic;
+using BizHawk.Client.Common;
+using Google.FlatBuffers;
+using System.Drawing;
 
 namespace UnityHawk {
 public partial class Emulator {
+    ///// props
     [Header("api")]
     [OnValueChanged(nameof(OnSetVolume))]
     [Range(0, 100)]
     [Tooltip("the the volume of the emulator, 0-100")]
     [SerializeField] int volume = 100;
 
-    /// the volume of the emulator, 0-100
-    public int Volume {
-        get => volume;
-        set {
-            volume = value;
-            OnSetVolume();
-        }
-    }
-
     [OnValueChanged(nameof(OnSetIsMuted))]
     [Tooltip("if the emulator is muted")]
     [SerializeField] bool isMuted;
-
-    /// if the emulator is muted
-    public bool IsMuted {
-        get => isMuted;
-        set {
-            isMuted = value;
-            OnSetIsMuted();
-        }
-    }
 
     [OnValueChanged(nameof(OnSetIsPaused))]
     [Tooltip("if the emulator is paused")]
@@ -46,18 +36,21 @@ public partial class Emulator {
         get => isPaused;
         set {
             isPaused = value;
-            OnSetIsPaused();
+            OnSetIsPaused(value);
         }
     }
 
     /// the internal render texture
     public RenderTexture Texture => renderTexture;
 
-    /// is the emuhawk.exe process started? (best guess, might be wrong)
-    public bool IsStarted => Status == EmulatorStatus.Started;
+    /// is the emulator process started
+    public bool IsStarted => Status >= EmulatorStatus.Started;
 
-    /// is the emuhawk.exe process running a game? (best guess, might be wrong)
-    public bool IsRunning => Status == EmulatorStatus.Running;
+    /// is the emulator process running a game? (best guess, might be wrong)
+    public bool IsRunning => Status >= EmulatorStatus.Running; // is the emuhawk.exe process running? (best guess, might be wrong)
+
+    /// .
+    public string SystemId => _systemId; // (Will be null if no core currently running)
 
     /// the current status of the emulator
     public enum EmulatorStatus {
@@ -97,6 +90,10 @@ public partial class Emulator {
 
     /// Register a callback that can be called via `unityhawk.callmethod('MethodName')` in BizHawk lua
     public void RegisterLuaCallback(string methodName, LuaCallback luaCallback) {
+        if (SpecialCommands.All.Contains(methodName)) {
+            Debug.LogWarning($"Tried to register a Lua callback for reserved method name '{methodName}', this will not work!");
+            return;
+        }
         _registeredLuaCallbacks[methodName] = luaCallback;
     }
 
@@ -111,9 +108,9 @@ public partial class Emulator {
     // can also pass absolute path (but this will most likely break in build!)
 
     /// calls the emulator api to pause/unpause
-    void OnSetIsPaused() {
-        var method = IsPaused ? "Pause" : "Unpause";
-        _apiCallBuffer.CallMethod(method, null);
+    void OnSetIsPaused(bool value) {
+        string command = value ? ApiCommands.Pause : ApiCommands.Unpause;
+        _apiCommandBuffer.CallMethod(ApiCommands.Pause, null);
     }
 
     /// pauses the emulator
@@ -123,22 +120,7 @@ public partial class Emulator {
 
     /// unpauses the emulator
     public void Unpause() {
-        _apiCallBuffer.CallMethod("Unpause", null);
-    }
-
-    [Obsolete("use Volume setter instead")]
-    public void SetVolume(int volume) {
-        Volume = volume;
-    }
-
-    /// calls the emulator api to set volume
-    void OnSetVolume() {
-        _apiCallBuffer.CallMethod("SetVolume", $"{volume}");
-    }
-
-    /// calls the emulator api to set sound on/off
-    void OnSetIsMuted() {
-        _apiCallBuffer.CallMethod("SetSoundOn", $"{!isMuted}");
+        IsPaused = false;
     }
 
     /// saves a state to a given path
@@ -150,7 +132,8 @@ public partial class Emulator {
         {
             path += ".savestate";
         }
-        _apiCallBuffer.CallMethod("SaveState", path);
+
+        _apiCommandBuffer.CallMethod(ApiCommands.SaveState, path);
 
         // TODO: create savestate asset here, async?
         return path;
@@ -161,15 +144,21 @@ public partial class Emulator {
     public void LoadState(string path) {
         // TODO: set emulator savestateFile?
         path = Paths.GetFullPath(path);
-
-        if (_status == EmulatorStatus.Inactive) return;
-        _apiCallBuffer.CallMethod("LoadState", path);
+        _apiCommandBuffer.CallMethod(ApiCommands.LoadState, path);
     }
 
     /// loads a state from a Savestate asset
     /// <param name="sample"></param>
     public void LoadState(Savestate sample) {
-        LoadState(Paths.GetAssetPath(sample));
+        string path = Paths.GetAssetPath(sample);
+        if (path == null) {
+            Debug.LogError($"Savestate {sample} not found");
+            return;
+        }
+
+        // TODO would be nice if there was some callback or way to know when state is loaded
+        // OnRunning?
+        LoadState(path);
     }
 
     /// reloads the current state
@@ -193,10 +182,11 @@ public partial class Emulator {
         }
 
         // TODO: set emulator romFile?
-        _apiCallBuffer.CallMethod("LoadRom", path);
+        _apiCommandBuffer.CallMethod(ApiCommands.LoadRom, path);
         // Need to update texture buffer size in case platform has changed:
         _sharedTextureBuffer.UpdateSize();
-        _status = EmulatorStatus.Started; // Not ready until new texture buffer is set up
+
+        Status = EmulatorStatus.Started; // Not running until new texture buffer is set up
     }
 
     /// loads a rom from a Rom asset
@@ -207,18 +197,166 @@ public partial class Emulator {
 
     /// advances a frame on the emulator
     public void FrameAdvance() {
-        _apiCallBuffer.CallMethod("FrameAdvance");
+        _apiCommandBuffer.CallMethod(ApiCommands.FrameAdvance, null);
     }
 
-    /// initializes the emulator
-    public void Initialize() {
-        Debug.Log("initialiazing!", this);
-        if (_initialized) {
-            Debug.LogWarning("attempting to initialize already initialized emulator", this);
-            return;
-        }
+    /// <summary>
+    /// sets the emulator volume
+    /// </summary>
+    public void SetVolume(int value) {
+        volume = value;
+    }
 
-        _Initialize();
+    /// <summary>
+    /// Sets the speed of the emulator as integer percentage
+    /// </summary>
+    public void SetSpeedPercent(int percent) {
+        _apiCommandBuffer.CallMethod(ApiCommands.SetSpeedPercent, $"{percent}");
+    }
+
+    ///// RAM read/write
+    /// For all methods, domain defaults to main memory if not specified
+
+    // ReadXXX methodshave type-safety issues so disabled for now, use WatchXXX instead
+    // public uint? ReadUnsigned(long address, int size, bool isBigEndian, string domain = null) {
+    //     string args = $"{address},{size},{isBigEndian}";
+    //     if (domain != null) {
+    //         args += $",{domain}";
+    //     }
+    //     string v = _apiCallRpcBuffer.CallMethod("ReadUnsigned", args);
+    //     return (v == null) ? null : uint.Parse(v);
+    // }
+    // public int? ReadSigned(long address, int size, bool isBigEndian, string domain = null) {
+    //     string args = $"{address},{size},{isBigEndian}";
+    //     if (domain != null) {
+    //         args += $",{domain}";
+    //     }
+    //     string v = _apiCallRpcBuffer.CallMethod("ReadSigned", args);
+    //     return (v == null) ? null : int.Parse(v);
+    // }
+    // public float? ReadFloat(long address, bool isBigEndian, string domain = null) {
+    //     string args = $"{address},{isBigEndian}";
+    //     if (domain != null) {
+    //         args += $",{domain}";
+    //     }
+    //     string v = _apiCallRpcBuffer.CallMethod("ReadFloat", args);
+    //     return (v == null) ? null : float.Parse(v);
+    // }
+
+    // WatchXXX methods allow you to register a callback that will be called after each bizhawk frame with the value of the memory address
+    // These methods return an int id which can be used later with Unwatch(id)
+    // (I guess in theory it could be that the callback only gets called when the value changes, but it's just every frame for now)
+    public int WatchUnsigned(long address, int size, bool isBigEndian, string domain, Action<uint> callback) {
+        return Watch(WatchType.Unsigned, address, size, isBigEndian, domain, value => {
+            if (uint.TryParse(value, out uint result)) {
+                callback(result);
+            } else {
+                Debug.LogError($"Failed to parse unsigned value from Bizhawk watch: {value}");
+            }
+        });
+    }
+
+    public int WatchSigned(long address, int size, bool isBigEndian, string domain, Action<int> callback) {
+        return Watch(WatchType.Signed, address, size, isBigEndian, domain, value => {
+            if (int.TryParse(value, out int result)) {
+                callback(result);
+            } else {
+                Debug.LogError($"Failed to parse signed value from Bizhawk watch: {value}");
+            }
+        });
+    }
+
+    public int WatchFloat(long address, bool isBigEndian, string domain, Action<float> callback) {
+        return Watch(WatchType.Float, address, 4, isBigEndian, domain, value => {
+            if (float.TryParse(value, out float result)) {
+                callback(result);
+            } else {
+                Debug.LogError($"Failed to parse float value from Bizhawk watch: {value}");
+            }
+        });
+    }
+
+    private int Watch(WatchType type, long address, int size, bool isBigEndian, string domain, Action<string> callback) {
+        string args = $"{address},{size},{isBigEndian},{type}";
+        if (domain != null) {
+            args += $",{domain}";
+        }
+        _apiCommandBuffer.CallMethod("Watch", args);
+        var key = (address, size, isBigEndian, type, domain);
+        var hashCode = key.GetHashCode();
+        if (_watchCallbacks.ContainsKey(hashCode)) {
+            Debug.LogWarning($"Overwriting existing watch for key {key}");
+        }
+        _watchCallbacks[hashCode] = (key, callback);
+        return hashCode;
+    }
+
+    public void Unwatch(int id) {
+        // Unregister the callback first
+        if (_watchCallbacks.ContainsKey(id)) {
+            var (key, _) = _watchCallbacks[id];
+            var (address, size, isBigEndian, type, domain) = key;
+            string args = $"{address},{size},{isBigEndian},{type}";
+            if (domain != null) {
+                args += $",{domain}";
+            }
+            _apiCommandBuffer.CallMethod("Unwatch", args);
+            _watchCallbacks.Remove(id);
+        } else {
+            Debug.LogWarning($"Unwatch called for id {id} that was not being watched.");
+        }
+    }
+
+    /// Sets a memory address to a given value (for a single frame - to freeze the address, use FreezeBytes)
+    public void WriteUnsigned(long address, uint value, int size, bool isBigEndian, string domain = null) {
+        string args = $"{address},{value},{size},{isBigEndian}";
+        if (domain != null) {
+            args += $",{domain}";
+        }
+        _apiCommandBuffer.CallMethod("WriteUnsigned", args);
+    }
+    public void WriteSigned(long address, int value, int size, bool isBigEndian, string domain = null) {
+        string args = $"{address},{value},{size},{isBigEndian}";
+        if (domain != null) {
+            args += $",{domain}";
+        }
+        _apiCommandBuffer.CallMethod("WriteSigned", args);
+    }
+    public void WriteFloat(long address, float value, bool isBigEndian, string domain = null) {
+        string args = $"{address},{value},{isBigEndian}";
+        if (domain != null) {
+            args += $",{domain}";
+        }
+        _apiCommandBuffer.CallMethod("WriteFloat", args);
+    }
+
+    /// Freezes a memory address for a given size (1-4 bytes)
+    public void Freeze(long address, int size, string domain = null) {
+        string args = $"{address},{size}";
+        if (domain != null) {
+            args += $",{domain}";
+        }
+        _apiCommandBuffer.CallMethod("Freeze", args);
+    }
+
+    /// Unfreezes a memory address that was previously frozen
+    public void Unfreeze(long address, int size, string domain = null) {
+        string args = $"{address},{size}";
+        if (domain != null) {
+            args += $",{domain}";
+        }
+        _apiCommandBuffer.CallMethod("Unfreeze", args);
+    }
+
+    ///// events
+    /// when the volume changes
+    void OnSetVolume(float value) {
+        _apiCommandBuffer.CallMethod(ApiCommands.SetVolume, $"{value}");
+    }
+
+    /// when the sound is muted
+    void OnSetIsMuted(bool value) {
+        _apiCommandBuffer.CallMethod("SetSoundOn", $"{!value}");
     }
 }
 }
