@@ -5,10 +5,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Diagnostics;
 using System.Linq;
-using System.Reflection;
 using System.Runtime.InteropServices;
-using BizHawk.Client.Common;
-using BizHawkConfig = BizHawk.Client.Common.Config;
 using NaughtyAttributes;
 using UnityEngine;
 using Debug = UnityEngine.Debug;
@@ -17,8 +14,6 @@ using Debug = UnityEngine.Debug;
 using UnityEditor;
 #endif
 
-using Newtonsoft.Json;
-using Newtonsoft.Json.Serialization;
 using UnityEngine.Serialization;
 
 namespace UnityHawk {
@@ -350,15 +345,15 @@ public partial class Emulator : MonoBehaviour {
             Debug.Log($"[emulator] {name} using default config file at {configPath}");
         }
 
-        var bizConfig = BizHawkConfigExt.Load(configPath);
+        var bizConfig = ConfigService.Load(configPath);
 
         // create a temporary file for this config
-        // TODO: better path
         configPath = Path.GetFullPath($"{Path.GetTempPath()}/unityhawk-config-{guid}.ini");
 
-        SetConfigDefaults(ref bizConfig);
-
-        bizConfig.Save(configPath);
+        bizConfig.SoundVolume = volume;
+        bizConfig.StartPaused = IsPaused;
+        bizConfig.SoundEnabled = !isMuted;
+        ConfigService.Save(configPath, bizConfig);
 
         args.Add($"--config={configPath}");
 
@@ -843,37 +838,6 @@ public partial class Emulator : MonoBehaviour {
             showBizhawkGui = _showBizhawkGui
         };
     }
-
-    /// sets the config default values
-    void SetConfigDefaults(ref BizHawkConfig bizConfig) {
-        bizConfig.SoundVolume = volume;
-        bizConfig.StartPaused = IsPaused;
-        bizConfig.SoundEnabled = !isMuted;
-    }
-
 }
 
-public static class BizHawkConfigExt {
-    public static BizHawkConfig Load(string path) {
-        var settings = new JsonSerializerSettings() {
-            Error = (sender, error) => error.ErrorContext.Handled = true,
-            MissingMemberHandling = MissingMemberHandling.Ignore,
-            TypeNameHandling = TypeNameHandling.Auto,
-            ConstructorHandling = ConstructorHandling.Default,
-            ObjectCreationHandling = ObjectCreationHandling.Replace,
-            ContractResolver = new DefaultContractResolver {
-                DefaultMembersSearchFlags = (BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic)
-            }
-        };
-
-        var serializer = JsonSerializer.Create(settings);
-        ConfigService.SetSerializer(serializer);
-
-        return ConfigService.Load<BizHawkConfig>(path);
-    }
-
-    public static void Save(this BizHawkConfig config, string path) {
-        ConfigService.Save(path, config);
-    }
-}
 }

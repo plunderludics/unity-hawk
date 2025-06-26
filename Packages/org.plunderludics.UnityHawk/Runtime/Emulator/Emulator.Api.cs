@@ -5,14 +5,7 @@ using System;
 using UnityEngine;
 
 using NaughtyAttributes;
-using BizHawkConfig = BizHawk.Client.Common.Config;
-using Plunderludics;
-using System.IO;
 using System.Linq;
-using System.Collections.Generic;
-using BizHawk.Client.Common;
-using Google.FlatBuffers;
-using System.Drawing;
 
 namespace UnityHawk {
 public partial class Emulator {
@@ -39,6 +32,12 @@ public partial class Emulator {
             OnSetIsPaused(value);
         }
     }
+
+    /// the emulator current volume
+    public int Volume => volume;
+
+    /// the emulator current volume
+    public bool IsMuted => isMuted;
 
     /// the internal render texture
     public RenderTexture Texture => renderTexture;

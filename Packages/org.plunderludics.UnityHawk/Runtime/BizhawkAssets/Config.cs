@@ -1,8 +1,5 @@
-﻿using UnityEditor;
-using UnityEngine;
+﻿namespace UnityHawk {
 
-namespace UnityHawk {
-    
 public class Config : BizhawkAsset { }
 
 }
