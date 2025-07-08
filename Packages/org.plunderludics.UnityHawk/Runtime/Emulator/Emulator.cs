@@ -52,8 +52,10 @@ public partial class Emulator : MonoBehaviour
     [Tooltip("If true, audio will be played via an attached AudioSource (may induce some latency). If false, BizHawk will play audio directly to the OS")]
     public bool captureEmulatorAudio = false;
 
+    bool EnableRomFileSelection => !autoSelectRomFile || SaveStateFileIsNull;
+    
     [Header("Files")]
-    [DisableIf("autoSelectRomFile")]
+    [EnableIf("EnableRomFileSelection")]
     public Rom romFile;
     public Savestate saveStateFile;
     bool SaveStateFileIsNull => saveStateFile is null;
@@ -171,6 +173,8 @@ public partial class Emulator : MonoBehaviour
 
     /// buffer to receive screen texture from bizhawk
     SharedTextureBuffer _sharedTextureBuffer;
+
+    int[] _localTextureBuffer;
 
     Texture2D _bufferTexture;
 
@@ -578,11 +582,13 @@ public partial class Emulator : MonoBehaviour
         // Get the texture buffer and dimensions from BizHawk via the shared memory file
         // protocol has to match MainForm.cs in BizHawk
         // TODO should probably put this protocol in some shared schema file or something idk
-        int[] localTextureBuffer = new int[_sharedTextureBuffer.Length];
-        _sharedTextureBuffer.CopyTo(localTextureBuffer, 0);
-        int width = localTextureBuffer[_sharedTextureBuffer.Length - 3];
-        int height = localTextureBuffer[_sharedTextureBuffer.Length - 2];
-        _currentFrame = localTextureBuffer[_sharedTextureBuffer.Length - 1]; // frame index of this texture [hacky solution to sync issues]
+        if (_localTextureBuffer == null || _localTextureBuffer.Length != _sharedTextureBuffer.Length) {
+            _localTextureBuffer = new int[_sharedTextureBuffer.Length];
+        }
+        _sharedTextureBuffer.CopyTo(_localTextureBuffer, 0);
+        int width = _localTextureBuffer[_sharedTextureBuffer.Length - 3];
+        int height = _localTextureBuffer[_sharedTextureBuffer.Length - 2];
+        _currentFrame = _localTextureBuffer[_sharedTextureBuffer.Length - 1]; // frame index of this texture [hacky solution to sync issues]
 
         // Debug.Log($"{width}, {height}");
         // resize textures if necessary
@@ -595,7 +601,7 @@ public partial class Emulator : MonoBehaviour
         }
 
         if (_bufferTexture) {
-            _bufferTexture.SetPixelData(localTextureBuffer, 0);
+            _bufferTexture.SetPixelData(_localTextureBuffer, 0);
             _bufferTexture.Apply(/*updateMipmaps: false*/);
 
             // Correct issues with the texture by applying a shader and blitting to a separate render texture:
