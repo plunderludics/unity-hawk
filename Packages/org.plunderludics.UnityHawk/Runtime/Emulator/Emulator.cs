@@ -218,6 +218,23 @@ public partial class Emulator : MonoBehaviour
                 Debug.LogError("UnityHawkConfigDefault.asset not found");
             }
         }
+
+        // Select rom file automatically based on save state (if possible)
+        if (autoSelectRomFile && saveStateFile != null) {
+            var roms = AssetDatabase.FindAssets("t:rom")
+                .Select(guid => AssetDatabase.LoadAssetAtPath<Rom>(AssetDatabase.GUIDToAssetPath(guid)))
+                .Where(rom => saveStateFile.MatchesRom(rom));
+            
+            if (roms.Any()) {
+                var rom = roms.First();
+                if (roms.Count() > 1) {
+                    Debug.LogWarning($"Multiple roms found matching savestate {saveStateFile.name}, using first match: {rom}");
+                }
+                romFile = rom;
+            } else {
+                Debug.LogWarning($"No rom found matching savestate {saveStateFile.name}");
+            }
+        }
     }
 #endif
 
@@ -463,30 +480,10 @@ public partial class Emulator : MonoBehaviour
 
     void _Update() {
         SetShowBizhawkGui();
-        if (!Equals(_currentBizhawkArgs, MakeBizhawkArgs()))
-            {
-                // Params set in inspector have changed since the bizhawk process was started, needs restart
-                Deactivate();
-            }
-
-#if UNITY_EDITOR
-        if (autoSelectRomFile && saveStateFile != null) {
-            // Select rom file automatically based on save state (if possible)
-            var roms = AssetDatabase.FindAssets("t:rom")
-                .Select(guid => AssetDatabase.LoadAssetAtPath<Rom>(AssetDatabase.GUIDToAssetPath(guid)))
-                .Where(rom => saveStateFile.MatchesRom(rom));
-            
-            if (roms.Any()) {
-                var rom = roms.First();
-                if (roms.Count() > 1) {
-                    Debug.LogWarning($"Multiple roms found matching savestate {saveStateFile.name}, using first match: {rom}");
-                }
-                romFile = rom;
-            } else {
-                Debug.LogWarning($"No rom found matching savestate {saveStateFile.name}");
-            }
+        if (!Equals(_currentBizhawkArgs, MakeBizhawkArgs())) {
+            // Params set in inspector have changed since the bizhawk process was started, needs restart
+            Deactivate();
         }
-#endif
 
         if (!Application.isPlaying && !runInEditMode) {
             if (Status != EmulatorStatus.Inactive) {
