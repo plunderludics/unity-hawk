@@ -229,8 +229,6 @@ public partial class Emulator : MonoBehaviour
 #endif
         _initialized = false;
 
-        if (!runInEditMode && (!Application.isPlaying || romFile == null)) return;
-
         TryInitialize();
     }
 
@@ -251,6 +249,12 @@ public partial class Emulator : MonoBehaviour
     ////// Core methods
 
     bool TryInitialize() {
+        if (!runInEditMode && !Application.isPlaying) return false;
+        if (romFile == null) {
+            Debug.LogError("No rom file set, cannot start emulator");
+            return false;
+        }
+
         SetShowBizhawkGui();
         _currentBizhawkArgs = MakeBizhawkArgs();
 
