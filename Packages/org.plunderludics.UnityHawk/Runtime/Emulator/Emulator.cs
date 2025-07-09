@@ -143,7 +143,14 @@ public partial class Emulator : MonoBehaviour
         public bool showBizhawkGui;
     }
 
-    bool _showBizhawkGui; // Either showBizhawkGuiInEditor or showBizhawkGuiInBuild, depending on the context
+
+    bool ShowBizhawkGui => 
+#if UNITY_EDITOR
+        showBizhawkGuiInEditor
+#else
+        showBizhawkGuiInBuild
+#endif
+    ;
 
     BizhawkArgs _currentBizhawkArgs; // remember the params corresponding to the currently running process
 
@@ -298,7 +305,6 @@ public partial class Emulator : MonoBehaviour
             return false;
         }
 
-        SetShowBizhawkGui();
         _currentBizhawkArgs = MakeBizhawkArgs();
 
         // Debug.Log("Emulator Initialize");
@@ -326,7 +332,7 @@ public partial class Emulator : MonoBehaviour
             _emuhawk.StartInfo.EnvironmentVariables["LD_LIBRARY_PATH"] = Paths.dllDir;
             _emuhawk.StartInfo.EnvironmentVariables["MONO_PATH"] = Paths.dllDir;
             _emuhawk.StartInfo.FileName = "/Library/Frameworks/Mono.framework/Versions/Current/Commands/mono";
-            if (_showBizhawkGui) {
+            if (ShowBizhawkGui) {
                 Debug.LogWarning("'Show Bizhawk Gui' is not supported on Mac'");
             }
             args.Add(exePath);
@@ -385,7 +391,7 @@ public partial class Emulator : MonoBehaviour
         }
         args.Add($"--save-ram-watch={ramWatchOutputDirPath}");
 
-        if (!_showBizhawkGui) {
+        if (!ShowBizhawkGui) {
             args.Add("--headless");
             _emuhawk.StartInfo.CreateNoWindow = true;
             _emuhawk.StartInfo.WindowStyle = ProcessWindowStyle.Hidden;
@@ -497,8 +503,6 @@ public partial class Emulator : MonoBehaviour
     }
 
     void _Update() {
-        SetShowBizhawkGui();
-
         if (!runInEditMode) {
             return;
         }
@@ -512,7 +516,7 @@ public partial class Emulator : MonoBehaviour
         //  - fortunately for some reason it doesn't steal focus when clicking into a different application]
         // [Except this has a nasty side effect, in the editor in play mode if you try to open a unity modal window
         //  (e.g. the game view aspect ratio config) it gets closed. To avoid this only do the check in the first 5 seconds after starting up]
-        if (Time.realtimeSinceStartup - _startedTime < 5f && Application.isPlaying && !_targetMac && !_showBizhawkGui && _emuhawk != null) {
+        if (Time.realtimeSinceStartup - _startedTime < 5f && Application.isPlaying && !_targetMac && !ShowBizhawkGui && _emuhawk != null) {
             IntPtr unityWindow = Process.GetCurrentProcess().MainWindowHandle;
             IntPtr bizhawkWindow = _emuhawk.MainWindowHandle;
             IntPtr focusedWindow = GetForegroundWindow();
@@ -762,15 +766,6 @@ public partial class Emulator : MonoBehaviour
         }
     }
 
-    void SetShowBizhawkGui()
-    {
-#if UNITY_EDITOR
-        _showBizhawkGui = showBizhawkGuiInEditor;
-#else
-        _showBizhawkGui = showBizhawkGuiInBuild;
-#endif
-    }
-
     BizhawkArgs MakeBizhawkArgs() {
         return new BizhawkArgs {
 #if UNITY_EDITOR
@@ -782,7 +777,7 @@ public partial class Emulator : MonoBehaviour
             passInputFromUnity = passInputFromUnity,
             captureEmulatorAudio = captureEmulatorAudio,
             acceptBackgroundInput = acceptBackgroundInput,
-            showBizhawkGui = _showBizhawkGui
+            showBizhawkGui = ShowBizhawkGui
         };
     }
 }
