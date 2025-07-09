@@ -23,12 +23,10 @@ public class SavestateImporter : BizHawkAssetImporter<Savestate> {
         Texture2D screenshot = null;
         // find the game info file and deserialize it
         foreach (var entry in stateFile.Entries) {
-            Debug.Log(entry.Name);
             if (entry.Name == k_GameInfoFile) {
                 using var s = entry.Open();
                 gameInfo = GameInfo.Deserialize(s) ?? GameInfo.NullInstance;
             } else if (entry.Name == k_FramebufferFile) {
-                Debug.Log($"Found framebuffer file: {entry.Name}");
                 using var s = entry.Open();
                 using var bmpStream = new DecompressionStream(s);
 
@@ -44,9 +42,10 @@ public class SavestateImporter : BizHawkAssetImporter<Savestate> {
                 BMPImage bmpImg = bmpLoader.LoadBMP(bmpBytes);
 
                 //Convert the Color32 array into a Texture2D
-                screenshot = bmpImg.ToTexture2D();
+                screenshot = bmpImg.ToTexture2D(TextureFormat.RGB24); // Ensure no alpha channel
             }
         }
+
         savestate.RomInfo.Name = gameInfo.Name;
         savestate.RomInfo.Hash = gameInfo.Hash;
         savestate.RomInfo.Region = gameInfo.Region;
