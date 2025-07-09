@@ -250,7 +250,7 @@ public partial class Emulator : MonoBehaviour {
         if (!runInEditMode && (!Application.isPlaying || !romFile)) return;
 
         if (runOnAwake) {
-            _Initialize();
+            Initialize();
         }
     }
 
@@ -270,10 +270,6 @@ public partial class Emulator : MonoBehaviour {
 
     ////// Core methods
     public void Initialize() {
-        _shouldInitialize = true;
-    }
-
-    void _Initialize() {
         _shouldInitialize = true;
 
         // get a random number to identify the buffers
@@ -549,7 +545,7 @@ public partial class Emulator : MonoBehaviour {
 
         if (!_initialized) {
             if (_shouldInitialize) {
-                _Initialize();
+                Initialize();
             }
 
             return;
