@@ -212,10 +212,26 @@ public partial class Emulator : MonoBehaviour
         EditorUtility.RevealInFinder(bizhawkLogLocation);
     }
 #endif
-    ///// MonoBehaviour lifecycle
-    ///
+
 #if UNITY_EDITOR
     void OnValidate() {
+        if (!Equals(_currentBizhawkArgs, MakeBizhawkArgs())) {
+            // Params set in inspector have changed since the bizhawk process was started, needs restart
+            Deactivate();
+        }
+        
+        if (!runInEditMode && Status != EmulatorStatus.Inactive) {
+            Deactivate();
+        }
+
+        if (useAttachedRenderer) {
+            // Default to the attached Renderer component, if there is one
+            targetRenderer = GetComponent<Renderer>();
+            if (!targetRenderer) {
+                Debug.LogWarning("No Renderer attached, will not display emulator graphics");
+            }
+        }
+
 	    if (!config) {
 		    config = (UnityHawkConfig)AssetDatabase.LoadAssetAtPath(Paths.defaultUnityHawkConfigPath, typeof(UnityHawkConfig));
             if (config == null) {
@@ -239,9 +255,15 @@ public partial class Emulator : MonoBehaviour
                 Debug.LogWarning($"No rom found matching savestate {saveStateFile.name}");
             }
         }
+
+        // If emulator not running, set texture to savestate screenshot
+        if (!IsRunning && saveStateFile?.Screenshot is not null) {
+            InitTextures(saveStateFile.Screenshot.width, saveStateFile.Screenshot.height);
+        }
     }
 #endif
 
+    ///// MonoBehaviour lifecycle
     // (These methods are public only for convenient testing)
     public void OnEnable()
     {
@@ -286,14 +308,6 @@ public partial class Emulator : MonoBehaviour
         _systemId = null;
 
         _textureCorrectionMat = new Material(Resources.Load<Shader>(textureCorrectionShaderName));
-
-        if (useAttachedRenderer) {
-            // Default to the attached Renderer component, if there is one
-            targetRenderer = GetComponent<Renderer>();
-            if (!targetRenderer) {
-                Debug.LogWarning("No Renderer attached, will not display emulator graphics");
-            }
-        }
 
         if (captureEmulatorAudio && GetComponent<AudioSource>() == null) {
             Debug.LogWarning("captureEmulatorAudio is enabled but no AudioSource is attached, will not play audio");
@@ -484,20 +498,12 @@ public partial class Emulator : MonoBehaviour
 
     void _Update() {
         SetShowBizhawkGui();
-        if (!Equals(_currentBizhawkArgs, MakeBizhawkArgs())) {
-            // Params set in inspector have changed since the bizhawk process was started, needs restart
-            Deactivate();
-        }
 
-        if (!Application.isPlaying && !runInEditMode) {
-            if (Status != EmulatorStatus.Inactive) {
-                Deactivate();
-            }
+        if (!runInEditMode) {
             return;
         }
 
-        if (!_initialized && !TryInitialize())
-        {
+        if (!_initialized && !TryInitialize()) {
             return;
         }
 
@@ -640,8 +646,7 @@ public partial class Emulator : MonoBehaviour
         _textureSize = new Vector2Int(width, height);
         _bufferTexture = new Texture2D(width, height, textureFormat, false);
 
-        if (!customRenderTexture)
-        {
+        if (!customRenderTexture) {
             renderTexture = new RenderTexture(width, height, depth:0, format:renderTextureFormat);
             renderTexture.name = this.name;
         }
@@ -655,12 +660,12 @@ public partial class Emulator : MonoBehaviour
                     _renderMaterial = Instantiate(targetRenderer.sharedMaterial);
                     _renderMaterial.name = targetRenderer.sharedMaterial.name;
                 }
-                _renderMaterial.mainTexture = renderTexture;
+                _renderMaterial.mainTexture = Texture;
 
                 targetRenderer.material = _renderMaterial;
             } else  {
                 // play mode, just let unity clone the material the default way
-                targetRenderer.material.mainTexture = renderTexture;
+                targetRenderer.material.mainTexture = Texture;
             }
         }
     }
