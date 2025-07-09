@@ -4,7 +4,6 @@ using BizHawk.Emulation.Common;
 using UnityEditor.AssetImporters;
 using UnityEngine;
 using ZstdSharp;
-using System.Drawing;
 using B83.Image.BMP;
 
 namespace UnityHawk.Editor {
