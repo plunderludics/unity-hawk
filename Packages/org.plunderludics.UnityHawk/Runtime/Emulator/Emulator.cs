@@ -57,8 +57,10 @@ public partial class Emulator : MonoBehaviour {
     [Tooltip("If true, audio will be played via an attached AudioSource (may induce some latency). If false, BizHawk will play audio directly to the OS")]
     public bool captureEmulatorAudio = false;
 
+    bool EnableRomFileSelection => !autoSelectRomFile || SaveStateFileIsNull;
+
     [Header("Files")]
-    [DisableIf("autoSelectRomFile")]
+    [EnableIf("EnableRomFileSelection")]
     public Rom romFile;
     public Savestate saveStateFile;
     bool SaveStateFileIsNull => saveStateFile is null;
@@ -236,6 +238,23 @@ public partial class Emulator : MonoBehaviour {
                 Debug.LogError("UnityHawkConfigDefault.asset not found");
             }
         }
+
+        // Select rom file automatically based on save state (if possible)
+        if (autoSelectRomFile && saveStateFile != null) {
+            var roms = AssetDatabase.FindAssets("t:rom")
+                .Select(guid => AssetDatabase.LoadAssetAtPath<Rom>(AssetDatabase.GUIDToAssetPath(guid)))
+                .Where(rom => saveStateFile.MatchesRom(rom));
+
+            if (roms.Any()) {
+                var rom = roms.First();
+                if (roms.Count() > 1) {
+                    Debug.LogWarning($"Multiple roms found matching savestate {saveStateFile.name}, using first match: {rom}");
+                }
+                romFile = rom;
+            } else {
+                Debug.LogWarning($"No rom found matching savestate {saveStateFile.name}");
+            }
+        }
     }
 #endif
 
@@ -247,11 +266,7 @@ public partial class Emulator : MonoBehaviour {
 #endif
         _initialized = false;
 
-        if (!runInEditMode && (!Application.isPlaying || !romFile)) return;
-
-        if (runOnAwake) {
-            Initialize();
-        }
+        Initialize();
     }
 
     public void Update() {
@@ -271,6 +286,12 @@ public partial class Emulator : MonoBehaviour {
     ////// Core methods
     public void Initialize() {
         _shouldInitialize = true;
+
+        if (!runInEditMode && !Application.isPlaying) return;
+        if (!romFile) {
+            Debug.LogError("No rom file set, cannot start emulator");
+            return;
+        }
 
         // get a random number to identify the buffers
         var guid = new System.Random().Next();
@@ -511,30 +532,9 @@ public partial class Emulator : MonoBehaviour {
     void _Update() {
         SetShowBizhawkGui();
         if (!Equals(_currentBizhawkArgs, MakeBizhawkArgs())) {
-                // Params set in inspector have changed since the bizhawk process was started, needs restart
-                Deactivate();
-            }
-
-#if UNITY_EDITOR
-        // TODO (mut): move to OnValidate?
-        if (autoSelectRomFile && saveStateFile) {
-            // Select rom file automatically based on save state (if possible)
-            var roms = AssetDatabase.FindAssets("t:rom")
-                .Select(guid => AssetDatabase.LoadAssetAtPath<Rom>(AssetDatabase.GUIDToAssetPath(guid)))
-                .Where(rom => saveStateFile.MatchesRom(rom))
-                .ToList();
-
-            if (roms.Any()) {
-                var rom = roms.First();
-                if (roms.Count() > 1) {
-                    Debug.LogWarning($"Multiple roms found matching savestate {saveStateFile.name}, using first match: {rom}", rom);
-                }
-                romFile = rom;
-            } else {
-                Debug.LogWarning($"No rom found matching savestate {saveStateFile.name}", saveStateFile);
-            }
+            // Params set in inspector have changed since the bizhawk process was started, needs restart
+            Deactivate();
         }
-#endif
 
         if (!Application.isPlaying && !runInEditMode) {
             if (Status != EmulatorStatus.Inactive) {
@@ -657,12 +657,13 @@ public partial class Emulator : MonoBehaviour {
         }
 
         if (bSize > size) {
-            Debug.LogWarning($"buffer bigger than received size {bSize} > {size}");
+            Debug.LogWarning($"emulator: buffer bigger than received size {bSize} > {size}");
             return;
         }
 
         try {
-            _bufferTexture.SetPixelData(_localTextureBuffer[..^10], 0);
+            // TODO: make constants for metadata size/indices in texture buffer
+            _bufferTexture.SetPixelData(_localTextureBuffer[..^3], 0);
             _bufferTexture.Apply(/*updateMipmaps: false*/);
         } catch (Exception e) {
             Debug.Log($"{e}");

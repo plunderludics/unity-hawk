@@ -154,16 +154,29 @@ public class BasicInputProvider : InputProvider {
     }
 
 #if ENABLE_INPUT_SYSTEM
+    static Dictionary<KeyCode, string> _keyCodeNameCache = new();
+    static Dictionary<string, Key> _keyNameToKeyCache = new();
+
     Key KeyCodeToKey(KeyCode kc) {
-        // Pretty ugly but works for most keys... TODO better solution
-        string name = System.Enum.GetName(typeof(KeyCode), kc);        
-        try {
-            if (name == "Return") name = "Enter"; // Urgh
-            return (Key)System.Enum.Parse(typeof(Key), name);
-        } catch (System.ArgumentException e) {
-            // Debug.LogWarning($"KeyCode {kc} not found in Key enum: {e}");
-            return Key.None;
+        // Cache the name lookup
+        if (!_keyCodeNameCache.TryGetValue(kc, out string name)) {
+            name = System.Enum.GetName(typeof(KeyCode), kc);
+            _keyCodeNameCache[kc] = name;
         }
+
+        if (name == "Return") name = "Enter"; // Urgh
+
+        // Cache the parse result
+        if (!_keyNameToKeyCache.TryGetValue(name, out Key key)) {
+            try {
+                key = (Key)System.Enum.Parse(typeof(Key), name);
+            } catch (System.ArgumentException) {
+                key = Key.None;
+            }
+            _keyNameToKeyCache[name] = key;
+        }
+
+        return key;
     }
 #endif
 }
