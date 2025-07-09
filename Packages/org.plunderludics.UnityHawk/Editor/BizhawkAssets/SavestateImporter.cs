@@ -15,6 +15,9 @@ public class SavestateImporter : BizHawkAssetImporter<Savestate> {
     const string k_FramebufferFile = "Framebuffer.bmp";
 
     public override void OnImportAsset(AssetImportContext ctx) {
+        base.OnImportAsset(ctx);
+        var savestate = (Savestate)ctx.mainObject;
+
         using var stateFile = ZipFile.OpenRead(ctx.assetPath);
         var gameInfo = GameInfo.NullInstance;
         Texture2D screenshot = null;
@@ -44,10 +47,6 @@ public class SavestateImporter : BizHawkAssetImporter<Savestate> {
                 screenshot = bmpImg.ToTexture2D();
             }
         }
-
-        var savestate = ScriptableObject.CreateInstance<Savestate>();
-        savestate.Location = Path.GetRelativePath(Application.dataPath, ctx.assetPath);
-
         savestate.RomInfo.Name = gameInfo.Name;
         savestate.RomInfo.Hash = gameInfo.Hash;
         savestate.RomInfo.Region = gameInfo.Region;
@@ -57,9 +56,6 @@ public class SavestateImporter : BizHawkAssetImporter<Savestate> {
 
         ctx.AddObjectToAsset("screenshot", screenshot);
         savestate.Screenshot = screenshot;
-
-        ctx.AddObjectToAsset("main obj", savestate);
-        ctx.SetMainObject(savestate);
     }
 }
 
