@@ -6,7 +6,10 @@ using UnityEngine.Serialization;
 namespace UnityHawk {
 
 public class Savestate : BizhawkAsset {
-    [FormerlySerializedAs("GameInfo")] [Header("Game")]
+    public Texture2D Screenshot;
+
+    [Header("Game")]
+    [FormerlySerializedAs("GameInfo")]
     public RomInfo RomInfo;
 
     // TODO: get the rom associated with this game using gamedb

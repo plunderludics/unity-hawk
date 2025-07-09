@@ -3,25 +3,46 @@ using System.IO.Compression;
 using BizHawk.Emulation.Common;
 using UnityEditor.AssetImporters;
 using UnityEngine;
+using ZstdSharp;
+using System.Drawing;
+using B83.Image.BMP;
 
 namespace UnityHawk.Editor {
 
-// [ScriptedImporter(1, "z64,cue,nes")]
 [ScriptedImporter(1, "savestate")]
 public class SavestateImporter : BizHawkAssetImporter<Savestate> {
     const string k_GameInfoFile = "GameInfo.json";
+    const string k_FramebufferFile = "Framebuffer.bmp";
 
     public override void OnImportAsset(AssetImportContext ctx) {
-
         using var stateFile = ZipFile.OpenRead(ctx.assetPath);
         var gameInfo = GameInfo.NullInstance;
+        Texture2D screenshot = null;
         // find the game info file and deserialize it
         foreach (var entry in stateFile.Entries) {
-            if (entry.Name != k_GameInfoFile) continue;
+            Debug.Log(entry.Name);
+            if (entry.Name == k_GameInfoFile) {
+                using var s = entry.Open();
+                gameInfo = GameInfo.Deserialize(s) ?? GameInfo.NullInstance;
+            } else if (entry.Name == k_FramebufferFile) {
+                Debug.Log($"Found framebuffer file: {entry.Name}");
+                using var s = entry.Open();
+                using var bmpStream = new DecompressionStream(s);
 
-            using var s = entry.Open();
-            gameInfo = GameInfo.Deserialize(s) ?? GameInfo.NullInstance;
-            break;
+                // First read all bytes from stream
+                byte[] bmpBytes;
+                using (var ms = new MemoryStream())
+                {
+                    bmpStream.CopyTo(ms);
+                    bmpBytes = ms.ToArray();
+                }
+
+                BMPLoader bmpLoader = new BMPLoader();
+                BMPImage bmpImg = bmpLoader.LoadBMP(bmpBytes);
+
+                //Convert the Color32 array into a Texture2D
+                screenshot = bmpImg.ToTexture2D();
+            }
         }
 
         var savestate = ScriptableObject.CreateInstance<Savestate>();
@@ -33,6 +54,9 @@ public class SavestateImporter : BizHawkAssetImporter<Savestate> {
         savestate.RomInfo.System = gameInfo.System;
         savestate.RomInfo.NotInDatabase = gameInfo.NotInDatabase;
         savestate.RomInfo.Core = gameInfo.ForcedCore;
+
+        ctx.AddObjectToAsset("screenshot", screenshot);
+        savestate.Screenshot = screenshot;
 
         ctx.AddObjectToAsset("main obj", savestate);
         ctx.SetMainObject(savestate);
