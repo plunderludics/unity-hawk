@@ -30,7 +30,7 @@ public partial class Emulator : MonoBehaviour {
 
     [Header("config")]
     [Tooltip("if the emulator launches on start")]
-    public bool runOnAwake = true;
+    public bool runOnEnable = true;
 
     [Tooltip("if the emulator should use its attached renderer")]
     public bool useAttachedRenderer = true;
@@ -264,9 +264,10 @@ public partial class Emulator : MonoBehaviour {
 #if UNITY_EDITOR && UNITY_2022_2_OR_NEWER
         if (Undo.isProcessing) return; // OnEnable gets called after undo/redo, but ignore it
 #endif
-        _initialized = false;
-
-        Initialize();
+        if (runOnEnable) {
+            _initialized = false;
+            Initialize();
+        }
     }
 
     public void Update() {
@@ -289,6 +290,7 @@ public partial class Emulator : MonoBehaviour {
 
         if (!runInEditMode && !Application.isPlaying) return;
         if (!romFile) {
+            _shouldInitialize = false;
             Debug.LogError("No rom file set, cannot start emulator");
             return;
         }
