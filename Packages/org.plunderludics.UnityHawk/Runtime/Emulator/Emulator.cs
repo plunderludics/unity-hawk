@@ -503,7 +503,7 @@ public partial class Emulator : MonoBehaviour
     }
 
     void _Update() {
-        if (!runInEditMode) {
+        if (!Application.isPlaying && !runInEditMode) {
             return;
         }
 
