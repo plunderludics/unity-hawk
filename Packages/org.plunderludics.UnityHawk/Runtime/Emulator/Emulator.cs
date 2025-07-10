@@ -92,12 +92,6 @@ public partial class Emulator : MonoBehaviour {
     public Action OnRunning;
 
     [Foldout("Debug")]
-    [ReadOnly, SerializeField] bool _initialized;
-
-    [Foldout("Debug")]
-    [ReadOnly, SerializeField] bool _shouldInitialize;
-
-    [Foldout("Debug")]
     [ReadOnly, SerializeField] EmulatorStatus _status;
 
     [Foldout("Debug")]
@@ -222,6 +216,11 @@ public partial class Emulator : MonoBehaviour {
 
     Action _deferredForMainThread = null; // Pretty ugly solution for rpc handlers to get stuff to run on the main thread
 
+    /// if the game can be running right now (application playing or runInEditMode)
+    bool CanRun {
+        get => Application.isPlaying || runInEditMode;
+    }
+
 #if UNITY_EDITOR
     [Button]
     private void ShowBizhawkLogInOS() {
@@ -283,8 +282,7 @@ public partial class Emulator : MonoBehaviour {
 #if UNITY_EDITOR && UNITY_2022_2_OR_NEWER
         if (Undo.isProcessing) return; // OnEnable gets called after undo/redo, but ignore it
 #endif
-        if (runOnEnable) {
-            _initialized = false;
+        if (CanRun && runOnEnable) {
             Initialize();
         }
     }
@@ -306,12 +304,16 @@ public partial class Emulator : MonoBehaviour {
 
     ////// Core methods
     public void Initialize() {
-        _shouldInitialize = true;
+        if (Status != EmulatorStatus.Inactive) {
+            // TODO: should we deactivate here and reinitialize?
+            return;
+        }
 
-        if (!runInEditMode && !Application.isPlaying) return;
+        Debug.Log("Emulator Initialize");
+
+        if (!CanRun) return;
 
         if (!romFile) {
-            _shouldInitialize = false;
             Debug.LogError("No rom file set, cannot start emulator");
             return;
         }
@@ -321,7 +323,6 @@ public partial class Emulator : MonoBehaviour {
 
         _currentBizhawkArgs = MakeBizhawkArgs();
 
-        Debug.Log("Emulator Initialize");
         if (!customRenderTexture) renderTexture = null; // Clear texture so that it's forced to be reinitialized
 
         Status = EmulatorStatus.Inactive;
@@ -523,8 +524,6 @@ public partial class Emulator : MonoBehaviour {
         Status = EmulatorStatus.Started;
         _startedTime = Time.realtimeSinceStartup;
 
-        _initialized = true;
-
         return;
 
         // creates a folder on the specified path, if any
@@ -548,11 +547,10 @@ public partial class Emulator : MonoBehaviour {
             return;
         }
 
-        if (!_initialized) {
-            if (_shouldInitialize) {
+        if (Status == EmulatorStatus.Inactive) {
+            if (runInEditMode) {
                 Initialize();
             }
-
             return;
         }
 
@@ -627,7 +625,7 @@ public partial class Emulator : MonoBehaviour {
                 return true;
             }
 
-            if (!Application.isPlaying && !runInEditMode) {
+            if (!CanRun) {
                 Deactivate();
                 return true;
             }
@@ -701,7 +699,7 @@ public partial class Emulator : MonoBehaviour {
 
     void Deactivate() {
         Debug.Log("Emulator Deactivate");
-        _initialized = false;
+        Status = EmulatorStatus.Inactive;
 
         if (_bizHawkLogWriter != null) {
             _bizHawkLogWriter.Close();
@@ -711,8 +709,6 @@ public partial class Emulator : MonoBehaviour {
             // Kill the _emuhawk process
             _emuhawk.Kill();
         }
-
-        Status = EmulatorStatus.Inactive;
 
         foreach (ISharedBuffer buf in new ISharedBuffer[] {
             _sharedTextureBuffer,
