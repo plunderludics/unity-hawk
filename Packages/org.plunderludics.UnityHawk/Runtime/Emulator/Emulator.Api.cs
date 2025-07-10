@@ -29,7 +29,7 @@ public partial class Emulator {
         get => isPaused;
         set {
             isPaused = value;
-            OnSetIsPaused(value);
+            OnSetIsPaused();
         }
     }
 
@@ -39,8 +39,9 @@ public partial class Emulator {
     /// the emulator current volume
     public bool IsMuted => isMuted;
 
-    /// the internal render texture
-    public RenderTexture Texture => renderTexture;
+    /// Currently displayed emulator texture.
+    /// (If emulator is not running but savestate is set, show savestate texture)
+    public Texture Texture => IsRunning ? renderTexture : saveStateFile?.Screenshot;
 
     /// is the emulator process started
     public bool IsStarted => Status >= EmulatorStatus.Started;
@@ -48,8 +49,9 @@ public partial class Emulator {
     /// is the emulator process running a game? (best guess, might be wrong)
     public bool IsRunning => Status >= EmulatorStatus.Running; // is the emuhawk.exe process running? (best guess, might be wrong)
 
-    /// .
-    public string SystemId => _systemId; // (Will be null if no core currently running)
+    /// ID of the current emulator platform (e.g. "N64", "PSX", etc.)
+    /// Returns null if emulator is not running.
+    public string SystemId => _systemId;
 
     /// the current status of the emulator
     public enum EmulatorStatus {
@@ -107,9 +109,9 @@ public partial class Emulator {
     // can also pass absolute path (but this will most likely break in build!)
 
     /// calls the emulator api to pause/unpause
-    void OnSetIsPaused(bool value) {
-        string command = value ? ApiCommands.Pause : ApiCommands.Unpause;
-        _apiCommandBuffer.CallMethod(ApiCommands.Pause, null);
+    void OnSetIsPaused() {
+        string command = isPaused ? ApiCommands.Pause : ApiCommands.Unpause;
+        _apiCommandBuffer.CallMethod(command, null);
     }
 
     /// pauses the emulator
@@ -349,13 +351,13 @@ public partial class Emulator {
 
     ///// events
     /// when the volume changes
-    void OnSetVolume(float value) {
-        _apiCommandBuffer.CallMethod(ApiCommands.SetVolume, $"{value}");
+    void OnSetVolume() {
+        _apiCommandBuffer.CallMethod(ApiCommands.SetVolume, $"{volume}");
     }
 
     /// when the sound is muted
-    void OnSetIsMuted(bool value) {
-        _apiCommandBuffer.CallMethod("SetSoundOn", $"{!value}");
+    void OnSetIsMuted() {
+        _apiCommandBuffer.CallMethod("SetSoundOn", $"{!isMuted}");
     }
 }
 }
