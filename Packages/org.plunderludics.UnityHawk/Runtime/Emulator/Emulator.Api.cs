@@ -218,7 +218,7 @@ public partial class Emulator {
     ///// RAM read/write
     /// For all methods, domain defaults to main memory if not specified
 
-    // ReadXXX methodshave type-safety issues so disabled for now, use WatchXXX instead
+    // ReadXXX methods have type-safety issues so disabled for now, use WatchXXX instead
     // public uint? ReadUnsigned(long address, int size, bool isBigEndian, string domain = null) {
     //     string args = $"{address},{size},{isBigEndian}";
     //     if (domain != null) {

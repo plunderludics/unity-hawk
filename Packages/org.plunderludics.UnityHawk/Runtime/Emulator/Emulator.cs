@@ -184,7 +184,7 @@ public partial class Emulator : MonoBehaviour {
     struct BizhawkArgs {
 #if UNITY_EDITOR
         public Rom RomFile;
-        public Savestate SavStateFile;
+        public Savestate SaveStateFile;
         public Config ConfigFile;
         public LuaScript LuaScriptFile;
         public RamWatch RamWatchFile;
@@ -294,7 +294,7 @@ public partial class Emulator : MonoBehaviour {
 
         DeactivateIfNeeded();
 
-        if (useAttachedRenderer) {
+        if (RenderMode == EmulatorRenderMode.AttachedRenderer) {
             // Default to the attached Renderer component, if there is one
             targetRenderer = GetComponent<Renderer>();
             if (!targetRenderer) {
@@ -386,8 +386,6 @@ public partial class Emulator : MonoBehaviour {
         _currentBizhawkArgs = MakeBizhawkArgs();
 
         Debug.Log("Emulator Initialize");
-        if (!customRenderTexture) renderTexture = null; // Clear texture so that it's forced to be reinitialized
-
         Status = EmulatorStatus.Inactive;
         _systemId = null;
 
@@ -805,9 +803,13 @@ public partial class Emulator : MonoBehaviour {
         // TODO: cache textures
         _bufferTexture = new Texture2D(width, height, textureFormat, false);
 
-        if (RenderMode == EmulatorRenderMode.RenderTexture) {
+        if (RenderMode != EmulatorRenderMode.RenderTexture) {
             renderTexture = new RenderTexture(width, height, depth:0, format:renderTextureFormat);
-            renderTexture.name = this.name;
+            renderTexture.name = name;
+        }
+
+        if (_materialProperties == null) {
+            _materialProperties = new();
         }
 
         if (targetRenderer) {
