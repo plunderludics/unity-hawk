@@ -221,7 +221,7 @@ public partial class Emulator : MonoBehaviour
 #endif
 
 #if UNITY_EDITOR
-    void OnValidate() {
+    public void OnValidate() {
         if (!Equals(_currentBizhawkArgs, MakeBizhawkArgs())) {
             // Params set in inspector have changed since the bizhawk process was started, needs restart
             Deactivate();
