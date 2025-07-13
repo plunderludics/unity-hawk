@@ -656,9 +656,9 @@ public partial class Emulator : MonoBehaviour {
         // TODO is this even working? seems like the width and height are always blank?
         int size = _sharedTextureBuffer.Length;
         _sharedTextureBuffer.CopyTo(_localTextureBuffer, 0);
-        int width = _localTextureBuffer[size - 3];
-        int height = _localTextureBuffer[size - 2];
-        _currentFrame = _localTextureBuffer[size - 1]; // frame index of this texture [hacky solution to sync issues]
+        int width = _localTextureBuffer[^3];
+        int height = _localTextureBuffer[^2];
+        _currentFrame = _localTextureBuffer[^1]; // frame index of this texture [hacky solution to sync issues]
 
         bool noTextures = !_bufferTexture || !renderTexture;
 
@@ -726,7 +726,7 @@ public partial class Emulator : MonoBehaviour {
     void InitTextures(int width, int height) {
         Debug.Log($"[emulator] creating new textures with dimensions {width}x{height}");
 
-        // TODO: cache texutres
+        // TODO: cache textures
         _textureSize = new Vector2Int(width, height);
         _bufferTexture = new Texture2D(width, height, textureFormat, false);
 

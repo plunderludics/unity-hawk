@@ -157,8 +157,6 @@ public partial class Emulator {
             return;
         }
 
-        // TODO would be nice if there was some callback or way to know when state is loaded
-        // OnRunning?
         LoadState(path);
     }
 
