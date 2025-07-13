@@ -228,7 +228,7 @@ public partial class Emulator : MonoBehaviour {
     }
 #endif
 #if UNITY_EDITOR
-    void OnValidate() {
+    public void OnValidate() {
         if (!config) {
             config = (UnityHawkConfig)AssetDatabase.LoadAssetAtPath(
                 Paths.defaultUnityHawkConfigPath,
