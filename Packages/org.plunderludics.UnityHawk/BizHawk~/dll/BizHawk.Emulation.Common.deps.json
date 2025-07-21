@@ -143,7 +143,10 @@
           "System.Reflection.Emit": "4.7.0"
         },
         "runtime": {
-          "BizHawk.BizInvoke.dll": {}
+          "BizHawk.BizInvoke.dll": {
+            "assemblyVersion": "1.0.0.0",
+            "fileVersion": "1.0.0.0"
+          }
         }
       },
       "BizHawk.Common/1.0.0": {
@@ -154,7 +157,10 @@
           "System.Runtime.CompilerServices.Unsafe": "6.0.0"
         },
         "runtime": {
-          "BizHawk.Common.dll": {}
+          "BizHawk.Common.dll": {
+            "assemblyVersion": "1.0.0.0",
+            "fileVersion": "1.0.0.0"
+          }
         }
       }
     }

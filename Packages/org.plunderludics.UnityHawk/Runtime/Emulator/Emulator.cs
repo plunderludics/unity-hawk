@@ -1,42 +1,48 @@
 // This is the main user-facing MonoBehaviour
 // handles starting up and communicating with the BizHawk process
-
 using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Diagnostics;
 using System.Linq;
 using System.Runtime.InteropServices;
+using NaughtyAttributes;
+using UnityEngine;
 using Debug = UnityEngine.Debug;
 
 #if UNITY_EDITOR
 using UnityEditor;
 #endif
 
-using NaughtyAttributes;
-
-using UnityEngine;
 using UnityEngine.Serialization;
+using Random = UnityEngine.Random;
 
 namespace UnityHawk {
 
 [ExecuteInEditMode]
-public partial class Emulator : MonoBehaviour
-{
-    static readonly bool _targetMac =
+public partial class Emulator : MonoBehaviour {
+    static readonly int _shader_MainTex = Shader.PropertyToID("_MainTex");
+    const bool _targetMac =
 #if UNITY_EDITOR_OSX || UNITY_STANDALONE_OSX
         true;
 #else
         false;
 #endif
 
+    [Header("config")]
+    [Tooltip("if the emulator launches on start")]
+    public bool runOnEnable = true;
+
+    [Tooltip("if the emulator should use its attached renderer")]
     public bool useAttachedRenderer = true;
+
     [HideIf("useAttachedRenderer")]
     public Renderer targetRenderer;
 
     [Tooltip("Write to an existing render texture rather than creating one automatically")]
     [FormerlySerializedAs("writeToTexture")]
     public bool customRenderTexture = false;
+
     [EnableIf("customRenderTexture")]
     [Tooltip("The render texture to write to")]
     public RenderTexture renderTexture;
@@ -53,7 +59,7 @@ public partial class Emulator : MonoBehaviour
     public bool captureEmulatorAudio = false;
 
     bool EnableRomFileSelection => !autoSelectRomFile || SaveStateFileIsNull;
-    
+
     [Header("Files")]
     [EnableIf("EnableRomFileSelection")]
     public Rom romFile;
@@ -73,17 +79,17 @@ public partial class Emulator : MonoBehaviour
     [ReadOnlyWhenPlaying]
     [Tooltip("whether bizhawk should run when in edit mode")]
     public new bool runInEditMode = false;
+
     [ShowIf("runInEditMode")]
     [ReadOnlyWhenPlaying]
     [Tooltip("Whether BizHawk will accept input when window is unfocused (in edit mode)")]
     public bool acceptBackgroundInput = true;
 
+    /// when the emulator boots up
     public Action OnStarted;
 
+    /// when the emulator starts running its game
     public Action OnRunning;
-
-    [Foldout("Debug")]
-    [ReadOnly, SerializeField] bool _initialized;
 
     [Foldout("Debug")]
     [ReadOnly, SerializeField] EmulatorStatus _status;
@@ -106,28 +112,29 @@ public partial class Emulator : MonoBehaviour
     [SerializeField] bool muteBizhawkInEditMode = true;
     [Foldout("Debug")]
     [SerializeField] UnityHawkConfig config;
+
     [Tooltip("Prevent BizHawk from popping up windows for warnings and errors; these will still appear in logs")]
-    public bool suppressBizhawkPopups = true;
+    [SerializeField] bool suppressBizhawkPopups = true;
+
     [Foldout("Debug")]
-    public bool writeBizhawkLogs = true;
+    [SerializeField] bool writeBizhawkLogs = true;
+
     [ShowIf("writeBizhawkLogs")]
     [Foldout("Debug")]
     [ReadOnly, SerializeField] string bizhawkLogLocation;
-
-    [Foldout("Debug")]
-    public string savestatesOutputPath;
 
     [Foldout("Debug")]
     [ShowIf("captureEmulatorAudio")]
     [SerializeField]
     AudioResampler _audioResampler;
 
-    private TextureFormat textureFormat = TextureFormat.BGRA32;
-    private RenderTextureFormat renderTextureFormat = RenderTextureFormat.BGRA32;
+    TextureFormat textureFormat = TextureFormat.BGRA32;
+
+    RenderTextureFormat renderTextureFormat = RenderTextureFormat.BGRA32;
 
     Process _emuhawk;
 
-    // Basically these are the params which, if changed, we want to reset the bizhawk process
+    /// Basically these are the params which, if changed, we want to reset the bizhawk process
     // Don't include the path params here, because then the process gets reset for every character typed/deleted
     struct BizhawkArgs {
 #if UNITY_EDITOR
@@ -144,7 +151,7 @@ public partial class Emulator : MonoBehaviour
     }
 
 
-    bool ShowBizhawkGui => 
+    bool ShowBizhawkGui =>
 #if UNITY_EDITOR
         showBizhawkGuiInEditor
 #else
@@ -190,6 +197,8 @@ public partial class Emulator : MonoBehaviour
 
     Material _renderMaterial; // just used for rendering in edit mode
 
+    MaterialPropertyBlock _materialProperties;
+
     StreamWriter _bizHawkLogWriter;
 
     float _startedTime;
@@ -207,10 +216,9 @@ public partial class Emulator : MonoBehaviour
 
     Action _deferredForMainThread = null; // Pretty ugly solution for rpc handlers to get stuff to run on the main thread
 
-    [Button]
-    public void Reset() {
-        Deactivate();
-        // Will be reactivated in Update on next frame
+    /// if the game can be running right now (application playing or runInEditMode)
+    bool CanRun {
+        get => Application.isPlaying || runInEditMode;
     }
 
 #if UNITY_EDITOR
@@ -219,17 +227,19 @@ public partial class Emulator : MonoBehaviour
         EditorUtility.RevealInFinder(bizhawkLogLocation);
     }
 #endif
-
 #if UNITY_EDITOR
     public void OnValidate() {
-        if (!Equals(_currentBizhawkArgs, MakeBizhawkArgs())) {
-            // Params set in inspector have changed since the bizhawk process was started, needs restart
-            Deactivate();
+        if (!config) {
+            config = (UnityHawkConfig)AssetDatabase.LoadAssetAtPath(
+                Paths.defaultUnityHawkConfigPath,
+                typeof(UnityHawkConfig));
+
+            if (!config) {
+                Debug.LogError("UnityHawkConfigDefault.asset not found");
+            }
         }
-        
-        if (!runInEditMode && Status != EmulatorStatus.Inactive) {
-            Deactivate();
-        }
+
+        DeactivateIfNeeded();
 
         if (useAttachedRenderer) {
             // Default to the attached Renderer component, if there is one
@@ -239,19 +249,12 @@ public partial class Emulator : MonoBehaviour
             }
         }
 
-	    if (!config) {
-		    config = (UnityHawkConfig)AssetDatabase.LoadAssetAtPath(Paths.defaultUnityHawkConfigPath, typeof(UnityHawkConfig));
-            if (config == null) {
-                Debug.LogError("UnityHawkConfigDefault.asset not found");
-            }
-        }
-
         // Select rom file automatically based on save state (if possible)
         if (autoSelectRomFile && saveStateFile != null) {
             var roms = AssetDatabase.FindAssets("t:rom")
                 .Select(guid => AssetDatabase.LoadAssetAtPath<Rom>(AssetDatabase.GUIDToAssetPath(guid)))
                 .Where(rom => saveStateFile.MatchesRom(rom));
-            
+
             if (roms.Any()) {
                 var rom = roms.First();
                 if (roms.Count() > 1) {
@@ -264,6 +267,8 @@ public partial class Emulator : MonoBehaviour
         }
 
         // If emulator not running, set texture to savestate screenshot
+        // TODO: why is this happening only on validate
+        // should this even be reiniting the texture if the dimensions are the same?
         if (!IsRunning && saveStateFile?.Screenshot is not null) {
             InitTextures(saveStateFile.Screenshot.width, saveStateFile.Screenshot.height);
         }
@@ -271,15 +276,21 @@ public partial class Emulator : MonoBehaviour
 #endif
 
     ///// MonoBehaviour lifecycle
+    [Button]
+    public void Reset() {
+        Deactivate();
+        // Will be reactivated in Update on next frame
+    }
+
     // (These methods are public only for convenient testing)
-    public void OnEnable()
-    {
+    public void OnEnable() {
+        _materialProperties = new MaterialPropertyBlock();
 #if UNITY_EDITOR && UNITY_2022_2_OR_NEWER
         if (Undo.isProcessing) return; // OnEnable gets called after undo/redo, but ignore it
 #endif
-        _initialized = false;
-
-        TryInitialize();
+        if (CanRun && runOnEnable && Status == EmulatorStatus.Inactive) {
+            Initialize();
+        }
     }
 
     public void Update() {
@@ -291,23 +302,33 @@ public partial class Emulator : MonoBehaviour
 #if UNITY_EDITOR && UNITY_2022_2_OR_NEWER
         if (Undo.isProcessing) return; // OnDisable gets called after undo/redo, but ignore it
 #endif
-        if (_initialized) {
+
+        if (Status != EmulatorStatus.Inactive) {
             Deactivate();
         }
     }
 
     ////// Core methods
-
-    bool TryInitialize() {
-        if (!runInEditMode && !Application.isPlaying) return false;
-        if (romFile == null) {
-            Debug.LogError("No rom file set, cannot start emulator");
-            return false;
+    public void Initialize() {
+        if (Status != EmulatorStatus.Inactive) {
+            // TODO: should we deactivate here and reinitialize?
+            return;
         }
+
+        Debug.Log("Emulator Initialize");
+
+        if (!CanRun) return;
+
+        if (!romFile) {
+            Debug.LogError("No rom file set, cannot start emulator");
+            return;
+        }
+
+        // get a random number to identify the buffers
+        var guid = new System.Random().Next();
 
         _currentBizhawkArgs = MakeBizhawkArgs();
 
-        // Debug.Log("Emulator Initialize");
         if (!customRenderTexture) renderTexture = null; // Clear texture so that it's forced to be reinitialized
 
         Status = EmulatorStatus.Inactive;
@@ -324,6 +345,7 @@ public partial class Emulator : MonoBehaviour
 
         // Start EmuHawk.exe w args
         var exePath = Path.GetFullPath(Paths.emuhawkExePath);
+        var workingDir = Application.dataPath;
         _emuhawk = new Process();
         _emuhawk.StartInfo.UseShellExecute = false;
         var args = _emuhawk.StartInfo.ArgumentList;
@@ -343,13 +365,33 @@ public partial class Emulator : MonoBehaviour
         }
 
         // add rom path
-        var romPath = Paths.GetAssetPath(romFile);
-        args.Add(romPath);
+        if (romFile) {
+            var romPath = Paths.GetAssetPath(romFile);
+            args.Add(romPath);
+            workingDir = Path.GetDirectoryName(romPath);
+        }
 
         // add config path
         var configPath = configFile
             ? Paths.GetAssetPath(configFile)
             : Path.GetFullPath(Paths.defaultBizhawkConfigPath);
+
+        if (configFile) {
+            configPath = Paths.GetAssetPath(configFile);
+            Debug.Log($"[emulator] found config at {configPath}");
+        } else {
+            Debug.Log($"[emulator] {name} using default config file at {configPath}");
+        }
+
+        var bizConfig = ConfigService.Load(configPath);
+
+        // create a temporary file for this config
+        configPath = Path.GetFullPath($"{Path.GetTempPath()}/unityhawk-config-{guid}.ini");
+
+        bizConfig.SoundVolume = volume;
+        bizConfig.StartPaused = IsPaused;
+        bizConfig.SoundEnabled = !isMuted;
+        ConfigService.Save(configPath, bizConfig);
 
         args.Add($"--config={configPath}");
 
@@ -372,23 +414,15 @@ public partial class Emulator : MonoBehaviour
         args.Add($"--savestate-extension={_savestateExtension}");
 
         // set savestates output dir
-        // (default to rom parent directory when not provided)
-        var savestatesOutputPath = string.IsNullOrEmpty(config.SavestatesOutputPath) ? Path.GetDirectoryName(romPath) : config.SavestatesOutputPath;
-        var fullSavestatesOutputPath = Paths.GetFullPath(savestatesOutputPath);
-        if (!Directory.Exists(fullSavestatesOutputPath)) {
-            Directory.CreateDirectory(fullSavestatesOutputPath);
-        }
-        args.Add($"--savestates={fullSavestatesOutputPath}");
+        // (default to application directory when not provided)
+        var saveStatesOutputPath = GetOrCreateDirectory(config.SavestatesOutputPath) ?? workingDir;
+        args.Add($"--savestates={saveStatesOutputPath}");
 
         // add firmware
         args.Add($"--firmware={Path.Combine(Application.streamingAssetsPath, config.FirmwarePath)}");
 
         // set ramwatch output dir
-        var ramWatchOutputDirPath = config.RamWatchOutputPath;
-        // use rom directory as default ramwatch output path
-        if (string.IsNullOrEmpty(ramWatchOutputDirPath)) {
-            ramWatchOutputDirPath = Path.GetDirectoryName(romPath);
-        }
+        var ramWatchOutputDirPath = GetOrCreateDirectory(config.RamWatchOutputPath) ?? workingDir;
         args.Add($"--save-ram-watch={ramWatchOutputDirPath}");
 
         if (!ShowBizhawkGui) {
@@ -396,29 +430,26 @@ public partial class Emulator : MonoBehaviour
             _emuhawk.StartInfo.CreateNoWindow = true;
             _emuhawk.StartInfo.WindowStyle = ProcessWindowStyle.Hidden;
         }
-        
+
         List<string> userData = new(); // Userdata args get used by UnityHawk external tool
 
         // add buffers
-        // get a random number to identify the buffers
-        var randomNumber = new System.Random().Next();
-
         // create & register sharedTextureBuffer
-        var sharedTextureBufferName = $"texture-{randomNumber}";
+        var sharedTextureBufferName = $"texture-{guid}";
         userData.Add($"{Args.TextureBuffer}:{sharedTextureBufferName}");
         _sharedTextureBuffer = new SharedTextureBuffer(sharedTextureBufferName);
 
         // create & register callbacks rpc (used for lua callbacks and also the Watch memory api)
-        var callMethodRpcBufferName = $"call-method-{randomNumber}";
+        var callMethodRpcBufferName = $"call-method-{guid}";
         userData.Add($"{Args.CallMethodRpc}:{callMethodRpcBufferName}");
         _callMethodRpcBuffer = new CallMethodRpcBuffer(callMethodRpcBufferName, ProcessRpcCallback);
 
         // create & register api call buffers
-        var apiCommandBufferName = $"api-command-{randomNumber}";
+        var apiCommandBufferName = $"api-command-{guid}";
         userData.Add($"{Args.ApiCommandBuffer}:{apiCommandBufferName}");
         _apiCommandBuffer = new ApiCommandBuffer(apiCommandBufferName);
 
-        // var apiCallRpcBufferName = $"api-call-rpc-{randomNumber}";
+        // var apiCallRpcBufferName = $"api-call-rpc-{guid}";
         // userData.Add($"{Args.ApiCallRpc}:{apiCallRpcBufferName}");
         // _apiCallRpcBuffer = new ApiCallRpcBuffer(apiCallRpcBufferName);
 
@@ -427,7 +458,7 @@ public partial class Emulator : MonoBehaviour
             if (runInEditMode && !Application.isPlaying) {
                 Debug.LogWarning("captureEmulatorAudio is enabled but emulator audio cannot be captured in edit mode");
             } else {
-                var sharedAudioBufferName = $"audio-{randomNumber}";
+                var sharedAudioBufferName = $"audio-{guid}";
                 userData.Add($"{Args.AudioRpc}:{sharedAudioBufferName}");
                 _sharedAudioBuffer = new SharedAudioBuffer(sharedAudioBufferName);
 
@@ -445,7 +476,7 @@ public partial class Emulator : MonoBehaviour
         // create & register input buffers
         if (Application.isPlaying) {
             if (passInputFromUnity) {
-                var sharedInputBufferName = $"input-{randomNumber}";
+                var sharedInputBufferName = $"input-{guid}";
                 // args.Add($"--read-input-from-shared-buffer={sharedKeyInputBufferName}");
                 userData.Add($"{Args.InputBuffer}:{sharedInputBufferName}");
                 _sharedInputBuffer = new SharedInputBuffer(sharedInputBufferName);
@@ -477,7 +508,7 @@ public partial class Emulator : MonoBehaviour
         if (writeBizhawkLogs) {
             // Redirect bizhawk output + error into a log file
             var logFileName = $"{name}-{GetInstanceID()}.log";
-            var logPath = config.LogsPath;
+            var logPath = config.BizHawkLogsPath;
             Directory.CreateDirectory (logPath);
             bizhawkLogLocation = Path.Combine(logPath, logFileName);
 
@@ -495,19 +526,38 @@ public partial class Emulator : MonoBehaviour
         _emuhawk.Start(); // [This seems to block for ~20s sometimes, not sure why. Should maybe run in a separate thread?]
         _emuhawk.BeginOutputReadLine();
         _emuhawk.BeginErrorReadLine();
+
         Status = EmulatorStatus.Started;
         _startedTime = Time.realtimeSinceStartup;
 
-        _initialized = true;
-        return true;
+        return;
+
+        // creates a folder on the specified path, if any
+        static string GetOrCreateDirectory(string path) {
+            var s = path;
+            if (string.IsNullOrEmpty(s)) {
+                return null;
+            }
+
+            s = Paths.GetFullPath(s);
+            if (!Directory.Exists(s)) {
+                Directory.CreateDirectory(s);
+            }
+
+            return s;
+        }
     }
 
     void _Update() {
-        if (!Application.isPlaying && !runInEditMode) {
+        if (DeactivateIfNeeded()) {
             return;
         }
 
-        if (!_initialized && !TryInitialize()) {
+        if (Status == EmulatorStatus.Inactive) {
+            if (runInEditMode) {
+                Initialize();
+            }
+
             return;
         }
 
@@ -528,12 +578,6 @@ public partial class Emulator : MonoBehaviour
             }
         }
 
-        if (_sharedTextureBuffer.IsOpen()) {
-            UpdateTextureFromBuffer();
-        } else {
-            AttemptOpenBuffer(_sharedTextureBuffer);
-        }
-
         if (passInputFromUnity && Application.isPlaying) {
             List<InputEvent> inputEvents = inputProvider.InputForFrame();
             if (_sharedInputBuffer.IsOpen()) {
@@ -546,15 +590,10 @@ public partial class Emulator : MonoBehaviour
         if (!_callMethodRpcBuffer.IsOpen()) {
             AttemptOpenBuffer(_callMethodRpcBuffer);
         }
+
         if (!_apiCommandBuffer.IsOpen()) {
             AttemptOpenBuffer(_apiCommandBuffer);
         }
-        if (!_apiCommandBuffer.IsOpen()) {
-            AttemptOpenBuffer(_apiCommandBuffer);
-        }
-        // if (!_apiCallRpcBuffer.IsOpen()) {
-        //     AttemptOpenBuffer(_apiCallRpcBuffer);
-        // }
 
         if (captureEmulatorAudio && Application.isPlaying) {
             if (_sharedAudioBuffer.IsOpen()) {
@@ -568,9 +607,15 @@ public partial class Emulator : MonoBehaviour
             }
         }
 
-        if (_deferredForMainThread != null) {
-            _deferredForMainThread();
+        // texture buffer only exists if there's a game running
+        if (_sharedTextureBuffer.IsOpen()) {
+            UpdateTextureFromBuffer();
+        } else {
+            AttemptOpenBuffer(_sharedTextureBuffer);
         }
+
+        _deferredForMainThread?.Invoke();
+        _deferredForMainThread = null;
 
         if (_emuhawk != null && _emuhawk.HasExited) {
             Debug.LogWarning("EmuHawk process was unexpectedly killed");
@@ -578,9 +623,29 @@ public partial class Emulator : MonoBehaviour
         }
     }
 
-    void WriteInputToBuffer(List<UnityHawk.InputEvent> inputEvents) {
+    /// deactivates the emulator if it's in a state where it should be deactivated
+    /// returns whether it was deactivated
+    bool DeactivateIfNeeded() {
+        if (Status != EmulatorStatus.Inactive) {
+            if (!Equals(_currentBizhawkArgs, MakeBizhawkArgs())) {
+                // Params set in inspector have changed since the bizhawk process was started, needs restart
+                Deactivate();
+                return true;
+            }
+
+            if (!CanRun) {
+                Deactivate();
+                return true;
+            }
+
+        }
+
+        return false;
+    }
+
+    void WriteInputToBuffer(List<InputEvent> inputEvents) {
         // Get input from inputProvider, serialize and write to the shared memory
-        foreach (UnityHawk.InputEvent ie in inputEvents) {
+        foreach (InputEvent ie in inputEvents) {
             // Convert Unity InputEvent to BizHawk InputEvent
             // [for now only supporting keys, no gamepad]
             Plunderludics.UnityHawk.Shared.InputEvent bie = ConvertInput.ToBizHawk(ie);
@@ -589,55 +654,75 @@ public partial class Emulator : MonoBehaviour
     }
 
     void UpdateTextureFromBuffer() {
-        // Get the texture buffer and dimensions from BizHawk via the shared memory file
-        // protocol has to match MainForm.cs in BizHawk
-        // TODO should probably put this protocol in some shared schema file or something idk
         if (_localTextureBuffer == null || _localTextureBuffer.Length != _sharedTextureBuffer.Length) {
             _localTextureBuffer = new int[_sharedTextureBuffer.Length];
         }
-        _sharedTextureBuffer.CopyTo(_localTextureBuffer, 0);
-        int width = _localTextureBuffer[_sharedTextureBuffer.Length - 3];
-        int height = _localTextureBuffer[_sharedTextureBuffer.Length - 2];
-        _currentFrame = _localTextureBuffer[_sharedTextureBuffer.Length - 1]; // frame index of this texture [hacky solution to sync issues]
 
-        // Debug.Log($"{width}, {height}");
+        // Get the texture buffer and dimensions from BizHawk via the shared memory file
+        // protocol has to match MainForm.cs in BizHawk
+        // TODO should probably put this protocol in some shared schema file or something idk
+        // TODO is this even working? seems like the width and height are always blank?
+        int size = _sharedTextureBuffer.Length;
+        _sharedTextureBuffer.CopyTo(_localTextureBuffer, 0);
+        int width = _localTextureBuffer[^3];
+        int height = _localTextureBuffer[^2];
+        _currentFrame = _localTextureBuffer[^1]; // frame index of this texture [hacky solution to sync issues]
+
+        bool noTextures = !_bufferTexture || !renderTexture;
+
+        int bWidth = _bufferTexture?.width ?? 0;
+        int bHeight = _bufferTexture?.height ?? 0;
+        bool newDimensions = width != 0 && height != 0 && (bWidth != width || bHeight != height);
+
+        if (newDimensions) {
+            Debug.Log($"new width and height received : {width} x {height} (was {bWidth}x{bHeight})");
+        }
+
         // resize textures if necessary
-        if ((width != 0 && height != 0)
-        && (_bufferTexture == null
-        || renderTexture == null
-        ||  _bufferTexture.width != width
-        ||  _bufferTexture.height != height)) {
+        if (noTextures || newDimensions) {
             InitTextures(width, height);
         }
 
-        if (_bufferTexture) {
-            _bufferTexture.SetPixelData(_localTextureBuffer, 0);
-            _bufferTexture.Apply(/*updateMipmaps: false*/);
-
-            // Correct issues with the texture by applying a shader and blitting to a separate render texture:
-            Graphics.Blit(_bufferTexture, renderTexture, _textureCorrectionMat, 0);
+        int bSize = _bufferTexture!.width * _bufferTexture.height;
+        if (bSize == 0) {
+            return;
         }
+
+        if (bSize > size) {
+            Debug.LogWarning($"emulator: buffer bigger than received size {bSize} > {size}");
+            return;
+        }
+
+        try {
+            // TODO: make constants for metadata size/indices in texture buffer
+            _bufferTexture.SetPixelData(_localTextureBuffer[..^3], 0);
+            _bufferTexture.Apply(/*updateMipmaps: false*/);
+        } catch (Exception e) {
+            Debug.Log($"{e}");
+        }
+
+        // Correct issues with the texture by applying a shader and blitting to a separate render texture:
+        Graphics.Blit(_bufferTexture, renderTexture, _textureCorrectionMat, 0);
     }
 
     void Deactivate() {
-        // Debug.Log("Emulator Deactivate");
+        Debug.Log("Emulator Deactivate");
+        Status = EmulatorStatus.Inactive;
 
-        _initialized = false;
         if (_bizHawkLogWriter != null) {
             _bizHawkLogWriter.Close();
         }
+
         if (_emuhawk != null && !_emuhawk.HasExited) {
             // Kill the _emuhawk process
             _emuhawk.Kill();
         }
-        Status = EmulatorStatus.Inactive;
 
         foreach (ISharedBuffer buf in new ISharedBuffer[] {
             _sharedTextureBuffer,
             _sharedAudioBuffer,
             _callMethodRpcBuffer,
             _apiCommandBuffer,
-            // _apiCallRpcBuffer
         }) {
             if (buf != null && buf.IsOpen()) {
                 buf.Close();
@@ -645,8 +730,11 @@ public partial class Emulator : MonoBehaviour
         }
     }
 
-    // Init/re-init the textures for rendering the screen - has to be done whenever the source dimensions change (which happens often on PSX for some reason)
+    /// Init/re-init the textures for rendering the screen - has to be done whenever the source dimensions change (which happens often on PSX for some reason)
     void InitTextures(int width, int height) {
+        Debug.Log($"[emulator] creating new textures with dimensions {width}x{height}");
+
+        // TODO: cache textures
         _textureSize = new Vector2Int(width, height);
         _bufferTexture = new Texture2D(width, height, textureFormat, false);
 
@@ -656,40 +744,27 @@ public partial class Emulator : MonoBehaviour
         }
 
         if (targetRenderer) {
-            if (!Application.isPlaying) {
-                // running in edit mode, manually make a clone of the renderer material
-                // to avoid unity's default cloning behavior that spits out an error message
-                // (probably still leaks materials into the scene but idk if it matters)
-                if (_renderMaterial == null) {
-                    _renderMaterial = Instantiate(targetRenderer.sharedMaterial);
-                    _renderMaterial.name = targetRenderer.sharedMaterial.name;
-                }
-                _renderMaterial.mainTexture = Texture;
-
-                targetRenderer.material = _renderMaterial;
-            } else  {
-                // play mode, just let unity clone the material the default way
-                targetRenderer.material.mainTexture = Texture;
-            }
+            _materialProperties.SetTexture(_shader_MainTex, Texture);
+            targetRenderer.SetPropertyBlock(_materialProperties);
         }
     }
 
-    // Send audio from the emulator to the AudioSource
-    // (this method gets called by Unity if there is an AudioSource component attached)
-    void OnAudioFilterRead(float[] out_buffer, int channels) {
+    /// Send audio from the emulator to the AudioSource
+    /// (this method gets called by Unity if there is an AudioSource component attached)
+    void OnAudioFilterRead(float[] outBuffer, int channels) {
         if (!captureEmulatorAudio) return;
         if (!_sharedAudioBuffer.IsOpen()) return;
         if (Status != EmulatorStatus.Running) return;
 
-        _audioResampler.GetSamples(out_buffer, channels);
+        _audioResampler.GetSamples(outBuffer, channels);
     }
 
+    /// try opening a shared buffer
     void AttemptOpenBuffer(ISharedBuffer buf) {
         try {
             buf.Open();
             // Debug.Log($"Connected to {buf}");
         } catch (FileNotFoundException) {
-            // Debug.LogError(e);
         }
     }
 
@@ -754,6 +829,7 @@ public partial class Emulator : MonoBehaviour
         }
     }
 
+    /// get logs from bizhawk
     void LogBizHawk(object sender, DataReceivedEventArgs e, bool isError) {
         string msg = e.Data;
         if (!string.IsNullOrEmpty(msg)) {
@@ -781,4 +857,5 @@ public partial class Emulator : MonoBehaviour
         };
     }
 }
+
 }
