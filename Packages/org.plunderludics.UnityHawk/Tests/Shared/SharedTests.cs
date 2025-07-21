@@ -68,6 +68,7 @@ public class SharedTests
         e.passInputFromUnity = _passInputFromUnity;
         e.captureEmulatorAudio = _captureEmulatorAudio;
         e.showBizhawkGuiInEditor = _showBizhawkGui;
+        e.OnValidate();
     }
     
     [TearDown]

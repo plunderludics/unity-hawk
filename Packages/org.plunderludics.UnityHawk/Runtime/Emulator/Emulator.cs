@@ -52,8 +52,10 @@ public partial class Emulator : MonoBehaviour
     [Tooltip("If true, audio will be played via an attached AudioSource (may induce some latency). If false, BizHawk will play audio directly to the OS")]
     public bool captureEmulatorAudio = false;
 
+    bool EnableRomFileSelection => !autoSelectRomFile || SaveStateFileIsNull;
+    
     [Header("Files")]
-    [DisableIf("autoSelectRomFile")]
+    [EnableIf("EnableRomFileSelection")]
     public Rom romFile;
     public Savestate saveStateFile;
     bool SaveStateFileIsNull => saveStateFile is null;
@@ -141,7 +143,14 @@ public partial class Emulator : MonoBehaviour
         public bool showBizhawkGui;
     }
 
-    bool _showBizhawkGui; // Either showBizhawkGuiInEditor or showBizhawkGuiInBuild, depending on the context
+
+    bool ShowBizhawkGui => 
+#if UNITY_EDITOR
+        showBizhawkGuiInEditor
+#else
+        showBizhawkGuiInBuild
+#endif
+    ;
 
     BizhawkArgs _currentBizhawkArgs; // remember the params corresponding to the currently running process
 
@@ -171,6 +180,8 @@ public partial class Emulator : MonoBehaviour
 
     /// buffer to receive screen texture from bizhawk
     SharedTextureBuffer _sharedTextureBuffer;
+
+    int[] _localTextureBuffer;
 
     Texture2D _bufferTexture;
 
@@ -208,19 +219,58 @@ public partial class Emulator : MonoBehaviour
         EditorUtility.RevealInFinder(bizhawkLogLocation);
     }
 #endif
-    ///// MonoBehaviour lifecycle
-    ///
+
 #if UNITY_EDITOR
-    void OnValidate() {
+    public void OnValidate() {
+        if (!Equals(_currentBizhawkArgs, MakeBizhawkArgs())) {
+            // Params set in inspector have changed since the bizhawk process was started, needs restart
+            Deactivate();
+        }
+        
+        if (!runInEditMode && Status != EmulatorStatus.Inactive) {
+            Deactivate();
+        }
+
+        if (useAttachedRenderer) {
+            // Default to the attached Renderer component, if there is one
+            targetRenderer = GetComponent<Renderer>();
+            if (!targetRenderer) {
+                Debug.LogWarning("No Renderer attached, will not display emulator graphics");
+            }
+        }
+
 	    if (!config) {
 		    config = (UnityHawkConfig)AssetDatabase.LoadAssetAtPath(Paths.defaultUnityHawkConfigPath, typeof(UnityHawkConfig));
             if (config == null) {
                 Debug.LogError("UnityHawkConfigDefault.asset not found");
             }
         }
+
+        // Select rom file automatically based on save state (if possible)
+        if (autoSelectRomFile && saveStateFile != null) {
+            var roms = AssetDatabase.FindAssets("t:rom")
+                .Select(guid => AssetDatabase.LoadAssetAtPath<Rom>(AssetDatabase.GUIDToAssetPath(guid)))
+                .Where(rom => saveStateFile.MatchesRom(rom));
+            
+            if (roms.Any()) {
+                var rom = roms.First();
+                if (roms.Count() > 1) {
+                    Debug.LogWarning($"Multiple roms found matching savestate {saveStateFile.name}, using first match: {rom}");
+                }
+                romFile = rom;
+            } else {
+                Debug.LogWarning($"No rom found matching savestate {saveStateFile.name}");
+            }
+        }
+
+        // If emulator not running, set texture to savestate screenshot
+        if (!IsRunning && saveStateFile?.Screenshot is not null) {
+            InitTextures(saveStateFile.Screenshot.width, saveStateFile.Screenshot.height);
+        }
     }
 #endif
 
+    ///// MonoBehaviour lifecycle
     // (These methods are public only for convenient testing)
     public void OnEnable()
     {
@@ -228,8 +278,6 @@ public partial class Emulator : MonoBehaviour
         if (Undo.isProcessing) return; // OnEnable gets called after undo/redo, but ignore it
 #endif
         _initialized = false;
-
-        if (!runInEditMode && (!Application.isPlaying || romFile == null)) return;
 
         TryInitialize();
     }
@@ -251,7 +299,12 @@ public partial class Emulator : MonoBehaviour
     ////// Core methods
 
     bool TryInitialize() {
-        SetShowBizhawkGui();
+        if (!runInEditMode && !Application.isPlaying) return false;
+        if (romFile == null) {
+            Debug.LogError("No rom file set, cannot start emulator");
+            return false;
+        }
+
         _currentBizhawkArgs = MakeBizhawkArgs();
 
         // Debug.Log("Emulator Initialize");
@@ -261,14 +314,6 @@ public partial class Emulator : MonoBehaviour
         _systemId = null;
 
         _textureCorrectionMat = new Material(Resources.Load<Shader>(textureCorrectionShaderName));
-
-        if (useAttachedRenderer) {
-            // Default to the attached Renderer component, if there is one
-            targetRenderer = GetComponent<Renderer>();
-            if (!targetRenderer) {
-                Debug.LogWarning("No Renderer attached, will not display emulator graphics");
-            }
-        }
 
         if (captureEmulatorAudio && GetComponent<AudioSource>() == null) {
             Debug.LogWarning("captureEmulatorAudio is enabled but no AudioSource is attached, will not play audio");
@@ -287,7 +332,7 @@ public partial class Emulator : MonoBehaviour
             _emuhawk.StartInfo.EnvironmentVariables["LD_LIBRARY_PATH"] = Paths.dllDir;
             _emuhawk.StartInfo.EnvironmentVariables["MONO_PATH"] = Paths.dllDir;
             _emuhawk.StartInfo.FileName = "/Library/Frameworks/Mono.framework/Versions/Current/Commands/mono";
-            if (_showBizhawkGui) {
+            if (ShowBizhawkGui) {
                 Debug.LogWarning("'Show Bizhawk Gui' is not supported on Mac'");
             }
             args.Add(exePath);
@@ -346,7 +391,7 @@ public partial class Emulator : MonoBehaviour
         }
         args.Add($"--save-ram-watch={ramWatchOutputDirPath}");
 
-        if (!_showBizhawkGui) {
+        if (!ShowBizhawkGui) {
             args.Add("--headless");
             _emuhawk.StartInfo.CreateNoWindow = true;
             _emuhawk.StartInfo.WindowStyle = ProcessWindowStyle.Hidden;
@@ -458,41 +503,11 @@ public partial class Emulator : MonoBehaviour
     }
 
     void _Update() {
-        SetShowBizhawkGui();
-        if (!Equals(_currentBizhawkArgs, MakeBizhawkArgs()))
-            {
-                // Params set in inspector have changed since the bizhawk process was started, needs restart
-                Deactivate();
-            }
-
-#if UNITY_EDITOR
-        if (autoSelectRomFile && saveStateFile != null) {
-            // Select rom file automatically based on save state (if possible)
-            var roms = AssetDatabase.FindAssets("t:rom")
-                .Select(guid => AssetDatabase.LoadAssetAtPath<Rom>(AssetDatabase.GUIDToAssetPath(guid)))
-                .Where(rom => saveStateFile.MatchesRom(rom));
-            
-            if (roms.Any()) {
-                var rom = roms.First();
-                if (roms.Count() > 1) {
-                    Debug.LogWarning($"Multiple roms found matching savestate {saveStateFile.name}, using first match: {rom}");
-                }
-                romFile = rom;
-            } else {
-                Debug.LogWarning($"No rom found matching savestate {saveStateFile.name}");
-            }
-        }
-#endif
-
         if (!Application.isPlaying && !runInEditMode) {
-            if (Status != EmulatorStatus.Inactive) {
-                Deactivate();
-            }
             return;
         }
 
-        if (!_initialized && !TryInitialize())
-        {
+        if (!_initialized && !TryInitialize()) {
             return;
         }
 
@@ -501,7 +516,7 @@ public partial class Emulator : MonoBehaviour
         //  - fortunately for some reason it doesn't steal focus when clicking into a different application]
         // [Except this has a nasty side effect, in the editor in play mode if you try to open a unity modal window
         //  (e.g. the game view aspect ratio config) it gets closed. To avoid this only do the check in the first 5 seconds after starting up]
-        if (Time.realtimeSinceStartup - _startedTime < 5f && Application.isPlaying && !_targetMac && !_showBizhawkGui && _emuhawk != null) {
+        if (Time.realtimeSinceStartup - _startedTime < 5f && Application.isPlaying && !_targetMac && !ShowBizhawkGui && _emuhawk != null) {
             IntPtr unityWindow = Process.GetCurrentProcess().MainWindowHandle;
             IntPtr bizhawkWindow = _emuhawk.MainWindowHandle;
             IntPtr focusedWindow = GetForegroundWindow();
@@ -577,11 +592,13 @@ public partial class Emulator : MonoBehaviour
         // Get the texture buffer and dimensions from BizHawk via the shared memory file
         // protocol has to match MainForm.cs in BizHawk
         // TODO should probably put this protocol in some shared schema file or something idk
-        int[] localTextureBuffer = new int[_sharedTextureBuffer.Length];
-        _sharedTextureBuffer.CopyTo(localTextureBuffer, 0);
-        int width = localTextureBuffer[_sharedTextureBuffer.Length - 3];
-        int height = localTextureBuffer[_sharedTextureBuffer.Length - 2];
-        _currentFrame = localTextureBuffer[_sharedTextureBuffer.Length - 1]; // frame index of this texture [hacky solution to sync issues]
+        if (_localTextureBuffer == null || _localTextureBuffer.Length != _sharedTextureBuffer.Length) {
+            _localTextureBuffer = new int[_sharedTextureBuffer.Length];
+        }
+        _sharedTextureBuffer.CopyTo(_localTextureBuffer, 0);
+        int width = _localTextureBuffer[_sharedTextureBuffer.Length - 3];
+        int height = _localTextureBuffer[_sharedTextureBuffer.Length - 2];
+        _currentFrame = _localTextureBuffer[_sharedTextureBuffer.Length - 1]; // frame index of this texture [hacky solution to sync issues]
 
         // Debug.Log($"{width}, {height}");
         // resize textures if necessary
@@ -594,7 +611,7 @@ public partial class Emulator : MonoBehaviour
         }
 
         if (_bufferTexture) {
-            _bufferTexture.SetPixelData(localTextureBuffer, 0);
+            _bufferTexture.SetPixelData(_localTextureBuffer, 0);
             _bufferTexture.Apply(/*updateMipmaps: false*/);
 
             // Correct issues with the texture by applying a shader and blitting to a separate render texture:
@@ -633,8 +650,7 @@ public partial class Emulator : MonoBehaviour
         _textureSize = new Vector2Int(width, height);
         _bufferTexture = new Texture2D(width, height, textureFormat, false);
 
-        if (!customRenderTexture)
-        {
+        if (!customRenderTexture) {
             renderTexture = new RenderTexture(width, height, depth:0, format:renderTextureFormat);
             renderTexture.name = this.name;
         }
@@ -648,12 +664,12 @@ public partial class Emulator : MonoBehaviour
                     _renderMaterial = Instantiate(targetRenderer.sharedMaterial);
                     _renderMaterial.name = targetRenderer.sharedMaterial.name;
                 }
-                _renderMaterial.mainTexture = renderTexture;
+                _renderMaterial.mainTexture = Texture;
 
                 targetRenderer.material = _renderMaterial;
             } else  {
                 // play mode, just let unity clone the material the default way
-                targetRenderer.material.mainTexture = renderTexture;
+                targetRenderer.material.mainTexture = Texture;
             }
         }
     }
@@ -750,15 +766,6 @@ public partial class Emulator : MonoBehaviour
         }
     }
 
-    void SetShowBizhawkGui()
-    {
-#if UNITY_EDITOR
-        _showBizhawkGui = showBizhawkGuiInEditor;
-#else
-        _showBizhawkGui = showBizhawkGuiInBuild;
-#endif
-    }
-
     BizhawkArgs MakeBizhawkArgs() {
         return new BizhawkArgs {
 #if UNITY_EDITOR
@@ -770,7 +777,7 @@ public partial class Emulator : MonoBehaviour
             passInputFromUnity = passInputFromUnity,
             captureEmulatorAudio = captureEmulatorAudio,
             acceptBackgroundInput = acceptBackgroundInput,
-            showBizhawkGui = _showBizhawkGui
+            showBizhawkGui = ShowBizhawkGui
         };
     }
 }

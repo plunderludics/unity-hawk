@@ -21,6 +21,7 @@ public class EditModeTests: SharedTests
     public IEnumerator TestNotRunningInEditMode()
     {
         e.runInEditMode = false;
+        e.OnValidate();
 
         yield return WaitForAWhile(e);
         Assert.That(e.Status, Is.EqualTo(Emulator.EmulatorStatus.Inactive));

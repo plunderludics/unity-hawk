@@ -18,12 +18,20 @@ public enum Controller {
 
 // input in Unity format
 // (basically same as InputEvent in BizHawk, but keep decoupled in case)
+[System.Serializable]
 public struct InputEvent {
     public string name; // Must correspond to emulator button/axis name E.g. "P1 A"
     public int value;  // 0 or 1 for buttons, -INT_MAX - INT_MAX for analog (?)
     public Controller controller;
     public bool isAnalog;
     public override string ToString() => $"{name}:{value}";
+
+    public InputEvent(string name, int value, Controller controller = Controller.P1, bool isAnalog = false) {
+        this.name = name;
+        this.value = value;
+        this.controller = controller;
+        this.isAnalog = isAnalog;
+    }
 }
 
 // Generic base class for providing input

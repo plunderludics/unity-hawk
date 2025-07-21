@@ -15,9 +15,14 @@ namespace UnityHawk {
 
 public partial class Emulator
 {
-    public RenderTexture Texture => renderTexture;
-    public bool IsRunning => Status == EmulatorStatus.Running; // is the emuhawk.exe process running? (best guess, might be wrong)
-    public string SystemId => _systemId; // (Will be null if no core currently running)
+    /// Currently displayed emulator texture.
+    /// (If emulator is not running but savestate is set, show savestate texture)
+    public Texture Texture => IsRunning ? renderTexture : saveStateFile?.Screenshot;
+    /// Is the emuhawk.exe process running?
+    public bool IsRunning => Status == EmulatorStatus.Running;
+    /// ID of the current emulator platform (e.g. "N64", "PSX", etc.)
+    /// Returns null if emulator is not running.
+    public string SystemId => _systemId;
 
     public enum EmulatorStatus {
         Inactive,
