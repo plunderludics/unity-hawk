@@ -276,13 +276,19 @@ public partial class Emulator : MonoBehaviour {
 #endif
 
     ///// MonoBehaviour lifecycle
+    [Button]
+    public void Reset() {
+        Deactivate();
+        // Will be reactivated in Update on next frame
+    }
+
     // (These methods are public only for convenient testing)
     public void OnEnable() {
         _materialProperties = new MaterialPropertyBlock();
 #if UNITY_EDITOR && UNITY_2022_2_OR_NEWER
         if (Undo.isProcessing) return; // OnEnable gets called after undo/redo, but ignore it
 #endif
-        if (CanRun && runOnEnable) {
+        if (CanRun && runOnEnable && Status == EmulatorStatus.Inactive) {
             Initialize();
         }
     }
@@ -551,6 +557,7 @@ public partial class Emulator : MonoBehaviour {
             if (runInEditMode) {
                 Initialize();
             }
+
             return;
         }
 
@@ -583,6 +590,7 @@ public partial class Emulator : MonoBehaviour {
         if (!_callMethodRpcBuffer.IsOpen()) {
             AttemptOpenBuffer(_callMethodRpcBuffer);
         }
+
         if (!_apiCommandBuffer.IsOpen()) {
             AttemptOpenBuffer(_apiCommandBuffer);
         }
