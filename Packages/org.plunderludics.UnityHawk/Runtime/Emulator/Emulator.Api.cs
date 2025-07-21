@@ -357,7 +357,7 @@ public partial class Emulator {
 
     /// when the sound is muted
     void OnSetIsMuted() {
-        _apiCommandBuffer.CallMethod("SetSoundOn", $"{!isMuted}");
+        _apiCommandBuffer.CallMethod(ApiCommands.SetSoundOn, $"{!isMuted}");
     }
 }
 }

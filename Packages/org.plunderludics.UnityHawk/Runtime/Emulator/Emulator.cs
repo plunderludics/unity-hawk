@@ -15,7 +15,6 @@ using UnityEditor;
 #endif
 
 using UnityEngine.Serialization;
-using Random = UnityEngine.Random;
 
 namespace UnityHawk {
 
@@ -29,15 +28,15 @@ public enum EmulatorRenderMode {
 public partial class Emulator : MonoBehaviour {
     const double BizhawkSampleRate = 44100f;
 
-    const string _savestateExtension = "savestate";
+    const string SavestateExtension = "savestate";
 
-    const string textureCorrectionShaderName = "TextureCorrection";
+    const string TextureCorrectionShaderName = "TextureCorrection";
 
-    const TextureFormat textureFormat = TextureFormat.BGRA32;
+    const TextureFormat TextureFormat = UnityEngine.TextureFormat.BGRA32;
 
-    const RenderTextureFormat renderTextureFormat = RenderTextureFormat.BGRA32;
+    const RenderTextureFormat RenderTextureFormat = UnityEngine.RenderTextureFormat.BGRA32;
 
-    static readonly int _shader_MainTex = Shader.PropertyToID("_MainTex");
+    static readonly int Shader_MainTex = Shader.PropertyToID("_MainTex");
 
     const bool _targetMac =
 #if UNITY_EDITOR_OSX || UNITY_STANDALONE_OSX
@@ -67,7 +66,7 @@ public partial class Emulator : MonoBehaviour {
     public Rom romFile;
 
     [Header("Rendering")]
-    public EmulatorRenderMode RenderMode;
+    public EmulatorRenderMode renderMode;
 
     // AAA: how to not break this comltly OnValidat?
     // [Deprecated("aaa")]
@@ -75,17 +74,17 @@ public partial class Emulator : MonoBehaviour {
     [Tooltip("if the emulator should use its attached renderer")]
     public bool useAttachedRenderer = true;
 
-    [ShowIf(nameof(RenderMode), EmulatorRenderMode.ExternalRenderer)]
+    [ShowIf(nameof(renderMode), EmulatorRenderMode.ExternalRenderer)]
     public Renderer targetRenderer;
 
-    // AAA
+    // AAA: is there a way to make this backwards compatible?
     // [Deprecated("aaa")]
     [HideInInspector]
     [Tooltip("Write to an existing render texture rather than creating one automatically")]
     [FormerlySerializedAs("writeToTexture")]
     public bool customRenderTexture = false;
 
-    [ShowIf(nameof(RenderMode), EmulatorRenderMode.RenderTexture)]
+    [ShowIf(nameof(renderMode), EmulatorRenderMode.RenderTexture)]
     [Tooltip("the render texture to write to")]
     public RenderTexture renderTexture;
     // We have to maintain a separate rendertexture just for the purpose of flipping the image we get from the emulator
@@ -124,6 +123,7 @@ public partial class Emulator : MonoBehaviour {
     public new bool runInEditMode = false;
 
     [Foldout("Development")]
+
     [ShowIf("runInEditMode")]
     [ReadOnlyWhenPlaying]
     [Tooltip("Whether BizHawk will accept input when window is unfocused (in edit mode)")]
@@ -156,21 +156,22 @@ public partial class Emulator : MonoBehaviour {
     [SerializeField]
     AudioResampler audioResampler;
 
-    [Foldout("Debug/State")]
+    [Foldout("State")]
     [ReadOnly, SerializeField] bool _initialized;
 
-    [Foldout("Debug/State")]
+    [Foldout("State")]
     [ReadOnly, SerializeField] bool _shouldInitialize;
 
-    [Foldout("Debug/State")]
+    [Foldout("State")]
     [ReadOnly, SerializeField] EmulatorStatus _status;
 
-    [Foldout("Debug/State")]
+    [Foldout("State")]
     [ReadOnly, SerializeField] int _currentFrame; // The frame index of the most-recently grabbed texture
 
-    [Foldout("Debug/State")]
+    [Foldout("State")]
     [ReadOnly, SerializeField] string _systemId; // The system ID of the current core (e.g. "N64", "PSX", etc.)
 
+    /// the bizhawk emulator process
     Process _emuhawk;
 
     /// when the emulator boots up
@@ -266,12 +267,6 @@ public partial class Emulator : MonoBehaviour {
         get => Application.isPlaying || runInEditMode;
     }
 
-#if UNITY_EDITOR
-    [Button]
-    void ShowBizhawkLogInOS() {
-        EditorUtility.RevealInFinder(bizhawkLogLocation);
-    }
-#endif
     ///// MonoBehaviour lifecycle
     // (These methods are public only for convenient testing)
     [Button]
@@ -294,7 +289,7 @@ public partial class Emulator : MonoBehaviour {
 
         DeactivateIfNeeded();
 
-        if (RenderMode == EmulatorRenderMode.AttachedRenderer) {
+        if (renderMode == EmulatorRenderMode.AttachedRenderer) {
             // Default to the attached Renderer component, if there is one
             targetRenderer = GetComponent<Renderer>();
             if (!targetRenderer) {
@@ -331,7 +326,7 @@ public partial class Emulator : MonoBehaviour {
 #endif
 
     public void Awake() {
-        _textureCorrectionMat = new Material(Resources.Load<Shader>(textureCorrectionShaderName));
+        _textureCorrectionMat = new Material(Resources.Load<Shader>(TextureCorrectionShaderName));
         _materialProperties = new MaterialPropertyBlock();
     }
 
@@ -339,7 +334,7 @@ public partial class Emulator : MonoBehaviour {
 #if UNITY_EDITOR && UNITY_2022_2_OR_NEWER
         if (Undo.isProcessing) return; // OnEnable gets called after undo/redo, but ignore it
 #endif
-        if (CanRun && runOnEnable) {
+        if (CanRun && runOnEnable && Status == EmulatorStatus.Inactive) {
             Initialize();
         }
     }
@@ -385,18 +380,19 @@ public partial class Emulator : MonoBehaviour {
 
         _currentBizhawkArgs = MakeBizhawkArgs();
 
-        Debug.Log("Emulator Initialize");
+        if (!customRenderTexture) renderTexture = null; // Clear texture so that it's forced to be reinitialized
+
         Status = EmulatorStatus.Inactive;
         _systemId = null;
 
-        _textureCorrectionMat = new Material(Resources.Load<Shader>(textureCorrectionShaderName));
+        _textureCorrectionMat = new Material(Resources.Load<Shader>(TextureCorrectionShaderName));
 
-        if (RenderMode != EmulatorRenderMode.RenderTexture) {
+        if (renderMode != EmulatorRenderMode.RenderTexture) {
             renderTexture = null; // Clear texture so that it's forced to be reinitialized
         }
         else {
             // Default to the attached Renderer component, if there is one
-            if (RenderMode == EmulatorRenderMode.AttachedRenderer) {
+            if (renderMode == EmulatorRenderMode.AttachedRenderer) {
                 targetRenderer = GetComponent<Renderer>();
             }
 
@@ -480,7 +476,7 @@ public partial class Emulator : MonoBehaviour {
         }
 
         // Save savestates with extension .savestate instead of .State, this is because Unity treats .State as some other kind of asset
-        args.Add($"--savestate-extension={_savestateExtension}");
+        args.Add($"--savestate-extension={SavestateExtension}");
 
         // set savestates output dir
         // (default to application directory when not provided)
@@ -660,6 +656,7 @@ public partial class Emulator : MonoBehaviour {
         if (!_callMethodRpcBuffer.IsOpen()) {
             AttemptOpenBuffer(_callMethodRpcBuffer);
         }
+
         if (!_apiCommandBuffer.IsOpen()) {
             AttemptOpenBuffer(_apiCommandBuffer);
         }
@@ -691,6 +688,13 @@ public partial class Emulator : MonoBehaviour {
             Deactivate();
         }
     }
+
+    #if UNITY_EDITOR
+        [Button]
+        private void ShowBizhawkLogInOS() {
+            EditorUtility.RevealInFinder(bizhawkLogLocation);
+        }
+    #endif
 
     /// deactivates the emulator if it's in a state where it should be deactivated
     /// returns whether it was deactivated
@@ -801,10 +805,10 @@ public partial class Emulator : MonoBehaviour {
         Debug.Log($"[emulator] creating new textures with dimensions {width}x{height}");
 
         // TODO: cache textures
-        _bufferTexture = new Texture2D(width, height, textureFormat, false);
+        _bufferTexture = new Texture2D(width, height, TextureFormat, false);
 
-        if (RenderMode != EmulatorRenderMode.RenderTexture) {
-            renderTexture = new RenderTexture(width, height, depth:0, format:renderTextureFormat);
+        if (renderMode != EmulatorRenderMode.RenderTexture) {
+            renderTexture = new RenderTexture(width, height, depth:0, format:RenderTextureFormat);
             renderTexture.name = name;
         }
 
@@ -813,7 +817,7 @@ public partial class Emulator : MonoBehaviour {
         }
 
         if (targetRenderer) {
-            _materialProperties.SetTexture(_shader_MainTex, Texture);
+            _materialProperties.SetTexture(Shader_MainTex, Texture);
             targetRenderer.SetPropertyBlock(_materialProperties);
         }
     }
