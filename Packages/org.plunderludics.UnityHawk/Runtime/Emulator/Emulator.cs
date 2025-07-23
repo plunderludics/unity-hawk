@@ -388,9 +388,10 @@ public partial class Emulator : MonoBehaviour {
         // create a temporary file for this config
         configPath = Path.GetFullPath($"{Path.GetTempPath()}/unityhawk-config-{guid}.ini");
 
-        bizConfig.SoundVolume = volume;
+        bizConfig.SoundVolume = Volume;
         bizConfig.StartPaused = IsPaused;
-        bizConfig.SoundEnabled = !isMuted;
+        bizConfig.SoundEnabled = !IsMuted;
+        bizConfig.SpeedPercent = SpeedPercent;
         ConfigService.Save(configPath, bizConfig);
 
         args.Add($"--config={configPath}");

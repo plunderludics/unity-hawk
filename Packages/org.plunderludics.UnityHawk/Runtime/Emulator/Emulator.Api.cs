@@ -13,7 +13,7 @@ public partial class Emulator {
     [Header("api")]
     [OnValueChanged(nameof(OnSetVolume))]
     [Range(0, 100)]
-    [Tooltip("the the volume of the emulator, 0-100")]
+    [Tooltip("the volume of the emulator, 0-100")]
     [SerializeField] int volume = 100;
 
     [OnValueChanged(nameof(OnSetIsMuted))]
@@ -23,6 +23,11 @@ public partial class Emulator {
     [OnValueChanged(nameof(OnSetIsPaused))]
     [Tooltip("if the emulator is paused")]
     [SerializeField] bool isPaused;
+    
+    [OnValueChanged(nameof(OnSetSpeedPercent))]
+    [Range(0, 200)]
+    [Tooltip("emulator speed as a percentage")]
+    [SerializeField] int speedPercent = 100;
 
     /// if the emulator is paused
     public bool IsPaused {
@@ -34,10 +39,31 @@ public partial class Emulator {
     }
 
     /// the emulator current volume
-    public int Volume => volume;
+    public int Volume {
+        get => volume;
+        set {
+            volume = value;
+            OnSetVolume();
+        }
+    }
 
-    /// the emulator current volume
-    public bool IsMuted => isMuted;
+    /// if the emulator is muted
+    public bool IsMuted {
+        get => isMuted;
+        set {
+            isMuted = value;
+            OnSetIsMuted();
+        }
+    }
+
+    /// the emulator speed as a percentage
+    public int SpeedPercent {
+        get => speedPercent;
+        set {
+            speedPercent = value;
+            OnSetSpeedPercent();
+        }
+    }
 
     /// Currently displayed emulator texture.
     /// (If emulator is not running but savestate is set, show savestate texture)
@@ -82,7 +108,7 @@ public partial class Emulator {
         }
     }
 
-    /// .
+    /// frame index of latest received texture
     public int CurrentFrame => _currentFrame;
 
     /// delegate for registering lua callbacks
@@ -210,13 +236,13 @@ public partial class Emulator {
     /// Sets the speed of the emulator as integer percentage
     /// </summary>
     public void SetSpeedPercent(int percent) {
-        _apiCommandBuffer.CallMethod(ApiCommands.SetSpeedPercent, $"{percent}");
+        speedPercent = percent;
     }
 
     ///// RAM read/write
     /// For all methods, domain defaults to main memory if not specified
 
-    // ReadXXX methodshave type-safety issues so disabled for now, use WatchXXX instead
+    // ReadXXX methods have thread-safety issues so disabled for now, use WatchXXX instead
     // public uint? ReadUnsigned(long address, int size, bool isBigEndian, string domain = null) {
     //     string args = $"{address},{size},{isBigEndian}";
     //     if (domain != null) {
@@ -356,6 +382,11 @@ public partial class Emulator {
     /// when the sound is muted
     void OnSetIsMuted() {
         _apiCommandBuffer.CallMethod(ApiCommands.SetSoundOn, $"{!isMuted}");
+    }
+
+    /// when the speed percent changes
+    void OnSetSpeedPercent() {
+        _apiCommandBuffer.CallMethod(ApiCommands.SetSpeedPercent, $"{speedPercent}");
     }
 }
 }
