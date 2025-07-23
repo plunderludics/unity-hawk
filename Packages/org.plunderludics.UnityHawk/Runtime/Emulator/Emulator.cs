@@ -26,19 +26,26 @@ public enum EmulatorRenderMode {
 
 [ExecuteInEditMode]
 public partial class Emulator : MonoBehaviour {
+    /// the sample rate for bizhawk audio
     const double BizhawkSampleRate = 44100f;
 
+    /// the file extension of savestates
     const string SavestateExtension = "savestate";
 
+    /// the shader name for texture correction
     const string TextureCorrectionShaderName = "TextureCorrection";
 
+    /// the texture format of the buffer texture
     const TextureFormat TextureFormat = UnityEngine.TextureFormat.BGRA32;
 
+    /// the texture format of the render texture
     const RenderTextureFormat RenderTextureFormat = UnityEngine.RenderTextureFormat.BGRA32;
 
+    /// the _MainTex shader property id
     static readonly int Shader_MainTex = Shader.PropertyToID("_MainTex");
 
-    const bool _targetMac =
+    /// if we are targetting mac
+    const bool IsTargetMac =
 #if UNITY_EDITOR_OSX || UNITY_STANDALONE_OSX
         true;
 #else
@@ -48,6 +55,7 @@ public partial class Emulator : MonoBehaviour {
     [Tooltip("if the emulator launches on start")]
     public bool runOnEnable = true;
 
+    [Header("Game")]
     [Header("Game")]
     public Savestate saveStateFile;
 
@@ -59,48 +67,44 @@ public partial class Emulator : MonoBehaviour {
     public bool autoSelectRomFile = true;
 
     /// .
+    //TODO: even if the rom is not in the db, in theory we can still match to a savestate using hash or filename? Not very concerned about this edge case though
     bool EnableRomFileSelection => !autoSelectRomFile || SaveStateFileIsNull || saveStateFile.RomInfo.NotInDatabase;
 
     [EnableIf(nameof(EnableRomFileSelection))]
     [Tooltip("a rom file")]
     public Rom romFile;
 
+    ///// Rendering
     [Header("Rendering")]
     public EmulatorRenderMode renderMode;
 
-    // AAA: how to not break this comltly OnValidat?
-    // [Deprecated("aaa")]
-    [HideInInspector]
-    [Tooltip("if the emulator should use its attached renderer")]
-    public bool useAttachedRenderer = true;
-
     [ShowIf(nameof(renderMode), EmulatorRenderMode.ExternalRenderer)]
     public Renderer targetRenderer;
-
-    // AAA: is there a way to make this backwards compatible?
-    // [Deprecated("aaa")]
-    [HideInInspector]
-    [Tooltip("Write to an existing render texture rather than creating one automatically")]
-    [FormerlySerializedAs("writeToTexture")]
-    public bool customRenderTexture = false;
 
     [ShowIf(nameof(renderMode), EmulatorRenderMode.RenderTexture)]
     [Tooltip("the render texture to write to")]
     public RenderTexture renderTexture;
     // We have to maintain a separate rendertexture just for the purpose of flipping the image we get from the emulator
 
+    ///// Input
     [Header("Input")]
     [Tooltip("If true, Unity will pass keyboard input to the emulator (only in play mode!). If false, BizHawk will accept input directly from the OS")]
     public bool passInputFromUnity = true;
 
     [Tooltip("If null and no InputProvider component attached, defaults to BasicInputProvider. Subclass InputProvider for custom behavior.")]
-    [ShowIf("passInputFromUnity")]
+    [ShowIf(nameof(passInputFromUnity)]
     public InputProvider inputProvider = null;
 
+    ///// Audio
     [Header("Audio")]
     [Tooltip("If true, audio will be played via an attached AudioSource (may induce some latency). If false, BizHawk will play audio directly to the OS")]
     public bool captureEmulatorAudio = false;
 
+    [ShowIf(nameof(captureEmulatorAudio))]
+    [SerializeField]
+    AudioResampler audioResampler;
+
+    ///// Additional Files
     [Header("Additional Files")]
     [Tooltip("a lua script file that will be loaded by the emulator (.lua)")]
     public LuaScript luaScriptFile;
@@ -108,9 +112,11 @@ public partial class Emulator : MonoBehaviour {
     [Tooltip("a lua script file that will be loaded by the emulator (.lua)")]
     public RamWatch ramWatchFile;
 
+    ///// Bizhawk Config
+    [FormerlySerializedAs("configFile")]
     [Foldout("BizHawk Config")]
-    [Tooltip("a BizHawk config file (.ini)")]
-    public Config configFile;
+    [Tooltip("a BizHawk config file (.ini) that will be copied for this instance")]
+    public Config baseConfigFile;
 
     ///// Development
     [Foldout("Development")]
@@ -124,7 +130,7 @@ public partial class Emulator : MonoBehaviour {
 
     [Foldout("Development")]
 
-    [ShowIf("runInEditMode")]
+    [ShowIf(nameof(runInEditMode))]
     [ReadOnlyWhenPlaying]
     [Tooltip("Whether BizHawk will accept input when window is unfocused (in edit mode)")]
     public bool acceptBackgroundInput = true;
@@ -147,15 +153,11 @@ public partial class Emulator : MonoBehaviour {
     [Foldout("Debug")]
     [SerializeField] bool writeBizhawkLogs = true;
 
-    [ShowIf("writeBizhawkLogs")]
+    [ShowIf(nameof(writeBizhawkLogs))]
     [Foldout("Debug")]
     [ReadOnly, SerializeField] string bizhawkLogLocation;
 
-    [Foldout("Debug")]
-    [ShowIf("captureEmulatorAudio")]
-    [SerializeField]
-    AudioResampler audioResampler;
-
+    ///// State
     [Foldout("State")]
     [ReadOnly, SerializeField] bool _initialized;
 
@@ -171,6 +173,7 @@ public partial class Emulator : MonoBehaviour {
     [Foldout("State")]
     [ReadOnly, SerializeField] string _systemId; // The system ID of the current core (e.g. "N64", "PSX", etc.)
 
+    ///// props
     /// the bizhawk emulator process
     Process _emuhawk;
 
@@ -196,7 +199,7 @@ public partial class Emulator : MonoBehaviour {
         public bool ShowBizhawkGui;
     }
 
-
+    /// if the bizhawk gui should be shown
     bool ShowBizhawkGui =>
 #if UNITY_EDITOR
         showBizhawkGuiInEditor
@@ -235,10 +238,13 @@ public partial class Emulator : MonoBehaviour {
     /// buffer to receive screen texture from bizhawk
     SharedTextureBuffer _sharedTextureBuffer;
 
+    /// the local texture buffer
     int[] _localTextureBuffer;
 
-    Texture2D _bufferTexture;
+    /// the local texture
+    Texture2D _localTexture;
 
+    /// the material for texture correction
     Material _textureCorrectionMat;
 
     /// material used for rendering in edit mode
@@ -252,20 +258,20 @@ public partial class Emulator : MonoBehaviour {
 
     /// the time the emulator started running
     float _startedTime;
-
-    [DllImport("user32.dll")]
-    private static extern int SetForegroundWindow(IntPtr hwnd);
-    [DllImport("user32.dll")]
-    private static extern bool ShowWindow(IntPtr hwnd, int nCmdShow);
-    [DllImport("user32.dll")]
-    private static extern IntPtr GetForegroundWindow();
-
     Action _deferredForMainThread = null; // Pretty ugly solution for rpc handlers to get stuff to run on the main thread
 
     /// if the game can be running right now (application playing or runInEditMode)
     bool CanRun {
         get => Application.isPlaying || runInEditMode;
     }
+
+    ///// user32 dlls
+    [DllImport("user32.dll")]
+    private static extern int SetForegroundWindow(IntPtr hwnd);
+    [DllImport("user32.dll")]
+    private static extern bool ShowWindow(IntPtr hwnd, int nCmdShow);
+    [DllImport("user32.dll")]
+    private static extern IntPtr GetForegroundWindow();
 
     ///// MonoBehaviour lifecycle
     // (These methods are public only for convenient testing)
@@ -380,8 +386,6 @@ public partial class Emulator : MonoBehaviour {
 
         _currentBizhawkArgs = MakeBizhawkArgs();
 
-        if (!customRenderTexture) renderTexture = null; // Clear texture so that it's forced to be reinitialized
-
         Status = EmulatorStatus.Inactive;
         _systemId = null;
 
@@ -389,8 +393,7 @@ public partial class Emulator : MonoBehaviour {
 
         if (renderMode != EmulatorRenderMode.RenderTexture) {
             renderTexture = null; // Clear texture so that it's forced to be reinitialized
-        }
-        else {
+        } else {
             // Default to the attached Renderer component, if there is one
             if (renderMode == EmulatorRenderMode.AttachedRenderer) {
                 targetRenderer = GetComponent<Renderer>();
@@ -414,7 +417,7 @@ public partial class Emulator : MonoBehaviour {
         _emuhawk = new Process();
         _emuhawk.StartInfo.UseShellExecute = false;
         var args = _emuhawk.StartInfo.ArgumentList;
-        if (_targetMac) {
+        if (IsTargetMac) {
             // Doesn't really work yet, need to make some more changes in the bizhawk executable
             _emuhawk.StartInfo.EnvironmentVariables["LD_LIBRARY_PATH"] = Paths.dllDir;
             _emuhawk.StartInfo.EnvironmentVariables["MONO_PATH"] = Paths.dllDir;
@@ -437,12 +440,12 @@ public partial class Emulator : MonoBehaviour {
         }
 
         // add config path
-        var configPath = configFile
-            ? Paths.GetAssetPath(configFile)
+        var configPath = baseConfigFile
+            ? Paths.GetAssetPath(baseConfigFile)
             : Path.GetFullPath(Paths.defaultBizhawkConfigPath);
 
-        if (configFile) {
-            configPath = Paths.GetAssetPath(configFile);
+        if (baseConfigFile) {
+            configPath = Paths.GetAssetPath(baseConfigFile);
             Debug.Log($"[emulator] found config at {configPath}");
         } else {
             Debug.Log($"[emulator] {name} using default config file at {configPath}");
@@ -632,7 +635,7 @@ public partial class Emulator : MonoBehaviour {
         //  - fortunately for some reason it doesn't steal focus when clicking into a different application]
         // [Except this has a nasty side effect, in the editor in play mode if you try to open a unity modal window
         //  (e.g. the game view aspect ratio config) it gets closed. To avoid this only do the check in the first 5 seconds after starting up]
-        if (Time.realtimeSinceStartup - _startedTime < 5f && Application.isPlaying && !_targetMac && !ShowBizhawkGui && _emuhawk != null) {
+        if (Time.realtimeSinceStartup - _startedTime < 5f && Application.isPlaying && !IsTargetMac && !ShowBizhawkGui && _emuhawk != null) {
             IntPtr unityWindow = Process.GetCurrentProcess().MainWindowHandle;
             IntPtr bizhawkWindow = _emuhawk.MainWindowHandle;
             IntPtr focusedWindow = GetForegroundWindow();
@@ -740,10 +743,10 @@ public partial class Emulator : MonoBehaviour {
         int height = _localTextureBuffer[^2];
         _currentFrame = _localTextureBuffer[^1]; // frame index of this texture [hacky solution to sync issues]
 
-        bool noTextures = !_bufferTexture || !renderTexture;
+        bool noTextures = !_localTexture || !renderTexture;
 
-        int bWidth = _bufferTexture?.width ?? 0;
-        int bHeight = _bufferTexture?.height ?? 0;
+        int bWidth = _localTexture?.width ?? 0;
+        int bHeight = _localTexture?.height ?? 0;
         bool newDimensions = width != 0 && height != 0 && (bWidth != width || bHeight != height);
 
         if (newDimensions) {
@@ -755,7 +758,7 @@ public partial class Emulator : MonoBehaviour {
             InitTextures(width, height);
         }
 
-        int bSize = _bufferTexture!.width * _bufferTexture.height;
+        int bSize = _localTexture!.width * _localTexture.height;
         if (bSize == 0) {
             return;
         }
@@ -767,14 +770,14 @@ public partial class Emulator : MonoBehaviour {
 
         try {
             // TODO: make constants for metadata size/indices in texture buffer
-            _bufferTexture.SetPixelData(_localTextureBuffer[..^3], 0);
-            _bufferTexture.Apply(/*updateMipmaps: false*/);
+            _localTexture.SetPixelData(_localTextureBuffer[..^3], 0);
+            _localTexture.Apply(/*updateMipmaps: false*/);
         } catch (Exception e) {
             Debug.Log($"{e}");
         }
 
         // Correct issues with the texture by applying a shader and blitting to a separate render texture:
-        Graphics.Blit(_bufferTexture, renderTexture, _textureCorrectionMat, 0);
+        Graphics.Blit(_localTexture, renderTexture, _textureCorrectionMat, 0);
     }
 
     void Deactivate() {
@@ -805,7 +808,7 @@ public partial class Emulator : MonoBehaviour {
         Debug.Log($"[emulator] creating new textures with dimensions {width}x{height}");
 
         // TODO: cache textures
-        _bufferTexture = new Texture2D(width, height, TextureFormat, false);
+        _localTexture = new Texture2D(width, height, TextureFormat, false);
 
         if (renderMode != EmulatorRenderMode.RenderTexture) {
             renderTexture = new RenderTexture(width, height, depth:0, format:RenderTextureFormat);
@@ -920,7 +923,7 @@ public partial class Emulator : MonoBehaviour {
 #if UNITY_EDITOR
             RomFile = romFile,
             SaveStateFile = saveStateFile,
-            ConfigFile = configFile,
+            ConfigFile = baseConfigFile,
             LuaScriptFile = luaScriptFile,
 #endif
             PassInputFromUnity = passInputFromUnity,
