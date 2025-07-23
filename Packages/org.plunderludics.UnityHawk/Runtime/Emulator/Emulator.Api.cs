@@ -13,7 +13,7 @@ public partial class Emulator {
     [Foldout("BizHawk Config")]
     [OnValueChanged(nameof(OnSetVolume))]
     [Range(0, 100)]
-    [Tooltip("the the volume of the emulator, 0-100")]
+    [Tooltip("the volume of the emulator, 0-100")]
     [SerializeField] int volume = 100;
 
     [Foldout("BizHawk Config")]
@@ -25,6 +25,11 @@ public partial class Emulator {
     [OnValueChanged(nameof(OnSetIsPaused))]
     [Tooltip("if the emulator is paused")]
     [SerializeField] bool isPaused;
+    
+    [OnValueChanged(nameof(OnSetSpeedPercent))]
+    [Range(0, 200)]
+    [Tooltip("emulator speed as a percentage")]
+    [SerializeField] int speedPercent = 100;
 
     /// if the emulator is paused
     public bool IsPaused {
@@ -36,10 +41,31 @@ public partial class Emulator {
     }
 
     /// the emulator current volume
-    public int Volume => volume;
+    public int Volume {
+        get => volume;
+        set {
+            volume = value;
+            OnSetVolume();
+        }
+    }
 
-    /// the emulator current volume
-    public bool IsMuted => isMuted;
+    /// if the emulator is muted
+    public bool IsMuted {
+        get => isMuted;
+        set {
+            isMuted = value;
+            OnSetIsMuted();
+        }
+    }
+
+    /// the emulator speed as a percentage
+    public int SpeedPercent {
+        get => speedPercent;
+        set {
+            speedPercent = value;
+            OnSetSpeedPercent();
+        }
+    }
 
     /// Currently displayed emulator texture.
     /// (If emulator is not running but savestate is set, show savestate texture)
@@ -48,8 +74,8 @@ public partial class Emulator {
     /// is the emulator process started
     public bool IsStarted => Status >= EmulatorStatus.Started;
 
-    /// is the emulator process running a game? (best guess, might be wrong)
-    public bool IsRunning => Status >= EmulatorStatus.Running; // is the emuhawk.exe process running? (best guess, might be wrong)
+    /// is the emulator process running a game?
+    public bool IsRunning => Status >= EmulatorStatus.Running;
 
     /// ID of the current emulator platform (e.g. "N64", "PSX", etc.)
     /// Returns null if emulator is not running.
@@ -84,7 +110,7 @@ public partial class Emulator {
         }
     }
 
-    /// .
+    /// frame index of latest received texture
     public int CurrentFrame => _currentFrame;
 
     /// delegate for registering lua callbacks
@@ -100,21 +126,10 @@ public partial class Emulator {
         _registeredLuaCallbacks[methodName] = luaCallback;
     }
 
-    /// Register a method that can be called via `unityhawk.callmethod('MethodName')` in BizHawk lua
     [Obsolete("use RegisterLuaCallback instead")]
-    public void RegisterMethod(string methodName, LuaCallback luaCallback) {
-        RegisterLuaCallback(methodName, luaCallback);
-    }
+    public void RegisterMethod(string methodName, LuaCallback luaCallback) => RegisterLuaCallback(methodName, luaCallback);
 
     ///// Bizhawk API methods
-    // For LoadState/SaveState/LoadRom, path should be relative to StreamingAssets (same as for rom/savestate/lua params in the inspector)
-    // can also pass absolute path (but this will most likely break in build!)
-
-    /// calls the emulator api to pause/unpause
-    void OnSetIsPaused() {
-        string command = isPaused ? ApiCommands.Pause : ApiCommands.Unpause;
-        _apiCommandBuffer.CallMethod(command, null);
-    }
 
     /// pauses the emulator
     public void Pause() {
@@ -124,6 +139,26 @@ public partial class Emulator {
     /// unpauses the emulator
     public void Unpause() {
         IsPaused = false;
+    }
+
+    /// mutes the emulator (and disables sound engine)
+    public void Mute() {
+        IsMuted = true;
+    }
+
+    /// unmutes the emulator (and enables sound engine)
+    public void Unmute() {
+        IsMuted = false;
+    }
+
+    /// sets the emulator volume
+    public void SetVolume(int value) {
+        volume = value;
+    }
+
+    /// sets the speed of the emulator as integer percentage
+    public void SetSpeedPercent(int percent) {
+        speedPercent = percent;
     }
 
     /// saves a state to a given path
@@ -201,24 +236,10 @@ public partial class Emulator {
         _apiCommandBuffer.CallMethod(ApiCommands.FrameAdvance, null);
     }
 
-    /// <summary>
-    /// sets the emulator volume
-    /// </summary>
-    public void SetVolume(int value) {
-        volume = value;
-    }
-
-    /// <summary>
-    /// Sets the speed of the emulator as integer percentage
-    /// </summary>
-    public void SetSpeedPercent(int percent) {
-        _apiCommandBuffer.CallMethod(ApiCommands.SetSpeedPercent, $"{percent}");
-    }
-
     ///// RAM read/write
     /// For all methods, domain defaults to main memory if not specified
 
-    // ReadXXX methods have type-safety issues so disabled for now, use WatchXXX instead
+    // ReadXXX methods have thread-safety issues so disabled for now, use WatchXXX instead
     // public uint? ReadUnsigned(long address, int size, bool isBigEndian, string domain = null) {
     //     string args = $"{address},{size},{isBigEndian}";
     //     if (domain != null) {
@@ -358,6 +379,17 @@ public partial class Emulator {
     /// when the sound is muted
     void OnSetIsMuted() {
         _apiCommandBuffer.CallMethod(ApiCommands.SetSoundOn, $"{!isMuted}");
+    }
+
+    /// when the speed percent changes
+    void OnSetSpeedPercent() {
+        _apiCommandBuffer.CallMethod(ApiCommands.SetSpeedPercent, $"{speedPercent}");
+    }
+
+    /// when emulator is paused or unpaused
+    void OnSetIsPaused() {
+        string command = IsPaused ? ApiCommands.Pause : ApiCommands.Unpause;
+        _apiCommandBuffer.CallMethod(command, null);
     }
 }
 }
