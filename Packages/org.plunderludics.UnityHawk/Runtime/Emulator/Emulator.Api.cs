@@ -10,16 +10,18 @@ using System.Linq;
 namespace UnityHawk {
 public partial class Emulator {
     ///// props
-    [Header("api")]
+    [Foldout("BizHawk Config")]
     [OnValueChanged(nameof(OnSetVolume))]
     [Range(0, 100)]
     [Tooltip("the the volume of the emulator, 0-100")]
     [SerializeField] int volume = 100;
 
+    [Foldout("BizHawk Config")]
     [OnValueChanged(nameof(OnSetIsMuted))]
     [Tooltip("if the emulator is muted")]
     [SerializeField] bool isMuted;
 
+    [Foldout("BizHawk Config")]
     [OnValueChanged(nameof(OnSetIsPaused))]
     [Tooltip("if the emulator is paused")]
     [SerializeField] bool isPaused;
@@ -216,7 +218,7 @@ public partial class Emulator {
     ///// RAM read/write
     /// For all methods, domain defaults to main memory if not specified
 
-    // ReadXXX methodshave type-safety issues so disabled for now, use WatchXXX instead
+    // ReadXXX methods have type-safety issues so disabled for now, use WatchXXX instead
     // public uint? ReadUnsigned(long address, int size, bool isBigEndian, string domain = null) {
     //     string args = $"{address},{size},{isBigEndian}";
     //     if (domain != null) {
