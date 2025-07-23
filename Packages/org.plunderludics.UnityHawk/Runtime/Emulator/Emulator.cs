@@ -92,7 +92,7 @@ public partial class Emulator : MonoBehaviour {
     public bool passInputFromUnity = true;
 
     [Tooltip("If null and no InputProvider component attached, defaults to BasicInputProvider. Subclass InputProvider for custom behavior.")]
-    [ShowIf(nameof(passInputFromUnity)]
+    [ShowIf(nameof(passInputFromUnity))]
     public InputProvider inputProvider = null;
 
     ///// Audio
