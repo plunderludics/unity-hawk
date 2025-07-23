@@ -228,7 +228,10 @@
           "System.Reflection.Emit": "4.7.0"
         },
         "runtime": {
-          "BizHawk.BizInvoke.dll": {}
+          "BizHawk.BizInvoke.dll": {
+            "assemblyVersion": "1.0.0.0",
+            "fileVersion": "1.0.0.0"
+          }
         }
       },
       "BizHawk.Bizware.BizwareGL/1.0.0": {
@@ -238,7 +241,10 @@
           "System.Drawing.Common": "6.0.0"
         },
         "runtime": {
-          "BizHawk.Bizware.BizwareGL.dll": {}
+          "BizHawk.Bizware.BizwareGL.dll": {
+            "assemblyVersion": "1.0.0.0",
+            "fileVersion": "1.0.0.0"
+          }
         }
       },
       "BizHawk.Client.Common/1.0.0": {
@@ -250,7 +256,10 @@
           "SharpCompress": "0.31.0"
         },
         "runtime": {
-          "BizHawk.Client.Common.dll": {}
+          "BizHawk.Client.Common.dll": {
+            "assemblyVersion": "1.0.0.0",
+            "fileVersion": "1.0.0.0"
+          }
         }
       },
       "BizHawk.Common/1.0.0": {
@@ -261,7 +270,10 @@
           "System.Runtime.CompilerServices.Unsafe": "6.0.0"
         },
         "runtime": {
-          "BizHawk.Common.dll": {}
+          "BizHawk.Common.dll": {
+            "assemblyVersion": "1.0.0.0",
+            "fileVersion": "1.0.0.0"
+          }
         }
       },
       "BizHawk.Emulation.Common/1.0.0": {
@@ -272,7 +284,10 @@
           "System.Collections.Immutable": "7.0.0"
         },
         "runtime": {
-          "BizHawk.Emulation.Common.dll": {}
+          "BizHawk.Emulation.Common.dll": {
+            "assemblyVersion": "1.0.0.0",
+            "fileVersion": "1.0.0.0"
+          }
         }
       },
       "BizHawk.Emulation.Cores/1.0.0": {
@@ -283,7 +298,10 @@
           "Microsoft.CSharp": "4.7.0"
         },
         "runtime": {
-          "BizHawk.Emulation.Cores.dll": {}
+          "BizHawk.Emulation.Cores.dll": {
+            "assemblyVersion": "1.0.0.0",
+            "fileVersion": "1.0.0.0"
+          }
         }
       },
       "BizHawk.Emulation.DiscSystem/1.0.0": {
@@ -291,12 +309,18 @@
           "BizHawk.Common": "1.0.0"
         },
         "runtime": {
-          "BizHawk.Emulation.DiscSystem.dll": {}
+          "BizHawk.Emulation.DiscSystem.dll": {
+            "assemblyVersion": "1.0.0.0",
+            "fileVersion": "1.0.0.0"
+          }
         }
       },
       "Plunderludics.UnityHawk.Shared/1.0.0": {
         "runtime": {
-          "Plunderludics.UnityHawk.Shared.dll": {}
+          "Plunderludics.UnityHawk.Shared.dll": {
+            "assemblyVersion": "1.0.0.0",
+            "fileVersion": "1.0.0.0"
+          }
         }
       },
       "Plunderludics.UnityHawk.SharedBuffers/1.0.0": {
@@ -305,7 +329,10 @@
           "SharedMemory": "2.3.2"
         },
         "runtime": {
-          "Plunderludics.UnityHawk.SharedBuffers.dll": {}
+          "Plunderludics.UnityHawk.SharedBuffers.dll": {
+            "assemblyVersion": "1.0.0.0",
+            "fileVersion": "1.0.0.0"
+          }
         }
       },
       "NLua/1.4.1.0": {

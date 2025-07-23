@@ -3,32 +3,69 @@
 
 using System;
 using UnityEngine;
-using Plunderludics;
-using System.IO;
+
+using NaughtyAttributes;
 using System.Linq;
-using System.Collections.Generic;
-using BizHawk.Client.Common;
-using Google.FlatBuffers;
-using System.Drawing;
 
 namespace UnityHawk {
+public partial class Emulator {
+    ///// props
+    [Header("api")]
+    [OnValueChanged(nameof(OnSetVolume))]
+    [Range(0, 100)]
+    [Tooltip("the the volume of the emulator, 0-100")]
+    [SerializeField] int volume = 100;
 
-public partial class Emulator
-{
+    [OnValueChanged(nameof(OnSetIsMuted))]
+    [Tooltip("if the emulator is muted")]
+    [SerializeField] bool isMuted;
+
+    [OnValueChanged(nameof(OnSetIsPaused))]
+    [Tooltip("if the emulator is paused")]
+    [SerializeField] bool isPaused;
+
+    /// if the emulator is paused
+    public bool IsPaused {
+        get => isPaused;
+        set {
+            isPaused = value;
+            OnSetIsPaused();
+        }
+    }
+
+    /// the emulator current volume
+    public int Volume => volume;
+
+    /// the emulator current volume
+    public bool IsMuted => isMuted;
+
     /// Currently displayed emulator texture.
     /// (If emulator is not running but savestate is set, show savestate texture)
     public Texture Texture => IsRunning ? renderTexture : saveStateFile?.Screenshot;
-    /// Is the emuhawk.exe process running?
-    public bool IsRunning => Status == EmulatorStatus.Running;
+
+    /// is the emulator process started
+    public bool IsStarted => Status >= EmulatorStatus.Started;
+
+    /// is the emulator process running a game? (best guess, might be wrong)
+    public bool IsRunning => Status >= EmulatorStatus.Running; // is the emuhawk.exe process running? (best guess, might be wrong)
+
     /// ID of the current emulator platform (e.g. "N64", "PSX", etc.)
     /// Returns null if emulator is not running.
     public string SystemId => _systemId;
 
+    /// the current status of the emulator
     public enum EmulatorStatus {
+        /// BizHawk hasn't started yet
         Inactive,
-        Started, // Underlying bizhawk has been started, but not rendering yet
-        Running  // Bizhawk is running and sending textures [technically gets set when shared texture channel is open]
+
+        /// BizHawk has been started, but not rendering yet
+        Started,
+
+        /// Bizhawk is running and sending textures [technically gets set when shared texture channel is open]
+        Running
     }
+
+    /// the current status of the emulator
     public EmulatorStatus Status {
         get => _status;
         private set {
@@ -45,9 +82,11 @@ public partial class Emulator
         }
     }
 
+    /// .
     public int CurrentFrame => _currentFrame;
 
-    /// TODO: string-to-string only rn but some automatic de/serialization for different types would be nice
+    /// delegate for registering lua callbacks
+    // TODO: string-to-string only rn but some automatic de/serialization for different types would be nice
     public delegate string LuaCallback(string arg);
 
     /// Register a callback that can be called via `unityhawk.callmethod('MethodName')` in BizHawk lua
@@ -69,45 +108,47 @@ public partial class Emulator
     // For LoadState/SaveState/LoadRom, path should be relative to StreamingAssets (same as for rom/savestate/lua params in the inspector)
     // can also pass absolute path (but this will most likely break in build!)
 
-    /// <summary>
+    /// calls the emulator api to pause/unpause
+    void OnSetIsPaused() {
+        string command = isPaused ? ApiCommands.Pause : ApiCommands.Unpause;
+        _apiCommandBuffer.CallMethod(command, null);
+    }
+
     /// pauses the emulator
-    /// </summary>
     public void Pause() {
-        _apiCommandBuffer.CallMethod(ApiCommands.Pause, null);
+        IsPaused = true;
     }
 
-    /// <summary>
     /// unpauses the emulator
-    /// </summary>
     public void Unpause() {
-        _apiCommandBuffer.CallMethod(ApiCommands.Unpause, null);
+        IsPaused = false;
     }
 
-    /// <summary>
     /// saves a state to a given path
-    /// </summary>
     /// <param name="path"></param>
     /// TODO: how can this return a savestate object?
-    public void SaveState(string path) {
+    public string SaveState(string path) {
         path = Paths.GetFullPath(path);
+        if (!path.Contains(".savestate"))
+        {
+            path += ".savestate";
+        }
+
         _apiCommandBuffer.CallMethod(ApiCommands.SaveState, path);
+
+        // TODO: create savestate asset here, async?
+        return path;
     }
 
-    /// <summary>
     /// loads a state from a given path
-    /// </summary>
     /// <param name="path"></param>
     public void LoadState(string path) {
         // TODO: set emulator savestateFile?
         path = Paths.GetFullPath(path);
-
-        if (_status == EmulatorStatus.Inactive) return;
         _apiCommandBuffer.CallMethod(ApiCommands.LoadState, path);
     }
 
-    /// <summary>
     /// loads a state from a Savestate asset
-    /// </summary>
     /// <param name="sample"></param>
     public void LoadState(Savestate sample) {
         string path = Paths.GetAssetPath(sample);
@@ -115,54 +156,54 @@ public partial class Emulator
             Debug.LogError($"Savestate {sample} not found");
             return;
         }
+
         LoadState(path);
-        // TODO would be nice if there was some callback or way to know when state is loaded
     }
 
-    /// <summary>
     /// reloads the current state
-    /// </summary>
     /// <param name="path"></param>
     public void ReloadState() {
         LoadState(saveStateFile);
     }
 
-    /// <summary>
     /// loads a rom from a given path
-    /// </summary>
     /// <param name="path"></param>
     public void LoadRom(string path) {
         path = Paths.GetFullPath(path);
 
-        if (_status == EmulatorStatus.Inactive) return;
+        if (string.IsNullOrEmpty(path)) {
+            Debug.LogWarning("[emulator] attempting to load rom with invalid path, ignoring...");
+            return;
+        }
+
+        if (_status == EmulatorStatus.Inactive) {
+            return;
+        }
 
         // TODO: set emulator romFile?
         _apiCommandBuffer.CallMethod(ApiCommands.LoadRom, path);
         // Need to update texture buffer size in case platform has changed:
         _sharedTextureBuffer.UpdateSize();
-        Status = EmulatorStatus.Started; // Not ready until new texture buffer is set up
+
+        Status = EmulatorStatus.Started; // Not running until new texture buffer is set up
     }
 
-    /// <summary>
     /// loads a rom from a Rom asset
-    /// </summary>
     /// <param name="rom"></param>
     public void LoadRom(Rom rom) {
         LoadRom(Paths.GetAssetPath(rom));
     }
 
-    /// <summary>
     /// advances a frame on the emulator
-    /// </summary>
     public void FrameAdvance() {
         _apiCommandBuffer.CallMethod(ApiCommands.FrameAdvance, null);
     }
-    
+
     /// <summary>
-    /// unpauses the emulator
+    /// sets the emulator volume
     /// </summary>
-    public void SetVolume(float volume) {
-        _apiCommandBuffer.CallMethod(ApiCommands.SetVolume, $"{volume}");
+    public void SetVolume(int value) {
+        volume = value;
     }
 
     /// <summary>
@@ -174,7 +215,7 @@ public partial class Emulator
 
     ///// RAM read/write
     /// For all methods, domain defaults to main memory if not specified
-    
+
     // ReadXXX methodshave type-safety issues so disabled for now, use WatchXXX instead
     // public uint? ReadUnsigned(long address, int size, bool isBigEndian, string domain = null) {
     //     string args = $"{address},{size},{isBigEndian}";
@@ -304,6 +345,17 @@ public partial class Emulator
             args += $",{domain}";
         }
         _apiCommandBuffer.CallMethod("Unfreeze", args);
+    }
+
+    ///// events
+    /// when the volume changes
+    void OnSetVolume() {
+        _apiCommandBuffer.CallMethod(ApiCommands.SetVolume, $"{volume}");
+    }
+
+    /// when the sound is muted
+    void OnSetIsMuted() {
+        _apiCommandBuffer.CallMethod(ApiCommands.SetSoundOn, $"{!isMuted}");
     }
 }
 }

@@ -1,24 +1,25 @@
 ﻿using UnityEngine;
+using UnityEngine.Serialization;
 
 namespace UnityHawk {
 
 [CreateAssetMenu(menuName = "Plunderludics/UnityHawk/Config", fileName = "UnityHawkConfig")]
 public class UnityHawkConfig: ScriptableObject {
 	[Tooltip("the log output path, relative to the project folder")]
-	[SerializeField] string m_LogsPath;
-	public string LogsPath => m_LogsPath;
+	[SerializeField] string bizHawkLogsPath = "Logs/BizHawk";
+	public string BizHawkLogsPath => bizHawkLogsPath;
 
     [Tooltip("the firmware path, relative to streaming assets")]
-	[SerializeField] string m_FirmwarePath;
-	public string FirmwarePath => m_FirmwarePath;
+	[SerializeField] string firmwarePath = "Firmware";
+	public string FirmwarePath => firmwarePath;
 
     [Tooltip("if left blank, defaults to initial romFile directory")]
-	[SerializeField] string m_SavestatesOutputPath;
-	public string SavestatesOutputPath => m_SavestatesOutputPath;
+	[SerializeField] string savestatesOutputPath = "";
+	public string SavestatesOutputPath => savestatesOutputPath;
 
-    [Tooltip("if left blank, defaults to initial romFile directory")]
-	[SerializeField] string m_RamWatchOutputPath;
-	public string RamWatchOutputPath => m_RamWatchOutputPath;
+	[Tooltip("if left blank, defaults to initial romFile directory")]
+	[SerializeField] string ramWatchOutputPath = "";
+	public string RamWatchOutputPath => ramWatchOutputPath;
 
 }
 }
