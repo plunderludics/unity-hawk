@@ -56,7 +56,6 @@ public partial class Emulator : MonoBehaviour {
     public bool runOnEnable = true;
 
     [Header("Game")]
-    [Header("Game")]
     public Savestate saveStateFile;
 
     /// .
@@ -82,9 +81,12 @@ public partial class Emulator : MonoBehaviour {
     public Renderer targetRenderer;
 
     [ShowIf(nameof(renderMode), EmulatorRenderMode.RenderTexture)]
+    [Tooltip("render to a specific render texture instead of creating a default one")]
+    public bool customRenderTexture = false;
+
+    [EnableIf(nameof(customRenderTexture))]
     [Tooltip("the render texture to write to")]
     public RenderTexture renderTexture;
-    // We have to maintain a separate rendertexture just for the purpose of flipping the image we get from the emulator
 
     ///// Input
     [Header("Input")]
@@ -391,10 +393,7 @@ public partial class Emulator : MonoBehaviour {
 
         _textureCorrectionMat = new Material(Resources.Load<Shader>(TextureCorrectionShaderName));
 
-        if (renderMode != EmulatorRenderMode.RenderTexture) {
-            renderTexture = null; // Clear texture so that it's forced to be reinitialized
-        } else {
-            // Default to the attached Renderer component, if there is one
+        if (renderMode == EmulatorRenderMode.AttachedRenderer || renderMode == EmulatorRenderMode.ExternalRenderer) {
             if (renderMode == EmulatorRenderMode.AttachedRenderer) {
                 targetRenderer = GetComponent<Renderer>();
             }
@@ -402,6 +401,15 @@ public partial class Emulator : MonoBehaviour {
             if (!targetRenderer) {
                 Debug.LogWarning("No Renderer attached, might not display emulator graphics");
             }
+        }
+
+        if (customRenderTexture) {
+            if (renderTexture == null) {
+                Debug.LogWarning("customRenderTexture is enabled but no RenderTexture is set, will create a default one");
+            }
+        } else {
+            // Clear texture so that it's forced to be reinitialized
+            renderTexture = null;
         }
 
         if (captureEmulatorAudio && !GetComponent<AudioSource>()) {
@@ -811,7 +819,7 @@ public partial class Emulator : MonoBehaviour {
         // TODO: cache textures
         _localTexture = new Texture2D(width, height, TextureFormat, false);
 
-        if (renderMode != EmulatorRenderMode.RenderTexture) {
+        if (!customRenderTexture || renderTexture == null) {
             renderTexture = new RenderTexture(width, height, depth:0, format:RenderTextureFormat);
             renderTexture.name = name;
         }

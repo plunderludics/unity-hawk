@@ -26,6 +26,7 @@ public partial class Emulator {
     [Tooltip("if the emulator is paused")]
     [SerializeField] bool isPaused;
     
+    [Foldout("BizHawk Config")]
     [OnValueChanged(nameof(OnSetSpeedPercent))]
     [Range(0, 200)]
     [Tooltip("emulator speed as a percentage")]
