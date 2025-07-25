@@ -291,7 +291,7 @@ public partial class Emulator : MonoBehaviour {
                 typeof(UnityHawkConfig));
 
             if (!config) {
-                Debug.LogError("UnityHawkConfigDefault.asset not found");
+                Debug.LogError("UnityHawkConfigDefault.asset not found", this);
             }
         }
 
@@ -301,7 +301,7 @@ public partial class Emulator : MonoBehaviour {
             // Default to the attached Renderer component, if there is one
             targetRenderer = GetComponent<Renderer>();
             if (!targetRenderer) {
-                Debug.LogWarning("No Renderer attached, will not display emulator graphics");
+                Debug.LogWarning("No Renderer attached, will not display emulator graphics", this);
             }
         }
 
@@ -316,11 +316,11 @@ public partial class Emulator : MonoBehaviour {
             if (roms.Any()) {
                 var rom = roms.First();
                 if (roms.Count() > 1) {
-                    Debug.LogWarning($"Multiple roms found matching savestate {saveStateFile.name}, using first match: {rom}");
+                    Debug.LogWarning($"Multiple roms found matching savestate {saveStateFile.name}, using first match: {rom}", this);
                 }
                 romFile = rom;
             } else {
-                Debug.LogWarning($"No rom found matching savestate {saveStateFile.name}");
+                Debug.LogWarning($"No rom found matching savestate {saveStateFile.name}", this);
             }
         }
 
@@ -379,7 +379,7 @@ public partial class Emulator : MonoBehaviour {
         if (!CanRun) return;
 
         if (!romFile) {
-            Debug.LogError("No rom file set, cannot start emulator");
+            Debug.LogError("No rom file set, cannot start emulator", this);
             return;
         }
 
@@ -399,13 +399,13 @@ public partial class Emulator : MonoBehaviour {
             }
 
             if (!targetRenderer) {
-                Debug.LogWarning("No Renderer attached, might not display emulator graphics");
+                Debug.LogWarning("No Renderer attached, might not display emulator graphics", this);
             }
         }
 
         if (customRenderTexture) {
             if (renderTexture == null) {
-                Debug.LogWarning("customRenderTexture is enabled but no RenderTexture is set, will create a default one");
+                Debug.LogWarning("customRenderTexture is enabled but no RenderTexture is set, will create a default one", this);
             }
         } else {
             // Clear texture so that it's forced to be reinitialized
@@ -413,7 +413,7 @@ public partial class Emulator : MonoBehaviour {
         }
 
         if (captureEmulatorAudio && !GetComponent<AudioSource>()) {
-            Debug.LogWarning("captureEmulatorAudio is enabled but no AudioSource is attached, will not play audio");
+            Debug.LogWarning("captureEmulatorAudio is enabled but no AudioSource is attached, will not play audio", this);
         }
 
         // If using referenced assets then first map those assets to filenames
@@ -431,7 +431,7 @@ public partial class Emulator : MonoBehaviour {
             _emuhawk.StartInfo.EnvironmentVariables["MONO_PATH"] = Paths.dllDir;
             _emuhawk.StartInfo.FileName = "/Library/Frameworks/Mono.framework/Versions/Current/Commands/mono";
             if (ShowBizhawkGui) {
-                Debug.LogWarning("'Show Bizhawk Gui' is not supported on Mac'");
+                Debug.LogWarning("'Show Bizhawk Gui' is not supported on Mac'", this);
             }
             args.Add(exePath);
         } else {
@@ -454,9 +454,9 @@ public partial class Emulator : MonoBehaviour {
 
         if (baseConfigFile) {
             configPath = Paths.GetAssetPath(baseConfigFile);
-            Debug.Log($"[emulator] found config at {configPath}");
+            // Debug.Log($"[emulator] found config at {configPath}");
         } else {
-            Debug.Log($"[emulator] {name} using default config file at {configPath}");
+            // Debug.Log($"[emulator] {name} using default config file at {configPath}");
         }
 
         var bizConfig = ConfigService.Load(configPath);
@@ -533,7 +533,7 @@ public partial class Emulator : MonoBehaviour {
         // create & register audio buffer
         if (captureEmulatorAudio) {
             if (runInEditMode && !Application.isPlaying) {
-                Debug.LogWarning("captureEmulatorAudio is enabled but emulator audio cannot be captured in edit mode");
+                Debug.LogWarning("captureEmulatorAudio is enabled but emulator audio cannot be captured in edit mode", this);
             } else {
                 var sharedAudioBufferName = $"audio-{guid}";
                 userData.Add($"{Args.AudioRpc}:{sharedAudioBufferName}");
@@ -696,7 +696,7 @@ public partial class Emulator : MonoBehaviour {
         _deferredForMainThread = null;
 
         if (_emuhawk != null && _emuhawk.HasExited) {
-            Debug.LogWarning("EmuHawk process was unexpectedly killed");
+            Debug.LogWarning("EmuHawk process was unexpectedly killed", this);
             Deactivate();
         }
     }
@@ -773,7 +773,7 @@ public partial class Emulator : MonoBehaviour {
         }
 
         if (bSize > size) {
-            Debug.LogWarning($"emulator: buffer bigger than received size {bSize} > {size}");
+            Debug.LogWarning($"emulator: buffer bigger than received size {bSize} > {size}", this);
             return;
         }
 
@@ -782,7 +782,7 @@ public partial class Emulator : MonoBehaviour {
             _localTexture.SetPixelData(_localTextureBuffer[..^3], 0);
             _localTexture.Apply(/*updateMipmaps: false*/);
         } catch (Exception e) {
-            Debug.LogError($"{e}");
+            Debug.LogError($"{e}", this);
         }
 
         // Correct issues with the texture by applying a shader and blitting to a separate render texture:
@@ -866,7 +866,7 @@ public partial class Emulator : MonoBehaviour {
                     var args = argString.Split(',');
                     if (args.Length != 6)
                     {
-                        Debug.LogWarning($"Expected 6 arguments for callback '{callbackName}', but got {args.Length}: {argString}");
+                        Debug.LogWarning($"Expected 6 arguments for callback '{callbackName}', but got {args.Length}: {argString}", this);
                         returnString = "";
                         break;
                     }
@@ -883,7 +883,7 @@ public partial class Emulator : MonoBehaviour {
                         var callback = v.Callback;
                         v.Callback(value);
                     } else {
-                        Debug.LogWarning($"Bizhawk tried to call a watch callback for key {key} but no callback was registered");
+                        Debug.LogWarning($"Bizhawk tried to call a watch callback for key {key} but no callback was registered", this);
                     }
                     break;
                 case SpecialCommands.OnRomLoaded:
@@ -893,7 +893,7 @@ public partial class Emulator : MonoBehaviour {
                     // (At this point I think we can be confident all the buffers should be open)
                     break;
                 default:
-                    Debug.LogWarning($"Bizhawk tried to call unknown special method {callbackName}");
+                    Debug.LogWarning($"Bizhawk tried to call unknown special method {callbackName}", this);
                     break;
             }
         } else {
@@ -907,7 +907,7 @@ public partial class Emulator : MonoBehaviour {
 
             // add to set of called methods to not spam this warning every frame
             if (!exists && !_invokedLuaCallbacks.Contains(callbackName)){
-                Debug.LogWarning($"Tried to call a method named {callbackName} from lua but none was registered");
+                Debug.LogWarning($"Tried to call a method named {callbackName} from lua but none was registered", this);
             }
 
             _invokedLuaCallbacks.Add(callbackName);
@@ -922,7 +922,7 @@ public partial class Emulator : MonoBehaviour {
             _bizHawkLogWriter.WriteLine(msg);
             _bizHawkLogWriter.Flush();
             if (isError) {
-                Debug.LogWarning(msg);
+                Debug.LogWarning(msg, this);
             }
         }
     }
