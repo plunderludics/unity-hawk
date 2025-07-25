@@ -374,7 +374,7 @@ public partial class Emulator : MonoBehaviour {
             return;
         }
 
-        Debug.Log("Emulator Initialize");
+        // Debug.Log("Emulator Initialize");
 
         if (!CanRun) return;
 
@@ -599,7 +599,7 @@ public partial class Emulator : MonoBehaviour {
             _emuhawk.ErrorDataReceived += (sender, e) => LogBizHawk(sender, e, true);
         }
 
-        Debug.Log($"[unity-hawk] {exePath} {string.Join(' ', args)}");
+        // Debug.Log($"[unity-hawk] {exePath} {string.Join(' ', args)}");
 
         _emuhawk.Start(); // [This seems to block for ~20s sometimes, not sure why. Should maybe run in a separate thread?]
         _emuhawk.BeginOutputReadLine();
@@ -759,7 +759,7 @@ public partial class Emulator : MonoBehaviour {
         bool newDimensions = width != 0 && height != 0 && (bWidth != width || bHeight != height);
 
         if (newDimensions) {
-            Debug.Log($"new width and height received : {width} x {height} (was {bWidth}x{bHeight})");
+            // Debug.Log($"new width and height received : {width} x {height} (was {bWidth}x{bHeight})");
         }
 
         // resize textures if necessary
@@ -782,7 +782,7 @@ public partial class Emulator : MonoBehaviour {
             _localTexture.SetPixelData(_localTextureBuffer[..^3], 0);
             _localTexture.Apply(/*updateMipmaps: false*/);
         } catch (Exception e) {
-            Debug.Log($"{e}");
+            Debug.LogError($"{e}");
         }
 
         // Correct issues with the texture by applying a shader and blitting to a separate render texture:
@@ -790,7 +790,7 @@ public partial class Emulator : MonoBehaviour {
     }
 
     void Deactivate() {
-        Debug.Log("Emulator Deactivate");
+        // Debug.Log("Emulator Deactivate");
         Status = EmulatorStatus.Inactive;
 
         _bizHawkLogWriter?.Close();
@@ -814,7 +814,7 @@ public partial class Emulator : MonoBehaviour {
 
     /// Init/re-init the textures for rendering the screen - has to be done whenever the source dimensions change (which happens often on PSX for some reason)
     void InitTextures(int width, int height) {
-        Debug.Log($"[emulator] creating new textures with dimensions {width}x{height}");
+        // Debug.Log($"[emulator] creating new textures with dimensions {width}x{height}");
 
         // TODO: cache textures
         _localTexture = new Texture2D(width, height, TextureFormat, false);
