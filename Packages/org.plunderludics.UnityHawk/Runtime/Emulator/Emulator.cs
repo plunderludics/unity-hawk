@@ -161,12 +161,6 @@ public partial class Emulator : MonoBehaviour {
 
     ///// State
     [Foldout("State")]
-    [ReadOnly, SerializeField] bool _initialized;
-
-    [Foldout("State")]
-    [ReadOnly, SerializeField] bool _shouldInitialize;
-
-    [Foldout("State")]
     [ReadOnly, SerializeField] EmulatorStatus _status;
 
     [Foldout("State")]
@@ -280,7 +274,7 @@ public partial class Emulator : MonoBehaviour {
     [Button]
     public void Reset() {
         Deactivate();
-        // Will be reactivated in Update on next frame
+        Initialize();
     }
 
 #if UNITY_EDITOR
@@ -294,8 +288,6 @@ public partial class Emulator : MonoBehaviour {
                 Debug.LogError("UnityHawkConfigDefault.asset not found", this);
             }
         }
-
-        DeactivateIfNeeded();
 
         if (renderMode == EmulatorRenderMode.AttachedRenderer) {
             // Default to the attached Renderer component, if there is one
@@ -329,6 +321,22 @@ public partial class Emulator : MonoBehaviour {
         // should this even be reiniting the texture if the dimensions are the same?
         if (!IsRunning && saveStateFile?.Screenshot is not null) {
             InitTextures(saveStateFile.Screenshot.width, saveStateFile.Screenshot.height);
+        }
+
+        if (Status != EmulatorStatus.Inactive) {
+            if (!Equals(_currentBizhawkArgs, MakeBizhawkArgs())) {
+                // Bizhawk params have changed since bizhawk process was started, needs restart
+                Reset();
+            }
+
+            if (!CanRun) {
+                Deactivate();
+            }
+        }
+
+        if (!Application.isPlaying && runInEditMode && Status == EmulatorStatus.Inactive) {
+            // In edit mode, initialize the emulator if it is not already running
+            Initialize();
         }
     }
 #endif
@@ -627,15 +635,7 @@ public partial class Emulator : MonoBehaviour {
     }
 
     void _Update() {
-        if (DeactivateIfNeeded()) {
-            return;
-        }
-
         if (Status == EmulatorStatus.Inactive) {
-            if (runInEditMode) {
-                Initialize();
-            }
-
             return;
         }
 
@@ -696,8 +696,10 @@ public partial class Emulator : MonoBehaviour {
         _deferredForMainThread = null;
 
         if (_emuhawk != null && _emuhawk.HasExited) {
-            Debug.LogWarning("EmuHawk process was unexpectedly killed", this);
             Deactivate();
+            // TODO: maybe we want an option to not restart bizhawk here?
+            Debug.LogWarning("EmuHawk process was unexpectedly killed, restarting", this);
+            Initialize();
         }
     }
 
@@ -707,26 +709,6 @@ public partial class Emulator : MonoBehaviour {
             EditorUtility.RevealInFinder(bizhawkLogLocation);
         }
     #endif
-
-    /// deactivates the emulator if it's in a state where it should be deactivated
-    /// returns whether it was deactivated
-    bool DeactivateIfNeeded() {
-        if (Status != EmulatorStatus.Inactive) {
-            if (!Equals(_currentBizhawkArgs, MakeBizhawkArgs())) {
-                // Params set in inspector have changed since the bizhawk process was started, needs restart
-                Deactivate();
-                return true;
-            }
-
-            if (!CanRun) {
-                Deactivate();
-                return true;
-            }
-
-        }
-
-        return false;
-    }
 
     void WriteInputToBuffer(List<InputEvent> inputEvents) {
         // Get input from inputProvider, serialize and write to the shared memory
@@ -750,6 +732,8 @@ public partial class Emulator : MonoBehaviour {
         _sharedTextureBuffer.CopyTo(_localTextureBuffer, 0);
         int width = _localTextureBuffer[^3];
         int height = _localTextureBuffer[^2];
+
+        // Debug.Log($"{_currentFrame}, {_localTextureBuffer[^1]}");
         _currentFrame = _localTextureBuffer[^1]; // frame index of this texture [hacky solution to sync issues]
 
         bool noTextures = !_localTexture || !renderTexture;
