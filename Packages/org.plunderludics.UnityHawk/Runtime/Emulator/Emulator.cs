@@ -456,10 +456,17 @@ public partial class Emulator : MonoBehaviour {
         }
 
         // Run _StartBizhawk in a separate thread to avoid blocking the main thread
-        bool applicationIsPlaying = Application.isPlaying;
-        initThread = new (() => _StartBizhawk(applicationIsPlaying, romPath, configPath, saveStatePath, ramWatchPath, luaScriptPath, shareAudio));
-        initThread.IsBackground = true;
-        initThread.Start();
+        // Don't allow starting a new thread if the previous one is still running
+        if (initThread == null || !initThread.IsAlive) {
+            bool applicationIsPlaying = Application.isPlaying;
+            initThread = new(() => _StartBizhawk(applicationIsPlaying, romPath, configPath, saveStatePath, ramWatchPath, luaScriptPath, shareAudio));
+            initThread.IsBackground = true;
+            initThread.Start();
+        } else {
+            // TODO: Should be some way for user to know if this is the case
+            // Have another 'Starting' state in EmulatorStatus?
+            Debug.LogError("Emulator is currently initializing", this);
+        }
     }
 
     static readonly ProfilerMarker StartBizhawk = new ("Emulator.StartBizhawk");
@@ -774,6 +781,8 @@ public partial class Emulator : MonoBehaviour {
             // - presumably the texture buffer is open but bizhawk hasn't sent any data yet
             return;
         }
+
+        // TODO: Something weird is going on here, texture is shifted a few pixels to the left for some reason
 
         _sharedTextureBuffer.CopyPixelsTo(_localTextureBuffer);
 
