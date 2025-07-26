@@ -9,6 +9,10 @@ using System.Runtime.InteropServices;
 using NaughtyAttributes;
 using UnityEngine;
 using Debug = UnityEngine.Debug;
+using Unity.Profiling;
+using UnityEngine.Assertions;
+
+
 
 #if UNITY_EDITOR
 using UnityEditor;
@@ -288,14 +292,6 @@ public partial class Emulator : MonoBehaviour {
             }
         }
 
-        if (renderMode == EmulatorRenderMode.AttachedRenderer) {
-            // Default to the attached Renderer component, if there is one
-            targetRenderer = GetComponent<Renderer>();
-            if (!targetRenderer) {
-                Debug.LogWarning("No Renderer attached, will not display emulator graphics", this);
-            }
-        }
-
         // Select rom file automatically based on save state (if possible)
         // TODO: could this be saved on the saveStateFile asset, rather than having to happen on validate?
         if (autoSelectRomFile && saveStateFile) {
@@ -340,15 +336,13 @@ public partial class Emulator : MonoBehaviour {
     }
 #endif
 
-    public void Awake() {
-        _textureCorrectionMat = new Material(Resources.Load<Shader>(TextureCorrectionShaderName));
-        _materialProperties = new MaterialPropertyBlock();
-    }
-
     public void OnEnable() {
 #if UNITY_EDITOR && UNITY_2022_2_OR_NEWER
         if (Undo.isProcessing) return; // OnEnable gets called after undo/redo, but ignore it
 #endif
+        _textureCorrectionMat = new Material(Resources.Load<Shader>(TextureCorrectionShaderName));
+        _materialProperties = new MaterialPropertyBlock();
+
         if (CanRun && runOnEnable && Status == EmulatorStatus.Inactive) {
             Initialize();
         }
@@ -375,38 +369,18 @@ public partial class Emulator : MonoBehaviour {
     }
 
     ////// Core methods
+
+    System.Threading.Thread initThread;
     public void Initialize() {
-        if (Status != EmulatorStatus.Inactive) {
-            // TODO: should we deactivate here and reinitialize?
-            return;
-        }
-
         // Debug.Log("Emulator Initialize");
-
-        if (!CanRun) return;
-
-        if (!romFile) {
-            Debug.LogError("No rom file set, cannot start emulator", this);
-            return;
-        }
-
-        // get a random number to identify the buffers
-        var guid = new System.Random().Next();
-
-        _currentBizhawkArgs = MakeBizhawkArgs();
-
-        Status = EmulatorStatus.Inactive;
-        _systemId = null;
-
-        _textureCorrectionMat = new Material(Resources.Load<Shader>(TextureCorrectionShaderName));
-
+        // Pre-process inspector params
         if (renderMode == EmulatorRenderMode.AttachedRenderer || renderMode == EmulatorRenderMode.ExternalRenderer) {
             if (renderMode == EmulatorRenderMode.AttachedRenderer) {
                 targetRenderer = GetComponent<Renderer>();
             }
 
             if (!targetRenderer) {
-                Debug.LogWarning("No Renderer attached, might not display emulator graphics", this);
+                Debug.LogWarning("No Renderer attached, will not display emulator graphics", this);
             }
         }
 
@@ -423,12 +397,92 @@ public partial class Emulator : MonoBehaviour {
             Debug.LogWarning("captureEmulatorAudio is enabled but no AudioSource is attached, will not play audio", this);
         }
 
+        if (Application.isPlaying) {    
+            // default to BasicInputProvider (uses preset default keymapping)
+            if (!inputProvider) {
+                if (!(inputProvider = GetComponent<InputProvider>())) {
+                    inputProvider = gameObject.AddComponent<BasicInputProvider>();
+                }
+            }
+        }
+
+        // Compute file paths (since Paths.GetAssetPath() can only run on main thread)
+        string romPath;
+        // add rom path
+        if (romFile) {
+            romPath = Paths.GetAssetPath(romFile);
+        } else {
+            Debug.LogError("No rom file set, cannot start emulator", this);
+            return;
+        }
+
+        // add config path
+        string configPath;
+
+        if (baseConfigFile) {
+            configPath = Paths.GetAssetPath(baseConfigFile);
+            // Debug.Log($"[emulator] found config at {configPath}");
+        } else {
+            configPath = Path.GetFullPath(Paths.defaultBizhawkConfigPath);
+            // Debug.Log($"[emulator] {name} using default config file at {configPath}");
+        }
+
+        string saveStatePath = saveStateFile ? Paths.GetAssetPath(saveStateFile) : null;
+        string ramWatchPath = ramWatchFile ? Paths.GetAssetPath(ramWatchFile) : null;
+        string luaScriptPath = luaScriptFile ? Paths.GetAssetPath(luaScriptFile) : null;
+
+        // Setup logger
+        // Redirect bizhawk output + error into a log file
+        if (writeBizhawkLogs) {
+            var logFileName = $"{name}-{GetInstanceID()}.log";
+            var logPath = config.BizHawkLogsPath;
+            Directory.CreateDirectory(logPath);
+            bizhawkLogLocation = Path.Combine(logPath, logFileName);
+
+            _bizHawkLogWriter?.Dispose();
+            _bizHawkLogWriter = new(bizhawkLogLocation);
+        }
+
+        // Run _StartBizhawk in a separate thread to avoid blocking the main thread
+        bool applicationIsPlaying = Application.isPlaying;
+        initThread = new (() => _StartBizhawk(applicationIsPlaying, romPath, configPath, saveStatePath, ramWatchPath, luaScriptPath));
+        initThread.IsBackground = true;
+        initThread.Start();
+    }
+
+    static readonly ProfilerMarker StartBizhawk = new ("Emulator.StartBizhawk");
+    void _StartBizhawk(
+        bool applicationIsPlaying,
+        string romPath,
+        string configPath,
+        string saveStatePath = null,
+        string ramWatchPath = null,
+        string luaScriptPath = null
+    ) {
+        // TODO: The separation between Initialize and _StartBizhawk is sort of messy,
+        // mainly just moving anything that has to run on the main thread into Initialize
+        // Would probably be better to make _StartBizhawk as small as possible, just the config loading and the process start
+
+        StartBizhawk.Begin();
+
+        if (Status != EmulatorStatus.Inactive) {
+            // TODO: should we deactivate here and reinitialize?
+            return;
+        }
+
+        // get a random number to identify the buffers
+        var guid = new System.Random().Next();
+
+        _currentBizhawkArgs = MakeBizhawkArgs();
+
+        Status = EmulatorStatus.Inactive;
+        _systemId = null;
+
         // If using referenced assets then first map those assets to filenames
         // (Bizhawk requires a path to a real file on disk)
 
         // Start EmuHawk.exe w args
         var exePath = Path.GetFullPath(Paths.emuhawkExePath);
-        var workingDir = Application.dataPath;
         _emuhawk = new Process();
         _emuhawk.StartInfo.UseShellExecute = false;
         var args = _emuhawk.StartInfo.ArgumentList;
@@ -448,50 +502,36 @@ public partial class Emulator : MonoBehaviour {
         }
 
         // add rom path
-        if (romFile) {
-            var romPath = Paths.GetAssetPath(romFile);
-            args.Add(romPath);
-            workingDir = Path.GetDirectoryName(romPath);
-        }
-
-        // add config path
-        var configPath = baseConfigFile
-            ? Paths.GetAssetPath(baseConfigFile)
-            : Path.GetFullPath(Paths.defaultBizhawkConfigPath);
-
-        if (baseConfigFile) {
-            configPath = Paths.GetAssetPath(baseConfigFile);
-            // Debug.Log($"[emulator] found config at {configPath}");
-        } else {
-            // Debug.Log($"[emulator] {name} using default config file at {configPath}");
-        }
+        Assert.IsTrue(romPath != null, "romPath must not be null");
+        args.Add(romPath);
+        string workingDir = Path.GetDirectoryName(romPath);
 
         var bizConfig = ConfigService.Load(configPath);
 
         // create a temporary file for this config
-        configPath = Path.GetFullPath($"{Path.GetTempPath()}/unityhawk-config-{guid}.ini");
+        string tempConfigPath = Path.GetFullPath($"{Path.GetTempPath()}/unityhawk-config-{guid}.ini");
 
         bizConfig.SoundVolume = Volume;
         bizConfig.StartPaused = IsPaused;
         bizConfig.SoundEnabled = !IsMuted;
         bizConfig.SpeedPercent = SpeedPercent;
-        ConfigService.Save(configPath, bizConfig);
+        ConfigService.Save(tempConfigPath, bizConfig);
 
-        args.Add($"--config={configPath}");
+        args.Add($"--config={tempConfigPath}");
 
         // add save state path
-        if (saveStateFile) {
-            args.Add($"--load-state={Paths.GetAssetPath(saveStateFile)}");
+        if (saveStatePath != null) {
+            args.Add($"--load-state={saveStatePath}");
         }
 
         // add ram watch file
-        if (ramWatchFile) {
-            args.Add($"--ram-watch-file={Paths.GetAssetPath(ramWatchFile)}");
+        if (ramWatchPath != null) {
+            args.Add($"--ram-watch-file={ramWatchPath}");
         }
 
         // add lua script file
-        if (luaScriptFile) {
-            args.Add($"--lua={Paths.GetAssetPath(luaScriptFile)}");
+        if (luaScriptPath != null) {
+            args.Add($"--lua={luaScriptPath}");
         }
 
         // Save savestates with extension .savestate instead of .State, this is because Unity treats .State as some other kind of asset
@@ -539,7 +579,7 @@ public partial class Emulator : MonoBehaviour {
 
         // create & register audio buffer
         if (captureEmulatorAudio) {
-            if (runInEditMode && !Application.isPlaying) {
+            if (runInEditMode && !applicationIsPlaying) {
                 Debug.LogWarning("captureEmulatorAudio is enabled but emulator audio cannot be captured in edit mode", this);
             } else {
                 var sharedAudioBufferName = $"audio-{guid}";
@@ -554,24 +594,17 @@ public partial class Emulator : MonoBehaviour {
             }
         }
 
-        if (muteBizhawkInEditMode && !Application.isPlaying) {
+        if (muteBizhawkInEditMode && !applicationIsPlaying) {
             args.Add("--mute=true");
         }
 
         // create & register input buffers
-        if (Application.isPlaying) {
+        if (applicationIsPlaying) {
             if (passInputFromUnity) {
                 var sharedInputBufferName = $"input-{guid}";
                 // args.Add($"--read-input-from-shared-buffer={sharedKeyInputBufferName}");
                 userData.Add($"{Args.InputBuffer}:{sharedInputBufferName}");
                 _sharedInputBuffer = new SharedInputBuffer(sharedInputBufferName);
-
-                // default to BasicInputProvider (maps keys directly from keyboard)
-                if (!inputProvider) {
-                    if (!(inputProvider = GetComponent<InputProvider>())) {
-                        inputProvider = gameObject.AddComponent<BasicInputProvider>();
-                    }
-                }
                 args.Add($"--accept-background-input=false");
             } else {
                 // Always accept background input in play mode if not getting input from unity (otherwise would be no input at all)
@@ -591,15 +624,6 @@ public partial class Emulator : MonoBehaviour {
         args.Add($"--ext-tools-dir={Path.GetFullPath(Paths.externalToolsDir)}"); // Has to be set since not running from the bizhawk directory
 
         if (writeBizhawkLogs) {
-            // Redirect bizhawk output + error into a log file
-            var logFileName = $"{name}-{GetInstanceID()}.log";
-            var logPath = config.BizHawkLogsPath;
-            Directory.CreateDirectory (logPath);
-            bizhawkLogLocation = Path.Combine(logPath, logFileName);
-
-            _bizHawkLogWriter?.Dispose();
-            _bizHawkLogWriter = new(bizhawkLogLocation);
-
             _emuhawk.StartInfo.RedirectStandardOutput = true;
             _emuhawk.StartInfo.RedirectStandardError = true;
             _emuhawk.OutputDataReceived += (sender, e) => LogBizHawk(sender, e, false);
@@ -612,8 +636,12 @@ public partial class Emulator : MonoBehaviour {
         _emuhawk.BeginOutputReadLine();
         _emuhawk.BeginErrorReadLine();
 
-        Status = EmulatorStatus.Started;
-        _startedTime = Time.realtimeSinceStartup;
+        _deferredForMainThread += () => {
+            Status = EmulatorStatus.Started;
+            _startedTime = Time.realtimeSinceStartup;
+        };
+
+        StartBizhawk.End();
 
         return;
 
@@ -634,6 +662,9 @@ public partial class Emulator : MonoBehaviour {
     }
 
     void _Update() {
+        _deferredForMainThread?.Invoke();
+        _deferredForMainThread = null;
+
         if (Status == EmulatorStatus.Inactive) {
             return;
         }
@@ -690,9 +721,6 @@ public partial class Emulator : MonoBehaviour {
         } else {
             AttemptOpenBuffer(_sharedTextureBuffer);
         }
-
-        _deferredForMainThread?.Invoke();
-        _deferredForMainThread = null;
 
         if (_emuhawk != null && _emuhawk.HasExited) {
             Deactivate();
@@ -829,6 +857,7 @@ public partial class Emulator : MonoBehaviour {
 
     /// try opening a shared buffer
     void AttemptOpenBuffer(ISharedBuffer buf) {
+        // Debug.Log($"Attempting to open buffer {buf} ({buf.GetType().Name})");
         try {
             buf.Open();
             // Debug.Log($"Connected to {buf}");
