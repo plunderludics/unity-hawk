@@ -257,8 +257,8 @@ public partial class Emulator : MonoBehaviour {
     float _startedTime;
     Action _deferredForMainThread = null; // Pretty ugly solution for rpc handlers to get stuff to run on the main thread
 
-    /// if the game can be running right now (application playing or runInEditMode)
-    bool CanRun {
+    /// if the game should be running right now (application playing or runInEditMode)
+    bool ShouldRun {
         get => Application.isPlaying || runInEditMode;
     }
 
@@ -322,7 +322,7 @@ public partial class Emulator : MonoBehaviour {
                 Reset();
             }
 
-            if (!CanRun) {
+            if (!ShouldRun) {
                 Deactivate();
             }
         }
@@ -341,7 +341,7 @@ public partial class Emulator : MonoBehaviour {
         _textureCorrectionMat = new Material(Resources.Load<Shader>(TextureCorrectionShaderName));
         _materialProperties = new MaterialPropertyBlock();
 
-        if (CanRun && runOnEnable && Status == EmulatorStatus.Inactive) {
+        if (ShouldRun && runOnEnable && Status == EmulatorStatus.Inactive) {
             Initialize();
         }
     }
@@ -732,7 +732,9 @@ public partial class Emulator : MonoBehaviour {
             Deactivate();
             // TODO: maybe we want an option to not restart bizhawk here?
             Debug.LogWarning("EmuHawk process was unexpectedly killed, restarting", this);
-            Initialize();
+            if (ShouldRun) {
+                Initialize();
+            }
         }
     }
 
