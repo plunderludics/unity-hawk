@@ -770,10 +770,13 @@ public partial class Emulator : MonoBehaviour {
         Assert.IsTrue(_sharedTextureBuffer != null && _sharedTextureBuffer.IsOpen());
 
         // Get the texture buffer and dimensions from BizHawk via shared memory
-        int size = _sharedTextureBuffer.Length;
-
         int width = _sharedTextureBuffer.Width;
         int height = _sharedTextureBuffer.Height;
+        if (_sharedTextureBuffer.Frame == _currentFrame) {
+            // Already read this texture, no need to update
+            return;
+        }
+
         _currentFrame = _sharedTextureBuffer.Frame; // TODO: only copy pixel data if the frame has changed
         
         if (width <= 0 || height <= 0) {
@@ -806,8 +809,8 @@ public partial class Emulator : MonoBehaviour {
             return;
         }
 
-        if (bSize > size) {
-            Debug.LogWarning($"emulator: buffer bigger than received size {bSize} > {size}", this);
+        if (bSize > _localTextureBuffer.Length) {
+            Debug.LogWarning($"emulator: texture bigger than buffer size {bSize} > {_localTextureBuffer.Length}", this);
             return;
         }
 
