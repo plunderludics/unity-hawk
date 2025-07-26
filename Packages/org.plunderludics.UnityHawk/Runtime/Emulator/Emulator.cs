@@ -777,15 +777,13 @@ public partial class Emulator : MonoBehaviour {
             return;
         }
 
-        _currentFrame = _sharedTextureBuffer.Frame; // TODO: only copy pixel data if the frame has changed
+        _currentFrame = _sharedTextureBuffer.Frame;
         
         if (width <= 0 || height <= 0) {
             // Width and height are 0 for a few frames after the emulator starts up
             // - presumably the texture buffer is open but bizhawk hasn't sent any data yet
             return;
         }
-
-        // TODO: Something weird is going on here, texture is shifted a few pixels to the left for some reason
 
         _sharedTextureBuffer.CopyPixelsTo(_localTextureBuffer);
 
