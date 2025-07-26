@@ -12,8 +12,6 @@ using Debug = UnityEngine.Debug;
 using Unity.Profiling;
 using UnityEngine.Assertions;
 
-
-
 #if UNITY_EDITOR
 using UnityEditor;
 #endif
@@ -748,26 +746,32 @@ public partial class Emulator : MonoBehaviour {
     }
 
     void UpdateTextureFromBuffer() {
-        if (_localTextureBuffer == null || _localTextureBuffer.Length != _sharedTextureBuffer.Length) {
-            _localTextureBuffer = new int[_sharedTextureBuffer.Length];
+        if (_localTextureBuffer == null || _localTextureBuffer.Length != _sharedTextureBuffer.PixelDataLength) {
+            _localTextureBuffer = new int[_sharedTextureBuffer.PixelDataLength];
         }
 
-        // Get the texture buffer and dimensions from BizHawk via the shared memory file
-        // protocol has to match MainForm.cs in BizHawk
-        // TODO should probably put this protocol in some shared schema file or something idk
-        int size = _sharedTextureBuffer.Length;
-        _sharedTextureBuffer.CopyTo(_localTextureBuffer, 0);
-        int width = _localTextureBuffer[^3];
-        int height = _localTextureBuffer[^2];
+        Assert.IsTrue(_sharedTextureBuffer != null && _sharedTextureBuffer.IsOpen());
 
-        // Debug.Log($"{_currentFrame}, {_localTextureBuffer[^1]}");
-        _currentFrame = _localTextureBuffer[^1]; // frame index of this texture [hacky solution to sync issues]
+        // Get the texture buffer and dimensions from BizHawk via shared memory
+        int size = _sharedTextureBuffer.Length;
+
+        int width = _sharedTextureBuffer.Width;
+        int height = _sharedTextureBuffer.Height;
+        _currentFrame = _sharedTextureBuffer.Frame; // TODO: only copy pixel data if the frame has changed
+        
+        if (width <= 0 || height <= 0) {
+            // Width and height are 0 for a few frames after the emulator starts up
+            // - presumably the texture buffer is open but bizhawk hasn't sent any data yet
+            return;
+        }
+
+        _sharedTextureBuffer.CopyPixelsTo(_localTextureBuffer);
 
         bool noTextures = !_localTexture || !renderTexture;
 
         int bWidth = _localTexture?.width ?? 0;
         int bHeight = _localTexture?.height ?? 0;
-        bool newDimensions = width != 0 && height != 0 && (bWidth != width || bHeight != height);
+        bool newDimensions = bWidth != width || bHeight != height;
 
         if (newDimensions) {
             // Debug.Log($"new width and height received : {width} x {height} (was {bWidth}x{bHeight})");
@@ -789,8 +793,7 @@ public partial class Emulator : MonoBehaviour {
         }
 
         try {
-            // TODO: make constants for metadata size/indices in texture buffer
-            _localTexture.SetPixelData(_localTextureBuffer[..^3], 0);
+            _localTexture.SetPixelData(_localTextureBuffer, 0);
             _localTexture.Apply(/*updateMipmaps: false*/);
         } catch (Exception e) {
             Debug.LogError($"{e}", this);
