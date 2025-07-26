@@ -182,13 +182,11 @@ public partial class Emulator : MonoBehaviour {
     /// Basically these are the params which, if changed, we want to reset the bizhawk process
     // Don't include the path params here, because then the process gets reset for every character typed/deleted
     struct BizhawkArgs {
-#if UNITY_EDITOR
         public Rom RomFile;
         public Savestate SaveStateFile;
         public Config ConfigFile;
         public LuaScript LuaScriptFile;
         public RamWatch RamWatchFile;
-#endif
         public bool PassInputFromUnity;
         public bool CaptureEmulatorAudio;
         public bool AcceptBackgroundInput;
@@ -205,6 +203,7 @@ public partial class Emulator : MonoBehaviour {
     ;
 
     /// the params corresponding to the currently running process
+    /// (used for auto-restarting when params change, only in editor)
     BizhawkArgs _currentBizhawkArgs;
 
     /// Dictionary of registered methods that can be called from bizhawk lua
@@ -913,12 +912,10 @@ public partial class Emulator : MonoBehaviour {
 
     BizhawkArgs MakeBizhawkArgs() {
         return new BizhawkArgs {
-#if UNITY_EDITOR
             RomFile = romFile,
             SaveStateFile = saveStateFile,
             ConfigFile = baseConfigFile,
             LuaScriptFile = luaScriptFile,
-#endif
             PassInputFromUnity = passInputFromUnity,
             CaptureEmulatorAudio = captureEmulatorAudio,
             AcceptBackgroundInput = acceptBackgroundInput,
