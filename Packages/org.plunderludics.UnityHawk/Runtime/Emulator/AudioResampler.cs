@@ -10,19 +10,21 @@ namespace UnityHawk {
 public class AudioResampler {
     [AllowNesting]
     [Tooltip("Higher value means more audio latency. Lower value may cause crackles and pops")]
-    public int idealBufferSize = 4096;
+    public int idealBufferSize = 512; // [TODO: this should be much less (maybe half or less) than SharedAudioBuffer.MaxBufferSize - should probably enforce somehow]
 
     [AllowNesting]
     // [ReadOnly, SerializeField]
     private double _avgSamplesProvided;
 
-    private ConcurrentQueue<short> _rawBuffer;
+    private RingBuffer<short> _sourceBuffer;
+    public bool HasSourceBuffer => _sourceBuffer != null;
 
     [AllowNesting]
     public int movingAverageN = 1024; // Has to be biiig because the input is so unstable
     private List<int> _samplesProvidedHistory;
 
     [AllowNesting]
+    [Tooltip("How much pressure to apply to keep the buffer short. Higher value will reduce latency but can cause pitch distortion")]
     public float excessPressureFactor = 0.01f;
 
     private int _samplesProvidedThisFrame;
@@ -33,7 +35,7 @@ public class AudioResampler {
     
     [AllowNesting]
     [ReadOnly, SerializeField]
-    private int rawBufferCount;
+    private int sourceBufferCount;
 
     [AllowNesting]
     [ReadOnly, SerializeField]
@@ -43,40 +45,64 @@ public class AudioResampler {
     private int _consecutiveEmptyFrames = 0;
 
     private int _inputSampleDeficit;
-    private const int MaxDeficitSampleCountForWarning = 1024;
+    private const int DeficitSampleCountForWarning = 4096; // Warn after accumulating a deficit of this many samples
 
+    int _samplesConsumedLastFrame;
+
+    /// Restart resampler from clean slate
     public void Init(double defaultResampleRatio) {
         _defaultResampleRatio = defaultResampleRatio;
-        _rawBuffer = new();
+        // _sourceBuffer = new();
+        _sourceBuffer = null;
         _samplesProvidedHistory = new();
         _consecutiveEmptyFrames = 0;
-        _samplesProvidedThisFrame = 0;
         _inputSampleDeficit = 0;
+        _samplesConsumedLastFrame = 0;
     }
 
-    public void PushSamples(short [] samples) {
-        if (samples == null) return;
+    // This slightly awkward structure is to avoid having to have two separate sample buffers and copy between them
+    // - we just read directly from the samples accumulated in SharedAudioBuffer
+    public void SetSourceBuffer(RingBuffer<short> sourceBuffer) {
+        _sourceBuffer = sourceBuffer;
+    }
 
-        _samplesProvidedThisFrame += samples.Length/ChannelCount;
-        // Debug.Log($"Capturing audio, received {_samplesProvidedThisFrame} samples");
+    // No longer used - get samples directly from SampleQueue instead
+    // public void PushSamples(short [] samples) {
+    //     if (samples == null) return;
 
-        // Append samples to running audio buffer to be played back later
-        // [Doing an Array.Copy here instead would probably be way faster but not a big deal]
-        for (int i = 0; i < samples.Length; i++) {
-            // TODO may want to cap the size of the queue
-            _rawBuffer.Enqueue(samples[i]);
-        }
+    //     _samplesProvidedThisFrame += samples.Length/ChannelCount;
+    //     // Debug.Log($"Capturing audio, received {_samplesProvidedThisFrame} samples");
+
+    //     // Append samples to running audio buffer to be played back later
+    //     // [Doing an Array.Copy here instead would probably be way faster but not a big deal]
+    //     for (int i = 0; i < samples.Length; i++) {
+    //         // TODO may want to cap the size of the queue
+    //         _sourceBuffer.Enqueue(samples[i]);
+    //     }
         
-        rawBufferCount = _rawBuffer.Count/ChannelCount;
-    }
+    //     sourceBufferCount = _sourceBuffer.Count/ChannelCount;
+    // }
 
     public void GetSamples(float[] out_buffer, int channels) {
+        if (_sourceBuffer == null) {
+            Debug.LogError("[unity-hawk] AudioResampler source buffer has not been set");
+            return;
+        }
+
         if (channels != 2) {
             Debug.LogError("[unity-hawk] AudioSource must be set to 2 channels");
             return;
         }
 
-        if (_samplesProvidedThisFrame == 0) {
+        int newSourceBufferCount = _sourceBuffer.Count/ChannelCount;
+        int newSamplesThisFrame = newSourceBufferCount - sourceBufferCount + _samplesConsumedLastFrame; // Number of samples added since last GetSamples call (ie last OnAudioFilterRead call)
+        // (Above calculation will be incorrect when buffer is full, but that's good -
+        //  Afaik the only case where this happens is when unity is paused or hangs for some reason, and in that case
+        //  we want samples accumulated above the length of the buffer to get dropped and not affect resampling ratio.
+        // TODO: I guess if we want to handle that case better we could track the duration between OnAudioFilterRead calls but it seems minor
+        sourceBufferCount = newSourceBufferCount;
+
+        if (newSamplesThisFrame == 0) {
             _consecutiveEmptyFrames++;
             if (_consecutiveEmptyFrames > ConsecutiveEmptyFramesToStopAudio) {
                 // Sometimes bizhawk just stops sending sound (e.g. when paused), we don't want this to affect the moving average resample ratio
@@ -89,8 +115,7 @@ public class AudioResampler {
         // Resample
         int stereoSamplesNeeded = out_buffer.Length/ChannelCount;
 
-        _samplesProvidedHistory.Add(_samplesProvidedThisFrame);
-        _samplesProvidedThisFrame = 0;
+        _samplesProvidedHistory.Add(newSamplesThisFrame);
         while (_samplesProvidedHistory.Count > movingAverageN) {
             _samplesProvidedHistory.RemoveAt(0);
         }
@@ -107,7 +132,7 @@ public class AudioResampler {
         resampleRatio = ratio;
 
         int stereoSamplesToConsume = (int)(ratio*stereoSamplesNeeded);
-        int availableStereoSamples = _rawBuffer.Count/ChannelCount;
+        int availableStereoSamples = sourceBufferCount;
 
         int excessStereoSamples = availableStereoSamples - stereoSamplesToConsume - idealBufferSize;
 
@@ -119,7 +144,7 @@ public class AudioResampler {
         if (stereoSamplesToConsume > availableStereoSamples) {
             // Debug.LogWarning($"Starved of bizhawk samples");
             _inputSampleDeficit += stereoSamplesToConsume - availableStereoSamples;
-            if (_inputSampleDeficit > MaxDeficitSampleCountForWarning) {
+            if (_inputSampleDeficit > DeficitSampleCountForWarning) {
                 Debug.LogWarning($"Starved of audio samples, consider increasing idealBufferSize");
                 _inputSampleDeficit = 0;
             }
@@ -129,13 +154,16 @@ public class AudioResampler {
         stereoSamplesToConsume = Math.Max(0, stereoSamplesToConsume);
 
         // Pop `stereoSamplesToConsume` samples off the buffer
-        short[] rawSamples = new short[stereoSamplesToConsume*ChannelCount]; // TODO init elsewhere
-        for (int i = 0; i < rawSamples.Length; i++) {
-            short x;
-            _rawBuffer.TryDequeue(out x);
-            rawSamples[i] = x;
-        }
-        rawBufferCount = _rawBuffer.Count/ChannelCount;
+        short[] rawSamples = new short[stereoSamplesToConsume*ChannelCount]; // TODO alloc elsewhere
+        _sourceBuffer.Read(rawSamples, 0, rawSamples.Length);
+
+        _samplesConsumedLastFrame = stereoSamplesToConsume;
+
+        // for (int i = 0; i < rawSamples.Length; i++) {
+        //     short x;
+        //     _sourceBuffer.TryDequeue(out x);
+        //     rawSamples[i] = x;
+        // }
 
         // Debug.Log($"Resampling from {stereoSamplesToConsume} to {stereoSamplesNeeded} ({ratio})");
         short[] resampled = Resample(rawSamples, stereoSamplesToConsume, stereoSamplesNeeded);

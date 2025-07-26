@@ -327,7 +327,9 @@ public partial class Emulator : MonoBehaviour {
             }
         }
 
-        if (!Application.isPlaying && runInEditMode && Status == EmulatorStatus.Inactive) {
+        // [use EditorApplication.isPlayingOrWillChangePlaymode instead of Application.isPlaying
+        //  to avoid OnEnable call as play mode is being entered]
+        if (!EditorApplication.isPlayingOrWillChangePlaymode && runInEditMode && Status == EmulatorStatus.Inactive) {
             // In edit mode, initialize the emulator if it is not already running
             Initialize();
         }
@@ -340,6 +342,14 @@ public partial class Emulator : MonoBehaviour {
 #endif
         _textureCorrectionMat = new Material(Resources.Load<Shader>(TextureCorrectionShaderName));
         _materialProperties = new MaterialPropertyBlock();
+
+# if UNITY_EDITOR
+        // In Editor when entering play mode OnEnable gets called twice
+        // - once immediately before play mode starts, and once after - don't start up the emulator in the first case
+        if (EditorApplication.isPlayingOrWillChangePlaymode && !Application.isPlaying) {
+            return;
+        }
+#endif
 
         if (ShouldRun && runOnEnable && Status == EmulatorStatus.Inactive) {
             Initialize();
@@ -369,8 +379,24 @@ public partial class Emulator : MonoBehaviour {
     ////// Core methods
 
     System.Threading.Thread initThread;
+    // [Why is this method public?]
     public void Initialize() {
         // Debug.Log("Emulator Initialize");
+
+        // Don't allow re-initializing if already initialized
+        if (Status != EmulatorStatus.Inactive) {
+            // TODO: or should we reset in this case?
+            Debug.LogError("Emulator is already initialized, ignoring", this);
+            return;
+        }
+        // Don't allow starting a new thread if the previous one is still running
+        if (initThread != null && initThread.IsAlive) {
+            // TODO: Should be some way for user to know if this is the case
+            // Have another 'Starting' state in EmulatorStatus?
+            Debug.LogError("Emulator is currently initializing, ignoring", this);
+            return;
+        }
+
         // Pre-process inspector params
         if (renderMode == EmulatorRenderMode.AttachedRenderer || renderMode == EmulatorRenderMode.ExternalRenderer) {
             if (renderMode == EmulatorRenderMode.AttachedRenderer) {
@@ -443,35 +469,26 @@ public partial class Emulator : MonoBehaviour {
         string ramWatchPath = ramWatchFile ? Paths.GetAssetPath(ramWatchFile) : null;
         string luaScriptPath = luaScriptFile ? Paths.GetAssetPath(luaScriptFile) : null;
 
-        // Setup logger
-        // Redirect bizhawk output + error into a log file
+        string logFilePath = null;
         if (writeBizhawkLogs) {
-            var logFileName = $"{name}-{GetInstanceID()}.log";
+            var logFileName = $"{gameObject.name}-{GetInstanceID()}.log";
             var logPath = config.BizHawkLogsPath;
             Directory.CreateDirectory(logPath);
-            bizhawkLogLocation = Path.Combine(logPath, logFileName);
-
-            _bizHawkLogWriter?.Dispose();
-            _bizHawkLogWriter = new(bizhawkLogLocation);
+            logFilePath = Path.Combine(logPath, logFileName);
+            bizhawkLogLocation = logFilePath;
         }
 
         // Run _StartBizhawk in a separate thread to avoid blocking the main thread
-        // Don't allow starting a new thread if the previous one is still running
-        if (initThread == null || !initThread.IsAlive) {
-            bool applicationIsPlaying = Application.isPlaying;
-            initThread = new(() => _StartBizhawk(applicationIsPlaying, romPath, configPath, saveStatePath, ramWatchPath, luaScriptPath, shareAudio));
-            initThread.IsBackground = true;
-            initThread.Start();
-        } else {
-            // TODO: Should be some way for user to know if this is the case
-            // Have another 'Starting' state in EmulatorStatus?
-            Debug.LogError("Emulator is currently initializing", this);
-        }
+        bool applicationIsPlaying = Application.isPlaying;
+        initThread = new(() => _StartBizhawk(applicationIsPlaying, logFilePath, romPath, configPath, saveStatePath, ramWatchPath, luaScriptPath, shareAudio));
+        initThread.IsBackground = true;
+        initThread.Start();
     }
 
     static readonly ProfilerMarker StartBizhawk = new ("Emulator.StartBizhawk");
     void _StartBizhawk(
         bool applicationIsPlaying,
+        string logFilePath, // null to disable logging
         string romPath,
         string configPath,
         string saveStatePath,
@@ -484,11 +501,6 @@ public partial class Emulator : MonoBehaviour {
         // Would probably be better to make _StartBizhawk as small as possible, just the config loading and the process start
 
         StartBizhawk.Begin();
-
-        if (Status != EmulatorStatus.Inactive) {
-            // TODO: should we deactivate here and reinitialize?
-            return;
-        }
 
         // get a random number to identify the buffers
         var guid = new System.Random().Next();
@@ -633,7 +645,12 @@ public partial class Emulator : MonoBehaviour {
         args.Add("--open-ext-tool-dll=UnityHawk"); // Open unityhawk external tool
         args.Add($"--ext-tools-dir={Path.GetFullPath(Paths.externalToolsDir)}"); // Has to be set since not running from the bizhawk directory
 
-        if (writeBizhawkLogs) {
+        // Setup logger
+        // Redirect bizhawk output + error into a log file
+        if (logFilePath != null) {
+            _bizHawkLogWriter?.Dispose();
+            _bizHawkLogWriter = new(bizhawkLogLocation);
+
             process.StartInfo.RedirectStandardOutput = true;
             process.StartInfo.RedirectStandardError = true;
             process.OutputDataReceived += (sender, e) => LogBizHawk(sender, e, false);
@@ -718,10 +735,11 @@ public partial class Emulator : MonoBehaviour {
 
         if (captureEmulatorAudio && Application.isPlaying) {
             if (_sharedAudioBuffer.IsOpen()) {
-                if (Status == EmulatorStatus.Running) {
-                    short[] samples = _sharedAudioBuffer.GetSamples();
-                    // Updating audio before the emulator is actually running messes up the resampling algorithm
-                    audioResampler.PushSamples(samples);
+                if (Status == EmulatorStatus.Running && !audioResampler.HasSourceBuffer) {
+                    // Set source buffer directly instead of copying samples
+                    audioResampler.SetSourceBuffer(_sharedAudioBuffer.SampleQueue);
+                    // short[] samples = _sharedAudioBuffer.GetSamples();
+                    // audioResampler.PushSamples(samples);
                 }
             } else {
                 AttemptOpenBuffer(_sharedAudioBuffer);
@@ -832,8 +850,7 @@ public partial class Emulator : MonoBehaviour {
             _emuhawk = null;
         }
 
-        _bizHawkLogWriter?.Close();
-
+        // _bizHawkLogWriter?.Close();
 
         foreach (ISharedBuffer buf in new ISharedBuffer[] {
             _sharedTextureBuffer,
@@ -877,6 +894,7 @@ public partial class Emulator : MonoBehaviour {
         if (_sharedAudioBuffer == null || !_sharedAudioBuffer.IsOpen()) return;
         if (Status != EmulatorStatus.Running) return;
 
+        // Debug.Log($"[emulator] OnAudioFilterRead {outBuffer.Length} samples, {channels} channels", this);
         audioResampler.GetSamples(outBuffer, channels);
     }
 
@@ -959,7 +977,8 @@ public partial class Emulator : MonoBehaviour {
             _bizHawkLogWriter.WriteLine(msg);
             _bizHawkLogWriter.Flush();
             if (isError) {
-                Debug.LogWarning(msg, this);
+                Debug.LogWarning(msg /*, this*/); // Don't pass context object cause it breaks in non-main thread
+                // TODO: Probably should add to a queue here and log the queue in the main thread
             }
         }
     }
