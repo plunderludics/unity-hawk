@@ -391,18 +391,32 @@ public partial class Emulator : MonoBehaviour {
             renderTexture = null;
         }
 
-        if (captureEmulatorAudio && !GetComponent<AudioSource>()) {
-            Debug.LogWarning("captureEmulatorAudio is enabled but no AudioSource is attached, will not play audio", this);
-        }
-
         if (Application.isPlaying) {    
             // default to BasicInputProvider (uses preset default keymapping)
             if (!inputProvider) {
                 if (!(inputProvider = GetComponent<InputProvider>())) {
+                    // TODO can't do this during onvalidate, urgh
                     inputProvider = gameObject.AddComponent<BasicInputProvider>();
                 }
             }
         }
+
+        if (captureEmulatorAudio) {
+            if (!GetComponent<AudioSource>()) {
+                Debug.LogWarning("captureEmulatorAudio is enabled but no AudioSource is attached, will not play audio", this);
+            }
+
+            if (runInEditMode && !Application.isPlaying) {
+                Debug.LogWarning("Emulator audio cannot be captured in edit mode", this);
+            } else {
+                if (audioResampler == null) {
+                    audioResampler = new();
+                }
+
+                audioResampler.Init(BizhawkSampleRate/AudioSettings.outputSampleRate);
+            }
+        }
+        bool shareAudio = captureEmulatorAudio && Application.isPlaying;
 
         // Compute file paths (since Paths.GetAssetPath() can only run on main thread)
         string romPath;
@@ -443,7 +457,7 @@ public partial class Emulator : MonoBehaviour {
 
         // Run _StartBizhawk in a separate thread to avoid blocking the main thread
         bool applicationIsPlaying = Application.isPlaying;
-        initThread = new (() => _StartBizhawk(applicationIsPlaying, romPath, configPath, saveStatePath, ramWatchPath, luaScriptPath));
+        initThread = new (() => _StartBizhawk(applicationIsPlaying, romPath, configPath, saveStatePath, ramWatchPath, luaScriptPath, shareAudio));
         initThread.IsBackground = true;
         initThread.Start();
     }
@@ -453,9 +467,10 @@ public partial class Emulator : MonoBehaviour {
         bool applicationIsPlaying,
         string romPath,
         string configPath,
-        string saveStatePath = null,
-        string ramWatchPath = null,
-        string luaScriptPath = null
+        string saveStatePath,
+        string ramWatchPath,
+        string luaScriptPath,
+        bool shareAudio
     ) {
         // TODO: The separation between Initialize and _StartBizhawk is sort of messy,
         // mainly just moving anything that has to run on the main thread into Initialize
@@ -481,22 +496,22 @@ public partial class Emulator : MonoBehaviour {
 
         // Start EmuHawk.exe w args
         var exePath = Path.GetFullPath(Paths.emuhawkExePath);
-        _emuhawk = new Process();
-        _emuhawk.StartInfo.UseShellExecute = false;
-        var args = _emuhawk.StartInfo.ArgumentList;
+        Process process = new Process();
+        process.StartInfo.UseShellExecute = false;
+        var args = process.StartInfo.ArgumentList;
         if (IsTargetMac) {
             // Doesn't really work yet, need to make some more changes in the bizhawk executable
-            _emuhawk.StartInfo.EnvironmentVariables["LD_LIBRARY_PATH"] = Paths.dllDir;
-            _emuhawk.StartInfo.EnvironmentVariables["MONO_PATH"] = Paths.dllDir;
-            _emuhawk.StartInfo.FileName = "/Library/Frameworks/Mono.framework/Versions/Current/Commands/mono";
+            process.StartInfo.EnvironmentVariables["LD_LIBRARY_PATH"] = Paths.dllDir;
+            process.StartInfo.EnvironmentVariables["MONO_PATH"] = Paths.dllDir;
+            process.StartInfo.FileName = "/Library/Frameworks/Mono.framework/Versions/Current/Commands/mono";
             if (ShowBizhawkGui) {
                 Debug.LogWarning("'Show Bizhawk Gui' is not supported on Mac'", this);
             }
             args.Add(exePath);
         } else {
             // Windows
-            _emuhawk.StartInfo.FileName = exePath;
-            _emuhawk.StartInfo.UseShellExecute = false;
+            process.StartInfo.FileName = exePath;
+            process.StartInfo.UseShellExecute = false;
         }
 
         // add rom path
@@ -549,8 +564,8 @@ public partial class Emulator : MonoBehaviour {
 
         if (!ShowBizhawkGui) {
             args.Add("--headless");
-            _emuhawk.StartInfo.CreateNoWindow = true;
-            _emuhawk.StartInfo.WindowStyle = ProcessWindowStyle.Hidden;
+            process.StartInfo.CreateNoWindow = true;
+            process.StartInfo.WindowStyle = ProcessWindowStyle.Hidden;
         }
 
         List<string> userData = new(); // Userdata args get used by UnityHawk external tool
@@ -576,20 +591,10 @@ public partial class Emulator : MonoBehaviour {
         // _apiCallRpcBuffer = new ApiCallRpcBuffer(apiCallRpcBufferName);
 
         // create & register audio buffer
-        if (captureEmulatorAudio) {
-            if (runInEditMode && !applicationIsPlaying) {
-                Debug.LogWarning("captureEmulatorAudio is enabled but emulator audio cannot be captured in edit mode", this);
-            } else {
-                var sharedAudioBufferName = $"audio-{guid}";
-                userData.Add($"{Args.AudioRpc}:{sharedAudioBufferName}");
-                _sharedAudioBuffer = new SharedAudioBuffer(sharedAudioBufferName);
-
-                if (audioResampler == null) {
-                    audioResampler = new();
-                }
-
-                audioResampler.Init(BizhawkSampleRate/AudioSettings.outputSampleRate);
-            }
+        if (shareAudio) {
+            var sharedAudioBufferName = $"audio-{guid}";
+            userData.Add($"{Args.AudioRpc}:{sharedAudioBufferName}");
+            _sharedAudioBuffer = new SharedAudioBuffer(sharedAudioBufferName);
         }
 
         if (muteBizhawkInEditMode && !applicationIsPlaying) {
@@ -622,17 +627,20 @@ public partial class Emulator : MonoBehaviour {
         args.Add($"--ext-tools-dir={Path.GetFullPath(Paths.externalToolsDir)}"); // Has to be set since not running from the bizhawk directory
 
         if (writeBizhawkLogs) {
-            _emuhawk.StartInfo.RedirectStandardOutput = true;
-            _emuhawk.StartInfo.RedirectStandardError = true;
-            _emuhawk.OutputDataReceived += (sender, e) => LogBizHawk(sender, e, false);
-            _emuhawk.ErrorDataReceived += (sender, e) => LogBizHawk(sender, e, true);
+            process.StartInfo.RedirectStandardOutput = true;
+            process.StartInfo.RedirectStandardError = true;
+            process.OutputDataReceived += (sender, e) => LogBizHawk(sender, e, false);
+            process.ErrorDataReceived += (sender, e) => LogBizHawk(sender, e, true);
         }
 
         // Debug.Log($"[unity-hawk] {exePath} {string.Join(' ', args)}");
 
-        _emuhawk.Start(); // [This seems to block for ~20s sometimes, not sure why. Should maybe run in a separate thread?]
-        _emuhawk.BeginOutputReadLine();
-        _emuhawk.BeginErrorReadLine();
+        process.Start();
+        _emuhawk = process; // _emuhawk is non-null only after the process has started
+        if (writeBizhawkLogs) {
+            process.BeginOutputReadLine();
+            process.BeginErrorReadLine();
+        }
 
         _deferredForMainThread += () => {
             Status = EmulatorStatus.Started;
@@ -805,14 +813,15 @@ public partial class Emulator : MonoBehaviour {
 
     void Deactivate() {
         // Debug.Log("Emulator Deactivate");
-        Status = EmulatorStatus.Inactive;
-
-        _bizHawkLogWriter?.Close();
 
         if (_emuhawk != null && !_emuhawk.HasExited) {
             // Kill the _emuhawk process
             _emuhawk.Kill();
+            _emuhawk = null;
         }
+
+        _bizHawkLogWriter?.Close();
+
 
         foreach (ISharedBuffer buf in new ISharedBuffer[] {
             _sharedTextureBuffer,
@@ -824,6 +833,7 @@ public partial class Emulator : MonoBehaviour {
                 buf.Close();
             }
         }
+        Status = EmulatorStatus.Inactive;
     }
 
     /// Init/re-init the textures for rendering the screen - has to be done whenever the source dimensions change (which happens often on PSX for some reason)
@@ -852,7 +862,7 @@ public partial class Emulator : MonoBehaviour {
     /// (this method gets called by Unity if there is an AudioSource component attached)
     void OnAudioFilterRead(float[] outBuffer, int channels) {
         if (!captureEmulatorAudio) return;
-        if (!_sharedAudioBuffer.IsOpen()) return;
+        if (_sharedAudioBuffer == null || !_sharedAudioBuffer.IsOpen()) return;
         if (Status != EmulatorStatus.Running) return;
 
         audioResampler.GetSamples(outBuffer, channels);
