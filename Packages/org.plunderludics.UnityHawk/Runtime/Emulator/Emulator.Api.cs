@@ -26,6 +26,7 @@ public partial class Emulator {
     [Tooltip("if the emulator is paused")]
     [SerializeField] bool isPaused;
     
+    [Foldout("BizHawk Config")]
     [OnValueChanged(nameof(OnSetSpeedPercent))]
     [Range(0, 200)]
     [Tooltip("emulator speed as a percentage")]
@@ -120,7 +121,7 @@ public partial class Emulator {
     /// Register a callback that can be called via `unityhawk.callmethod('MethodName')` in BizHawk lua
     public void RegisterLuaCallback(string methodName, LuaCallback luaCallback) {
         if (SpecialCommands.All.Contains(methodName)) {
-            Debug.LogWarning($"Tried to register a Lua callback for reserved method name '{methodName}', this will not work!");
+            Debug.LogWarning($"Tried to register a Lua callback for reserved method name '{methodName}', this will not work!", this);
             return;
         }
         _registeredLuaCallbacks[methodName] = luaCallback;
@@ -190,7 +191,7 @@ public partial class Emulator {
     public void LoadState(Savestate sample) {
         string path = Paths.GetAssetPath(sample);
         if (path == null) {
-            Debug.LogError($"Savestate {sample} not found");
+            Debug.LogError($"Savestate {sample} not found", this);
             return;
         }
 
@@ -209,7 +210,7 @@ public partial class Emulator {
         path = Paths.GetFullPath(path);
 
         if (string.IsNullOrEmpty(path)) {
-            Debug.LogWarning("[emulator] attempting to load rom with invalid path, ignoring...");
+            Debug.LogWarning("[emulator] attempting to load rom with invalid path, ignoring...", this);
             return;
         }
 
@@ -273,7 +274,7 @@ public partial class Emulator {
             if (uint.TryParse(value, out uint result)) {
                 callback(result);
             } else {
-                Debug.LogError($"Failed to parse unsigned value from Bizhawk watch: {value}");
+                Debug.LogError($"Failed to parse unsigned value from Bizhawk watch: {value}", this);
             }
         });
     }
@@ -283,7 +284,7 @@ public partial class Emulator {
             if (int.TryParse(value, out int result)) {
                 callback(result);
             } else {
-                Debug.LogError($"Failed to parse signed value from Bizhawk watch: {value}");
+                Debug.LogError($"Failed to parse signed value from Bizhawk watch: {value}", this);
             }
         });
     }
@@ -293,7 +294,7 @@ public partial class Emulator {
             if (float.TryParse(value, out float result)) {
                 callback(result);
             } else {
-                Debug.LogError($"Failed to parse float value from Bizhawk watch: {value}");
+                Debug.LogError($"Failed to parse float value from Bizhawk watch: {value}", this);
             }
         });
     }
@@ -307,7 +308,7 @@ public partial class Emulator {
         var key = (address, size, isBigEndian, type, domain);
         var hashCode = key.GetHashCode();
         if (_watchCallbacks.ContainsKey(hashCode)) {
-            Debug.LogWarning($"Overwriting existing watch for key {key}");
+            Debug.LogWarning($"Overwriting existing watch for key {key}", this);
         }
         _watchCallbacks[hashCode] = (key, callback);
         return hashCode;
@@ -325,7 +326,7 @@ public partial class Emulator {
             _apiCommandBuffer.CallMethod("Unwatch", args);
             _watchCallbacks.Remove(id);
         } else {
-            Debug.LogWarning($"Unwatch called for id {id} that was not being watched.");
+            Debug.LogWarning($"Unwatch called for id {id} that was not being watched.", this);
         }
     }
 
