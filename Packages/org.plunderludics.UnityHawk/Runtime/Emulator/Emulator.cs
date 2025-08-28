@@ -402,12 +402,6 @@ public partial class Emulator : MonoBehaviour {
             return;
         }
 
-        // if (_initThread != null && _initThread.IsAlive) {
-        //     // This shouldn't happen - Status should be == Starting in this case
-        //     throw new Exception($"Status is {Status} but _initThread is still alive - shouldn't happen");
-        //     return;
-        // }
-
         // Pre-process inspector params
         if (renderMode == EmulatorRenderMode.AttachedRenderer || renderMode == EmulatorRenderMode.ExternalRenderer) {
             if (renderMode == EmulatorRenderMode.AttachedRenderer) {
