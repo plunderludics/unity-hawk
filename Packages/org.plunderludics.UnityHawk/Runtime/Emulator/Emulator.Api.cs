@@ -72,6 +72,8 @@ public partial class Emulator {
     /// (If emulator is not running but savestate is set, show savestate texture)
     public Texture Texture => IsRunning ? renderTexture : saveStateFile?.Screenshot;
 
+    public bool IsStarting => Status == EmulatorStatus.Starting;
+
     /// is the emulator process started
     public bool IsStarted => Status >= EmulatorStatus.Started;
 
@@ -87,6 +89,9 @@ public partial class Emulator {
         /// BizHawk hasn't started yet
         Inactive,
 
+        /// The BizHawk process is starting up but not started yet
+        Starting,
+
         /// BizHawk has been started, but not rendering yet
         Started,
 
@@ -99,6 +104,7 @@ public partial class Emulator {
         get => _status;
         private set {
             if (_status != value) {
+                Debug.Log($"Emulator status changed from {_status} to {value}", this);
                 var raise = value switch {
                     EmulatorStatus.Started => OnStarted,
                     EmulatorStatus.Running => OnRunning,

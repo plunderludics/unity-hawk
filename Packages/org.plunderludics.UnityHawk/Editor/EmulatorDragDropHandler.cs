@@ -57,12 +57,17 @@ public static class EmulatorDragDropHandler {
         // Perform the drop
         if (romAsset != null) {
             emulator.romFile = romAsset;
+
+            if (emulator.autoSelectRomFile && !emulator.saveStateFile.MatchesRom(romAsset)) {
+                // Need to clear savestateFile so romFile doesn't get overwritten
+                emulator.saveStateFile = null;
+            }
             
             // Debug.Log($"Rom asset '{romAsset.name}' assigned to Emulator on '{gameObject.name}'");
         } else if (savestateAsset != null) {
             // Assign the Savestate to the Emulator
             emulator.saveStateFile = savestateAsset;
-            
+
             // Debug.Log($"Savestate asset '{savestateAsset.name}' assigned to Emulator on '{gameObject.name}'");
         }
 
