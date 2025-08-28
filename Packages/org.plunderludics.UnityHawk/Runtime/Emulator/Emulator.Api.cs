@@ -84,6 +84,14 @@ public partial class Emulator {
     /// Returns null if emulator is not running.
     public string SystemId => _systemId;
 
+    /// when the emulator boots up
+    /// (will be a slight delay since this gets deferred to main thread Update)
+    public Action OnStarted;
+
+    /// when the emulator starts running its game
+    /// (will be a slight delay since this gets deferred to main thread Update)
+    public Action OnRunning;
+
     /// the current status of the emulator
     public enum EmulatorStatus {
         /// BizHawk hasn't started yet
@@ -104,14 +112,14 @@ public partial class Emulator {
         get => _status;
         private set {
             if (_status != value) {
-                Debug.Log($"Emulator status changed from {_status} to {value}", this);
+                // Debug.Log($"Emulator status changed from {_status} to {value}", this);
                 var raise = value switch {
                     EmulatorStatus.Started => OnStarted,
                     EmulatorStatus.Running => OnRunning,
                     _ => null,
                 };
 
-                raise?.Invoke();
+                _deferredForMainThread += () => raise?.Invoke();
             }
             _status = value;
         }
