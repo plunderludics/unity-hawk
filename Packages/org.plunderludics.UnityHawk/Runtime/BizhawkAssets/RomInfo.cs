@@ -1,4 +1,5 @@
 ﻿using System;
+using BizHawk.Emulation.Common;
 
 namespace UnityHawk {
     [Serializable]
@@ -14,5 +15,14 @@ namespace UnityHawk {
         public bool NotInDatabase;
 
         public string Core;
+
+        public RomInfo(GameInfo gameInfo) {
+            Name = gameInfo.Name;
+            Hash = gameInfo.Hash;
+            Region = gameInfo.Region;
+            System = gameInfo.System;
+            NotInDatabase = gameInfo.NotInDatabase;
+            Core = gameInfo.ForcedCore;
+        }
     }
 }

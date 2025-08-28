@@ -55,10 +55,10 @@ public class BasicApiTool : MonoBehaviour
     private void FrameAdvance() {
         emulator.FrameAdvance();
     }
-    
+
     [Button]
     private void SetVolume() {
-        emulator.SetVolume(float.Parse(arg));
+        emulator.SetVolume(int.Parse(arg));
     }
 
     [Button]

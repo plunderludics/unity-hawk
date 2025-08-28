@@ -1,8 +1,3 @@
-using System.Linq;
-using UnityEngine;
-using System.Collections.Generic;
-using Plunderludics.UnityHawk.Shared;
-
 namespace UnityHawk {
 
 // Convert from Unity input format to BizHawk input format

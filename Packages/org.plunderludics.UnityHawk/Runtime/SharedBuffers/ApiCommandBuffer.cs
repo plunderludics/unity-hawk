@@ -36,7 +36,7 @@ public class ApiCommandBuffer : ISharedBuffer {
 
         MethodCall methodCall = new MethodCall {
             MethodName = methodName,
-            Argument = arg
+            Argument = arg ?? string.Empty,
         };
         // Debug.Log($"Attempting api method call: {methodCall}");
         byte[] bytes = Serialization.Serialize(methodCall);
