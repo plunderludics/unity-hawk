@@ -288,7 +288,7 @@ public partial class Emulator : MonoBehaviour {
     ///// MonoBehaviour lifecycle
     // (These methods are public only for convenient testing)
     [Button]
-    public void Reset() {
+    public void Restart() {
         Deactivate();
         Initialize();
     }
@@ -335,7 +335,7 @@ public partial class Emulator : MonoBehaviour {
         if (Status != EmulatorStatus.Inactive) {
             if (!Equals(_currentBizhawkArgs, MakeBizhawkArgs())) {
                 // Bizhawk params have changed since bizhawk process was started, needs restart
-                Reset();
+                Restart();
             }
 
             if (!ShouldRun) {
@@ -682,8 +682,9 @@ public partial class Emulator : MonoBehaviour {
         // Setup logger
         // Redirect bizhawk output + error into a log file
         if (logFilePath != null) {
-            _bizHawkLogWriter?.Dispose();
-            _bizHawkLogWriter = new(bizhawkLogLocation);
+            // (Use FileShare.ReadWrite to avoid annoying multi-threading bug that I don't really understand)
+            var fileStream = new FileStream(logFilePath, FileMode.Create, FileAccess.Write, FileShare.ReadWrite);
+            _bizHawkLogWriter = new(fileStream);
 
             process.StartInfo.RedirectStandardOutput = true;
             process.StartInfo.RedirectStandardError = true;
@@ -907,7 +908,7 @@ public partial class Emulator : MonoBehaviour {
             _emuhawk = null;
         }
 
-        // _bizHawkLogWriter?.Close();
+        _bizHawkLogWriter?.Close();
 
         foreach (ISharedBuffer buf in new ISharedBuffer[] {
             _sharedTextureBuffer,
