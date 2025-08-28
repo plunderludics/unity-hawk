@@ -58,13 +58,14 @@ public partial class Emulator : MonoBehaviour {
     public bool runOnEnable = true;
 
     [Header("Game")]
+    [Tooltip("Savestate file to load")]
     public Savestate saveStateFile;
 
     /// .
     bool SaveStateFileIsNull => saveStateFile is null;
 
     [HideIf(nameof(SaveStateFileIsNull))]
-    [Tooltip("get romfile automatically from the savestate")]
+    [Tooltip("select rom file automatically based on savestate")]
     public bool autoSelectRomFile = true;
 
     /// .
@@ -72,7 +73,7 @@ public partial class Emulator : MonoBehaviour {
     bool EnableRomFileSelection => !autoSelectRomFile || SaveStateFileIsNull || saveStateFile.RomInfo.NotInDatabase;
 
     [EnableIf(nameof(EnableRomFileSelection))]
-    [Tooltip("a rom file")]
+    [Tooltip("Rom file to run")]
     public Rom romFile;
 
     ///// Rendering
@@ -280,6 +281,7 @@ public partial class Emulator : MonoBehaviour {
 
 #if UNITY_EDITOR
     public void OnValidate() {
+        // Debug.Log($"OnValidate");
         if (!config) {
             config = (UnityHawkConfig)AssetDatabase.LoadAssetAtPath(
                 Paths.defaultUnityHawkConfigPath,
@@ -312,7 +314,7 @@ public partial class Emulator : MonoBehaviour {
         // If emulator not running, set texture to savestate screenshot
         // TODO: why is this happening only on validate
         // should this even be reiniting the texture if the dimensions are the same?
-        if (!IsRunning && saveStateFile?.Screenshot is not null) {
+        if (!IsRunning && saveStateFile?.Screenshot != null) {
             InitTextures(saveStateFile.Screenshot.width, saveStateFile.Screenshot.height);
         }
 
@@ -329,7 +331,7 @@ public partial class Emulator : MonoBehaviour {
 
         // [use EditorApplication.isPlayingOrWillChangePlaymode instead of Application.isPlaying
         //  to avoid OnEnable call as play mode is being entered]
-        if (!EditorApplication.isPlayingOrWillChangePlaymode && runInEditMode && Status == EmulatorStatus.Inactive) {
+        if (gameObject.activeInHierarchy && !EditorApplication.isPlayingOrWillChangePlaymode && runInEditMode && Status == EmulatorStatus.Inactive) {
             // In edit mode, initialize the emulator if it is not already running
             Initialize();
         }
