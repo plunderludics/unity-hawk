@@ -287,11 +287,6 @@ public partial class Emulator : MonoBehaviour {
 
     ///// MonoBehaviour lifecycle
     // (These methods are public only for convenient testing)
-    [Button]
-    public void Restart() {
-        Deactivate();
-        Initialize();
-    }
 
 #if UNITY_EDITOR
     public void OnValidate() {
@@ -397,8 +392,7 @@ public partial class Emulator : MonoBehaviour {
     Thread _initThread;
     CancellationTokenSource _initThreadCancellationTokenSource;
 
-    // [Why is this method public?]
-    public void Initialize() {
+    void Initialize() {
         // Debug.Log("Emulator Initialize");
 
         // Don't allow re-initializing if already initialized

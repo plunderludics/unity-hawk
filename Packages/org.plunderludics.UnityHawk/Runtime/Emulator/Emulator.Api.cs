@@ -128,6 +128,13 @@ public partial class Emulator {
     /// frame index of latest received texture
     public int CurrentFrame => _currentFrame;
 
+    /// restarts the emulator
+    [Button]
+    public void Restart() {
+        Deactivate();
+        Initialize();
+    }
+
     /// delegate for registering lua callbacks
     // TODO: string-to-string only rn but some automatic de/serialization for different types would be nice
     public delegate string LuaCallback(string arg);
