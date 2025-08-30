@@ -75,10 +75,7 @@
       },
       "Plunderludics.UnityHawk.Shared/1.0.0": {
         "runtime": {
-          "Plunderludics.UnityHawk.Shared.dll": {
-            "assemblyVersion": "1.0.0.0",
-            "fileVersion": "1.0.0.0"
-          }
+          "Plunderludics.UnityHawk.Shared.dll": {}
         }
       }
     }

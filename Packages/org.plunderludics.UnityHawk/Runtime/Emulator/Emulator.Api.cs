@@ -72,6 +72,8 @@ public partial class Emulator {
     /// (If emulator is not running but savestate is set, show savestate texture)
     public Texture Texture => IsRunning ? renderTexture : saveStateFile?.Screenshot;
 
+    public bool IsStarting => Status == EmulatorStatus.Starting;
+
     /// is the emulator process started
     public bool IsStarted => Status >= EmulatorStatus.Started;
 
@@ -82,10 +84,21 @@ public partial class Emulator {
     /// Returns null if emulator is not running.
     public string SystemId => _systemId;
 
+    /// when the emulator boots up
+    /// (will be a slight delay since this gets deferred to main thread Update)
+    public Action OnStarted;
+
+    /// when the emulator starts running its game
+    /// (will be a slight delay since this gets deferred to main thread Update)
+    public Action OnRunning;
+
     /// the current status of the emulator
     public enum EmulatorStatus {
         /// BizHawk hasn't started yet
         Inactive,
+
+        /// The BizHawk process is starting up but not started yet
+        Starting,
 
         /// BizHawk has been started, but not rendering yet
         Started,
@@ -99,13 +112,14 @@ public partial class Emulator {
         get => _status;
         private set {
             if (_status != value) {
+                // Debug.Log($"Emulator status changed from {_status} to {value}", this);
                 var raise = value switch {
                     EmulatorStatus.Started => OnStarted,
                     EmulatorStatus.Running => OnRunning,
                     _ => null,
                 };
 
-                raise?.Invoke();
+                _deferredForMainThread += () => raise?.Invoke();
             }
             _status = value;
         }
@@ -113,6 +127,13 @@ public partial class Emulator {
 
     /// frame index of latest received texture
     public int CurrentFrame => _currentFrame;
+
+    /// restarts the emulator
+    [Button]
+    public void Restart() {
+        Deactivate();
+        Initialize();
+    }
 
     /// delegate for registering lua callbacks
     // TODO: string-to-string only rn but some automatic de/serialization for different types would be nice

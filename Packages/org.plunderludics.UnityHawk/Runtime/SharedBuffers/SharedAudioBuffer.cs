@@ -11,11 +11,19 @@ public class SharedAudioBuffer : ISharedBuffer {
     private string _name;
     private RpcBuffer _rpc;
 
-    private ConcurrentQueue<short> _localBuffer;
-    
+    /// Buffer to accumulate samples in
+    /// Has to be thread-safe since it gets modified in rpc call
+    /// Manually cap the size (circularly) [Is there a better class to use for this?]
+    private RingBuffer<short> _localBuffer; 
+
+    // store at most ~0.5s of audio samples (44100Hz with 2 channels)
+    const int MaxBufferSize = 44100; // [TODO: this should be a parameter maybe]
+
+    public RingBuffer<short> SampleQueue => _localBuffer; // Expose this so it can be used by AudioResampler directly without having to copy
+
     public SharedAudioBuffer(string name) {
         _name = name;
-        _localBuffer = new();
+        _localBuffer = new(MaxBufferSize);
     }
 
     public void Open() {
@@ -42,23 +50,28 @@ public class SharedAudioBuffer : ISharedBuffer {
             // Debug.LogWarning("BizHawk sent empty samples array");
             return;
         }
+
         // Convert bytes to shorts
         short[] samples = new short[bytes.Length/2];
         Buffer.BlockCopy(bytes, 0, samples, 0, bytes.Length);
 
+        // Write all samples into local buffer
+        _localBuffer.Write(samples, 0, samples.Length);
+
         // Debug.Log($"Received {samples.Length} samples from bizhawk");
         // Add to local buffer
-        for (int i = 0; i < samples.Length; i++) {
-            _localBuffer.Enqueue(samples[i]);
-        }
+        // for (int i = 0; i < samples.Length; i++) {
+        //     // _localBuffer.Enqueue(samples[i]);
+        // }
     }
 
-    public short[] GetSamples() {
-        // Read all available samples from local buffer
-        short[] samples = _localBuffer.ToArray();
-        _localBuffer.Clear();
+    // No longer used - AudioResampler gets samples directly from SampleQueue
+    // public short[] GetSamples() {
+    //     // Read all available samples from local buffer
+    //     short[] samples = _localBuffer.ToArray();
+    //     _localBuffer.Clear();
 
-        return samples;
-    }
+    //     return samples;
+    // }
 }
 }
