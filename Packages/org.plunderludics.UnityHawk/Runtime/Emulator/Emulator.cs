@@ -290,6 +290,8 @@ public partial class Emulator : MonoBehaviour {
 
 #if UNITY_EDITOR
     public void OnValidate() {
+        if (!gameObject.activeInHierarchy || !enabled) return;
+
         // Debug.Log($"OnValidate");
         if (!config) {
             config = (UnityHawkConfig)AssetDatabase.LoadAssetAtPath(
@@ -340,7 +342,7 @@ public partial class Emulator : MonoBehaviour {
 
         // [use EditorApplication.isPlayingOrWillChangePlaymode instead of Application.isPlaying
         //  to avoid OnEnable call as play mode is being entered]
-        if (gameObject.activeInHierarchy && !EditorApplication.isPlayingOrWillChangePlaymode && runInEditMode && Status == EmulatorStatus.Inactive) {
+        if (!EditorApplication.isPlayingOrWillChangePlaymode && runInEditMode && Status == EmulatorStatus.Inactive) {
             // In edit mode, initialize the emulator if it is not already running
             Initialize();
         }
@@ -348,6 +350,7 @@ public partial class Emulator : MonoBehaviour {
 #endif
 
     public void OnEnable() {
+        // Debug.Log($"Emulator OnEnable", this);
 #if UNITY_EDITOR && UNITY_2022_2_OR_NEWER
         if (Undo.isProcessing) return; // OnEnable gets called after undo/redo, but ignore it
 #endif
@@ -368,7 +371,7 @@ public partial class Emulator : MonoBehaviour {
     }
 
     public void OnDisable() {
-        // Debug.Log($"Emulator OnDisable");
+        // Debug.Log($"Emulator OnDisable", this);
 #if UNITY_EDITOR && UNITY_2022_2_OR_NEWER
         if (Undo.isProcessing) return; // OnDisable gets called after undo/redo, but ignore it
 #endif
@@ -393,7 +396,7 @@ public partial class Emulator : MonoBehaviour {
     CancellationTokenSource _initThreadCancellationTokenSource;
 
     void Initialize() {
-        // Debug.Log("Emulator Initialize");
+        Debug.Log("Emulator Initialize", this);
 
         // Don't allow re-initializing if already initialized
         if (Status != EmulatorStatus.Inactive) {
