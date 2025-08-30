@@ -396,7 +396,7 @@ public partial class Emulator : MonoBehaviour {
     CancellationTokenSource _initThreadCancellationTokenSource;
 
     void Initialize() {
-        Debug.Log("Emulator Initialize", this);
+        // Debug.Log("Emulator Initialize", this);
 
         // Don't allow re-initializing if already initialized
         if (Status != EmulatorStatus.Inactive) {
