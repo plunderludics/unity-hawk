@@ -6,7 +6,6 @@ using UnityEngine;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using BizHawk.Common.CollectionExtensions;
 
 namespace UnityHawk {
 
@@ -42,6 +41,9 @@ public class Controls {
         }
     }
     
+    // Get all KeyCodes that are mapped in the controls
+    public HashSet<KeyCode> AllKeyCodes => mappings.Where(m => m.Enabled).Select(m => m.Key).ToHashSet();
+
     // Note: Slightly problematic because control labels are specific to the core rather than the system,
     // so e.g. Nymashock (PSX) uses "P1 △" where Octoshock (PSX) uses "P1 Triangle".
     // Bizhawk Emulation api doesn't seem to have a nice way to get the current core, so we can either

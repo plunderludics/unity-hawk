@@ -36,12 +36,10 @@ public class BasicInputProvider : InputProvider {
     [HideIf("useControlsObject")]
     public Controls controls;
     
-    KeyCode[] _allKeyCodes;
     List<InputEvent> pressedThisFrame;
 
     void OnEnable() {
         pressedThisFrame = new();
-        _allKeyCodes = (KeyCode[])System.Enum.GetValues(typeof(KeyCode));
     
         if (!emulator) {
             emulator = GetComponent<Emulator>();
@@ -100,9 +98,10 @@ public class BasicInputProvider : InputProvider {
     void Poll() {
         if (useControlsObject || useDefaultControls) controls = controlsObject?.Controls;
         if (controls == null) return;
-        // Grab Unity input and add to the queue.
-        // [assuming/hoping that the key codes are ~same between old and new inputsystem]
-        foreach(var kc in _allKeyCodes)
+        
+        // Check all KeyCodes that are mapped in the controls
+        var mappedKeyCodes = controls.AllKeyCodes; // TODO cache this
+        foreach(var kc in mappedKeyCodes)
         {
             bool interaction = false;
             bool isPressed = false;
@@ -157,6 +156,7 @@ public class BasicInputProvider : InputProvider {
     static Dictionary<KeyCode, string> _keyCodeNameCache = new();
     static Dictionary<string, Key> _keyNameToKeyCache = new();
 
+    // Convert legacy input manager KeyCode to new InputSystem Key
     Key KeyCodeToKey(KeyCode kc) {
         // Cache the name lookup
         if (!_keyCodeNameCache.TryGetValue(kc, out string name)) {
