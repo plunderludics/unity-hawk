@@ -15,6 +15,23 @@ namespace UnityHawk.Editor {
             DrawControllerField(position, property, ref y);
         }
 
+        private void DrawInputSourceFields(Rect position, SerializedProperty property, ref float y) {
+            var sourceTypeProp = property.FindPropertyRelative(nameof(Controls.ButtonMapping.sourceType));
+            var sourceType = (Controls.InputSourceType)sourceTypeProp.enumValueIndex;
+
+            switch (sourceType) {
+                case Controls.InputSourceType.KeyCode:
+                    DrawKeyCodeField(position, property, ref y);
+                    break;
+                case Controls.InputSourceType.LegacyAxis:
+                    DrawLegacyAxisNameField(position, property, ref y);
+                    break;
+                case Controls.InputSourceType.InputActionReference:
+                    DrawInputActionReferenceField(position, property, ref y);
+                    break;
+            }
+        }
+
         protected override string FoldoutLabel(SerializedProperty property) {
             var sourceTypeProp = property.FindPropertyRelative(nameof(Controls.ButtonMapping.sourceType));
             var keyProp = property.FindPropertyRelative(nameof(Controls.ButtonMapping.Key));
@@ -50,10 +67,15 @@ namespace UnityHawk.Editor {
             // Add height for input source field
             height += LINE_HEIGHT + SPACING;
             
-            // Add height for InputActionReference warning if needed
+            // Add height for warnings if needed
 #if !ENABLE_INPUT_SYSTEM
             if (sourceType == Controls.InputSourceType.InputActionReference) {
                 height += LINE_HEIGHT + SPACING;
+            }
+#endif
+#if !ENABLE_LEGACY_INPUT_MANAGER
+            if (sourceType == Controls.InputSourceType.LegacyAxis) {
+                height += LINE_HEIGHT * 2 + SPACING;
             }
 #endif
             

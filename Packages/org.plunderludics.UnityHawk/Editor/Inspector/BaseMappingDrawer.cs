@@ -48,22 +48,7 @@ namespace UnityHawk.Editor {
             y += LINE_HEIGHT + SPACING;
         }
 
-        protected void DrawInputSourceFields(Rect position, SerializedProperty property, ref float y) {
-            var sourceTypeProp = property.FindPropertyRelative(nameof(Controls.ButtonMapping.sourceType));
-            var sourceType = (Controls.InputSourceType)sourceTypeProp.enumValueIndex;
 
-            switch (sourceType) {
-                case Controls.InputSourceType.KeyCode:
-                    DrawKeyCodeField(position, property, ref y);
-                    break;
-                case Controls.InputSourceType.LegacyAxis:
-                    DrawAxisNameField(position, property, ref y);
-                    break;
-                case Controls.InputSourceType.InputActionReference:
-                    DrawInputActionReferenceField(position, property, ref y);
-                    break;
-            }
-        }
 
         protected void DrawKeyCodeField(Rect position, SerializedProperty property, ref float y) {
             var keyProp = property.FindPropertyRelative(nameof(Controls.ButtonMapping.Key));
@@ -72,11 +57,17 @@ namespace UnityHawk.Editor {
             y += LINE_HEIGHT + SPACING;
         }
 
-        protected void DrawAxisNameField(Rect position, SerializedProperty property, ref float y) {
+        protected void DrawLegacyAxisNameField(Rect position, SerializedProperty property, ref float y) {
             var axisNameProp = property.FindPropertyRelative(nameof(Controls.ButtonMapping.AxisName));
             var axisRect = new Rect(position.x, y, position.width, LINE_HEIGHT);
             EditorGUI.PropertyField(axisRect, axisNameProp, new GUIContent("Axis Name"));
             y += LINE_HEIGHT + SPACING;
+            
+#if !ENABLE_LEGACY_INPUT_MANAGER
+            var warningRect = new Rect(position.x, y, position.width, LINE_HEIGHT * 2);
+            EditorGUI.HelpBox(warningRect, "Legacy Axis requires the legacy Input Manager is not enabled.", MessageType.Warning);
+            y += LINE_HEIGHT * 2 + SPACING;
+#endif
         }
 
         protected void DrawInputActionReferenceField(Rect position, SerializedProperty property, ref float y) {

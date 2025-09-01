@@ -51,7 +51,7 @@ namespace UnityHawk.Editor {
                     DrawKeyCodePairFields(position, property, ref y);
                     break;
                 case Controls.InputSourceType.LegacyAxis:
-                    DrawAxisNameField(position, property, ref y);
+                    DrawLegacyAxisNameField(position, property, ref y);
                     break;
                 case Controls.InputSourceType.InputActionReference:
                     DrawInputActionReferenceField(position, property, ref y);
@@ -98,10 +98,15 @@ namespace UnityHawk.Editor {
                 height += LINE_HEIGHT + SPACING; // Single field
             }
             
-            // Add height for InputActionReference warning if needed
+            // Add height for warnings if needed
 #if !ENABLE_INPUT_SYSTEM
             if (sourceType == Controls.InputSourceType.InputActionReference) {
                 height += LINE_HEIGHT + SPACING;
+            }
+#endif
+#if !ENABLE_LEGACY_INPUT_MANAGER
+            if (sourceType == Controls.InputSourceType.LegacyAxis) {
+                height += LINE_HEIGHT * 2 + SPACING;
             }
 #endif
             
