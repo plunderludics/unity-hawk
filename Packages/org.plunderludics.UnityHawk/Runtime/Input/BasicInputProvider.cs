@@ -36,10 +36,10 @@ public class BasicInputProvider : InputProvider {
     [HideIf("useControlsObject")]
     public Controls controls;
     
-    List<InputEvent> pressedThisFrame;
+    List<InputEvent> eventsThisFrame;
 
     void OnEnable() {
-        pressedThisFrame = new();
+        eventsThisFrame = new();
     
         if (!emulator) {
             emulator = GetComponent<Emulator>();
@@ -99,56 +99,99 @@ public class BasicInputProvider : InputProvider {
         if (useControlsObject || useDefaultControls) controls = controlsObject?.Controls;
         if (controls == null) return;
         
-        // Check all KeyCodes that are mapped in the controls
-        var mappedKeyCodes = controls.AllKeyCodes; // TODO cache this
-        foreach(var kc in mappedKeyCodes)
-        {
-            bool interaction = false;
-            bool isPressed = false;
+        // Handle button mappings
+        foreach(var mapping in controls.ButtonMappings) {
+            if (mapping.sourceType == Controls.InputSourceType.KeyCode) {
+                HandleButtonKeyCodeMapping(mapping);
+            }
+            // TODO: Handle other source types here
+        }
+        
+        // Handle axis mappings
+        foreach(var mapping in controls.AxisMappings) {
+            if (mapping.sourceType == Controls.InputSourceType.KeyCode) {
+                HandleAxisKeyCodeMapping(mapping);
+            }
+            // TODO: Handle other source types here
+        }
+    }
+    
+    private void HandleButtonKeyCodeMapping(Controls.ButtonMapping mapping) {
+        bool interaction = false;
+        bool isPressed = false;
 
 #if ENABLE_INPUT_SYSTEM
-            Key key = KeyCodeToKey(kc);
-            if (key == Key.None || key == Key.IMESelected) continue;
-            if (Keyboard.current[key].wasPressedThisFrame) {
-                interaction = true;
-                isPressed = true;
-            }
-            if (Keyboard.current[key].wasReleasedThisFrame) {
-                interaction = true;
-                isPressed = false;
-            }
-#else
-            if (Input.GetKeyDown(kc)) {
-                // Debug.Log("key down: " + k);
-                interaction = true;
-                isPressed = true;
-            }
-            if (Input.GetKeyUp(kc)) {
-                // Debug.Log("key up: " + k);
-                interaction = true;
-                isPressed = false;
-            }
-#endif
-            // keyName = System.Enum.GetName(typeof(KeyCode), kc);
-            if (interaction) {
-                List<(string, Controller)> controlNames = controls[kc];
-                if (controlNames == null) return;
-                foreach ((string name, Controller controller) in controlNames) {
-                    pressedThisFrame.Add(new InputEvent {
-                        name = name,
-                        value = isPressed ? 1 : 0,
-                        controller = controller,
-                        isAnalog = false
-                    });
-                }
-            }
+        Key key = KeyCodeToKey(mapping.Key);
+        if (Keyboard.current[key].wasPressedThisFrame) {
+            interaction = true;
+            isPressed = true;
         }
+        if (Keyboard.current[key].wasReleasedThisFrame) {
+            interaction = true;
+            isPressed = false;
+        }
+#else
+        if (Input.GetKeyDown(mapping.Key)) {
+            interaction = true;
+            isPressed = true;
+        }
+        if (Input.GetKeyUp(mapping.Key)) {
+            interaction = true;
+            isPressed = false;
+        }
+#endif
+
+        if (interaction) {
+            // Button mappings are always digital: send 0 on release, 1 on press
+            int value = isPressed ? 1 : 0;
+            eventsThisFrame.Add(new InputEvent {
+                name = mapping.EmulatorButtonName,
+                value = value,
+                controller = mapping.Controller,
+                isAnalog = false
+            });
+        }
+    }
+
+    private void HandleAxisKeyCodeMapping(Controls.AxisMapping mapping) {
+        bool key1Pressed = false;
+        bool key2Pressed = false;
+
+#if ENABLE_INPUT_SYSTEM
+        Key negativeKey = KeyCodeToKey(mapping.NegativeKey);
+        Key positiveKey = KeyCodeToKey(mapping.PositiveKey);
+            
+        key1Pressed = Keyboard.current[negativeKey].isPressed;
+        key2Pressed = Keyboard.current[positiveKey].isPressed;
+#else
+        key1Pressed = Input.GetKey(mapping.NegativeKey);
+        key2Pressed = Input.GetKey(mapping.PositiveKey);
+#endif
+
+        // Calculate axis value based on key presses
+        int axisValue = mapping.MinValue; // Default to min value
+        
+        if (key1Pressed && !key2Pressed) {
+            axisValue = mapping.MinValue;
+        } else if (key2Pressed && !key1Pressed) {
+            axisValue = mapping.MaxValue;
+        } else {
+            // Neither or both keys pressed - neutral position
+            axisValue = (mapping.MinValue + mapping.MaxValue) / 2;
+        }
+
+        eventsThisFrame.Add(new InputEvent {
+            name = mapping.EmulatorAxisName,
+            value = axisValue,
+            controller = mapping.Controller,
+            isAnalog = true
+        });
     }
 
     public override List<InputEvent> InputForFrame() {
         var baseInputs = base.InputForFrame();
-        var myInputs = new List<InputEvent>(pressedThisFrame);
-        pressedThisFrame.Clear(); // TODO: Not ideal because will break if multiple clients use the same InputProvider, should clear at the end of the frame
+        var myInputs = new List<InputEvent>(eventsThisFrame);
+        eventsThisFrame.Clear(); // TODO: Not ideal because will break if multiple clients use the same InputProvider, should clear at the end of the frame
         return baseInputs.Concat(myInputs).ToList();
     }
 
