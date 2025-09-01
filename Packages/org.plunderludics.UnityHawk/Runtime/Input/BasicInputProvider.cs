@@ -65,6 +65,8 @@ public class BasicInputProvider : InputProvider {
         if (controlsObject == null) {
             Debug.LogError($"No default controls found for platform '{systemId}', controls will not work");
         }
+
+        EnableInputActions();
         // Debug.Log($"Setting controls to {controls} for system {systemId}");
     }
 
@@ -93,6 +95,24 @@ public class BasicInputProvider : InputProvider {
         if (useControlsObject && controlsObject != null) {
             controls = new(controlsObject.Controls); // Keep mapping synced so that we get pre-populated controls if we untick 'use controls object'
         }
+
+        EnableInputActions();
+    }
+
+    void EnableInputActions() {
+        // We need to enable any InputActions that are referenced in the controls
+#if ENABLE_INPUT_SYSTEM
+        foreach(var mapping in controls.ButtonMappings) {
+            if (mapping.sourceType == Controls.InputSourceType.InputActionReference) {
+                mapping.ActionRef.action.Enable();
+            }
+        }
+        foreach(var mapping in controls.AxisMappings) {
+            if (mapping.sourceType == Controls.InputSourceType.InputActionReference) {
+                mapping.ActionRef.action.Enable();
+            }
+        }
+#endif
     }
 
     void Poll() {
@@ -101,18 +121,32 @@ public class BasicInputProvider : InputProvider {
         
         // Handle button mappings
         foreach(var mapping in controls.ButtonMappings) {
-            if (mapping.sourceType == Controls.InputSourceType.KeyCode) {
-                HandleButtonKeyCodeMapping(mapping);
+            switch (mapping.sourceType) {
+                case Controls.InputSourceType.KeyCode:
+                    HandleButtonKeyCodeMapping(mapping);
+                    break;
+                case Controls.InputSourceType.LegacyAxis:
+                    HandleButtonLegacyAxisMapping(mapping);
+                    break;
+                case Controls.InputSourceType.InputActionReference:
+                    HandleButtonInputActionReferenceMapping(mapping);
+                    break;
             }
-            // TODO: Handle other source types here
         }
         
         // Handle axis mappings
         foreach(var mapping in controls.AxisMappings) {
-            if (mapping.sourceType == Controls.InputSourceType.KeyCode) {
-                HandleAxisKeyCodeMapping(mapping);
+            switch (mapping.sourceType) {
+                case Controls.InputSourceType.KeyCode:
+                    HandleAxisKeyCodeMapping(mapping);
+                    break;
+                case Controls.InputSourceType.LegacyAxis:
+                    HandleAxisLegacyAxisMapping(mapping);
+                    break;
+                case Controls.InputSourceType.InputActionReference:
+                    HandleAxisInputActionReferenceMapping(mapping);
+                    break;
             }
-            // TODO: Handle other source types here
         }
     }
     
@@ -153,6 +187,57 @@ public class BasicInputProvider : InputProvider {
         }
     }
 
+    private void HandleButtonLegacyAxisMapping(Controls.ButtonMapping mapping) {
+#if ENABLE_LEGACY_INPUT_MANAGER
+        // Legacy axis as button - use GetButton for button-like axes
+        bool interaction = false;
+        bool isPressed = false;
+        if (Input.GetButtonDown(mapping.AxisName)) {
+            interaction = true;
+            isPressed = true;
+        }
+        if (Input.GetButtonUp(mapping.AxisName)) {
+            interaction = true;
+            isPressed = false;
+        }
+
+        if (interaction) {
+            int value = isPressed ? 1 : 0;
+            eventsThisFrame.Add(new InputEvent {
+                name = mapping.EmulatorButtonName,
+                value = value,
+                controller = mapping.Controller,
+                isAnalog = false
+            });
+        }
+#else
+        Debug.LogWarning("LegacyAxis mappings are not supported because legacy input manager is not enabled");
+#endif
+    }
+
+    private void HandleButtonInputActionReferenceMapping(Controls.ButtonMapping mapping) {
+        Debug.Log($"Handling button input action reference mapping: {mapping.EmulatorButtonName}");
+#if ENABLE_INPUT_SYSTEM
+        if (mapping.ActionRef != null && mapping.ActionRef.action != null) {
+            bool isPressed = mapping.ActionRef.action.WasPressedThisFrame();
+            bool isReleased = mapping.ActionRef.action.WasReleasedThisFrame();
+
+            Debug.Log($"Button {mapping.ActionRef.action.name} was pressed: {isPressed}, released: {isReleased}");
+            
+            if (isPressed || isReleased) {
+                eventsThisFrame.Add(new InputEvent {
+                    name = mapping.EmulatorButtonName,
+                    value = isReleased ? 0 : 1,
+                    controller = mapping.Controller,
+                    isAnalog = false
+                });
+            }
+        }
+#else
+        Debug.LogWarning("InputActionReference mappings are not supported because new InputSystem is not enabled");
+#endif
+    }
+
     private void HandleAxisKeyCodeMapping(Controls.AxisMapping mapping) {
         bool key1Pressed = false;
         bool key2Pressed = false;
@@ -186,6 +271,53 @@ public class BasicInputProvider : InputProvider {
             controller = mapping.Controller,
             isAnalog = true
         });
+    }
+
+    private void HandleAxisLegacyAxisMapping(Controls.AxisMapping mapping) {
+#if ENABLE_LEGACY_INPUT_MANAGER
+        // Legacy axis as axis - linear mapping from [-1, 1] to [MinValue, MaxValue]
+        float axisValue = Input.GetAxis(mapping.AxisName);
+        
+        // Map from [-1, 1] to [MinValue, MaxValue]
+        int mappedValue = Mathf.RoundToInt(Mathf.Lerp(mapping.MinValue, mapping.MaxValue, (axisValue + 1f) / 2f));
+        
+        eventsThisFrame.Add(new InputEvent {
+            name = mapping.EmulatorAxisName,
+            value = mappedValue,
+            controller = mapping.Controller,
+            isAnalog = true
+        });
+#else
+        Debug.LogWarning("LegacyAxis mappings are not supported because legacy input manager is not enabled");
+#endif
+    }
+
+    private void HandleAxisInputActionReferenceMapping(Controls.AxisMapping mapping) {
+#if ENABLE_INPUT_SYSTEM
+        if (mapping.ActionRef != null && mapping.ActionRef.action != null) {
+            // Ensure the action is of type float (not Vector2, etc.)
+            string controlType = mapping.ActionRef.action.expectedControlType;
+            if (controlType != "Axis" && controlType != "float") {
+                Debug.LogWarning($"InputActionReference '{mapping.ActionRef.action.name}' is a {controlType}, not a float/axis action. Axis mappings require a float action.");
+                return;
+            }
+            float axisValue = mapping.ActionRef.action.ReadValue<float>();
+
+            Debug.Log($"Axis {mapping.ActionRef.action.name} value: {axisValue}");
+            
+            // Map from [-1, 1] to [MinValue, MaxValue]
+            int mappedValue = Mathf.RoundToInt(Mathf.Lerp(mapping.MinValue, mapping.MaxValue, (axisValue + 1f) / 2f));
+            
+            eventsThisFrame.Add(new InputEvent {
+                name = mapping.EmulatorAxisName,
+                value = mappedValue,
+                controller = mapping.Controller,
+                isAnalog = true
+            });
+        }
+#else
+        Debug.LogWarning("InputActionReference mappings are not supported because new InputSystem is not enabled");
+#endif
     }
 
     public override List<InputEvent> InputForFrame() {
