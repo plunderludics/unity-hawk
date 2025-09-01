@@ -23,12 +23,12 @@ public class Controls {
         public bool Enabled;
         [Tooltip("What type of input source this is")]
         public InputSourceType sourceType;
-        [Tooltip("Key to press (only used if sourceType is KeyCode)")]
+        [Tooltip("Key to press")]
         public KeyCode Key;
-        [Tooltip("Axis name (only used if sourceType is LegacyAxis)")]
+        [Tooltip("Legacy input manager axis name")]
         public string AxisName;
 #if ENABLE_INPUT_SYSTEM
-        [Tooltip("Input action reference (only used if sourceType is InputActionReference)")]
+        [Tooltip("Input action reference")]
         public UnityEngine.InputSystem.InputActionReference ActionRef;
 #endif
         [Tooltip("Bizhawk control name e.g. \"D-Pad Up\" (Don't include \"P1 \" prefix!)")]
@@ -47,7 +47,7 @@ public class Controls {
         public KeyCode NegativeKey;
         [Tooltip("Positive key")]
         public KeyCode PositiveKey;
-        [Tooltip("Axis name")]
+        [Tooltip("Legacy input manager axis name")]
         public string AxisName;
 #if ENABLE_INPUT_SYSTEM
         [Tooltip("Input action reference")]
