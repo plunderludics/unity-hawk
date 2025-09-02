@@ -288,10 +288,7 @@ public partial class Emulator : MonoBehaviour {
     ///// MonoBehaviour lifecycle
     // (These methods are public only for convenient testing)
 
-#if UNITY_EDITOR
     public void OnValidate() {
-        if (!gameObject.activeInHierarchy || !enabled) return;
-
         // Debug.Log($"OnValidate");
         if (!config) {
             config = (UnityHawkConfig)AssetDatabase.LoadAssetAtPath(
@@ -328,26 +325,29 @@ public partial class Emulator : MonoBehaviour {
         if (!IsRunning && saveStateFile?.Screenshot != null) {
             InitTextures(saveStateFile.Screenshot.width, saveStateFile.Screenshot.height);
         }
+        
+        if (gameObject.activeInHierarchy && enabled) {
+            if (Status != EmulatorStatus.Inactive) {
+                if (!Equals(_currentBizhawkArgs, MakeBizhawkArgs())) {
+                    // Bizhawk params have changed since bizhawk process was started, needs restart
+                    Restart();
+                }
 
-        if (Status != EmulatorStatus.Inactive) {
-            if (!Equals(_currentBizhawkArgs, MakeBizhawkArgs())) {
-                // Bizhawk params have changed since bizhawk process was started, needs restart
-                Restart();
+                if (!ShouldRun) {
+                    Deactivate();
+                }
             }
 
-            if (!ShouldRun) {
-                Deactivate();
+#if UNITY_EDITOR
+            // [use EditorApplication.isPlayingOrWillChangePlaymode instead of Application.isPlaying
+            //  to avoid OnEnable call as play mode is being entered]
+            if (!EditorApplication.isPlayingOrWillChangePlaymode && runInEditMode && Status == EmulatorStatus.Inactive) {
+                // In edit mode, initialize the emulator if it is not already running
+                Initialize();
             }
-        }
-
-        // [use EditorApplication.isPlayingOrWillChangePlaymode instead of Application.isPlaying
-        //  to avoid OnEnable call as play mode is being entered]
-        if (!EditorApplication.isPlayingOrWillChangePlaymode && runInEditMode && Status == EmulatorStatus.Inactive) {
-            // In edit mode, initialize the emulator if it is not already running
-            Initialize();
+#endif
         }
     }
-#endif
 
     public void OnEnable() {
         // Debug.Log($"Emulator OnEnable", this);

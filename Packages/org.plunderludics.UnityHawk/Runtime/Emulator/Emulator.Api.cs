@@ -287,40 +287,39 @@ public partial class Emulator {
     //     return (v == null) ? null : float.Parse(v);
     // }
 
-    // WatchXXX methods allow you to register a callback that will be called after each bizhawk frame with the value of the memory address
+    // WatchXXX methods allow you to register a callback that will be called whenever the watched value changes
     // These methods return an int id which can be used later with Unwatch(id)
-    // (I guess in theory it could be that the callback only gets called when the value changes, but it's just every frame for now)
-    public int WatchUnsigned(long address, int size, bool isBigEndian, string domain, Action<uint> callback) {
+    public int WatchUnsigned(long address, int size, bool isBigEndian, string domain, Action<uint> onChanged) {
         return Watch(WatchType.Unsigned, address, size, isBigEndian, domain, value => {
             if (uint.TryParse(value, out uint result)) {
-                callback(result);
+                onChanged(result);
             } else {
                 Debug.LogError($"Failed to parse unsigned value from Bizhawk watch: {value}", this);
             }
         });
     }
 
-    public int WatchSigned(long address, int size, bool isBigEndian, string domain, Action<int> callback) {
+    public int WatchSigned(long address, int size, bool isBigEndian, string domain, Action<int> onChanged) {
         return Watch(WatchType.Signed, address, size, isBigEndian, domain, value => {
             if (int.TryParse(value, out int result)) {
-                callback(result);
+                onChanged(result);
             } else {
                 Debug.LogError($"Failed to parse signed value from Bizhawk watch: {value}", this);
             }
         });
     }
 
-    public int WatchFloat(long address, bool isBigEndian, string domain, Action<float> callback) {
+    public int WatchFloat(long address, bool isBigEndian, string domain, Action<float> onChanged) {
         return Watch(WatchType.Float, address, 4, isBigEndian, domain, value => {
             if (float.TryParse(value, out float result)) {
-                callback(result);
+                onChanged(result);
             } else {
                 Debug.LogError($"Failed to parse float value from Bizhawk watch: {value}", this);
             }
         });
     }
 
-    private int Watch(WatchType type, long address, int size, bool isBigEndian, string domain, Action<string> callback) {
+    private int Watch(WatchType type, long address, int size, bool isBigEndian, string domain, Action<string> onChanged) {
         string args = $"{address},{size},{isBigEndian},{type}";
         if (domain != null) {
             args += $",{domain}";
@@ -331,7 +330,7 @@ public partial class Emulator {
         if (_watchCallbacks.ContainsKey(hashCode)) {
             Debug.LogWarning($"Overwriting existing watch for key {key}", this);
         }
-        _watchCallbacks[hashCode] = (key, callback);
+        _watchCallbacks[hashCode] = (key, onChanged);
         return hashCode;
     }
 

@@ -21,7 +21,7 @@ namespace UnityHawk.Tests {
 [TestFixture(false, false, true)]
 public class SharedTests
 {
-    private const float WhileDuration = 5f;
+    private const float WhileDuration = 10f;
     private const float MomentDuration = 0.5f;
     private Rom eliteRom;
     private Rom swoopRom;
@@ -71,6 +71,7 @@ public class SharedTests
         e.captureEmulatorAudio = _captureEmulatorAudio;
         e.showBizhawkGuiInEditor = _showBizhawkGui;
         o.SetActive(true); // Should call OnEnable
+        e.OnValidate(); // Force validation
     }
     
     [TearDown]
@@ -285,8 +286,7 @@ public class SharedTests
         
         e.Restart();
 
-        // yield return WaitForAWhile(e);
-        yield return WaitForDuration(e, 10f); // Not really sure why but 5s is not long enough here
+        yield return WaitForAWhile(e);
         AssertEmulatorIsRunning(e);
         Assert.That(_submittedResult, Is.EqualTo("tseT"));
     }
