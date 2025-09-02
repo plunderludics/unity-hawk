@@ -5,10 +5,8 @@ namespace UnityHawk.Editor {
     [CustomPropertyDrawer(typeof(Controls.ButtonMapping))]
     public class ButtonMappingDrawer : BaseMappingDrawer {
         protected override void DrawFields(Rect position, SerializedProperty property, ref float y) {
-            var enabledProp = property.FindPropertyRelative(nameof(Controls.ButtonMapping.Enabled));
             var sourceTypeProp = property.FindPropertyRelative(nameof(Controls.ButtonMapping.sourceType));
             
-            DrawEnabledField(position, enabledProp, ref y);
             DrawSourceTypeField(position, sourceTypeProp, ref y);
             DrawInputSourceFields(position, property, ref y);
             DrawControlField(position, property, nameof(Controls.ButtonMapping.EmulatorButtonName), "Emulator Button Name", ref y);
@@ -62,7 +60,7 @@ namespace UnityHawk.Editor {
             var sourceType = (Controls.InputSourceType)sourceTypeProp.enumValueIndex;
             
             float height = LINE_HEIGHT; // Foldout header
-            height += (LINE_HEIGHT + SPACING) * 4; // Enabled, SourceType, Control, Controller
+            height += (LINE_HEIGHT + SPACING) * 3; // SourceType, Control, Controller
             
             // Add height for input source field
             height += LINE_HEIGHT + SPACING;

@@ -15,10 +15,10 @@ namespace UnityHawk.Editor {
             
             // Dim the color if not enabled
             Color c = GUI.color;
-            GUI.color = enabledProp.boolValue ? Color.white : Color.gray;
-            
+            GUI.color = enabledProp.boolValue ? Color.white : new Color(0.7f, 0.7f, 0.7f);
+
             // Draw foldout header
-            DrawFoldoutHeader(position, property, customLabel);
+            DrawFoldoutHeader(position, enabledProp, property, customLabel);
             
             if (property.isExpanded) {
                 float y = position.y + LINE_HEIGHT + SPACING;
@@ -31,9 +31,18 @@ namespace UnityHawk.Editor {
         protected abstract void DrawFields(Rect position, SerializedProperty property, ref float y);
         protected abstract string FoldoutLabel(SerializedProperty property);
 
-        protected void DrawFoldoutHeader(Rect position, SerializedProperty property, string customLabel) {
-            property.isExpanded = EditorGUI.Foldout(new Rect(position.x, position.y, position.width, LINE_HEIGHT), 
-                property.isExpanded, customLabel, true);
+        protected void DrawFoldoutHeader(Rect position, SerializedProperty enabledProp, SerializedProperty property, string customLabel) {            
+            float checkboxWidth = 16f;
+            float checkboxSpacing = 16f;
+            float foldoutWidth = position.width - checkboxWidth - checkboxSpacing;
+            
+            // Draw the enabled checkbox
+            var checkboxRect = new Rect(position.x, position.y, checkboxWidth, LINE_HEIGHT);
+            enabledProp.boolValue = EditorGUI.Toggle(checkboxRect, enabledProp.boolValue);
+            
+            // Draw the foldout
+            var foldoutRect = new Rect(position.x + checkboxWidth + checkboxSpacing, position.y, foldoutWidth, LINE_HEIGHT);
+            property.isExpanded = EditorGUI.Foldout(foldoutRect, property.isExpanded, customLabel, true);
         }
 
         protected void DrawEnabledField(Rect position, SerializedProperty enabledProp, ref float y) {

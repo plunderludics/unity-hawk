@@ -5,12 +5,10 @@ namespace UnityHawk.Editor {
     [CustomPropertyDrawer(typeof(Controls.AxisMapping))]
     public class AxisMappingDrawer : BaseMappingDrawer {
         protected override void DrawFields(Rect position, SerializedProperty property, ref float y) {
-            var enabledProp = property.FindPropertyRelative(nameof(Controls.AxisMapping.Enabled));
             var sourceTypeProp = property.FindPropertyRelative(nameof(Controls.AxisMapping.sourceType));
             var minValueProp = property.FindPropertyRelative(nameof(Controls.AxisMapping.MinValue));
             var maxValueProp = property.FindPropertyRelative(nameof(Controls.AxisMapping.MaxValue));
             
-            DrawEnabledField(position, enabledProp, ref y);
             DrawSourceTypeField(position, sourceTypeProp, ref y);
             DrawAxisInputSourceFields(position, property, ref y);
             DrawControlField(position, property, nameof(Controls.AxisMapping.EmulatorAxisName), "Emulator Axis Name", ref y);
@@ -89,7 +87,7 @@ namespace UnityHawk.Editor {
             var sourceType = (Controls.InputSourceType)sourceTypeProp.enumValueIndex;
             
             float height = LINE_HEIGHT; // Foldout header
-            height += (LINE_HEIGHT + SPACING) * 6; // Enabled, SourceType, Control, Controller, MinValue, MaxValue, NeutralValue
+            height += (LINE_HEIGHT + SPACING) * 5; // SourceType, Control, Controller, MinValue, MaxValue, NeutralValue
             
             // Add height for input source fields
             if (sourceType == Controls.InputSourceType.KeyCode) {
