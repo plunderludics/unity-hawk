@@ -216,13 +216,13 @@ public class BasicInputProvider : InputProvider {
     }
 
     private void HandleButtonInputActionReferenceMapping(Controls.ButtonMapping mapping) {
-        Debug.Log($"Handling button input action reference mapping: {mapping.EmulatorButtonName}");
+        // Debug.Log($"Handling button input action reference mapping: {mapping.EmulatorButtonName}");
 #if ENABLE_INPUT_SYSTEM
         if (mapping.ActionRef != null && mapping.ActionRef.action != null) {
             bool isPressed = mapping.ActionRef.action.WasPressedThisFrame();
             bool isReleased = mapping.ActionRef.action.WasReleasedThisFrame();
 
-            Debug.Log($"Button {mapping.ActionRef.action.name} was pressed: {isPressed}, released: {isReleased}");
+            // Debug.Log($"Button {mapping.ActionRef.action.name} was pressed: {isPressed}, released: {isReleased}");
             
             if (isPressed || isReleased) {
                 eventsThisFrame.Add(new InputEvent {
@@ -295,15 +295,9 @@ public class BasicInputProvider : InputProvider {
     private void HandleAxisInputActionReferenceMapping(Controls.AxisMapping mapping) {
 #if ENABLE_INPUT_SYSTEM
         if (mapping.ActionRef != null && mapping.ActionRef.action != null) {
-            // Ensure the action is of type float (not Vector2, etc.)
-            string controlType = mapping.ActionRef.action.expectedControlType;
-            if (controlType != "Axis" && controlType != "float") {
-                Debug.LogWarning($"InputActionReference '{mapping.ActionRef.action.name}' is a {controlType}, not a float/axis action. Axis mappings require a float action.");
-                return;
-            }
             float axisValue = mapping.ActionRef.action.ReadValue<float>();
 
-            Debug.Log($"Axis {mapping.ActionRef.action.name} value: {axisValue}");
+            // Debug.Log($"Axis {mapping.ActionRef.action.name} value: {axisValue}");
             
             // Map from [-1, 1] to [MinValue, MaxValue]
             int mappedValue = Mathf.RoundToInt(Mathf.Lerp(mapping.MinValue, mapping.MaxValue, (axisValue + 1f) / 2f));
