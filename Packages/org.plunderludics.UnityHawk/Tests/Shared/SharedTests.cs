@@ -70,7 +70,10 @@ public class SharedTests
         e.passInputFromUnity = _passInputFromUnity;
         e.captureEmulatorAudio = _captureEmulatorAudio;
         e.showBizhawkGuiInEditor = _showBizhawkGui;
-        o.SetActive(true); // Should call OnEnable
+    }
+
+    void ActivateEmulator() {
+        e.gameObject.SetActive(true);
     }
     
     [TearDown]
@@ -81,6 +84,7 @@ public class SharedTests
     [UnityTest]
     public IEnumerator TestEmulatorIsRunning()
     {
+        ActivateEmulator();
         yield return WaitForAWhile(e);
         
         AssertEmulatorIsRunning(e);
@@ -90,7 +94,7 @@ public class SharedTests
     public IEnumerator TestWithSavestate()
     {
         e.saveStateFile = eliteSavestate2000;
-        e.Restart();
+        ActivateEmulator();
 
         yield return WaitForAWhile(e);
         
@@ -101,6 +105,7 @@ public class SharedTests
     [UnityTest]
     public IEnumerator TestPauseAndUnpause()
     {
+        ActivateEmulator();
         yield return WaitForAWhile(e);
         AssertEmulatorIsRunning(e);
 
@@ -120,6 +125,7 @@ public class SharedTests
     [UnityTest]
     public IEnumerator TestFrameAdvance()
     {
+        ActivateEmulator();
         yield return WaitForAWhile(e);
         AssertEmulatorIsRunning(e);
 
@@ -149,6 +155,7 @@ public class SharedTests
     [UnityTest]
     public IEnumerator TestLoadState()
     {
+        ActivateEmulator();
         yield return WaitForAWhile(e);
         AssertEmulatorIsRunning(e);
 
@@ -166,6 +173,7 @@ public class SharedTests
     [UnityTest]
     public IEnumerator TestLoadRom()
     {
+        ActivateEmulator();
         yield return WaitForAWhile(e);
         AssertEmulatorIsRunning(e);
 
@@ -182,6 +190,7 @@ public class SharedTests
     [UnityTest]
     public IEnumerator TestRamWatch()
     {
+        ActivateEmulator();
         yield return WaitForAWhile(e);
         AssertEmulatorIsRunning(e);
 
@@ -204,6 +213,7 @@ public class SharedTests
     [UnityTest]
     public IEnumerator TestRamWrite()
     {
+        ActivateEmulator();
         yield return WaitForAWhile(e);
         AssertEmulatorIsRunning(e);
 
@@ -233,6 +243,7 @@ public class SharedTests
     [UnityTest]
     public IEnumerator TestRamFreeze()
     {
+        ActivateEmulator();
         yield return WaitForAWhile(e);
         AssertEmulatorIsRunning(e);
 
@@ -283,12 +294,24 @@ public class SharedTests
             return "";
         });
         
-        e.Restart();
+        ActivateEmulator();
 
-        // yield return WaitForAWhile(e);
-        yield return WaitForDuration(e, 10f); // Not really sure why but 5s is not long enough here
+        yield return WaitForAWhile(e);
         AssertEmulatorIsRunning(e);
         Assert.That(_submittedResult, Is.EqualTo("tseT"));
+    }
+
+    [UnityTest]
+    public IEnumerator TestRestart()
+    {
+        ActivateEmulator();
+        yield return WaitForAWhile(e);
+        AssertEmulatorIsRunning(e);
+
+        e.Restart();
+        yield return WaitForAWhile(e);
+        yield return WaitForAWhile(e); // Have to wait longer after restart for some reason
+        AssertEmulatorIsRunning(e);
     }
 
     

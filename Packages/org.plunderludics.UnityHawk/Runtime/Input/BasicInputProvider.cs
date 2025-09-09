@@ -100,6 +100,7 @@ public class BasicInputProvider : InputProvider {
     }
 
     void EnableInputActions() {
+        if (controls == null) return;
         // We need to enable any InputActions that are referenced in the controls
 #if ENABLE_INPUT_SYSTEM
         foreach(var mapping in controls.ButtonMappings) {

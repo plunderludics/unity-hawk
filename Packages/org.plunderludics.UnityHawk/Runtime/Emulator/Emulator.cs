@@ -290,8 +290,6 @@ public partial class Emulator : MonoBehaviour {
 
 #if UNITY_EDITOR
     public void OnValidate() {
-        if (!gameObject.activeInHierarchy || !enabled) return;
-
         // Debug.Log($"OnValidate");
         if (!config) {
             config = (UnityHawkConfig)AssetDatabase.LoadAssetAtPath(
@@ -329,22 +327,26 @@ public partial class Emulator : MonoBehaviour {
             InitTextures(saveStateFile.Screenshot.width, saveStateFile.Screenshot.height);
         }
 
-        if (Status != EmulatorStatus.Inactive) {
-            if (!Equals(_currentBizhawkArgs, MakeBizhawkArgs())) {
-                // Bizhawk params have changed since bizhawk process was started, needs restart
-                Restart();
+        if (gameObject.activeInHierarchy && enabled) {
+            // GameObject and Emulator are active, so check if we need to start the bizhawk process
+
+            if (Status != EmulatorStatus.Inactive) {
+                if (!Equals(_currentBizhawkArgs, MakeBizhawkArgs())) {
+                    // Bizhawk params have changed since bizhawk process was started, needs restart
+                    Restart();
+                }
+
+                if (!ShouldRun) {
+                    Deactivate();
+                }
             }
 
-            if (!ShouldRun) {
-                Deactivate();
+            // [use EditorApplication.isPlayingOrWillChangePlaymode instead of Application.isPlaying
+            //  to avoid OnEnable call as play mode is being entered]
+            if (!EditorApplication.isPlayingOrWillChangePlaymode && runInEditMode && Status == EmulatorStatus.Inactive) {
+                // In edit mode, initialize the emulator if it is not already running
+                Initialize();
             }
-        }
-
-        // [use EditorApplication.isPlayingOrWillChangePlaymode instead of Application.isPlaying
-        //  to avoid OnEnable call as play mode is being entered]
-        if (!EditorApplication.isPlayingOrWillChangePlaymode && runInEditMode && Status == EmulatorStatus.Inactive) {
-            // In edit mode, initialize the emulator if it is not already running
-            Initialize();
         }
     }
 #endif
@@ -401,7 +403,7 @@ public partial class Emulator : MonoBehaviour {
         // Don't allow re-initializing if already initialized
         if (Status != EmulatorStatus.Inactive) {
             // TODO: or should we reset in this case?
-            Debug.LogError("Emulator is already initialized, ignoring", this);
+            Debug.LogError($"Emulator is already initialized (Status = {Status}), ignoring Initialize() call", this);
             return;
         }
 
@@ -496,6 +498,12 @@ public partial class Emulator : MonoBehaviour {
 
         _initThreadCancellationTokenSource = new CancellationTokenSource();
 
+        if (_initThread != null && _initThread.IsAlive) {
+            // This can happen if previous thread has been cancelled (from Deactivate()) but not yet finished running
+            // TODO: What should we do here? Wait for thread to finish? Force kill it? Or just ignore - seems like nothing bad happens
+            Debug.LogWarning("Emulator.Initialize: starting a new _initThread while previous one is still running");
+        }
+
         _initThread = new(() => _StartBizhawk(
             applicationIsPlaying,
             logFilePath,
@@ -510,7 +518,7 @@ public partial class Emulator : MonoBehaviour {
         _initThread.Start();
     }
 
-    static readonly ProfilerMarker StartBizhawk = new ("Emulator.StartBizhawk");
+    static readonly ProfilerMarker StartBizhawkTimer = new ("Emulator.StartBizhawk");
     void _StartBizhawk(
         bool applicationIsPlaying,
         string logFilePath, // null to disable logging
@@ -526,7 +534,9 @@ public partial class Emulator : MonoBehaviour {
         // mainly just moving anything that has to run on the main thread into Initialize
         // Would probably be better to make _StartBizhawk as small as possible, just the config loading and the process start
 
-        StartBizhawk.Begin();
+        // Debug.Log("Emulator._StartBizhawk()", this);
+
+        StartBizhawkTimer.Begin();
 
         // get a random number to identify the buffers
         var guid = new System.Random().Next();
@@ -710,7 +720,7 @@ public partial class Emulator : MonoBehaviour {
         Status = EmulatorStatus.Started;
         _startedTime = SystemTime; // Unity Time.realtimeSinceStartup can't run on non-main thread
 
-        StartBizhawk.End();
+        StartBizhawkTimer.End();
 
         return;
 
@@ -881,7 +891,7 @@ public partial class Emulator : MonoBehaviour {
     }
 
     void Deactivate() {
-        // Debug.Log("Emulator Deactivate");
+        // Debug.Log("Emulator Deactivate", this);
 
         // Cancel _initThread if it's running
         if (_initThread != null && _initThread.IsAlive) {
