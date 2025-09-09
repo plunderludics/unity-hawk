@@ -103,12 +103,16 @@ public class BasicInputProvider : InputProvider {
         // We need to enable any InputActions that are referenced in the controls
 #if ENABLE_INPUT_SYSTEM
         foreach(var mapping in controls.ButtonMappings) {
-            if (mapping.sourceType == Controls.InputSourceType.InputActionReference) {
+            if (mapping.sourceType == Controls.InputSourceType.InputActionReference
+             && mapping.ActionRef != null
+             && mapping.ActionRef.action != null) {
                 mapping.ActionRef.action.Enable();
             }
         }
         foreach(var mapping in controls.AxisMappings) {
-            if (mapping.sourceType == Controls.InputSourceType.InputActionReference) {
+            if (mapping.sourceType == Controls.InputSourceType.InputActionReference
+             && mapping.ActionRef != null
+             && mapping.ActionRef.action != null) {
                 mapping.ActionRef.action.Enable();
             }
         }
