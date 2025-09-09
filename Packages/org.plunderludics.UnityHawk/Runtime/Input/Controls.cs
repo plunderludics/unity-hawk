@@ -6,41 +6,76 @@ using UnityEngine;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using BizHawk.Common.CollectionExtensions;
 
 namespace UnityHawk {
 
 [System.Serializable]
 public class Controls {
-    [System.Serializable]
-    public struct KeyCode2Control {
-        public bool Enabled;
-        public KeyCode Key; // Keyboard key name e.g. "Z"
-        public string Control; // Bizhawk control name e.g. "D-Pad Up" (Don't include "P1 " prefix!)
-        public Controller Controller; // Which controller this key is for (can be None)
+    public enum InputSourceType {
+        KeyCode,                // Keyboard code - should work with either new or legacy input system
+        LegacyAxis,             // Legacy input system axis (Unity input manager)
+        InputActionReference    // New input system action reference
     }
 
-    // Mappings from keyname to bizhawk console button name (can be many-to-many)
-    [SerializeField] List<KeyCode2Control> mappings;
+    [System.Serializable]
+    public struct ButtonMapping {
+        [Tooltip("Whether this mapping is enabled")]
+        public bool Enabled;
+        [Tooltip("What type of input source this is")]
+        public InputSourceType sourceType;
+        [Tooltip("Key to press")]
+        public KeyCode Key;
+        [Tooltip("Legacy input manager axis name")]
+        public string AxisName;
+#if ENABLE_INPUT_SYSTEM
+        [Tooltip("Input action reference")]
+        public UnityEngine.InputSystem.InputActionReference ActionRef;
+#endif
+        [Tooltip("Bizhawk control name e.g. \"D-Pad Up\" (Don't include \"P1 \" prefix!)")]
+        public string EmulatorButtonName;
+        [Tooltip("Which controller this key is for (can be None)")]
+        public Controller Controller;
+    }
+
+    [System.Serializable]
+    public struct AxisMapping {
+        [Tooltip("Whether this mapping is enabled")]
+        public bool Enabled;
+        [Tooltip("What type of input source this is")]
+        public InputSourceType sourceType;
+        [Tooltip("Negative key")]
+        public KeyCode NegativeKey;
+        [Tooltip("Positive key")]
+        public KeyCode PositiveKey;
+        [Tooltip("Legacy input manager axis name")]
+        public string AxisName;
+#if ENABLE_INPUT_SYSTEM
+        [Tooltip("Input action reference")]
+        public UnityEngine.InputSystem.InputActionReference ActionRef;
+#endif
+        [Tooltip("Bizhawk axis name name e.g. \"Left Stick Left / Right\" (Don't include \"P1 \" prefix!)")]
+        public string EmulatorAxisName;
+        [Tooltip("Which controller this axis is for (can be None)")]
+        public Controller Controller;
+        [Tooltip("Minimum value for this axis (probably 0)  ")]
+        public int MinValue;
+        [Tooltip("Maximum value for this axis (probably 255)")]
+        public int MaxValue;
+    }
+
+    // Mappings from input source to bizhawk control (can be many-to-many)
+    [SerializeField] List<ButtonMapping> buttonMappings;
+    [SerializeField] List<AxisMapping> axisMappings;
 
     // Clone constructor
     public Controls(Controls controls) {
-        mappings = new (controls.mappings);
+        buttonMappings = new (controls.buttonMappings);
+        axisMappings = new (controls.axisMappings);
     }
 
-    // Map from a keyname to a list of (button name, controller) tuples
-    public List<(string, Controller)> this[KeyCode key] {
-        get {
-            // Super inefficient TODO should probably store a Dictionary<string, List<(string, Controller)>> that gets updated when mappings changes
-            List<(string, Controller)> result = new();
-            foreach (var mapping in mappings) {
-                if (mapping.Key == key && mapping.Enabled) {
-                    result.Add((mapping.Control, mapping.Controller));
-                }
-            }
-            return result;
-        }
-    }
+    // Get all enabled mappings
+    public List<ButtonMapping> ButtonMappings => buttonMappings.Where(m => m.Enabled).ToList();
+    public List<AxisMapping> AxisMappings => axisMappings.Where(m => m.Enabled).ToList();
     
     // Note: Slightly problematic because control labels are specific to the core rather than the system,
     // so e.g. Nymashock (PSX) uses "P1 △" where Octoshock (PSX) uses "P1 Triangle".
