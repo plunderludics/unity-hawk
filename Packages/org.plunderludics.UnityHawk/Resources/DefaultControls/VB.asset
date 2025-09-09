@@ -13,60 +13,102 @@ MonoBehaviour:
   m_Name: VB
   m_EditorClassIdentifier: 
   Controls:
-    mappings:
+    buttonMappings:
     - Enabled: 1
+      sourceType: 0
       Key: 273
-      Control: L_Up
+      AxisName: 
+      ActionRef: {fileID: 0}
+      EmulatorButtonName: L_Up
       Controller: 1
     - Enabled: 1
+      sourceType: 0
       Key: 274
-      Control: L_Down
+      AxisName: 
+      ActionRef: {fileID: 0}
+      EmulatorButtonName: L_Down
       Controller: 1
     - Enabled: 1
+      sourceType: 0
       Key: 276
-      Control: L_Left
+      AxisName: 
+      ActionRef: {fileID: 0}
+      EmulatorButtonName: L_Left
       Controller: 1
     - Enabled: 1
+      sourceType: 0
       Key: 275
-      Control: L_Right
+      AxisName: 
+      ActionRef: {fileID: 0}
+      EmulatorButtonName: L_Right
       Controller: 1
     - Enabled: 1
+      sourceType: 0
       Key: 264
-      Control: R_Up
+      AxisName: 
+      ActionRef: {fileID: 0}
+      EmulatorButtonName: R_Up
       Controller: 1
     - Enabled: 1
+      sourceType: 0
       Key: 258
-      Control: R_Down
+      AxisName: 
+      ActionRef: {fileID: 0}
+      EmulatorButtonName: R_Down
       Controller: 1
     - Enabled: 1
+      sourceType: 0
       Key: 260
-      Control: R_Left
+      AxisName: 
+      ActionRef: {fileID: 0}
+      EmulatorButtonName: R_Left
       Controller: 1
     - Enabled: 1
+      sourceType: 0
       Key: 262
-      Control: R_Right
+      AxisName: 
+      ActionRef: {fileID: 0}
+      EmulatorButtonName: R_Right
       Controller: 1
     - Enabled: 1
+      sourceType: 0
       Key: 122
-      Control: B
+      AxisName: 
+      ActionRef: {fileID: 0}
+      EmulatorButtonName: B
       Controller: 1
     - Enabled: 1
+      sourceType: 0
       Key: 120
-      Control: A
+      AxisName: 
+      ActionRef: {fileID: 0}
+      EmulatorButtonName: A
       Controller: 1
     - Enabled: 1
+      sourceType: 0
       Key: 119
-      Control: R
+      AxisName: 
+      ActionRef: {fileID: 0}
+      EmulatorButtonName: R
       Controller: 1
     - Enabled: 1
+      sourceType: 0
       Key: 101
-      Control: L
+      AxisName: 
+      ActionRef: {fileID: 0}
+      EmulatorButtonName: L
       Controller: 1
     - Enabled: 1
+      sourceType: 0
       Key: 32
-      Control: Select
+      AxisName: 
+      ActionRef: {fileID: 0}
+      EmulatorButtonName: Select
       Controller: 1
     - Enabled: 1
+      sourceType: 0
       Key: 13
-      Control: Start
+      AxisName: 
+      ActionRef: {fileID: 0}
+      EmulatorButtonName: Start
       Controller: 1
