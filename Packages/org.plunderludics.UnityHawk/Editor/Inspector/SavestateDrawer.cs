@@ -26,50 +26,55 @@ public class SavestateDrawer : PropertyDrawer {
         // (so that we can filter the savestates by rom)
         var romProperty = property.serializedObject.FindProperty("romFile");
         Rom rom = romProperty?.objectReferenceValue as Rom;
-        float buttonWidth = 20f;
-        // First draw object picker
+
+        // First show native asset picker
+        float buttonWidth = (rom == null) ? 0f : 20f;
         // (Could be grey/disabled - but this way you can pick a non-matching savestate if you need to)
         var savestateRect = new Rect(position.x, position.y, position.width - buttonWidth, EditorGUIUtility.singleLineHeight);
         // GUI.enabled = false;
         EditorGUI.ObjectField(savestateRect, property, label);
-        // GUI.enabled = true;
 
-        // Dropdown UI:
-        // First find all savestates for the current rom
-        // (Shouldn't really do this every frame, but it doesn't seem to be too bad)
-        // (Some roms don't get hashed, so fallback to rom filename)
-        // (Some older savestates don't have rominfo at all, those will get hidden)
-        if (!_savestatesForRom.TryGetValue(rom, out var savestates)) {
-            // Debug.Log($"No cached savestates for rom {rom.name}, searching for savestates");
-            savestates = AssetDatabase.FindAssets("t:savestate")
-                    .Select(guid => AssetDatabase.LoadAssetAtPath<Savestate>(AssetDatabase.GUIDToAssetPath(guid)))
-                    .Where(savestate => savestate.MatchesRom(rom))
-                    .ToList();
-            _savestatesForRom[rom] = savestates;
-        } else {
-            // Debug.Log($"Using cached {savestates.Count} savestates for rom {rom.name}");
+        if (rom != null) {
+            // Show dropdown with matching savestates
+
+            // Dropdown UI:
+            // First find all savestates for the current rom
+            // (Shouldn't really do this every frame, but it doesn't seem to be too bad)
+            // (Some roms don't get hashed, so fallback to rom filename)
+            // (Some older savestates don't have rominfo at all, those will get hidden)
+            if (!_savestatesForRom.TryGetValue(rom, out var savestates)) {
+                // Debug.Log($"No cached savestates for rom {rom.name}, searching for savestates");
+                savestates = AssetDatabase.FindAssets("t:savestate")
+                        .Select(guid => AssetDatabase.LoadAssetAtPath<Savestate>(AssetDatabase.GUIDToAssetPath(guid)))
+                        .Where(savestate => savestate.MatchesRom(rom))
+                        .ToList();
+                _savestatesForRom[rom] = savestates;
+            } else {
+                // Debug.Log($"Using cached {savestates.Count} savestates for rom {rom.name}");
+            }
+
+            var dropdownSavestates = new List<Savestate>(savestates); // Clone savestates to add null option at the beginning
+            dropdownSavestates.Insert(0, null);
+
+            var savestateNames = dropdownSavestates.Select(savestate => savestate != null ? savestate.name : "None");
+            int currentIndex = dropdownSavestates.IndexOf(property.objectReferenceValue as Savestate);
+
+            // Create a dropdown menu with the savestates
+            EditorGUI.BeginChangeCheck();
+            var popupRect = new Rect(position.x + position.width - buttonWidth, position.y, buttonWidth, EditorGUIUtility.singleLineHeight);
+            int selectedIndex = EditorGUI.Popup(popupRect, currentIndex, savestateNames.ToArray());
+            if (EditorGUI.EndChangeCheck()) {
+                // Set the property to the selected savestate
+                var selectedSavestate = dropdownSavestates.ElementAt(selectedIndex);
+                property.objectReferenceValue = selectedSavestate;
+                property.serializedObject.ApplyModifiedProperties();
+
+                // Kinda hacky, but invalidate the cache for this rom whenever selecting an option
+                // - at least this way we can easily refresh the cache when needed
+                _savestatesForRom.Remove(rom);
+            }
         }
 
-        var dropdownSavestates = new List<Savestate>(savestates); // Clone savestates to add null option at the beginning
-        dropdownSavestates.Insert(0, null);
-
-        var savestateNames = dropdownSavestates.Select(savestate => savestate != null ? savestate.name : "None");
-        int currentIndex = dropdownSavestates.IndexOf(property.objectReferenceValue as Savestate);
-
-        // Create a dropdown menu with the savestates
-        EditorGUI.BeginChangeCheck();
-        var popupRect = new Rect(position.x + position.width - buttonWidth, position.y, buttonWidth, EditorGUIUtility.singleLineHeight);
-        int selectedIndex = EditorGUI.Popup(popupRect, currentIndex, savestateNames.ToArray());
-        if (EditorGUI.EndChangeCheck()) {
-            // Set the property to the selected savestate
-            var selectedSavestate = dropdownSavestates.ElementAt(selectedIndex);
-            property.objectReferenceValue = selectedSavestate;
-            property.serializedObject.ApplyModifiedProperties();
-
-            // Kinda hacky, but invalidate the cache for this rom whenever selecting an option
-            // - at least this way we can easily refresh the cache when needed
-            _savestatesForRom.Remove(rom);
-        }
         EditorGUI.EndProperty();
     }
 }

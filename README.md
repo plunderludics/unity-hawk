@@ -37,10 +37,10 @@ You will probably also need to install the BizHawk prerequisites, which can be i
 - Enable 'Pass Input From Unity' to send keyboard input from Unity to Bizhawk (gamepad input not supported yet). If this isn't enabled Bizhawk will get input directly from the operating system.
   - You can specify the component used to handle input under 'Input Provider'. If unspecified it will default to a `BasicInputProvider` with default controls according to the platform. If you want to configure controls, add your own `BasicInputProvider` component.
   - Alternatively you can create your own component that inherits from `InputProvider`.
-  - `InputProvider` also provides methods called `AddInputEvent` and `AddAxisInputEvent` which can be used to programmatically  add inputs.
+  - `InputProvider` also provides an `AddInputEvent` method which can be used to programmatically add inputs.
 - Enable 'Show Bizhawk Gui' to show the native Bizhawk window; useful for doing plunderludics development (finding save states, tweaking config & scripts, etc) without having to leave Unity
-- \[experimental\] Enable 'Capture Emulator Audio' to route emulator audio to an AudioSource, allowing you to use unity's positional audio system or add audio effects
-  - (unfortunately the current implementation creates some latency and sometimes distorted audio, especially with multiple emulators running concurrently)
+- Enable 'Capture Emulator Audio' to route emulator audio to an AudioSource, allowing you to use Unity's positional audio system or add audio effects
+  - (Might produce minor latency or distortion)
 - The live emulator graphics can be grabbed in code via the `Emulator.Texture` property.
 - The `Emulator` component provides an interface to basic Bizhawk API methods.
   - Basic emulator controls: `Pause()`, `Unpause()`, `FrameAdvance()`, `LoadState(Savestate s)`, `SaveState(string path)`, `LoadRom(Rom r)`, `SetVolume(float v)`, `SetSpeedPercent(int p)`. Use the `BasicApiTool` component to use these methods directly from the Editor.

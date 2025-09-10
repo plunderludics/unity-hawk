@@ -21,7 +21,7 @@ namespace UnityHawk.Tests {
 [TestFixture(false, false, true)]
 public class SharedTests
 {
-    private const float WhileDuration = 10f;
+    private const float WhileDuration = 5f;
     private const float MomentDuration = 0.5f;
     private Rom eliteRom;
     private Rom swoopRom;
