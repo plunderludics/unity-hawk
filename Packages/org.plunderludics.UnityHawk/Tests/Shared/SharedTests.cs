@@ -72,7 +72,7 @@ public class SharedTests
         e.showBizhawkGuiInEditor = _showBizhawkGui;
     }
 
-    void ActivateEmulator() {
+    protected void ActivateEmulator() {
         e.gameObject.SetActive(true);
     }
     
