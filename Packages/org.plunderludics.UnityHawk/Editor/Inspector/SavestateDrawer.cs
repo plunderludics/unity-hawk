@@ -43,7 +43,7 @@ public class SavestateDrawer : PropertyDrawer {
             // (Some roms don't get hashed, so fallback to rom filename)
             // (Some older savestates don't have rominfo at all, those will get hidden)
             if (!_savestatesForRom.TryGetValue(rom, out var savestates)) {
-                Debug.Log($"No cached savestates for rom {rom.name}, searching for savestates");
+                // Debug.Log($"No cached savestates for rom {rom.name}, searching for savestates");
                 savestates = AssetDatabase.FindAssets("t:savestate")
                         .Select(guid => AssetDatabase.LoadAssetAtPath<Savestate>(AssetDatabase.GUIDToAssetPath(guid)))
                         .Where(savestate => savestate.MatchesRom(rom))
