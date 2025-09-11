@@ -40,7 +40,6 @@ public struct InputEvent {
 public abstract class InputProvider : MonoBehaviour {
     // (derive from monobehaviour so params can be easily tweaked in inspector)
     List<InputEvent> _addedInputs = new();
-    Dictionary<string, int> _addedAxisInputs = new();
 
     // Return a list of input events for the frame, in chronological order
     public virtual List<InputEvent> InputForFrame() {
