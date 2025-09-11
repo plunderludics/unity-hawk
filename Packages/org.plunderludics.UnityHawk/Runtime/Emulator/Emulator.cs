@@ -288,7 +288,6 @@ public partial class Emulator : MonoBehaviour {
     ///// MonoBehaviour lifecycle
     // (These methods are public only for convenient testing)
 
-#if UNITY_EDITOR
     public void OnValidate() {
         // Debug.Log($"OnValidate");
         if (!config) {
@@ -326,7 +325,7 @@ public partial class Emulator : MonoBehaviour {
         if (!IsRunning && saveStateFile?.Screenshot != null) {
             InitTextures(saveStateFile.Screenshot.width, saveStateFile.Screenshot.height);
         }
-
+        
         if (gameObject.activeInHierarchy && enabled) {
             // GameObject and Emulator are active, so check if we need to start the bizhawk process
 
@@ -341,15 +340,16 @@ public partial class Emulator : MonoBehaviour {
                 }
             }
 
+#if UNITY_EDITOR
             // [use EditorApplication.isPlayingOrWillChangePlaymode instead of Application.isPlaying
             //  to avoid OnEnable call as play mode is being entered]
             if (!EditorApplication.isPlayingOrWillChangePlaymode && runInEditMode && Status == EmulatorStatus.Inactive) {
                 // In edit mode, initialize the emulator if it is not already running
                 Initialize();
             }
+#endif
         }
     }
-#endif
 
     public void OnEnable() {
         // Debug.Log($"Emulator OnEnable", this);
