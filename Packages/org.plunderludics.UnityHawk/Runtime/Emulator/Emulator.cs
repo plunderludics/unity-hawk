@@ -289,11 +289,13 @@ public partial class Emulator : MonoBehaviour {
     // (These methods are public only for convenient testing)
 
     public void OnValidate() {
+#if UNITY_EDITOR
         // Debug.Log($"OnValidate");
         if (!config) {
             config = (UnityHawkConfig)AssetDatabase.LoadAssetAtPath(
                 Paths.defaultUnityHawkConfigPath,
-                typeof(UnityHawkConfig));
+                typeof(UnityHawkConfig)
+            );
 
             if (!config) {
                 Debug.LogError("UnityHawkConfigDefault.asset not found", this);
@@ -340,15 +342,14 @@ public partial class Emulator : MonoBehaviour {
                 }
             }
 
-#if UNITY_EDITOR
             // [use EditorApplication.isPlayingOrWillChangePlaymode instead of Application.isPlaying
             //  to avoid OnEnable call as play mode is being entered]
             if (!EditorApplication.isPlayingOrWillChangePlaymode && runInEditMode && Status == EmulatorStatus.Inactive) {
                 // In edit mode, initialize the emulator if it is not already running
                 Initialize();
             }
-#endif
         }
+#endif
     }
 
     public void OnEnable() {
