@@ -2,11 +2,11 @@
 <html>
   <head>
     <meta charset="utf-8">
-      <title>Enum Emulator.EmulatorStatus | unity-hawk </title>
+      <title>Struct InputEvent | unity-hawk </title>
       <meta name="viewport" content="width=device-width, initial-scale=1.0">
-      <meta name="title" content="Enum Emulator.EmulatorStatus | unity-hawk ">
+      <meta name="title" content="Struct InputEvent | unity-hawk ">
       
-      <meta name="description" content="the current status of the emulator">
+      
       <link rel="icon" href="../favicon.ico">
       <link rel="stylesheet" href="../public/docfx.min.css">
       <link rel="stylesheet" href="../public/main.css">
@@ -84,13 +84,12 @@
           <nav id="breadcrumb"></nav>
         </div>
 
-        <article data-uid="UnityHawk.Emulator.EmulatorStatus">
+        <article data-uid="UnityHawk.InputEvent">
 
 
 
-
-  <h1 id="UnityHawk_Emulator_EmulatorStatus" data-uid="UnityHawk.Emulator.EmulatorStatus" class="text-break">
-Enum Emulator.EmulatorStatus  
+  <h1 id="UnityHawk_InputEvent" data-uid="UnityHawk.InputEvent" class="text-break">
+Struct InputEvent  
   </h1>
 
   <div class="facts text-secondary">
@@ -98,13 +97,214 @@ Enum Emulator.EmulatorStatus
   <dl><dt>Assembly</dt><dd>UnityHawk.dll</dd></dl>
   </div>
 
-  <div class="markdown summary"><p>the current status of the emulator</p>
-</div>
+  <div class="markdown summary"></div>
   <div class="markdown conceptual"></div>
 
   <div class="codewrapper">
-    <pre><code class="lang-csharp hljs">public enum Emulator.EmulatorStatus</code></pre>
+    <pre><code class="lang-csharp hljs">public struct InputEvent</code></pre>
   </div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+  <h2 class="section" id="constructors">Constructors
+</h2>
+
+
+  <a id="UnityHawk_InputEvent__ctor_" data-uid="UnityHawk.InputEvent.#ctor*"></a>
+
+  <h3 id="UnityHawk_InputEvent__ctor_System_String_System_Int32_UnityHawk_Controller_System_Boolean_" data-uid="UnityHawk.InputEvent.#ctor(System.String,System.Int32,UnityHawk.Controller,System.Boolean)">
+  InputEvent(string, int, Controller, bool)
+  
+  </h3>
+
+  <div class="markdown level1 summary"></div>
+  <div class="markdown level1 conceptual"></div>
+
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public InputEvent(string name, int value, Controller controller = Controller.P1, bool isAnalog = false)</code></pre>
+  </div>
+
+  <h4 class="section">Parameters</h4>
+  <dl class="parameters">
+    <dt><code>name</code> <span class="xref">string</span></dt>
+    <dd></dd>
+    <dt><code>value</code> <span class="xref">int</span></dt>
+    <dd></dd>
+    <dt><code>controller</code> <span class="xref">Controller</span></dt>
+    <dd></dd>
+    <dt><code>isAnalog</code> <span class="xref">bool</span></dt>
+    <dd></dd>
+  </dl>
+
+
+
+
+
+
+
+
+
+
+
+
+  <h2 class="section" id="fields">Fields
+</h2>
+
+
+
+  <h3 id="UnityHawk_InputEvent_controller" data-uid="UnityHawk.InputEvent.controller">
+  controller
+  
+  </h3>
+
+  <div class="markdown level1 summary"></div>
+  <div class="markdown level1 conceptual"></div>
+
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public Controller controller</code></pre>
+  </div>
+
+
+
+
+  <h4 class="section">Field Value</h4>
+  <dl class="parameters">
+    <dt><span class="xref">Controller</span></dt>
+    <dd></dd>
+  </dl>
+
+
+
+
+
+
+
+
+
+
+  <h3 id="UnityHawk_InputEvent_isAnalog" data-uid="UnityHawk.InputEvent.isAnalog">
+  isAnalog
+  
+  </h3>
+
+  <div class="markdown level1 summary"></div>
+  <div class="markdown level1 conceptual"></div>
+
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public bool isAnalog</code></pre>
+  </div>
+
+
+
+
+  <h4 class="section">Field Value</h4>
+  <dl class="parameters">
+    <dt><span class="xref">bool</span></dt>
+    <dd></dd>
+  </dl>
+
+
+
+
+
+
+
+
+
+
+  <h3 id="UnityHawk_InputEvent_name" data-uid="UnityHawk.InputEvent.name">
+  name
+  
+  </h3>
+
+  <div class="markdown level1 summary"></div>
+  <div class="markdown level1 conceptual"></div>
+
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public string name</code></pre>
+  </div>
+
+
+
+
+  <h4 class="section">Field Value</h4>
+  <dl class="parameters">
+    <dt><span class="xref">string</span></dt>
+    <dd></dd>
+  </dl>
+
+
+
+
+
+
+
+
+
+
+  <h3 id="UnityHawk_InputEvent_value" data-uid="UnityHawk.InputEvent.value">
+  value
+  
+  </h3>
+
+  <div class="markdown level1 summary"></div>
+  <div class="markdown level1 conceptual"></div>
+
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public int value</code></pre>
+  </div>
+
+
+
+
+  <h4 class="section">Field Value</h4>
+  <dl class="parameters">
+    <dt><span class="xref">int</span></dt>
+    <dd></dd>
+  </dl>
+
+
+
+
+
+
+
+
+
+  <h2 class="section" id="methods">Methods
+</h2>
+
+
+  <a id="UnityHawk_InputEvent_ToString_" data-uid="UnityHawk.InputEvent.ToString*"></a>
+
+  <h3 id="UnityHawk_InputEvent_ToString" data-uid="UnityHawk.InputEvent.ToString">
+  ToString()
+  
+  </h3>
+
+  <div class="markdown level1 summary"></div>
+  <div class="markdown level1 conceptual"></div>
+
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public override string ToString()</code></pre>
+  </div>
+
+
+  <h4 class="section">Returns</h4>
+  <dl class="parameters">
+    <dt><span class="xref">string</span></dt>
+    <dd></dd>
+  </dl>
 
 
 

@@ -4,6 +4,9 @@ items:
   name: UnityHawk
   type: Namespace
   items:
+  - uid: UnityHawk.BasicInputProvider
+    name: BasicInputProvider
+    type: Class
   - uid: UnityHawk.Emulator
     name: Emulator
     type: Class
@@ -13,4 +16,10 @@ items:
   - uid: UnityHawk.Emulator.LuaCallback
     name: Emulator.LuaCallback
     type: Delegate
+  - uid: UnityHawk.InputEvent
+    name: InputEvent
+    type: Struct
+  - uid: UnityHawk.InputProvider
+    name: InputProvider
+    type: Class
 memberLayout: SamePage

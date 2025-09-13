@@ -4,9 +4,12 @@ items:
   commentId: N:UnityHawk
   id: UnityHawk
   children:
+  - UnityHawk.BasicInputProvider
   - UnityHawk.Emulator
   - UnityHawk.Emulator.EmulatorStatus
   - UnityHawk.Emulator.LuaCallback
+  - UnityHawk.InputEvent
+  - UnityHawk.InputProvider
   langs:
   - csharp
   - vb
@@ -19,6 +22,7 @@ items:
 references:
 - uid: UnityHawk.Emulator
   commentId: T:UnityHawk.Emulator
+  parent: UnityHawk
   isExternal: true
   href: UnityHawk.Emulator.html
   name: Emulator
@@ -80,6 +84,29 @@ references:
     name: LuaCallback
     isExternal: true
     href: UnityHawk.Emulator.LuaCallback.html
+- uid: UnityHawk.BasicInputProvider
+  commentId: T:UnityHawk.BasicInputProvider
+  isExternal: true
+  href: UnityHawk.BasicInputProvider.html
+  name: BasicInputProvider
+  nameWithType: BasicInputProvider
+  fullName: UnityHawk.BasicInputProvider
+- uid: UnityHawk.InputEvent
+  commentId: T:UnityHawk.InputEvent
+  parent: UnityHawk
+  isExternal: true
+  href: UnityHawk.InputEvent.html
+  name: InputEvent
+  nameWithType: InputEvent
+  fullName: UnityHawk.InputEvent
+- uid: UnityHawk.InputProvider
+  commentId: T:UnityHawk.InputProvider
+  parent: UnityHawk
+  isExternal: true
+  href: UnityHawk.InputProvider.html
+  name: InputProvider
+  nameWithType: InputProvider
+  fullName: UnityHawk.InputProvider
 - uid: UnityHawk
   commentId: N:UnityHawk
   isExternal: true

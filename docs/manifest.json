@@ -12,6 +12,20 @@
     },
     {
       "type": "ManagedReference",
+      "source_relative_path": "api/UnityHawk.BasicInputProvider.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/UnityHawk.BasicInputProvider.html"
+        }
+      },
+      "version": "",
+      "Uid": null,
+      "IsMRef": true,
+      "Title": "UnityHawk.BasicInputProvider",
+      "Summary": null
+    },
+    {
+      "type": "ManagedReference",
       "source_relative_path": "api/UnityHawk.Emulator.EmulatorStatus.yml",
       "output": {
         ".html": {
@@ -50,6 +64,34 @@
       "Uid": null,
       "IsMRef": true,
       "Title": "UnityHawk.Emulator",
+      "Summary": null
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/UnityHawk.InputEvent.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/UnityHawk.InputEvent.html"
+        }
+      },
+      "version": "",
+      "Uid": null,
+      "IsMRef": true,
+      "Title": "UnityHawk.InputEvent",
+      "Summary": null
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/UnityHawk.InputProvider.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/UnityHawk.InputProvider.html"
+        }
+      },
+      "version": "",
+      "Uid": null,
+      "IsMRef": true,
+      "Title": "UnityHawk.InputProvider",
       "Summary": null
     },
     {
