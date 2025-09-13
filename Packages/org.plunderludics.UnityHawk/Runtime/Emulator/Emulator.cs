@@ -360,7 +360,7 @@ public partial class Emulator : MonoBehaviour {
         _textureCorrectionMat = new Material(Resources.Load<Shader>(TextureCorrectionShaderName));
         _materialProperties = new MaterialPropertyBlock();
 
-# if UNITY_EDITOR
+#if UNITY_EDITOR
         // In Editor when entering play mode OnEnable gets called twice
         // - once immediately before play mode starts, and once after - don't start up the emulator in the first case
         if (EditorApplication.isPlayingOrWillChangePlaymode && !Application.isPlaying) {
