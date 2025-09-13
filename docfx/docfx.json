@@ -27,14 +27,23 @@
         ]
       }
     ],
+    "resource": [
+      {
+        "files": [
+          "images/**"
+        ]
+      }
+    ],
     "output": "../docs",
     "template": [
       "default",
-      "modern"
+      "modern",
+      "unityhawk-template"
     ],
     "globalMetadata": {
       "_appName": "UnityHawk",
       "_appTitle": "UnityHawk",
+      "_appLogoPath": "images/mario.png",
       "_enableSearch": true,
       "pdf": false
     }

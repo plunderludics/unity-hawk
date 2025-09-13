@@ -122,6 +122,16 @@
       "version": ""
     },
     {
+      "type": "Resource",
+      "source_relative_path": "images/mario.png",
+      "output": {
+        "resource": {
+          "relative_path": "images/mario.png"
+        }
+      },
+      "version": ""
+    },
+    {
       "type": "Redirection",
       "source_relative_path": "index.md",
       "output": {
