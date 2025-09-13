@@ -87,17 +87,17 @@ public partial class Emulator {
     /// <summary>
     /// is the emulator process currently starting up?
     /// </summary>
-    public bool IsStarting => Status == EmulatorStatus.Starting;
+    public bool IsStarting => CurrentStatus == Status.Starting;
 
     /// <summary>
     /// is the emulator process started?
     /// </summary>
-    public bool IsStarted => Status >= EmulatorStatus.Started;
+    public bool IsStarted => CurrentStatus >= Status.Started;
 
     /// <summary>
     /// is the emulator process running a game?
     /// </summary>
-    public bool IsRunning => Status >= EmulatorStatus.Running;
+    public bool IsRunning => CurrentStatus >= Status.Running;
 
     /// <summary>
     /// ID of the current emulator platform (e.g. "N64", "PSX", etc.)
@@ -122,9 +122,9 @@ public partial class Emulator {
     public Action OnRunning;
  
     /// <summary>
-    /// the current status of the emulator
+    /// possible values for the emulator status
     /// </summary>
-    public enum EmulatorStatus {
+    public enum Status {
         /// <summary>
         /// BizHawk hasn't started yet
         /// </summary>
@@ -149,14 +149,14 @@ public partial class Emulator {
     /// <summary>
     /// the current status of the emulator
     /// </summary>
-    public EmulatorStatus Status {
+    public Status CurrentStatus {
         get => _status;
         private set {
             if (_status != value) {
                 // Debug.Log($"Emulator status changed from {_status} to {value}", this);
                 var raise = value switch {
-                    EmulatorStatus.Started => OnStarted,
-                    EmulatorStatus.Running => OnRunning,
+                    Status.Started => OnStarted,
+                    Status.Running => OnRunning,
                     _ => null,
                 };
 
@@ -326,7 +326,7 @@ public partial class Emulator {
             return;
         }
 
-        if (_status == EmulatorStatus.Inactive) {
+        if (_status == Status.Inactive) {
             return;
         }
 
@@ -335,7 +335,7 @@ public partial class Emulator {
         // Need to update texture buffer size in case platform has changed:
         _sharedTextureBuffer.UpdateSize();
 
-        Status = EmulatorStatus.Started; // Not running until new texture buffer is set up
+        CurrentStatus = Status.Started; // Not running until new texture buffer is set up
     }
 
     /// <summary>
