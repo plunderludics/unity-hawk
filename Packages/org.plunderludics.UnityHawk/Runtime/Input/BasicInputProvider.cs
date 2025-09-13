@@ -18,6 +18,12 @@ using UnityEditor.EditorTools;
 namespace UnityHawk {
 
 // Just gets key events directly from Unity
+
+/// <summary>
+/// The default input provider for a UnityHawk Emulator. By default will try to use built-in default controls for the current system.
+/// A custom ControlsObject or a control mapping can be provided.
+/// Supports both the legacy input manager and the new InputSystem on the Unity side, and both button and axis inputs on the BizHawk side.
+/// </summary>
 [DefaultExecutionOrder(-1000)] // Kinda hacky but this has to run before Emulator or there will be a 1-frame input delay.
 public class BasicInputProvider : InputProvider {
     [Tooltip("Emulator to use. If null, will look for attached Emulator")]

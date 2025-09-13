@@ -27,6 +27,10 @@ public enum EmulatorRenderMode {
     RenderTexture,
 }
 
+/// <summary>
+/// The component responsible for initializing,
+/// running, and managing a single BizHawk emulator instance.
+/// </summary>
 [ExecuteInEditMode]
 public partial class Emulator : MonoBehaviour {
     /// the sample rate for bizhawk audio
@@ -394,7 +398,7 @@ public partial class Emulator : MonoBehaviour {
     }
 
     ////// Core methods
-
+ 
     Thread _initThread;
     CancellationTokenSource _initThreadCancellationTokenSource;
 
