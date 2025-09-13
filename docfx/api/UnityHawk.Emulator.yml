@@ -1,0 +1,2321 @@
+### YamlMime:ManagedReference
+items:
+- uid: UnityHawk.Emulator
+  commentId: T:UnityHawk.Emulator
+  id: Emulator
+  parent: UnityHawk
+  children:
+  - UnityHawk.Emulator.#ctor
+  - UnityHawk.Emulator.CurrentFrame
+  - UnityHawk.Emulator.FrameAdvance
+  - UnityHawk.Emulator.Freeze(System.Int64,System.Int32,System.String)
+  - UnityHawk.Emulator.IsMuted
+  - UnityHawk.Emulator.IsPaused
+  - UnityHawk.Emulator.IsRunning
+  - UnityHawk.Emulator.IsStarted
+  - UnityHawk.Emulator.IsStarting
+  - UnityHawk.Emulator.LoadRom(System.String)
+  - UnityHawk.Emulator.LoadRom(UnityHawk.Rom)
+  - UnityHawk.Emulator.LoadState(System.String)
+  - UnityHawk.Emulator.LoadState(UnityHawk.Savestate)
+  - UnityHawk.Emulator.Mute
+  - UnityHawk.Emulator.OnDestroy
+  - UnityHawk.Emulator.OnDisable
+  - UnityHawk.Emulator.OnEnable
+  - UnityHawk.Emulator.OnRunning
+  - UnityHawk.Emulator.OnStarted
+  - UnityHawk.Emulator.OnValidate
+  - UnityHawk.Emulator.Pause
+  - UnityHawk.Emulator.RegisterLuaCallback(System.String,UnityHawk.Emulator.LuaCallback)
+  - UnityHawk.Emulator.RegisterMethod(System.String,UnityHawk.Emulator.LuaCallback)
+  - UnityHawk.Emulator.ReloadState
+  - UnityHawk.Emulator.Restart
+  - UnityHawk.Emulator.SaveState(System.String)
+  - UnityHawk.Emulator.SetSpeedPercent(System.Int32)
+  - UnityHawk.Emulator.SetVolume(System.Int32)
+  - UnityHawk.Emulator.SpeedPercent
+  - UnityHawk.Emulator.Status
+  - UnityHawk.Emulator.SystemId
+  - UnityHawk.Emulator.Texture
+  - UnityHawk.Emulator.Unfreeze(System.Int64,System.Int32,System.String)
+  - UnityHawk.Emulator.Unmute
+  - UnityHawk.Emulator.Unpause
+  - UnityHawk.Emulator.Unwatch(System.Int32)
+  - UnityHawk.Emulator.Update
+  - UnityHawk.Emulator.Volume
+  - UnityHawk.Emulator.WatchFloat(System.Int64,System.Boolean,System.String,System.Action{System.Single})
+  - UnityHawk.Emulator.WatchSigned(System.Int64,System.Int32,System.Boolean,System.String,System.Action{System.Int32})
+  - UnityHawk.Emulator.WatchUnsigned(System.Int64,System.Int32,System.Boolean,System.String,System.Action{System.UInt32})
+  - UnityHawk.Emulator.WriteFloat(System.Int64,System.Single,System.Boolean,System.String)
+  - UnityHawk.Emulator.WriteSigned(System.Int64,System.Int32,System.Int32,System.Boolean,System.String)
+  - UnityHawk.Emulator.WriteUnsigned(System.Int64,System.UInt32,System.Int32,System.Boolean,System.String)
+  - UnityHawk.Emulator.acceptBackgroundInput
+  - UnityHawk.Emulator.autoSelectRomFile
+  - UnityHawk.Emulator.baseConfigFile
+  - UnityHawk.Emulator.captureEmulatorAudio
+  - UnityHawk.Emulator.customRenderTexture
+  - UnityHawk.Emulator.inputProvider
+  - UnityHawk.Emulator.luaScriptFile
+  - UnityHawk.Emulator.passInputFromUnity
+  - UnityHawk.Emulator.ramWatchFile
+  - UnityHawk.Emulator.renderMode
+  - UnityHawk.Emulator.renderTexture
+  - UnityHawk.Emulator.romFile
+  - UnityHawk.Emulator.runInEditMode
+  - UnityHawk.Emulator.runOnEnable
+  - UnityHawk.Emulator.saveStateFile
+  - UnityHawk.Emulator.showBizhawkGuiInEditor
+  - UnityHawk.Emulator.targetRenderer
+  langs:
+  - csharp
+  - vb
+  name: Emulator
+  nameWithType: Emulator
+  fullName: UnityHawk.Emulator
+  type: Class
+  assemblies:
+  - UnityHawk
+  namespace: UnityHawk
+  syntax:
+    content: 'public class Emulator : MonoBehaviour'
+    content.vb: Public Class Emulator Inherits MonoBehaviour
+  inheritance:
+  - System.Object
+- uid: UnityHawk.Emulator.OnStarted
+  commentId: F:UnityHawk.Emulator.OnStarted
+  id: OnStarted
+  parent: UnityHawk.Emulator
+  langs:
+  - csharp
+  - vb
+  name: OnStarted
+  nameWithType: Emulator.OnStarted
+  fullName: UnityHawk.Emulator.OnStarted
+  type: Field
+  assemblies:
+  - UnityHawk
+  namespace: UnityHawk
+  summary: when the emulator boots up
+  remarks: Will be a slight delay since this gets deferred to main thread Update
+  example: []
+  syntax:
+    content: public Action OnStarted
+    return:
+      type: System.Action
+    content.vb: Public OnStarted As Action
+- uid: UnityHawk.Emulator.OnRunning
+  commentId: F:UnityHawk.Emulator.OnRunning
+  id: OnRunning
+  parent: UnityHawk.Emulator
+  langs:
+  - csharp
+  - vb
+  name: OnRunning
+  nameWithType: Emulator.OnRunning
+  fullName: UnityHawk.Emulator.OnRunning
+  type: Field
+  assemblies:
+  - UnityHawk
+  namespace: UnityHawk
+  summary: when the emulator starts running a game
+  remarks: Will be a slight delay since this gets deferred to main thread Update
+  example: []
+  syntax:
+    content: public Action OnRunning
+    return:
+      type: System.Action
+    content.vb: Public OnRunning As Action
+- uid: UnityHawk.Emulator.runOnEnable
+  commentId: F:UnityHawk.Emulator.runOnEnable
+  id: runOnEnable
+  parent: UnityHawk.Emulator
+  langs:
+  - csharp
+  - vb
+  name: runOnEnable
+  nameWithType: Emulator.runOnEnable
+  fullName: UnityHawk.Emulator.runOnEnable
+  type: Field
+  assemblies:
+  - UnityHawk
+  namespace: UnityHawk
+  syntax:
+    content: public bool runOnEnable
+    return:
+      type: System.Boolean
+    content.vb: Public runOnEnable As Boolean
+- uid: UnityHawk.Emulator.saveStateFile
+  commentId: F:UnityHawk.Emulator.saveStateFile
+  id: saveStateFile
+  parent: UnityHawk.Emulator
+  langs:
+  - csharp
+  - vb
+  name: saveStateFile
+  nameWithType: Emulator.saveStateFile
+  fullName: UnityHawk.Emulator.saveStateFile
+  type: Field
+  assemblies:
+  - UnityHawk
+  namespace: UnityHawk
+  syntax:
+    content: public Savestate saveStateFile
+    return:
+      type: UnityHawk.Savestate
+    content.vb: Public saveStateFile As Savestate
+- uid: UnityHawk.Emulator.autoSelectRomFile
+  commentId: F:UnityHawk.Emulator.autoSelectRomFile
+  id: autoSelectRomFile
+  parent: UnityHawk.Emulator
+  langs:
+  - csharp
+  - vb
+  name: autoSelectRomFile
+  nameWithType: Emulator.autoSelectRomFile
+  fullName: UnityHawk.Emulator.autoSelectRomFile
+  type: Field
+  assemblies:
+  - UnityHawk
+  namespace: UnityHawk
+  syntax:
+    content: >-
+      [HideIf("SaveStateFileIsNull")]
+
+      public bool autoSelectRomFile
+    return:
+      type: System.Boolean
+    content.vb: >-
+      <HideIf("SaveStateFileIsNull")>
+
+      Public autoSelectRomFile As Boolean
+  attributes:
+  - type: NaughtyAttributes.HideIfAttribute
+    ctor: NaughtyAttributes.HideIfAttribute.#ctor(System.String)
+    arguments:
+    - type: System.String
+      value: SaveStateFileIsNull
+- uid: UnityHawk.Emulator.romFile
+  commentId: F:UnityHawk.Emulator.romFile
+  id: romFile
+  parent: UnityHawk.Emulator
+  langs:
+  - csharp
+  - vb
+  name: romFile
+  nameWithType: Emulator.romFile
+  fullName: UnityHawk.Emulator.romFile
+  type: Field
+  assemblies:
+  - UnityHawk
+  namespace: UnityHawk
+  syntax:
+    content: >-
+      [EnableIf("EnableRomFileSelection")]
+
+      public Rom romFile
+    return:
+      type: UnityHawk.Rom
+    content.vb: >-
+      <EnableIf("EnableRomFileSelection")>
+
+      Public romFile As Rom
+  attributes:
+  - type: NaughtyAttributes.EnableIfAttribute
+    ctor: NaughtyAttributes.EnableIfAttribute.#ctor(System.String)
+    arguments:
+    - type: System.String
+      value: EnableRomFileSelection
+- uid: UnityHawk.Emulator.renderMode
+  commentId: F:UnityHawk.Emulator.renderMode
+  id: renderMode
+  parent: UnityHawk.Emulator
+  langs:
+  - csharp
+  - vb
+  name: renderMode
+  nameWithType: Emulator.renderMode
+  fullName: UnityHawk.Emulator.renderMode
+  type: Field
+  assemblies:
+  - UnityHawk
+  namespace: UnityHawk
+  syntax:
+    content: public EmulatorRenderMode renderMode
+    return:
+      type: UnityHawk.EmulatorRenderMode
+    content.vb: Public renderMode As EmulatorRenderMode
+- uid: UnityHawk.Emulator.targetRenderer
+  commentId: F:UnityHawk.Emulator.targetRenderer
+  id: targetRenderer
+  parent: UnityHawk.Emulator
+  langs:
+  - csharp
+  - vb
+  name: targetRenderer
+  nameWithType: Emulator.targetRenderer
+  fullName: UnityHawk.Emulator.targetRenderer
+  type: Field
+  assemblies:
+  - UnityHawk
+  namespace: UnityHawk
+  syntax:
+    content: >-
+      [ShowIf("renderMode", EmulatorRenderMode.ExternalRenderer)]
+
+      public Renderer targetRenderer
+    return:
+      type: UnityEngine.Renderer
+    content.vb: >-
+      <ShowIf("renderMode", EmulatorRenderMode.ExternalRenderer)>
+
+      Public targetRenderer As Renderer
+  attributes:
+  - type: NaughtyAttributes.ShowIfAttribute
+    ctor: NaughtyAttributes.ShowIfAttribute.#ctor(System.String,System.Object)
+    arguments:
+    - type: System.String
+      value: renderMode
+    - type: UnityHawk.EmulatorRenderMode
+      value: 1
+- uid: UnityHawk.Emulator.customRenderTexture
+  commentId: F:UnityHawk.Emulator.customRenderTexture
+  id: customRenderTexture
+  parent: UnityHawk.Emulator
+  langs:
+  - csharp
+  - vb
+  name: customRenderTexture
+  nameWithType: Emulator.customRenderTexture
+  fullName: UnityHawk.Emulator.customRenderTexture
+  type: Field
+  assemblies:
+  - UnityHawk
+  namespace: UnityHawk
+  syntax:
+    content: >-
+      [ShowIf("renderMode", EmulatorRenderMode.RenderTexture)]
+
+      public bool customRenderTexture
+    return:
+      type: System.Boolean
+    content.vb: >-
+      <ShowIf("renderMode", EmulatorRenderMode.RenderTexture)>
+
+      Public customRenderTexture As Boolean
+  attributes:
+  - type: NaughtyAttributes.ShowIfAttribute
+    ctor: NaughtyAttributes.ShowIfAttribute.#ctor(System.String,System.Object)
+    arguments:
+    - type: System.String
+      value: renderMode
+    - type: UnityHawk.EmulatorRenderMode
+      value: 2
+- uid: UnityHawk.Emulator.renderTexture
+  commentId: F:UnityHawk.Emulator.renderTexture
+  id: renderTexture
+  parent: UnityHawk.Emulator
+  langs:
+  - csharp
+  - vb
+  name: renderTexture
+  nameWithType: Emulator.renderTexture
+  fullName: UnityHawk.Emulator.renderTexture
+  type: Field
+  assemblies:
+  - UnityHawk
+  namespace: UnityHawk
+  syntax:
+    content: >-
+      [EnableIf("customRenderTexture")]
+
+      public RenderTexture renderTexture
+    return:
+      type: UnityEngine.RenderTexture
+    content.vb: >-
+      <EnableIf("customRenderTexture")>
+
+      Public renderTexture As RenderTexture
+  attributes:
+  - type: NaughtyAttributes.EnableIfAttribute
+    ctor: NaughtyAttributes.EnableIfAttribute.#ctor(System.String)
+    arguments:
+    - type: System.String
+      value: customRenderTexture
+- uid: UnityHawk.Emulator.passInputFromUnity
+  commentId: F:UnityHawk.Emulator.passInputFromUnity
+  id: passInputFromUnity
+  parent: UnityHawk.Emulator
+  langs:
+  - csharp
+  - vb
+  name: passInputFromUnity
+  nameWithType: Emulator.passInputFromUnity
+  fullName: UnityHawk.Emulator.passInputFromUnity
+  type: Field
+  assemblies:
+  - UnityHawk
+  namespace: UnityHawk
+  syntax:
+    content: public bool passInputFromUnity
+    return:
+      type: System.Boolean
+    content.vb: Public passInputFromUnity As Boolean
+- uid: UnityHawk.Emulator.inputProvider
+  commentId: F:UnityHawk.Emulator.inputProvider
+  id: inputProvider
+  parent: UnityHawk.Emulator
+  langs:
+  - csharp
+  - vb
+  name: inputProvider
+  nameWithType: Emulator.inputProvider
+  fullName: UnityHawk.Emulator.inputProvider
+  type: Field
+  assemblies:
+  - UnityHawk
+  namespace: UnityHawk
+  syntax:
+    content: >-
+      [ShowIf("passInputFromUnity")]
+
+      public InputProvider inputProvider
+    return:
+      type: UnityHawk.InputProvider
+    content.vb: >-
+      <ShowIf("passInputFromUnity")>
+
+      Public inputProvider As InputProvider
+  attributes:
+  - type: NaughtyAttributes.ShowIfAttribute
+    ctor: NaughtyAttributes.ShowIfAttribute.#ctor(System.String)
+    arguments:
+    - type: System.String
+      value: passInputFromUnity
+- uid: UnityHawk.Emulator.captureEmulatorAudio
+  commentId: F:UnityHawk.Emulator.captureEmulatorAudio
+  id: captureEmulatorAudio
+  parent: UnityHawk.Emulator
+  langs:
+  - csharp
+  - vb
+  name: captureEmulatorAudio
+  nameWithType: Emulator.captureEmulatorAudio
+  fullName: UnityHawk.Emulator.captureEmulatorAudio
+  type: Field
+  assemblies:
+  - UnityHawk
+  namespace: UnityHawk
+  syntax:
+    content: public bool captureEmulatorAudio
+    return:
+      type: System.Boolean
+    content.vb: Public captureEmulatorAudio As Boolean
+- uid: UnityHawk.Emulator.luaScriptFile
+  commentId: F:UnityHawk.Emulator.luaScriptFile
+  id: luaScriptFile
+  parent: UnityHawk.Emulator
+  langs:
+  - csharp
+  - vb
+  name: luaScriptFile
+  nameWithType: Emulator.luaScriptFile
+  fullName: UnityHawk.Emulator.luaScriptFile
+  type: Field
+  assemblies:
+  - UnityHawk
+  namespace: UnityHawk
+  syntax:
+    content: public LuaScript luaScriptFile
+    return:
+      type: UnityHawk.LuaScript
+    content.vb: Public luaScriptFile As LuaScript
+- uid: UnityHawk.Emulator.ramWatchFile
+  commentId: F:UnityHawk.Emulator.ramWatchFile
+  id: ramWatchFile
+  parent: UnityHawk.Emulator
+  langs:
+  - csharp
+  - vb
+  name: ramWatchFile
+  nameWithType: Emulator.ramWatchFile
+  fullName: UnityHawk.Emulator.ramWatchFile
+  type: Field
+  assemblies:
+  - UnityHawk
+  namespace: UnityHawk
+  syntax:
+    content: public RamWatch ramWatchFile
+    return:
+      type: UnityHawk.RamWatch
+    content.vb: Public ramWatchFile As RamWatch
+- uid: UnityHawk.Emulator.baseConfigFile
+  commentId: F:UnityHawk.Emulator.baseConfigFile
+  id: baseConfigFile
+  parent: UnityHawk.Emulator
+  langs:
+  - csharp
+  - vb
+  name: baseConfigFile
+  nameWithType: Emulator.baseConfigFile
+  fullName: UnityHawk.Emulator.baseConfigFile
+  type: Field
+  assemblies:
+  - UnityHawk
+  namespace: UnityHawk
+  syntax:
+    content: >-
+      [Foldout("BizHawk Config")]
+
+      public Config baseConfigFile
+    return:
+      type: UnityHawk.Config
+    content.vb: >-
+      <Foldout("BizHawk Config")>
+
+      Public baseConfigFile As Config
+  attributes:
+  - type: NaughtyAttributes.FoldoutAttribute
+    ctor: NaughtyAttributes.FoldoutAttribute.#ctor(System.String)
+    arguments:
+    - type: System.String
+      value: BizHawk Config
+- uid: UnityHawk.Emulator.showBizhawkGuiInEditor
+  commentId: F:UnityHawk.Emulator.showBizhawkGuiInEditor
+  id: showBizhawkGuiInEditor
+  parent: UnityHawk.Emulator
+  langs:
+  - csharp
+  - vb
+  name: showBizhawkGuiInEditor
+  nameWithType: Emulator.showBizhawkGuiInEditor
+  fullName: UnityHawk.Emulator.showBizhawkGuiInEditor
+  type: Field
+  assemblies:
+  - UnityHawk
+  namespace: UnityHawk
+  syntax:
+    content: >-
+      [Foldout("Development")]
+
+      public bool showBizhawkGuiInEditor
+    return:
+      type: System.Boolean
+    content.vb: >-
+      <Foldout("Development")>
+
+      Public showBizhawkGuiInEditor As Boolean
+  attributes:
+  - type: NaughtyAttributes.FoldoutAttribute
+    ctor: NaughtyAttributes.FoldoutAttribute.#ctor(System.String)
+    arguments:
+    - type: System.String
+      value: Development
+- uid: UnityHawk.Emulator.runInEditMode
+  commentId: F:UnityHawk.Emulator.runInEditMode
+  id: runInEditMode
+  parent: UnityHawk.Emulator
+  langs:
+  - csharp
+  - vb
+  name: runInEditMode
+  nameWithType: Emulator.runInEditMode
+  fullName: UnityHawk.Emulator.runInEditMode
+  type: Field
+  assemblies:
+  - UnityHawk
+  namespace: UnityHawk
+  syntax:
+    content: >-
+      [Foldout("Development")]
+
+      [ReadOnlyWhenPlaying]
+
+      public bool runInEditMode
+    return:
+      type: System.Boolean
+    content.vb: >-
+      <Foldout("Development")>
+
+      <ReadOnlyWhenPlaying>
+
+      Public runInEditMode As Boolean
+  attributes:
+  - type: NaughtyAttributes.FoldoutAttribute
+    ctor: NaughtyAttributes.FoldoutAttribute.#ctor(System.String)
+    arguments:
+    - type: System.String
+      value: Development
+  - type: UnityHawk.ReadOnlyWhenPlayingAttribute
+    ctor: UnityHawk.ReadOnlyWhenPlayingAttribute.#ctor
+    arguments: []
+- uid: UnityHawk.Emulator.acceptBackgroundInput
+  commentId: F:UnityHawk.Emulator.acceptBackgroundInput
+  id: acceptBackgroundInput
+  parent: UnityHawk.Emulator
+  langs:
+  - csharp
+  - vb
+  name: acceptBackgroundInput
+  nameWithType: Emulator.acceptBackgroundInput
+  fullName: UnityHawk.Emulator.acceptBackgroundInput
+  type: Field
+  assemblies:
+  - UnityHawk
+  namespace: UnityHawk
+  syntax:
+    content: >-
+      [Foldout("Development")]
+
+      [ShowIf("runInEditMode")]
+
+      [ReadOnlyWhenPlaying]
+
+      public bool acceptBackgroundInput
+    return:
+      type: System.Boolean
+    content.vb: >-
+      <Foldout("Development")>
+
+      <ShowIf("runInEditMode")>
+
+      <ReadOnlyWhenPlaying>
+
+      Public acceptBackgroundInput As Boolean
+  attributes:
+  - type: NaughtyAttributes.FoldoutAttribute
+    ctor: NaughtyAttributes.FoldoutAttribute.#ctor(System.String)
+    arguments:
+    - type: System.String
+      value: Development
+  - type: NaughtyAttributes.ShowIfAttribute
+    ctor: NaughtyAttributes.ShowIfAttribute.#ctor(System.String)
+    arguments:
+    - type: System.String
+      value: runInEditMode
+  - type: UnityHawk.ReadOnlyWhenPlayingAttribute
+    ctor: UnityHawk.ReadOnlyWhenPlayingAttribute.#ctor
+    arguments: []
+- uid: UnityHawk.Emulator.Restart
+  commentId: M:UnityHawk.Emulator.Restart
+  id: Restart
+  parent: UnityHawk.Emulator
+  langs:
+  - csharp
+  - vb
+  name: Restart()
+  nameWithType: Emulator.Restart()
+  fullName: UnityHawk.Emulator.Restart()
+  type: Method
+  assemblies:
+  - UnityHawk
+  namespace: UnityHawk
+  summary: restarts the emulator
+  example: []
+  syntax:
+    content: >-
+      [Button(null, EButtonEnableMode.Always)]
+
+      public void Restart()
+    content.vb: >-
+      <Button(Nothing, EButtonEnableMode.Always)>
+
+      Public Sub Restart()
+  overload: UnityHawk.Emulator.Restart*
+  attributes:
+  - type: NaughtyAttributes.ButtonAttribute
+    ctor: NaughtyAttributes.ButtonAttribute.#ctor(System.String,NaughtyAttributes.EButtonEnableMode)
+    arguments:
+    - type: System.String
+    - type: NaughtyAttributes.EButtonEnableMode
+      value: 0
+- uid: UnityHawk.Emulator.RegisterLuaCallback(System.String,UnityHawk.Emulator.LuaCallback)
+  commentId: M:UnityHawk.Emulator.RegisterLuaCallback(System.String,UnityHawk.Emulator.LuaCallback)
+  id: RegisterLuaCallback(System.String,UnityHawk.Emulator.LuaCallback)
+  parent: UnityHawk.Emulator
+  langs:
+  - csharp
+  - vb
+  name: RegisterLuaCallback(string, LuaCallback)
+  nameWithType: Emulator.RegisterLuaCallback(string, Emulator.LuaCallback)
+  fullName: UnityHawk.Emulator.RegisterLuaCallback(string, UnityHawk.Emulator.LuaCallback)
+  type: Method
+  assemblies:
+  - UnityHawk
+  namespace: UnityHawk
+  summary: Register a callback that can be called via `unityhawk.callmethod('MethodName', argString)` in BizHawk lua
+  example: []
+  syntax:
+    content: public void RegisterLuaCallback(string methodName, Emulator.LuaCallback luaCallback)
+    parameters:
+    - id: methodName
+      type: System.String
+      description: The name of the method to register
+    - id: luaCallback
+      type: UnityHawk.Emulator.LuaCallback
+      description: The Unity-side callback
+    content.vb: Public Sub RegisterLuaCallback(methodName As String, luaCallback As Emulator.LuaCallback)
+  overload: UnityHawk.Emulator.RegisterLuaCallback*
+  nameWithType.vb: Emulator.RegisterLuaCallback(String, Emulator.LuaCallback)
+  fullName.vb: UnityHawk.Emulator.RegisterLuaCallback(String, UnityHawk.Emulator.LuaCallback)
+  name.vb: RegisterLuaCallback(String, LuaCallback)
+- uid: UnityHawk.Emulator.RegisterMethod(System.String,UnityHawk.Emulator.LuaCallback)
+  commentId: M:UnityHawk.Emulator.RegisterMethod(System.String,UnityHawk.Emulator.LuaCallback)
+  id: RegisterMethod(System.String,UnityHawk.Emulator.LuaCallback)
+  parent: UnityHawk.Emulator
+  langs:
+  - csharp
+  - vb
+  name: RegisterMethod(string, LuaCallback)
+  nameWithType: Emulator.RegisterMethod(string, Emulator.LuaCallback)
+  fullName: UnityHawk.Emulator.RegisterMethod(string, UnityHawk.Emulator.LuaCallback)
+  type: Method
+  assemblies:
+  - UnityHawk
+  namespace: UnityHawk
+  summary: >-
+    [Obsolete: use RegisterLuaCallback instead]
+
+    Register a callback that can be called via `unityhawk.callmethod('MethodName')` in BizHawk lua
+  example: []
+  syntax:
+    content: >-
+      [Obsolete("use RegisterLuaCallback instead")]
+
+      public void RegisterMethod(string methodName, Emulator.LuaCallback luaCallback)
+    parameters:
+    - id: methodName
+      type: System.String
+    - id: luaCallback
+      type: UnityHawk.Emulator.LuaCallback
+    content.vb: >-
+      <Obsolete("use RegisterLuaCallback instead")>
+
+      Public Sub RegisterMethod(methodName As String, luaCallback As Emulator.LuaCallback)
+  overload: UnityHawk.Emulator.RegisterMethod*
+  attributes:
+  - type: System.ObsoleteAttribute
+    ctor: System.ObsoleteAttribute.#ctor(System.String)
+    arguments:
+    - type: System.String
+      value: use RegisterLuaCallback instead
+  nameWithType.vb: Emulator.RegisterMethod(String, Emulator.LuaCallback)
+  fullName.vb: UnityHawk.Emulator.RegisterMethod(String, UnityHawk.Emulator.LuaCallback)
+  name.vb: RegisterMethod(String, LuaCallback)
+- uid: UnityHawk.Emulator.Pause
+  commentId: M:UnityHawk.Emulator.Pause
+  id: Pause
+  parent: UnityHawk.Emulator
+  langs:
+  - csharp
+  - vb
+  name: Pause()
+  nameWithType: Emulator.Pause()
+  fullName: UnityHawk.Emulator.Pause()
+  type: Method
+  assemblies:
+  - UnityHawk
+  namespace: UnityHawk
+  summary: pauses the emulator
+  example: []
+  syntax:
+    content: public void Pause()
+    content.vb: Public Sub Pause()
+  overload: UnityHawk.Emulator.Pause*
+- uid: UnityHawk.Emulator.Unpause
+  commentId: M:UnityHawk.Emulator.Unpause
+  id: Unpause
+  parent: UnityHawk.Emulator
+  langs:
+  - csharp
+  - vb
+  name: Unpause()
+  nameWithType: Emulator.Unpause()
+  fullName: UnityHawk.Emulator.Unpause()
+  type: Method
+  assemblies:
+  - UnityHawk
+  namespace: UnityHawk
+  summary: unpauses the emulator
+  example: []
+  syntax:
+    content: public void Unpause()
+    content.vb: Public Sub Unpause()
+  overload: UnityHawk.Emulator.Unpause*
+- uid: UnityHawk.Emulator.Mute
+  commentId: M:UnityHawk.Emulator.Mute
+  id: Mute
+  parent: UnityHawk.Emulator
+  langs:
+  - csharp
+  - vb
+  name: Mute()
+  nameWithType: Emulator.Mute()
+  fullName: UnityHawk.Emulator.Mute()
+  type: Method
+  assemblies:
+  - UnityHawk
+  namespace: UnityHawk
+  summary: mutes the emulator (and disables sound engine)
+  example: []
+  syntax:
+    content: public void Mute()
+    content.vb: Public Sub Mute()
+  overload: UnityHawk.Emulator.Mute*
+- uid: UnityHawk.Emulator.Unmute
+  commentId: M:UnityHawk.Emulator.Unmute
+  id: Unmute
+  parent: UnityHawk.Emulator
+  langs:
+  - csharp
+  - vb
+  name: Unmute()
+  nameWithType: Emulator.Unmute()
+  fullName: UnityHawk.Emulator.Unmute()
+  type: Method
+  assemblies:
+  - UnityHawk
+  namespace: UnityHawk
+  summary: unmutes the emulator (and enables sound engine)
+  example: []
+  syntax:
+    content: public void Unmute()
+    content.vb: Public Sub Unmute()
+  overload: UnityHawk.Emulator.Unmute*
+- uid: UnityHawk.Emulator.SetVolume(System.Int32)
+  commentId: M:UnityHawk.Emulator.SetVolume(System.Int32)
+  id: SetVolume(System.Int32)
+  parent: UnityHawk.Emulator
+  langs:
+  - csharp
+  - vb
+  name: SetVolume(int)
+  nameWithType: Emulator.SetVolume(int)
+  fullName: UnityHawk.Emulator.SetVolume(int)
+  type: Method
+  assemblies:
+  - UnityHawk
+  namespace: UnityHawk
+  summary: sets the emulator volume
+  example: []
+  syntax:
+    content: public void SetVolume(int value)
+    parameters:
+    - id: value
+      type: System.Int32
+    content.vb: Public Sub SetVolume(value As Integer)
+  overload: UnityHawk.Emulator.SetVolume*
+  nameWithType.vb: Emulator.SetVolume(Integer)
+  fullName.vb: UnityHawk.Emulator.SetVolume(Integer)
+  name.vb: SetVolume(Integer)
+- uid: UnityHawk.Emulator.SetSpeedPercent(System.Int32)
+  commentId: M:UnityHawk.Emulator.SetSpeedPercent(System.Int32)
+  id: SetSpeedPercent(System.Int32)
+  parent: UnityHawk.Emulator
+  langs:
+  - csharp
+  - vb
+  name: SetSpeedPercent(int)
+  nameWithType: Emulator.SetSpeedPercent(int)
+  fullName: UnityHawk.Emulator.SetSpeedPercent(int)
+  type: Method
+  assemblies:
+  - UnityHawk
+  namespace: UnityHawk
+  summary: sets the speed of the emulator as integer percentage
+  remarks: This is the 'target' speed for the emulator - in reality might be slower if cpu-constrained
+  example: []
+  syntax:
+    content: public void SetSpeedPercent(int percent)
+    parameters:
+    - id: percent
+      type: System.Int32
+    content.vb: Public Sub SetSpeedPercent(percent As Integer)
+  overload: UnityHawk.Emulator.SetSpeedPercent*
+  nameWithType.vb: Emulator.SetSpeedPercent(Integer)
+  fullName.vb: UnityHawk.Emulator.SetSpeedPercent(Integer)
+  name.vb: SetSpeedPercent(Integer)
+- uid: UnityHawk.Emulator.SaveState(System.String)
+  commentId: M:UnityHawk.Emulator.SaveState(System.String)
+  id: SaveState(System.String)
+  parent: UnityHawk.Emulator
+  langs:
+  - csharp
+  - vb
+  name: SaveState(string)
+  nameWithType: Emulator.SaveState(string)
+  fullName: UnityHawk.Emulator.SaveState(string)
+  type: Method
+  assemblies:
+  - UnityHawk
+  namespace: UnityHawk
+  summary: saves a state to a given path
+  example: []
+  syntax:
+    content: public string SaveState(string path)
+    parameters:
+    - id: path
+      type: System.String
+      description: ''
+    return:
+      type: System.String
+    content.vb: Public Function SaveState(path As String) As String
+  overload: UnityHawk.Emulator.SaveState*
+  nameWithType.vb: Emulator.SaveState(String)
+  fullName.vb: UnityHawk.Emulator.SaveState(String)
+  name.vb: SaveState(String)
+- uid: UnityHawk.Emulator.LoadState(System.String)
+  commentId: M:UnityHawk.Emulator.LoadState(System.String)
+  id: LoadState(System.String)
+  parent: UnityHawk.Emulator
+  langs:
+  - csharp
+  - vb
+  name: LoadState(string)
+  nameWithType: Emulator.LoadState(string)
+  fullName: UnityHawk.Emulator.LoadState(string)
+  type: Method
+  assemblies:
+  - UnityHawk
+  namespace: UnityHawk
+  summary: loads a state from a given path
+  example: []
+  syntax:
+    content: public void LoadState(string path)
+    parameters:
+    - id: path
+      type: System.String
+      description: ''
+    content.vb: Public Sub LoadState(path As String)
+  overload: UnityHawk.Emulator.LoadState*
+  nameWithType.vb: Emulator.LoadState(String)
+  fullName.vb: UnityHawk.Emulator.LoadState(String)
+  name.vb: LoadState(String)
+- uid: UnityHawk.Emulator.LoadState(UnityHawk.Savestate)
+  commentId: M:UnityHawk.Emulator.LoadState(UnityHawk.Savestate)
+  id: LoadState(UnityHawk.Savestate)
+  parent: UnityHawk.Emulator
+  langs:
+  - csharp
+  - vb
+  name: LoadState(Savestate)
+  nameWithType: Emulator.LoadState(Savestate)
+  fullName: UnityHawk.Emulator.LoadState(UnityHawk.Savestate)
+  type: Method
+  assemblies:
+  - UnityHawk
+  namespace: UnityHawk
+  summary: loads a state from a Savestate asset
+  example: []
+  syntax:
+    content: public void LoadState(Savestate sample)
+    parameters:
+    - id: sample
+      type: UnityHawk.Savestate
+      description: ''
+    content.vb: Public Sub LoadState(sample As Savestate)
+  overload: UnityHawk.Emulator.LoadState*
+- uid: UnityHawk.Emulator.ReloadState
+  commentId: M:UnityHawk.Emulator.ReloadState
+  id: ReloadState
+  parent: UnityHawk.Emulator
+  langs:
+  - csharp
+  - vb
+  name: ReloadState()
+  nameWithType: Emulator.ReloadState()
+  fullName: UnityHawk.Emulator.ReloadState()
+  type: Method
+  assemblies:
+  - UnityHawk
+  namespace: UnityHawk
+  summary: reloads the current state
+  example: []
+  syntax:
+    content: public void ReloadState()
+    content.vb: Public Sub ReloadState()
+  overload: UnityHawk.Emulator.ReloadState*
+- uid: UnityHawk.Emulator.LoadRom(System.String)
+  commentId: M:UnityHawk.Emulator.LoadRom(System.String)
+  id: LoadRom(System.String)
+  parent: UnityHawk.Emulator
+  langs:
+  - csharp
+  - vb
+  name: LoadRom(string)
+  nameWithType: Emulator.LoadRom(string)
+  fullName: UnityHawk.Emulator.LoadRom(string)
+  type: Method
+  assemblies:
+  - UnityHawk
+  namespace: UnityHawk
+  summary: loads a rom from a given path
+  example: []
+  syntax:
+    content: public void LoadRom(string path)
+    parameters:
+    - id: path
+      type: System.String
+      description: ''
+    content.vb: Public Sub LoadRom(path As String)
+  overload: UnityHawk.Emulator.LoadRom*
+  nameWithType.vb: Emulator.LoadRom(String)
+  fullName.vb: UnityHawk.Emulator.LoadRom(String)
+  name.vb: LoadRom(String)
+- uid: UnityHawk.Emulator.LoadRom(UnityHawk.Rom)
+  commentId: M:UnityHawk.Emulator.LoadRom(UnityHawk.Rom)
+  id: LoadRom(UnityHawk.Rom)
+  parent: UnityHawk.Emulator
+  langs:
+  - csharp
+  - vb
+  name: LoadRom(Rom)
+  nameWithType: Emulator.LoadRom(Rom)
+  fullName: UnityHawk.Emulator.LoadRom(UnityHawk.Rom)
+  type: Method
+  assemblies:
+  - UnityHawk
+  namespace: UnityHawk
+  summary: loads a rom from a Rom asset
+  example: []
+  syntax:
+    content: public void LoadRom(Rom rom)
+    parameters:
+    - id: rom
+      type: UnityHawk.Rom
+      description: ''
+    content.vb: Public Sub LoadRom(rom As Rom)
+  overload: UnityHawk.Emulator.LoadRom*
+- uid: UnityHawk.Emulator.FrameAdvance
+  commentId: M:UnityHawk.Emulator.FrameAdvance
+  id: FrameAdvance
+  parent: UnityHawk.Emulator
+  langs:
+  - csharp
+  - vb
+  name: FrameAdvance()
+  nameWithType: Emulator.FrameAdvance()
+  fullName: UnityHawk.Emulator.FrameAdvance()
+  type: Method
+  assemblies:
+  - UnityHawk
+  namespace: UnityHawk
+  summary: advances a frame on the emulator
+  example: []
+  syntax:
+    content: public void FrameAdvance()
+    content.vb: Public Sub FrameAdvance()
+  overload: UnityHawk.Emulator.FrameAdvance*
+- uid: UnityHawk.Emulator.WatchUnsigned(System.Int64,System.Int32,System.Boolean,System.String,System.Action{System.UInt32})
+  commentId: M:UnityHawk.Emulator.WatchUnsigned(System.Int64,System.Int32,System.Boolean,System.String,System.Action{System.UInt32})
+  id: WatchUnsigned(System.Int64,System.Int32,System.Boolean,System.String,System.Action{System.UInt32})
+  parent: UnityHawk.Emulator
+  langs:
+  - csharp
+  - vb
+  name: WatchUnsigned(long, int, bool, string, Action<uint>)
+  nameWithType: Emulator.WatchUnsigned(long, int, bool, string, Action<uint>)
+  fullName: UnityHawk.Emulator.WatchUnsigned(long, int, bool, string, System.Action<uint>)
+  type: Method
+  assemblies:
+  - UnityHawk
+  namespace: UnityHawk
+  summary: Watch an unsigned integer value in emulated memory at a given address
+  example: []
+  syntax:
+    content: public int WatchUnsigned(long address, int size, bool isBigEndian, string domain, Action<uint> onChanged)
+    parameters:
+    - id: address
+      type: System.Int64
+      description: The address to watch
+    - id: size
+      type: System.Int32
+      description: The size of the value to watch
+    - id: isBigEndian
+      type: System.Boolean
+      description: Whether the value is big endian
+    - id: domain
+      type: System.String
+      description: The domain to watch. If null, defaults to main memory.
+    - id: onChanged
+      type: System.Action{System.UInt32}
+      description: The callback to call when the value changes
+    return:
+      type: System.Int32
+      description: The id of the watch, can be used with Unwatch(id) to stop watching
+    content.vb: Public Function WatchUnsigned(address As Long, size As Integer, isBigEndian As Boolean, domain As String, onChanged As Action(Of UInteger)) As Integer
+  overload: UnityHawk.Emulator.WatchUnsigned*
+  nameWithType.vb: Emulator.WatchUnsigned(Long, Integer, Boolean, String, Action(Of UInteger))
+  fullName.vb: UnityHawk.Emulator.WatchUnsigned(Long, Integer, Boolean, String, System.Action(Of UInteger))
+  name.vb: WatchUnsigned(Long, Integer, Boolean, String, Action(Of UInteger))
+- uid: UnityHawk.Emulator.WatchSigned(System.Int64,System.Int32,System.Boolean,System.String,System.Action{System.Int32})
+  commentId: M:UnityHawk.Emulator.WatchSigned(System.Int64,System.Int32,System.Boolean,System.String,System.Action{System.Int32})
+  id: WatchSigned(System.Int64,System.Int32,System.Boolean,System.String,System.Action{System.Int32})
+  parent: UnityHawk.Emulator
+  langs:
+  - csharp
+  - vb
+  name: WatchSigned(long, int, bool, string, Action<int>)
+  nameWithType: Emulator.WatchSigned(long, int, bool, string, Action<int>)
+  fullName: UnityHawk.Emulator.WatchSigned(long, int, bool, string, System.Action<int>)
+  type: Method
+  assemblies:
+  - UnityHawk
+  namespace: UnityHawk
+  summary: Watch a signed integer value in emulated memory at a given address
+  example: []
+  syntax:
+    content: public int WatchSigned(long address, int size, bool isBigEndian, string domain, Action<int> onChanged)
+    parameters:
+    - id: address
+      type: System.Int64
+      description: The address to watch
+    - id: size
+      type: System.Int32
+      description: The size of the value to watch
+    - id: isBigEndian
+      type: System.Boolean
+      description: Whether the value is big endian
+    - id: domain
+      type: System.String
+      description: The domain to watch. If null, defaults to main memory.
+    - id: onChanged
+      type: System.Action{System.Int32}
+      description: The callback to call when the value changes
+    return:
+      type: System.Int32
+      description: The id of the watch, can be used with Unwatch(id) to stop watching
+    content.vb: Public Function WatchSigned(address As Long, size As Integer, isBigEndian As Boolean, domain As String, onChanged As Action(Of Integer)) As Integer
+  overload: UnityHawk.Emulator.WatchSigned*
+  nameWithType.vb: Emulator.WatchSigned(Long, Integer, Boolean, String, Action(Of Integer))
+  fullName.vb: UnityHawk.Emulator.WatchSigned(Long, Integer, Boolean, String, System.Action(Of Integer))
+  name.vb: WatchSigned(Long, Integer, Boolean, String, Action(Of Integer))
+- uid: UnityHawk.Emulator.WatchFloat(System.Int64,System.Boolean,System.String,System.Action{System.Single})
+  commentId: M:UnityHawk.Emulator.WatchFloat(System.Int64,System.Boolean,System.String,System.Action{System.Single})
+  id: WatchFloat(System.Int64,System.Boolean,System.String,System.Action{System.Single})
+  parent: UnityHawk.Emulator
+  langs:
+  - csharp
+  - vb
+  name: WatchFloat(long, bool, string, Action<float>)
+  nameWithType: Emulator.WatchFloat(long, bool, string, Action<float>)
+  fullName: UnityHawk.Emulator.WatchFloat(long, bool, string, System.Action<float>)
+  type: Method
+  assemblies:
+  - UnityHawk
+  namespace: UnityHawk
+  summary: Watch a float value in emulated memory at a given address
+  example: []
+  syntax:
+    content: public int WatchFloat(long address, bool isBigEndian, string domain, Action<float> onChanged)
+    parameters:
+    - id: address
+      type: System.Int64
+      description: The address to watch
+    - id: isBigEndian
+      type: System.Boolean
+      description: Whether the value is big endian
+    - id: domain
+      type: System.String
+      description: The domain to watch. If null, defaults to main memory.
+    - id: onChanged
+      type: System.Action{System.Single}
+      description: The callback to call when the value changes
+    return:
+      type: System.Int32
+      description: The id of the watch, can be used with Unwatch(id) to stop watching
+    content.vb: Public Function WatchFloat(address As Long, isBigEndian As Boolean, domain As String, onChanged As Action(Of Single)) As Integer
+  overload: UnityHawk.Emulator.WatchFloat*
+  nameWithType.vb: Emulator.WatchFloat(Long, Boolean, String, Action(Of Single))
+  fullName.vb: UnityHawk.Emulator.WatchFloat(Long, Boolean, String, System.Action(Of Single))
+  name.vb: WatchFloat(Long, Boolean, String, Action(Of Single))
+- uid: UnityHawk.Emulator.Unwatch(System.Int32)
+  commentId: M:UnityHawk.Emulator.Unwatch(System.Int32)
+  id: Unwatch(System.Int32)
+  parent: UnityHawk.Emulator
+  langs:
+  - csharp
+  - vb
+  name: Unwatch(int)
+  nameWithType: Emulator.Unwatch(int)
+  fullName: UnityHawk.Emulator.Unwatch(int)
+  type: Method
+  assemblies:
+  - UnityHawk
+  namespace: UnityHawk
+  summary: Unwatch a value that was previously watched
+  example: []
+  syntax:
+    content: public void Unwatch(int id)
+    parameters:
+    - id: id
+      type: System.Int32
+      description: The id of the watch to stop
+    content.vb: Public Sub Unwatch(id As Integer)
+  overload: UnityHawk.Emulator.Unwatch*
+  nameWithType.vb: Emulator.Unwatch(Integer)
+  fullName.vb: UnityHawk.Emulator.Unwatch(Integer)
+  name.vb: Unwatch(Integer)
+- uid: UnityHawk.Emulator.WriteUnsigned(System.Int64,System.UInt32,System.Int32,System.Boolean,System.String)
+  commentId: M:UnityHawk.Emulator.WriteUnsigned(System.Int64,System.UInt32,System.Int32,System.Boolean,System.String)
+  id: WriteUnsigned(System.Int64,System.UInt32,System.Int32,System.Boolean,System.String)
+  parent: UnityHawk.Emulator
+  langs:
+  - csharp
+  - vb
+  name: WriteUnsigned(long, uint, int, bool, string)
+  nameWithType: Emulator.WriteUnsigned(long, uint, int, bool, string)
+  fullName: UnityHawk.Emulator.WriteUnsigned(long, uint, int, bool, string)
+  type: Method
+  assemblies:
+  - UnityHawk
+  namespace: UnityHawk
+  summary: Sets an unsigned integer value at a given address
+  remarks: Only sets the value for a single frame - to freeze the address, use Freeze
+  example: []
+  syntax:
+    content: public void WriteUnsigned(long address, uint value, int size, bool isBigEndian, string domain = null)
+    parameters:
+    - id: address
+      type: System.Int64
+      description: The address to write to
+    - id: value
+      type: System.UInt32
+      description: The value to write
+    - id: size
+      type: System.Int32
+      description: The size of the value to write
+    - id: isBigEndian
+      type: System.Boolean
+      description: Whether the value is big endian
+    - id: domain
+      type: System.String
+      description: The domain to write to. If null, defaults to main memory.
+    content.vb: Public Sub WriteUnsigned(address As Long, value As UInteger, size As Integer, isBigEndian As Boolean, domain As String = Nothing)
+  overload: UnityHawk.Emulator.WriteUnsigned*
+  nameWithType.vb: Emulator.WriteUnsigned(Long, UInteger, Integer, Boolean, String)
+  fullName.vb: UnityHawk.Emulator.WriteUnsigned(Long, UInteger, Integer, Boolean, String)
+  name.vb: WriteUnsigned(Long, UInteger, Integer, Boolean, String)
+- uid: UnityHawk.Emulator.WriteSigned(System.Int64,System.Int32,System.Int32,System.Boolean,System.String)
+  commentId: M:UnityHawk.Emulator.WriteSigned(System.Int64,System.Int32,System.Int32,System.Boolean,System.String)
+  id: WriteSigned(System.Int64,System.Int32,System.Int32,System.Boolean,System.String)
+  parent: UnityHawk.Emulator
+  langs:
+  - csharp
+  - vb
+  name: WriteSigned(long, int, int, bool, string)
+  nameWithType: Emulator.WriteSigned(long, int, int, bool, string)
+  fullName: UnityHawk.Emulator.WriteSigned(long, int, int, bool, string)
+  type: Method
+  assemblies:
+  - UnityHawk
+  namespace: UnityHawk
+  summary: Sets a signed integer value at a given address
+  remarks: Only sets the value for a single frame - to freeze the address, use Freeze
+  example: []
+  syntax:
+    content: public void WriteSigned(long address, int value, int size, bool isBigEndian, string domain = null)
+    parameters:
+    - id: address
+      type: System.Int64
+      description: The address to write to
+    - id: value
+      type: System.Int32
+      description: The value to write
+    - id: size
+      type: System.Int32
+      description: The size of the value to write
+    - id: isBigEndian
+      type: System.Boolean
+      description: Whether the value is big endian
+    - id: domain
+      type: System.String
+      description: The domain to write to. If null, defaults to main memory.
+    content.vb: Public Sub WriteSigned(address As Long, value As Integer, size As Integer, isBigEndian As Boolean, domain As String = Nothing)
+  overload: UnityHawk.Emulator.WriteSigned*
+  nameWithType.vb: Emulator.WriteSigned(Long, Integer, Integer, Boolean, String)
+  fullName.vb: UnityHawk.Emulator.WriteSigned(Long, Integer, Integer, Boolean, String)
+  name.vb: WriteSigned(Long, Integer, Integer, Boolean, String)
+- uid: UnityHawk.Emulator.WriteFloat(System.Int64,System.Single,System.Boolean,System.String)
+  commentId: M:UnityHawk.Emulator.WriteFloat(System.Int64,System.Single,System.Boolean,System.String)
+  id: WriteFloat(System.Int64,System.Single,System.Boolean,System.String)
+  parent: UnityHawk.Emulator
+  langs:
+  - csharp
+  - vb
+  name: WriteFloat(long, float, bool, string)
+  nameWithType: Emulator.WriteFloat(long, float, bool, string)
+  fullName: UnityHawk.Emulator.WriteFloat(long, float, bool, string)
+  type: Method
+  assemblies:
+  - UnityHawk
+  namespace: UnityHawk
+  summary: Sets a float value at a given address
+  remarks: Only sets the value for a single frame - to freeze the address, use Freeze
+  example: []
+  syntax:
+    content: public void WriteFloat(long address, float value, bool isBigEndian, string domain = null)
+    parameters:
+    - id: address
+      type: System.Int64
+      description: The address to write to
+    - id: value
+      type: System.Single
+      description: The value to write
+    - id: isBigEndian
+      type: System.Boolean
+      description: Whether the value is big endian
+    - id: domain
+      type: System.String
+      description: The domain to write to. If null, defaults to main memory.
+    content.vb: Public Sub WriteFloat(address As Long, value As Single, isBigEndian As Boolean, domain As String = Nothing)
+  overload: UnityHawk.Emulator.WriteFloat*
+  nameWithType.vb: Emulator.WriteFloat(Long, Single, Boolean, String)
+  fullName.vb: UnityHawk.Emulator.WriteFloat(Long, Single, Boolean, String)
+  name.vb: WriteFloat(Long, Single, Boolean, String)
+- uid: UnityHawk.Emulator.Freeze(System.Int64,System.Int32,System.String)
+  commentId: M:UnityHawk.Emulator.Freeze(System.Int64,System.Int32,System.String)
+  id: Freeze(System.Int64,System.Int32,System.String)
+  parent: UnityHawk.Emulator
+  langs:
+  - csharp
+  - vb
+  name: Freeze(long, int, string)
+  nameWithType: Emulator.Freeze(long, int, string)
+  fullName: UnityHawk.Emulator.Freeze(long, int, string)
+  type: Method
+  assemblies:
+  - UnityHawk
+  namespace: UnityHawk
+  summary: Freezes an address in emulated memory
+  example: []
+  syntax:
+    content: public void Freeze(long address, int size, string domain = null)
+    parameters:
+    - id: address
+      type: System.Int64
+      description: The address to freeze
+    - id: size
+      type: System.Int32
+      description: The size of the value to freeze (1-4 bytes)
+    - id: domain
+      type: System.String
+      description: The memory domain. If null, defaults to main memory.
+    content.vb: Public Sub Freeze(address As Long, size As Integer, domain As String = Nothing)
+  overload: UnityHawk.Emulator.Freeze*
+  nameWithType.vb: Emulator.Freeze(Long, Integer, String)
+  fullName.vb: UnityHawk.Emulator.Freeze(Long, Integer, String)
+  name.vb: Freeze(Long, Integer, String)
+- uid: UnityHawk.Emulator.Unfreeze(System.Int64,System.Int32,System.String)
+  commentId: M:UnityHawk.Emulator.Unfreeze(System.Int64,System.Int32,System.String)
+  id: Unfreeze(System.Int64,System.Int32,System.String)
+  parent: UnityHawk.Emulator
+  langs:
+  - csharp
+  - vb
+  name: Unfreeze(long, int, string)
+  nameWithType: Emulator.Unfreeze(long, int, string)
+  fullName: UnityHawk.Emulator.Unfreeze(long, int, string)
+  type: Method
+  assemblies:
+  - UnityHawk
+  namespace: UnityHawk
+  summary: Unfreezes an address that was previously frozen
+  example: []
+  syntax:
+    content: public void Unfreeze(long address, int size, string domain = null)
+    parameters:
+    - id: address
+      type: System.Int64
+      description: The address to unfreeze
+    - id: size
+      type: System.Int32
+      description: The size of the value to unfreeze (1-4 bytes)
+    - id: domain
+      type: System.String
+      description: The memory domain. If null, defaults to main memory.
+    content.vb: Public Sub Unfreeze(address As Long, size As Integer, domain As String = Nothing)
+  overload: UnityHawk.Emulator.Unfreeze*
+  nameWithType.vb: Emulator.Unfreeze(Long, Integer, String)
+  fullName.vb: UnityHawk.Emulator.Unfreeze(Long, Integer, String)
+  name.vb: Unfreeze(Long, Integer, String)
+- uid: UnityHawk.Emulator.OnValidate
+  commentId: M:UnityHawk.Emulator.OnValidate
+  id: OnValidate
+  parent: UnityHawk.Emulator
+  langs:
+  - csharp
+  - vb
+  name: OnValidate()
+  nameWithType: Emulator.OnValidate()
+  fullName: UnityHawk.Emulator.OnValidate()
+  type: Method
+  assemblies:
+  - UnityHawk
+  namespace: UnityHawk
+  syntax:
+    content: public void OnValidate()
+    content.vb: Public Sub OnValidate()
+  overload: UnityHawk.Emulator.OnValidate*
+- uid: UnityHawk.Emulator.OnEnable
+  commentId: M:UnityHawk.Emulator.OnEnable
+  id: OnEnable
+  parent: UnityHawk.Emulator
+  langs:
+  - csharp
+  - vb
+  name: OnEnable()
+  nameWithType: Emulator.OnEnable()
+  fullName: UnityHawk.Emulator.OnEnable()
+  type: Method
+  assemblies:
+  - UnityHawk
+  namespace: UnityHawk
+  syntax:
+    content: public void OnEnable()
+    content.vb: Public Sub OnEnable()
+  overload: UnityHawk.Emulator.OnEnable*
+- uid: UnityHawk.Emulator.OnDisable
+  commentId: M:UnityHawk.Emulator.OnDisable
+  id: OnDisable
+  parent: UnityHawk.Emulator
+  langs:
+  - csharp
+  - vb
+  name: OnDisable()
+  nameWithType: Emulator.OnDisable()
+  fullName: UnityHawk.Emulator.OnDisable()
+  type: Method
+  assemblies:
+  - UnityHawk
+  namespace: UnityHawk
+  syntax:
+    content: public void OnDisable()
+    content.vb: Public Sub OnDisable()
+  overload: UnityHawk.Emulator.OnDisable*
+- uid: UnityHawk.Emulator.OnDestroy
+  commentId: M:UnityHawk.Emulator.OnDestroy
+  id: OnDestroy
+  parent: UnityHawk.Emulator
+  langs:
+  - csharp
+  - vb
+  name: OnDestroy()
+  nameWithType: Emulator.OnDestroy()
+  fullName: UnityHawk.Emulator.OnDestroy()
+  type: Method
+  assemblies:
+  - UnityHawk
+  namespace: UnityHawk
+  syntax:
+    content: public void OnDestroy()
+    content.vb: Public Sub OnDestroy()
+  overload: UnityHawk.Emulator.OnDestroy*
+- uid: UnityHawk.Emulator.Update
+  commentId: M:UnityHawk.Emulator.Update
+  id: Update
+  parent: UnityHawk.Emulator
+  langs:
+  - csharp
+  - vb
+  name: Update()
+  nameWithType: Emulator.Update()
+  fullName: UnityHawk.Emulator.Update()
+  type: Method
+  assemblies:
+  - UnityHawk
+  namespace: UnityHawk
+  syntax:
+    content: public void Update()
+    content.vb: Public Sub Update()
+  overload: UnityHawk.Emulator.Update*
+- uid: UnityHawk.Emulator.#ctor
+  commentId: M:UnityHawk.Emulator.#ctor
+  id: '#ctor'
+  parent: UnityHawk.Emulator
+  langs:
+  - csharp
+  - vb
+  name: Emulator()
+  nameWithType: Emulator.Emulator()
+  fullName: UnityHawk.Emulator.Emulator()
+  type: Constructor
+  assemblies:
+  - UnityHawk
+  namespace: UnityHawk
+  syntax:
+    content: public Emulator()
+    content.vb: Public Sub New()
+  overload: UnityHawk.Emulator.#ctor*
+  nameWithType.vb: Emulator.New()
+  fullName.vb: UnityHawk.Emulator.New()
+  name.vb: New()
+- uid: UnityHawk.Emulator.IsPaused
+  commentId: P:UnityHawk.Emulator.IsPaused
+  id: IsPaused
+  parent: UnityHawk.Emulator
+  langs:
+  - csharp
+  - vb
+  name: IsPaused
+  nameWithType: Emulator.IsPaused
+  fullName: UnityHawk.Emulator.IsPaused
+  type: Property
+  assemblies:
+  - UnityHawk
+  namespace: UnityHawk
+  summary: if the emulator is paused
+  example: []
+  syntax:
+    content: public bool IsPaused { get; set; }
+    parameters: []
+    return:
+      type: System.Boolean
+    content.vb: Public Property IsPaused As Boolean
+  overload: UnityHawk.Emulator.IsPaused*
+- uid: UnityHawk.Emulator.Volume
+  commentId: P:UnityHawk.Emulator.Volume
+  id: Volume
+  parent: UnityHawk.Emulator
+  langs:
+  - csharp
+  - vb
+  name: Volume
+  nameWithType: Emulator.Volume
+  fullName: UnityHawk.Emulator.Volume
+  type: Property
+  assemblies:
+  - UnityHawk
+  namespace: UnityHawk
+  summary: the emulator current volume
+  example: []
+  syntax:
+    content: public int Volume { get; set; }
+    parameters: []
+    return:
+      type: System.Int32
+    content.vb: Public Property Volume As Integer
+  overload: UnityHawk.Emulator.Volume*
+- uid: UnityHawk.Emulator.IsMuted
+  commentId: P:UnityHawk.Emulator.IsMuted
+  id: IsMuted
+  parent: UnityHawk.Emulator
+  langs:
+  - csharp
+  - vb
+  name: IsMuted
+  nameWithType: Emulator.IsMuted
+  fullName: UnityHawk.Emulator.IsMuted
+  type: Property
+  assemblies:
+  - UnityHawk
+  namespace: UnityHawk
+  summary: if the emulator is muted
+  example: []
+  syntax:
+    content: public bool IsMuted { get; set; }
+    parameters: []
+    return:
+      type: System.Boolean
+    content.vb: Public Property IsMuted As Boolean
+  overload: UnityHawk.Emulator.IsMuted*
+- uid: UnityHawk.Emulator.SpeedPercent
+  commentId: P:UnityHawk.Emulator.SpeedPercent
+  id: SpeedPercent
+  parent: UnityHawk.Emulator
+  langs:
+  - csharp
+  - vb
+  name: SpeedPercent
+  nameWithType: Emulator.SpeedPercent
+  fullName: UnityHawk.Emulator.SpeedPercent
+  type: Property
+  assemblies:
+  - UnityHawk
+  namespace: UnityHawk
+  summary: the emulator speed as a percentage
+  example: []
+  syntax:
+    content: public int SpeedPercent { get; set; }
+    parameters: []
+    return:
+      type: System.Int32
+    content.vb: Public Property SpeedPercent As Integer
+  overload: UnityHawk.Emulator.SpeedPercent*
+- uid: UnityHawk.Emulator.Texture
+  commentId: P:UnityHawk.Emulator.Texture
+  id: Texture
+  parent: UnityHawk.Emulator
+  langs:
+  - csharp
+  - vb
+  name: Texture
+  nameWithType: Emulator.Texture
+  fullName: UnityHawk.Emulator.Texture
+  type: Property
+  assemblies:
+  - UnityHawk
+  namespace: UnityHawk
+  summary: Currently displayed emulator texture.
+  remarks: If emulator is not running but a savestate is set, will return the savestate preview texture
+  example: []
+  syntax:
+    content: public Texture Texture { get; }
+    parameters: []
+    return:
+      type: UnityEngine.Texture
+    content.vb: Public ReadOnly Property Texture As Texture
+  overload: UnityHawk.Emulator.Texture*
+- uid: UnityHawk.Emulator.IsStarting
+  commentId: P:UnityHawk.Emulator.IsStarting
+  id: IsStarting
+  parent: UnityHawk.Emulator
+  langs:
+  - csharp
+  - vb
+  name: IsStarting
+  nameWithType: Emulator.IsStarting
+  fullName: UnityHawk.Emulator.IsStarting
+  type: Property
+  assemblies:
+  - UnityHawk
+  namespace: UnityHawk
+  summary: is the emulator process currently starting up?
+  example: []
+  syntax:
+    content: public bool IsStarting { get; }
+    parameters: []
+    return:
+      type: System.Boolean
+    content.vb: Public ReadOnly Property IsStarting As Boolean
+  overload: UnityHawk.Emulator.IsStarting*
+- uid: UnityHawk.Emulator.IsStarted
+  commentId: P:UnityHawk.Emulator.IsStarted
+  id: IsStarted
+  parent: UnityHawk.Emulator
+  langs:
+  - csharp
+  - vb
+  name: IsStarted
+  nameWithType: Emulator.IsStarted
+  fullName: UnityHawk.Emulator.IsStarted
+  type: Property
+  assemblies:
+  - UnityHawk
+  namespace: UnityHawk
+  summary: is the emulator process started?
+  example: []
+  syntax:
+    content: public bool IsStarted { get; }
+    parameters: []
+    return:
+      type: System.Boolean
+    content.vb: Public ReadOnly Property IsStarted As Boolean
+  overload: UnityHawk.Emulator.IsStarted*
+- uid: UnityHawk.Emulator.IsRunning
+  commentId: P:UnityHawk.Emulator.IsRunning
+  id: IsRunning
+  parent: UnityHawk.Emulator
+  langs:
+  - csharp
+  - vb
+  name: IsRunning
+  nameWithType: Emulator.IsRunning
+  fullName: UnityHawk.Emulator.IsRunning
+  type: Property
+  assemblies:
+  - UnityHawk
+  namespace: UnityHawk
+  summary: is the emulator process running a game?
+  example: []
+  syntax:
+    content: public bool IsRunning { get; }
+    parameters: []
+    return:
+      type: System.Boolean
+    content.vb: Public ReadOnly Property IsRunning As Boolean
+  overload: UnityHawk.Emulator.IsRunning*
+- uid: UnityHawk.Emulator.SystemId
+  commentId: P:UnityHawk.Emulator.SystemId
+  id: SystemId
+  parent: UnityHawk.Emulator
+  langs:
+  - csharp
+  - vb
+  name: SystemId
+  nameWithType: Emulator.SystemId
+  fullName: UnityHawk.Emulator.SystemId
+  type: Property
+  assemblies:
+  - UnityHawk
+  namespace: UnityHawk
+  summary: >-
+    ID of the current emulator platform (e.g. "N64", "PSX", etc.)
+
+    Returns null if emulator is not running.
+  example: []
+  syntax:
+    content: public string SystemId { get; }
+    parameters: []
+    return:
+      type: System.String
+    content.vb: Public ReadOnly Property SystemId As String
+  overload: UnityHawk.Emulator.SystemId*
+- uid: UnityHawk.Emulator.Status
+  commentId: P:UnityHawk.Emulator.Status
+  id: Status
+  parent: UnityHawk.Emulator
+  langs:
+  - csharp
+  - vb
+  name: Status
+  nameWithType: Emulator.Status
+  fullName: UnityHawk.Emulator.Status
+  type: Property
+  assemblies:
+  - UnityHawk
+  namespace: UnityHawk
+  summary: the current status of the emulator
+  example: []
+  syntax:
+    content: public Emulator.EmulatorStatus Status { get; }
+    parameters: []
+    return:
+      type: UnityHawk.Emulator.EmulatorStatus
+    content.vb: Public ReadOnly Property Status As Emulator.EmulatorStatus
+  overload: UnityHawk.Emulator.Status*
+- uid: UnityHawk.Emulator.CurrentFrame
+  commentId: P:UnityHawk.Emulator.CurrentFrame
+  id: CurrentFrame
+  parent: UnityHawk.Emulator
+  langs:
+  - csharp
+  - vb
+  name: CurrentFrame
+  nameWithType: Emulator.CurrentFrame
+  fullName: UnityHawk.Emulator.CurrentFrame
+  type: Property
+  assemblies:
+  - UnityHawk
+  namespace: UnityHawk
+  summary: frame index of latest received texture
+  example: []
+  syntax:
+    content: public int CurrentFrame { get; }
+    parameters: []
+    return:
+      type: System.Int32
+    content.vb: Public ReadOnly Property CurrentFrame As Integer
+  overload: UnityHawk.Emulator.CurrentFrame*
+references:
+- uid: UnityHawk
+  commentId: N:UnityHawk
+  isExternal: true
+  href: UnityHawk.html
+  name: UnityHawk
+  nameWithType: UnityHawk
+  fullName: UnityHawk
+- uid: System.Object
+  commentId: T:System.Object
+  parent: System
+  isExternal: true
+  name: object
+  nameWithType: object
+  fullName: object
+  nameWithType.vb: Object
+  fullName.vb: Object
+  name.vb: Object
+- uid: System
+  commentId: N:System
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system
+  name: System
+  nameWithType: System
+  fullName: System
+- uid: System.Action
+  commentId: T:System.Action
+  parent: System
+  isExternal: true
+  name: Action
+  nameWithType: Action
+  fullName: System.Action
+- uid: System.Boolean
+  commentId: T:System.Boolean
+  parent: System
+  isExternal: true
+  name: bool
+  nameWithType: bool
+  fullName: bool
+  nameWithType.vb: Boolean
+  fullName.vb: Boolean
+  name.vb: Boolean
+- uid: UnityHawk.Savestate
+  commentId: T:UnityHawk.Savestate
+  parent: UnityHawk
+  isExternal: true
+  name: Savestate
+  nameWithType: Savestate
+  fullName: UnityHawk.Savestate
+- uid: UnityHawk.Rom
+  commentId: T:UnityHawk.Rom
+  parent: UnityHawk
+  isExternal: true
+  name: Rom
+  nameWithType: Rom
+  fullName: UnityHawk.Rom
+- uid: UnityHawk.EmulatorRenderMode
+  commentId: T:UnityHawk.EmulatorRenderMode
+  parent: UnityHawk
+  isExternal: true
+  name: EmulatorRenderMode
+  nameWithType: EmulatorRenderMode
+  fullName: UnityHawk.EmulatorRenderMode
+- uid: UnityEngine.Renderer
+  commentId: '!:UnityEngine.Renderer'
+  isExternal: true
+  name: Renderer
+  nameWithType: Renderer
+  fullName: UnityEngine.Renderer
+- uid: UnityEngine.RenderTexture
+  commentId: '!:UnityEngine.RenderTexture'
+  isExternal: true
+  name: RenderTexture
+  nameWithType: RenderTexture
+  fullName: UnityEngine.RenderTexture
+- uid: UnityHawk.InputProvider
+  commentId: T:UnityHawk.InputProvider
+  parent: UnityHawk
+  isExternal: true
+  name: InputProvider
+  nameWithType: InputProvider
+  fullName: UnityHawk.InputProvider
+- uid: UnityHawk.LuaScript
+  commentId: T:UnityHawk.LuaScript
+  parent: UnityHawk
+  isExternal: true
+  name: LuaScript
+  nameWithType: LuaScript
+  fullName: UnityHawk.LuaScript
+- uid: UnityHawk.RamWatch
+  commentId: T:UnityHawk.RamWatch
+  parent: UnityHawk
+  isExternal: true
+  name: RamWatch
+  nameWithType: RamWatch
+  fullName: UnityHawk.RamWatch
+- uid: UnityHawk.Config
+  commentId: T:UnityHawk.Config
+  parent: UnityHawk
+  isExternal: true
+  name: Config
+  nameWithType: Config
+  fullName: UnityHawk.Config
+- uid: UnityHawk.Emulator.Restart*
+  commentId: Overload:UnityHawk.Emulator.Restart
+  isExternal: true
+  href: UnityHawk.Emulator.html#UnityHawk_Emulator_Restart
+  name: Restart
+  nameWithType: Emulator.Restart
+  fullName: UnityHawk.Emulator.Restart
+- uid: UnityHawk.Emulator.RegisterLuaCallback*
+  commentId: Overload:UnityHawk.Emulator.RegisterLuaCallback
+  isExternal: true
+  href: UnityHawk.Emulator.html#UnityHawk_Emulator_RegisterLuaCallback_System_String_UnityHawk_Emulator_LuaCallback_
+  name: RegisterLuaCallback
+  nameWithType: Emulator.RegisterLuaCallback
+  fullName: UnityHawk.Emulator.RegisterLuaCallback
+- uid: System.String
+  commentId: T:System.String
+  parent: System
+  isExternal: true
+  name: string
+  nameWithType: string
+  fullName: string
+  nameWithType.vb: String
+  fullName.vb: String
+  name.vb: String
+- uid: UnityHawk.Emulator.LuaCallback
+  commentId: T:UnityHawk.Emulator.LuaCallback
+  parent: UnityHawk
+  isExternal: true
+  href: UnityHawk.Emulator.html
+  name: Emulator.LuaCallback
+  nameWithType: Emulator.LuaCallback
+  fullName: UnityHawk.Emulator.LuaCallback
+  spec.csharp:
+  - uid: UnityHawk.Emulator
+    name: Emulator
+    isExternal: true
+    href: UnityHawk.Emulator.html
+  - name: .
+  - uid: UnityHawk.Emulator.LuaCallback
+    name: LuaCallback
+    isExternal: true
+    href: UnityHawk.Emulator.LuaCallback.html
+  spec.vb:
+  - uid: UnityHawk.Emulator
+    name: Emulator
+    isExternal: true
+    href: UnityHawk.Emulator.html
+  - name: .
+  - uid: UnityHawk.Emulator.LuaCallback
+    name: LuaCallback
+    isExternal: true
+    href: UnityHawk.Emulator.LuaCallback.html
+- uid: UnityHawk.Emulator.RegisterMethod*
+  commentId: Overload:UnityHawk.Emulator.RegisterMethod
+  isExternal: true
+  href: UnityHawk.Emulator.html#UnityHawk_Emulator_RegisterMethod_System_String_UnityHawk_Emulator_LuaCallback_
+  name: RegisterMethod
+  nameWithType: Emulator.RegisterMethod
+  fullName: UnityHawk.Emulator.RegisterMethod
+- uid: UnityHawk.Emulator.Pause*
+  commentId: Overload:UnityHawk.Emulator.Pause
+  isExternal: true
+  href: UnityHawk.Emulator.html#UnityHawk_Emulator_Pause
+  name: Pause
+  nameWithType: Emulator.Pause
+  fullName: UnityHawk.Emulator.Pause
+- uid: UnityHawk.Emulator.Unpause*
+  commentId: Overload:UnityHawk.Emulator.Unpause
+  isExternal: true
+  href: UnityHawk.Emulator.html#UnityHawk_Emulator_Unpause
+  name: Unpause
+  nameWithType: Emulator.Unpause
+  fullName: UnityHawk.Emulator.Unpause
+- uid: UnityHawk.Emulator.Mute*
+  commentId: Overload:UnityHawk.Emulator.Mute
+  isExternal: true
+  href: UnityHawk.Emulator.html#UnityHawk_Emulator_Mute
+  name: Mute
+  nameWithType: Emulator.Mute
+  fullName: UnityHawk.Emulator.Mute
+- uid: UnityHawk.Emulator.Unmute*
+  commentId: Overload:UnityHawk.Emulator.Unmute
+  isExternal: true
+  href: UnityHawk.Emulator.html#UnityHawk_Emulator_Unmute
+  name: Unmute
+  nameWithType: Emulator.Unmute
+  fullName: UnityHawk.Emulator.Unmute
+- uid: UnityHawk.Emulator.SetVolume*
+  commentId: Overload:UnityHawk.Emulator.SetVolume
+  isExternal: true
+  href: UnityHawk.Emulator.html#UnityHawk_Emulator_SetVolume_System_Int32_
+  name: SetVolume
+  nameWithType: Emulator.SetVolume
+  fullName: UnityHawk.Emulator.SetVolume
+- uid: System.Int32
+  commentId: T:System.Int32
+  parent: System
+  isExternal: true
+  name: int
+  nameWithType: int
+  fullName: int
+  nameWithType.vb: Integer
+  fullName.vb: Integer
+  name.vb: Integer
+- uid: UnityHawk.Emulator.SetSpeedPercent*
+  commentId: Overload:UnityHawk.Emulator.SetSpeedPercent
+  isExternal: true
+  href: UnityHawk.Emulator.html#UnityHawk_Emulator_SetSpeedPercent_System_Int32_
+  name: SetSpeedPercent
+  nameWithType: Emulator.SetSpeedPercent
+  fullName: UnityHawk.Emulator.SetSpeedPercent
+- uid: UnityHawk.Emulator.SaveState*
+  commentId: Overload:UnityHawk.Emulator.SaveState
+  isExternal: true
+  href: UnityHawk.Emulator.html#UnityHawk_Emulator_SaveState_System_String_
+  name: SaveState
+  nameWithType: Emulator.SaveState
+  fullName: UnityHawk.Emulator.SaveState
+- uid: UnityHawk.Emulator.LoadState*
+  commentId: Overload:UnityHawk.Emulator.LoadState
+  isExternal: true
+  href: UnityHawk.Emulator.html#UnityHawk_Emulator_LoadState_System_String_
+  name: LoadState
+  nameWithType: Emulator.LoadState
+  fullName: UnityHawk.Emulator.LoadState
+- uid: UnityHawk.Emulator.ReloadState*
+  commentId: Overload:UnityHawk.Emulator.ReloadState
+  isExternal: true
+  href: UnityHawk.Emulator.html#UnityHawk_Emulator_ReloadState
+  name: ReloadState
+  nameWithType: Emulator.ReloadState
+  fullName: UnityHawk.Emulator.ReloadState
+- uid: UnityHawk.Emulator.LoadRom*
+  commentId: Overload:UnityHawk.Emulator.LoadRom
+  isExternal: true
+  href: UnityHawk.Emulator.html#UnityHawk_Emulator_LoadRom_System_String_
+  name: LoadRom
+  nameWithType: Emulator.LoadRom
+  fullName: UnityHawk.Emulator.LoadRom
+- uid: UnityHawk.Emulator.FrameAdvance*
+  commentId: Overload:UnityHawk.Emulator.FrameAdvance
+  isExternal: true
+  href: UnityHawk.Emulator.html#UnityHawk_Emulator_FrameAdvance
+  name: FrameAdvance
+  nameWithType: Emulator.FrameAdvance
+  fullName: UnityHawk.Emulator.FrameAdvance
+- uid: UnityHawk.Emulator.WatchUnsigned*
+  commentId: Overload:UnityHawk.Emulator.WatchUnsigned
+  isExternal: true
+  href: UnityHawk.Emulator.html#UnityHawk_Emulator_WatchUnsigned_System_Int64_System_Int32_System_Boolean_System_String_System_Action_System_UInt32__
+  name: WatchUnsigned
+  nameWithType: Emulator.WatchUnsigned
+  fullName: UnityHawk.Emulator.WatchUnsigned
+- uid: System.Int64
+  commentId: T:System.Int64
+  parent: System
+  isExternal: true
+  name: long
+  nameWithType: long
+  fullName: long
+  nameWithType.vb: Long
+  fullName.vb: Long
+  name.vb: Long
+- uid: System.Action{System.UInt32}
+  commentId: T:System.Action{System.UInt32}
+  parent: System
+  definition: System.Action`1
+  name: Action<uint>
+  nameWithType: Action<uint>
+  fullName: System.Action<uint>
+  nameWithType.vb: Action(Of UInteger)
+  fullName.vb: System.Action(Of UInteger)
+  name.vb: Action(Of UInteger)
+  spec.csharp:
+  - uid: System.Action`1
+    name: Action
+    isExternal: true
+  - name: <
+  - uid: System.UInt32
+    name: uint
+    isExternal: true
+  - name: '>'
+  spec.vb:
+  - uid: System.Action`1
+    name: Action
+    isExternal: true
+  - name: (
+  - name: Of
+  - name: " "
+  - uid: System.UInt32
+    name: UInteger
+    isExternal: true
+  - name: )
+- uid: System.Action`1
+  commentId: T:System.Action`1
+  isExternal: true
+  name: Action<T>
+  nameWithType: Action<T>
+  fullName: System.Action<T>
+  nameWithType.vb: Action(Of T)
+  fullName.vb: System.Action(Of T)
+  name.vb: Action(Of T)
+  spec.csharp:
+  - uid: System.Action`1
+    name: Action
+    isExternal: true
+  - name: <
+  - name: T
+  - name: '>'
+  spec.vb:
+  - uid: System.Action`1
+    name: Action
+    isExternal: true
+  - name: (
+  - name: Of
+  - name: " "
+  - name: T
+  - name: )
+- uid: UnityHawk.Emulator.WatchSigned*
+  commentId: Overload:UnityHawk.Emulator.WatchSigned
+  isExternal: true
+  href: UnityHawk.Emulator.html#UnityHawk_Emulator_WatchSigned_System_Int64_System_Int32_System_Boolean_System_String_System_Action_System_Int32__
+  name: WatchSigned
+  nameWithType: Emulator.WatchSigned
+  fullName: UnityHawk.Emulator.WatchSigned
+- uid: System.Action{System.Int32}
+  commentId: T:System.Action{System.Int32}
+  parent: System
+  definition: System.Action`1
+  name: Action<int>
+  nameWithType: Action<int>
+  fullName: System.Action<int>
+  nameWithType.vb: Action(Of Integer)
+  fullName.vb: System.Action(Of Integer)
+  name.vb: Action(Of Integer)
+  spec.csharp:
+  - uid: System.Action`1
+    name: Action
+    isExternal: true
+  - name: <
+  - uid: System.Int32
+    name: int
+    isExternal: true
+  - name: '>'
+  spec.vb:
+  - uid: System.Action`1
+    name: Action
+    isExternal: true
+  - name: (
+  - name: Of
+  - name: " "
+  - uid: System.Int32
+    name: Integer
+    isExternal: true
+  - name: )
+- uid: UnityHawk.Emulator.WatchFloat*
+  commentId: Overload:UnityHawk.Emulator.WatchFloat
+  isExternal: true
+  href: UnityHawk.Emulator.html#UnityHawk_Emulator_WatchFloat_System_Int64_System_Boolean_System_String_System_Action_System_Single__
+  name: WatchFloat
+  nameWithType: Emulator.WatchFloat
+  fullName: UnityHawk.Emulator.WatchFloat
+- uid: System.Action{System.Single}
+  commentId: T:System.Action{System.Single}
+  parent: System
+  definition: System.Action`1
+  name: Action<float>
+  nameWithType: Action<float>
+  fullName: System.Action<float>
+  nameWithType.vb: Action(Of Single)
+  fullName.vb: System.Action(Of Single)
+  name.vb: Action(Of Single)
+  spec.csharp:
+  - uid: System.Action`1
+    name: Action
+    isExternal: true
+  - name: <
+  - uid: System.Single
+    name: float
+    isExternal: true
+  - name: '>'
+  spec.vb:
+  - uid: System.Action`1
+    name: Action
+    isExternal: true
+  - name: (
+  - name: Of
+  - name: " "
+  - uid: System.Single
+    name: Single
+    isExternal: true
+  - name: )
+- uid: UnityHawk.Emulator.Unwatch*
+  commentId: Overload:UnityHawk.Emulator.Unwatch
+  isExternal: true
+  href: UnityHawk.Emulator.html#UnityHawk_Emulator_Unwatch_System_Int32_
+  name: Unwatch
+  nameWithType: Emulator.Unwatch
+  fullName: UnityHawk.Emulator.Unwatch
+- uid: UnityHawk.Emulator.WriteUnsigned*
+  commentId: Overload:UnityHawk.Emulator.WriteUnsigned
+  isExternal: true
+  href: UnityHawk.Emulator.html#UnityHawk_Emulator_WriteUnsigned_System_Int64_System_UInt32_System_Int32_System_Boolean_System_String_
+  name: WriteUnsigned
+  nameWithType: Emulator.WriteUnsigned
+  fullName: UnityHawk.Emulator.WriteUnsigned
+- uid: System.UInt32
+  commentId: T:System.UInt32
+  parent: System
+  isExternal: true
+  name: uint
+  nameWithType: uint
+  fullName: uint
+  nameWithType.vb: UInteger
+  fullName.vb: UInteger
+  name.vb: UInteger
+- uid: UnityHawk.Emulator.WriteSigned*
+  commentId: Overload:UnityHawk.Emulator.WriteSigned
+  isExternal: true
+  href: UnityHawk.Emulator.html#UnityHawk_Emulator_WriteSigned_System_Int64_System_Int32_System_Int32_System_Boolean_System_String_
+  name: WriteSigned
+  nameWithType: Emulator.WriteSigned
+  fullName: UnityHawk.Emulator.WriteSigned
+- uid: UnityHawk.Emulator.WriteFloat*
+  commentId: Overload:UnityHawk.Emulator.WriteFloat
+  isExternal: true
+  href: UnityHawk.Emulator.html#UnityHawk_Emulator_WriteFloat_System_Int64_System_Single_System_Boolean_System_String_
+  name: WriteFloat
+  nameWithType: Emulator.WriteFloat
+  fullName: UnityHawk.Emulator.WriteFloat
+- uid: System.Single
+  commentId: T:System.Single
+  parent: System
+  isExternal: true
+  name: float
+  nameWithType: float
+  fullName: float
+  nameWithType.vb: Single
+  fullName.vb: Single
+  name.vb: Single
+- uid: UnityHawk.Emulator.Freeze*
+  commentId: Overload:UnityHawk.Emulator.Freeze
+  isExternal: true
+  href: UnityHawk.Emulator.html#UnityHawk_Emulator_Freeze_System_Int64_System_Int32_System_String_
+  name: Freeze
+  nameWithType: Emulator.Freeze
+  fullName: UnityHawk.Emulator.Freeze
+- uid: UnityHawk.Emulator.Unfreeze*
+  commentId: Overload:UnityHawk.Emulator.Unfreeze
+  isExternal: true
+  href: UnityHawk.Emulator.html#UnityHawk_Emulator_Unfreeze_System_Int64_System_Int32_System_String_
+  name: Unfreeze
+  nameWithType: Emulator.Unfreeze
+  fullName: UnityHawk.Emulator.Unfreeze
+- uid: UnityHawk.Emulator.OnValidate*
+  commentId: Overload:UnityHawk.Emulator.OnValidate
+  isExternal: true
+  href: UnityHawk.Emulator.html#UnityHawk_Emulator_OnValidate
+  name: OnValidate
+  nameWithType: Emulator.OnValidate
+  fullName: UnityHawk.Emulator.OnValidate
+- uid: UnityHawk.Emulator.OnEnable*
+  commentId: Overload:UnityHawk.Emulator.OnEnable
+  isExternal: true
+  href: UnityHawk.Emulator.html#UnityHawk_Emulator_OnEnable
+  name: OnEnable
+  nameWithType: Emulator.OnEnable
+  fullName: UnityHawk.Emulator.OnEnable
+- uid: UnityHawk.Emulator.OnDisable*
+  commentId: Overload:UnityHawk.Emulator.OnDisable
+  isExternal: true
+  href: UnityHawk.Emulator.html#UnityHawk_Emulator_OnDisable
+  name: OnDisable
+  nameWithType: Emulator.OnDisable
+  fullName: UnityHawk.Emulator.OnDisable
+- uid: UnityHawk.Emulator.OnDestroy*
+  commentId: Overload:UnityHawk.Emulator.OnDestroy
+  isExternal: true
+  href: UnityHawk.Emulator.html#UnityHawk_Emulator_OnDestroy
+  name: OnDestroy
+  nameWithType: Emulator.OnDestroy
+  fullName: UnityHawk.Emulator.OnDestroy
+- uid: UnityHawk.Emulator.Update*
+  commentId: Overload:UnityHawk.Emulator.Update
+  isExternal: true
+  href: UnityHawk.Emulator.html#UnityHawk_Emulator_Update
+  name: Update
+  nameWithType: Emulator.Update
+  fullName: UnityHawk.Emulator.Update
+- uid: UnityHawk.Emulator.#ctor*
+  commentId: Overload:UnityHawk.Emulator.#ctor
+  isExternal: true
+  href: UnityHawk.Emulator.html#UnityHawk_Emulator__ctor
+  name: Emulator
+  nameWithType: Emulator.Emulator
+  fullName: UnityHawk.Emulator.Emulator
+  nameWithType.vb: Emulator.New
+  fullName.vb: UnityHawk.Emulator.New
+  name.vb: New
+- uid: UnityHawk.Emulator.IsPaused*
+  commentId: Overload:UnityHawk.Emulator.IsPaused
+  isExternal: true
+  href: UnityHawk.Emulator.html#UnityHawk_Emulator_IsPaused
+  name: IsPaused
+  nameWithType: Emulator.IsPaused
+  fullName: UnityHawk.Emulator.IsPaused
+- uid: UnityHawk.Emulator.Volume*
+  commentId: Overload:UnityHawk.Emulator.Volume
+  isExternal: true
+  href: UnityHawk.Emulator.html#UnityHawk_Emulator_Volume
+  name: Volume
+  nameWithType: Emulator.Volume
+  fullName: UnityHawk.Emulator.Volume
+- uid: UnityHawk.Emulator.IsMuted*
+  commentId: Overload:UnityHawk.Emulator.IsMuted
+  isExternal: true
+  href: UnityHawk.Emulator.html#UnityHawk_Emulator_IsMuted
+  name: IsMuted
+  nameWithType: Emulator.IsMuted
+  fullName: UnityHawk.Emulator.IsMuted
+- uid: UnityHawk.Emulator.SpeedPercent*
+  commentId: Overload:UnityHawk.Emulator.SpeedPercent
+  isExternal: true
+  href: UnityHawk.Emulator.html#UnityHawk_Emulator_SpeedPercent
+  name: SpeedPercent
+  nameWithType: Emulator.SpeedPercent
+  fullName: UnityHawk.Emulator.SpeedPercent
+- uid: UnityHawk.Emulator.Texture*
+  commentId: Overload:UnityHawk.Emulator.Texture
+  isExternal: true
+  href: UnityHawk.Emulator.html#UnityHawk_Emulator_Texture
+  name: Texture
+  nameWithType: Emulator.Texture
+  fullName: UnityHawk.Emulator.Texture
+- uid: UnityEngine.Texture
+  commentId: '!:UnityEngine.Texture'
+  isExternal: true
+  name: Texture
+  nameWithType: Texture
+  fullName: UnityEngine.Texture
+- uid: UnityHawk.Emulator.IsStarting*
+  commentId: Overload:UnityHawk.Emulator.IsStarting
+  isExternal: true
+  href: UnityHawk.Emulator.html#UnityHawk_Emulator_IsStarting
+  name: IsStarting
+  nameWithType: Emulator.IsStarting
+  fullName: UnityHawk.Emulator.IsStarting
+- uid: UnityHawk.Emulator.IsStarted*
+  commentId: Overload:UnityHawk.Emulator.IsStarted
+  isExternal: true
+  href: UnityHawk.Emulator.html#UnityHawk_Emulator_IsStarted
+  name: IsStarted
+  nameWithType: Emulator.IsStarted
+  fullName: UnityHawk.Emulator.IsStarted
+- uid: UnityHawk.Emulator.IsRunning*
+  commentId: Overload:UnityHawk.Emulator.IsRunning
+  isExternal: true
+  href: UnityHawk.Emulator.html#UnityHawk_Emulator_IsRunning
+  name: IsRunning
+  nameWithType: Emulator.IsRunning
+  fullName: UnityHawk.Emulator.IsRunning
+- uid: UnityHawk.Emulator.SystemId*
+  commentId: Overload:UnityHawk.Emulator.SystemId
+  isExternal: true
+  href: UnityHawk.Emulator.html#UnityHawk_Emulator_SystemId
+  name: SystemId
+  nameWithType: Emulator.SystemId
+  fullName: UnityHawk.Emulator.SystemId
+- uid: UnityHawk.Emulator.Status*
+  commentId: Overload:UnityHawk.Emulator.Status
+  isExternal: true
+  href: UnityHawk.Emulator.html#UnityHawk_Emulator_Status
+  name: Status
+  nameWithType: Emulator.Status
+  fullName: UnityHawk.Emulator.Status
+- uid: UnityHawk.Emulator.EmulatorStatus
+  commentId: T:UnityHawk.Emulator.EmulatorStatus
+  parent: UnityHawk
+  isExternal: true
+  href: UnityHawk.Emulator.html
+  name: Emulator.EmulatorStatus
+  nameWithType: Emulator.EmulatorStatus
+  fullName: UnityHawk.Emulator.EmulatorStatus
+  spec.csharp:
+  - uid: UnityHawk.Emulator
+    name: Emulator
+    isExternal: true
+    href: UnityHawk.Emulator.html
+  - name: .
+  - uid: UnityHawk.Emulator.EmulatorStatus
+    name: EmulatorStatus
+    isExternal: true
+    href: UnityHawk.Emulator.EmulatorStatus.html
+  spec.vb:
+  - uid: UnityHawk.Emulator
+    name: Emulator
+    isExternal: true
+    href: UnityHawk.Emulator.html
+  - name: .
+  - uid: UnityHawk.Emulator.EmulatorStatus
+    name: EmulatorStatus
+    isExternal: true
+    href: UnityHawk.Emulator.EmulatorStatus.html
+- uid: UnityHawk.Emulator.CurrentFrame*
+  commentId: Overload:UnityHawk.Emulator.CurrentFrame
+  isExternal: true
+  href: UnityHawk.Emulator.html#UnityHawk_Emulator_CurrentFrame
+  name: CurrentFrame
+  nameWithType: Emulator.CurrentFrame
+  fullName: UnityHawk.Emulator.CurrentFrame

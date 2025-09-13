@@ -1,0 +1,16 @@
+### YamlMime:TableOfContent
+items:
+- uid: UnityHawk
+  name: UnityHawk
+  type: Namespace
+  items:
+  - uid: UnityHawk.Emulator
+    name: Emulator
+    type: Class
+  - uid: UnityHawk.Emulator.EmulatorStatus
+    name: Emulator.EmulatorStatus
+    type: Enum
+  - uid: UnityHawk.Emulator.LuaCallback
+    name: Emulator.LuaCallback
+    type: Delegate
+memberLayout: SamePage

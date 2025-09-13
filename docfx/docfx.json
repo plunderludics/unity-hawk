@@ -1,0 +1,42 @@
+{
+  "$schema": "https://raw.githubusercontent.com/dotnet/docfx/main/schemas/docfx.schema.json",
+  "metadata": [
+    {
+      "src": [
+        {
+          "src": "../",
+          "files": [
+            "Library/ScriptAssemblies/UnityHawk.dll"
+          ],
+          "exclude": [
+            "Library/PackageCache/**"
+          ]
+        }
+      ],
+      "dest": "api",
+      "filter": "filterConfig.yml"
+    }
+  ],
+  "build": {
+    "content": [
+      {
+        "files": [
+          "api/*.{md,yml}",
+          "*.md",
+          "*.yml"
+        ]
+      }
+    ],
+    "output": "../docs",
+    "template": [
+      "default",
+      "modern"
+    ],
+    "globalMetadata": {
+      "_appName": "unity-hawk",
+      "_appTitle": "unity-hawk",
+      "_enableSearch": true,
+      "pdf": false
+    }
+  }
+}

@@ -1,0 +1,142 @@
+### YamlMime:ManagedReference
+items:
+- uid: UnityHawk.Emulator.EmulatorStatus
+  commentId: T:UnityHawk.Emulator.EmulatorStatus
+  id: Emulator.EmulatorStatus
+  parent: UnityHawk
+  children:
+  - UnityHawk.Emulator.EmulatorStatus.Inactive
+  - UnityHawk.Emulator.EmulatorStatus.Running
+  - UnityHawk.Emulator.EmulatorStatus.Started
+  - UnityHawk.Emulator.EmulatorStatus.Starting
+  langs:
+  - csharp
+  - vb
+  name: Emulator.EmulatorStatus
+  nameWithType: Emulator.EmulatorStatus
+  fullName: UnityHawk.Emulator.EmulatorStatus
+  type: Enum
+  assemblies:
+  - UnityHawk
+  namespace: UnityHawk
+  summary: the current status of the emulator
+  example: []
+  syntax:
+    content: public enum Emulator.EmulatorStatus
+    content.vb: Public Enum Emulator.EmulatorStatus
+- uid: UnityHawk.Emulator.EmulatorStatus.Inactive
+  commentId: F:UnityHawk.Emulator.EmulatorStatus.Inactive
+  id: Inactive
+  parent: UnityHawk.Emulator.EmulatorStatus
+  langs:
+  - csharp
+  - vb
+  name: Inactive
+  nameWithType: Emulator.EmulatorStatus.Inactive
+  fullName: UnityHawk.Emulator.EmulatorStatus.Inactive
+  type: Field
+  assemblies:
+  - UnityHawk
+  namespace: UnityHawk
+  summary: BizHawk hasn't started yet
+  example: []
+  syntax:
+    content: Inactive = 0
+    return:
+      type: UnityHawk.Emulator.EmulatorStatus
+- uid: UnityHawk.Emulator.EmulatorStatus.Starting
+  commentId: F:UnityHawk.Emulator.EmulatorStatus.Starting
+  id: Starting
+  parent: UnityHawk.Emulator.EmulatorStatus
+  langs:
+  - csharp
+  - vb
+  name: Starting
+  nameWithType: Emulator.EmulatorStatus.Starting
+  fullName: UnityHawk.Emulator.EmulatorStatus.Starting
+  type: Field
+  assemblies:
+  - UnityHawk
+  namespace: UnityHawk
+  summary: The BizHawk process is starting up but not started yet
+  example: []
+  syntax:
+    content: Starting = 1
+    return:
+      type: UnityHawk.Emulator.EmulatorStatus
+- uid: UnityHawk.Emulator.EmulatorStatus.Started
+  commentId: F:UnityHawk.Emulator.EmulatorStatus.Started
+  id: Started
+  parent: UnityHawk.Emulator.EmulatorStatus
+  langs:
+  - csharp
+  - vb
+  name: Started
+  nameWithType: Emulator.EmulatorStatus.Started
+  fullName: UnityHawk.Emulator.EmulatorStatus.Started
+  type: Field
+  assemblies:
+  - UnityHawk
+  namespace: UnityHawk
+  summary: BizHawk has been started, but not rendering yet
+  example: []
+  syntax:
+    content: Started = 2
+    return:
+      type: UnityHawk.Emulator.EmulatorStatus
+- uid: UnityHawk.Emulator.EmulatorStatus.Running
+  commentId: F:UnityHawk.Emulator.EmulatorStatus.Running
+  id: Running
+  parent: UnityHawk.Emulator.EmulatorStatus
+  langs:
+  - csharp
+  - vb
+  name: Running
+  nameWithType: Emulator.EmulatorStatus.Running
+  fullName: UnityHawk.Emulator.EmulatorStatus.Running
+  type: Field
+  assemblies:
+  - UnityHawk
+  namespace: UnityHawk
+  summary: Bizhawk is running and sending textures [technically gets set when shared texture channel is open]
+  example: []
+  syntax:
+    content: Running = 3
+    return:
+      type: UnityHawk.Emulator.EmulatorStatus
+references:
+- uid: UnityHawk
+  commentId: N:UnityHawk
+  isExternal: true
+  href: UnityHawk.html
+  name: UnityHawk
+  nameWithType: UnityHawk
+  fullName: UnityHawk
+- uid: UnityHawk.Emulator.EmulatorStatus
+  commentId: T:UnityHawk.Emulator.EmulatorStatus
+  parent: UnityHawk
+  isExternal: true
+  href: UnityHawk.Emulator.html
+  name: Emulator.EmulatorStatus
+  nameWithType: Emulator.EmulatorStatus
+  fullName: UnityHawk.Emulator.EmulatorStatus
+  spec.csharp:
+  - uid: UnityHawk.Emulator
+    name: Emulator
+    isExternal: true
+    href: UnityHawk.Emulator.html
+  - name: .
+  - uid: UnityHawk.Emulator.EmulatorStatus
+    name: EmulatorStatus
+    isExternal: true
+    href: UnityHawk.Emulator.EmulatorStatus.html
+  spec.vb:
+  - uid: UnityHawk.Emulator
+    name: Emulator
+    isExternal: true
+    href: UnityHawk.Emulator.html
+  - name: .
+  - uid: UnityHawk.Emulator.EmulatorStatus
+    name: EmulatorStatus
+    isExternal: true
+    href: UnityHawk.Emulator.EmulatorStatus.html

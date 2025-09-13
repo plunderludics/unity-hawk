@@ -1,0 +1,89 @@
+### YamlMime:ManagedReference
+items:
+- uid: UnityHawk
+  commentId: N:UnityHawk
+  id: UnityHawk
+  children:
+  - UnityHawk.Emulator
+  - UnityHawk.Emulator.EmulatorStatus
+  - UnityHawk.Emulator.LuaCallback
+  langs:
+  - csharp
+  - vb
+  name: UnityHawk
+  nameWithType: UnityHawk
+  fullName: UnityHawk
+  type: Namespace
+  assemblies:
+  - UnityHawk
+references:
+- uid: UnityHawk.Emulator
+  commentId: T:UnityHawk.Emulator
+  isExternal: true
+  href: UnityHawk.Emulator.html
+  name: Emulator
+  nameWithType: Emulator
+  fullName: UnityHawk.Emulator
+- uid: UnityHawk.Emulator.EmulatorStatus
+  commentId: T:UnityHawk.Emulator.EmulatorStatus
+  parent: UnityHawk
+  isExternal: true
+  href: UnityHawk.Emulator.html
+  name: Emulator.EmulatorStatus
+  nameWithType: Emulator.EmulatorStatus
+  fullName: UnityHawk.Emulator.EmulatorStatus
+  spec.csharp:
+  - uid: UnityHawk.Emulator
+    name: Emulator
+    isExternal: true
+    href: UnityHawk.Emulator.html
+  - name: .
+  - uid: UnityHawk.Emulator.EmulatorStatus
+    name: EmulatorStatus
+    isExternal: true
+    href: UnityHawk.Emulator.EmulatorStatus.html
+  spec.vb:
+  - uid: UnityHawk.Emulator
+    name: Emulator
+    isExternal: true
+    href: UnityHawk.Emulator.html
+  - name: .
+  - uid: UnityHawk.Emulator.EmulatorStatus
+    name: EmulatorStatus
+    isExternal: true
+    href: UnityHawk.Emulator.EmulatorStatus.html
+- uid: UnityHawk.Emulator.LuaCallback
+  commentId: T:UnityHawk.Emulator.LuaCallback
+  parent: UnityHawk
+  isExternal: true
+  href: UnityHawk.Emulator.html
+  name: Emulator.LuaCallback
+  nameWithType: Emulator.LuaCallback
+  fullName: UnityHawk.Emulator.LuaCallback
+  spec.csharp:
+  - uid: UnityHawk.Emulator
+    name: Emulator
+    isExternal: true
+    href: UnityHawk.Emulator.html
+  - name: .
+  - uid: UnityHawk.Emulator.LuaCallback
+    name: LuaCallback
+    isExternal: true
+    href: UnityHawk.Emulator.LuaCallback.html
+  spec.vb:
+  - uid: UnityHawk.Emulator
+    name: Emulator
+    isExternal: true
+    href: UnityHawk.Emulator.html
+  - name: .
+  - uid: UnityHawk.Emulator.LuaCallback
+    name: LuaCallback
+    isExternal: true
+    href: UnityHawk.Emulator.LuaCallback.html
+- uid: UnityHawk
+  commentId: N:UnityHawk
+  isExternal: true
+  href: UnityHawk.html
+  name: UnityHawk
+  nameWithType: UnityHawk
+  fullName: UnityHawk

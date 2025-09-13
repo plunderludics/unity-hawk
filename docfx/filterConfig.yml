@@ -1,0 +1,9 @@
+### YamlMime:ManagedReference
+# Only generate docs for the Emulator class and its methods (for now)
+apiRules:
+- include:
+    uidRegex: '^UnityHawk\.Emulator$'
+- include:
+    uidRegex: '^UnityHawk\.Emulator\..*'
+- exclude:
+    uidRegex: '.*'
