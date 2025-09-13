@@ -24,7 +24,7 @@ public class EditModeTests: SharedTests
         e.OnValidate();
 
         yield return WaitForAWhile(e);
-        Assert.That(e.CurrentStatus, Is.EqualTo(Emulator.Status.Inactive));
+        Assert.That(e.Status, Is.EqualTo(Emulator.EmulatorStatus.Inactive));
         Assert.That(e.IsRunning, Is.False);
     }
 }
