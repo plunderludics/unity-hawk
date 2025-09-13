@@ -38,6 +38,8 @@ public class BasicInputProvider : InputProvider {
     
     List<InputEvent> eventsThisFrame;
 
+    Logger _logger;
+
     void OnEnable() {
         eventsThisFrame = new();
     
@@ -47,6 +49,7 @@ public class BasicInputProvider : InputProvider {
                 Debug.LogWarning("BasicInputProvider has no specified or attached Emulator, will not be able to set controls correctly");
                 return;
             }
+            _logger = emulator.Logger;
         }
         emulator.OnRunning += OnNewRom;
         if (emulator.IsRunning) {
@@ -57,17 +60,16 @@ public class BasicInputProvider : InputProvider {
 
     // Runs when emulator starts or changes rom
     void OnNewRom() {
-        // Debug.Log("BasicInputProvider: New rom started, setting controls");
         if (!useDefaultControls) return;
 
         string systemId = emulator.SystemId;
         controlsObject = Controls.GetDefaultControlsObject(systemId);
         if (controlsObject == null) {
-            Debug.LogError($"No default controls found for platform '{systemId}', controls will not work");
+            _logger.LogError($"No default controls found for platform '{systemId}', controls will not work");
         }
 
         EnableInputActions();
-        // Debug.Log($"Setting controls to {controls} for system {systemId}");
+        _logger.Log($"New rom: Setting controls to {controls} for system {systemId}");
     }
 
     // Poll for events in Update / FixedUpdate rather than in InputForFrame directly,
@@ -216,18 +218,15 @@ public class BasicInputProvider : InputProvider {
             });
         }
 #else
-        Debug.LogWarning("LegacyAxis mappings are not supported because legacy input manager is not enabled");
+        _logger.LogWarning("LegacyAxis mappings are not supported because legacy input manager is not enabled");
 #endif
     }
 
     private void HandleButtonInputActionReferenceMapping(Controls.ButtonMapping mapping) {
-        // Debug.Log($"Handling button input action reference mapping: {mapping.EmulatorButtonName}");
 #if ENABLE_INPUT_SYSTEM
         if (mapping.ActionRef != null && mapping.ActionRef.action != null) {
             bool isPressed = mapping.ActionRef.action.WasPressedThisFrame();
             bool isReleased = mapping.ActionRef.action.WasReleasedThisFrame();
-
-            // Debug.Log($"Button {mapping.ActionRef.action.name} was pressed: {isPressed}, released: {isReleased}");
             
             if (isPressed || isReleased) {
                 eventsThisFrame.Add(new InputEvent {
@@ -239,7 +238,7 @@ public class BasicInputProvider : InputProvider {
             }
         }
 #else
-        Debug.LogWarning("InputActionReference mappings are not supported because new InputSystem is not enabled");
+        _logger.LogWarning("InputActionReference mappings are not supported because new InputSystem is not enabled");
 #endif
     }
 
@@ -293,7 +292,7 @@ public class BasicInputProvider : InputProvider {
             isAnalog = true
         });
 #else
-        Debug.LogWarning("LegacyAxis mappings are not supported because legacy input manager is not enabled");
+        _logger.LogWarning("LegacyAxis mappings are not supported because legacy input manager is not enabled");
 #endif
     }
 
@@ -301,8 +300,6 @@ public class BasicInputProvider : InputProvider {
 #if ENABLE_INPUT_SYSTEM
         if (mapping.ActionRef != null && mapping.ActionRef.action != null) {
             float axisValue = mapping.ActionRef.action.ReadValue<float>();
-
-            // Debug.Log($"Axis {mapping.ActionRef.action.name} value: {axisValue}");
             
             // Map from [-1, 1] to [MinValue, MaxValue]
             int mappedValue = Mathf.RoundToInt(Mathf.Lerp(mapping.MinValue, mapping.MaxValue, (axisValue + 1f) / 2f));
@@ -315,7 +312,7 @@ public class BasicInputProvider : InputProvider {
             });
         }
 #else
-        Debug.LogWarning("InputActionReference mappings are not supported because new InputSystem is not enabled");
+        _logger.LogWarning("InputActionReference mappings are not supported because new InputSystem is not enabled");
 #endif
     }
 
