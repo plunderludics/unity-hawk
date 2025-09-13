@@ -21,6 +21,8 @@ items:
   assemblies:
   - UnityHawk
   namespace: UnityHawk
+  summary: Represents an input event (button press or axis value) to send to the BizHawk emulator.
+  example: []
   syntax:
     content: public struct InputEvent
     content.vb: Public Structure InputEvent
@@ -38,6 +40,8 @@ items:
   assemblies:
   - UnityHawk
   namespace: UnityHawk
+  summary: The name of the input event. Must correspond to emulator button/axis name E.g. "D-Pad Up", etc
+  example: []
   syntax:
     content: public string name
     return:
@@ -57,6 +61,8 @@ items:
   assemblies:
   - UnityHawk
   namespace: UnityHawk
+  summary: The value of the input event. 0 or 1 for buttons. Analog value depends on emulator - e.g. 0-255 for Nymashock (PSX)
+  example: []
   syntax:
     content: public int value
     return:

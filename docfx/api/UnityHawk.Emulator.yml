@@ -56,6 +56,11 @@ items:
   assemblies:
   - UnityHawk
   namespace: UnityHawk
+  summary: >-
+    The component responsible for initializing,
+
+    running, and managing a single BizHawk emulator instance.
+  example: []
   syntax:
     content: 'public class Emulator : MonoBehaviour'
     content.vb: Public Class Emulator Inherits MonoBehaviour

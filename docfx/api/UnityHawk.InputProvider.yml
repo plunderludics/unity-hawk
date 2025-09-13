@@ -18,6 +18,8 @@ items:
   assemblies:
   - UnityHawk
   namespace: UnityHawk
+  summary: Base class for providing input to a UnityHawk Emulator. Override this to create a custom input provider.
+  example: []
   syntax:
     content: 'public abstract class InputProvider : MonoBehaviour'
     content.vb: Public MustInherit Class InputProvider Inherits MonoBehaviour
@@ -39,6 +41,12 @@ items:
   assemblies:
   - UnityHawk
   namespace: UnityHawk
+  summary: >-
+    Return a list of input events for the frame, in chronological order.
+
+    InputProvider implementations should override this.
+  remarks: Should only be called by a single Emulator once per frame - will break if multiple clients use the same InputProvider.
+  example: []
   syntax:
     content: public virtual List<InputEvent> InputForFrame()
     return:
@@ -59,11 +67,17 @@ items:
   assemblies:
   - UnityHawk
   namespace: UnityHawk
+  summary: >-
+    Add an input event to the input provider.
+
+    (This can be used as an alternative way of providing custom input without creating an InputProvider implementation.)
+  example: []
   syntax:
     content: public void AddInputEvent(InputEvent ie)
     parameters:
     - id: ie
       type: UnityHawk.InputEvent
+      description: The input event to add.
     content.vb: Public Sub AddInputEvent(ie As InputEvent)
   overload: UnityHawk.InputProvider.AddInputEvent*
 - uid: UnityHawk.InputProvider.#ctor

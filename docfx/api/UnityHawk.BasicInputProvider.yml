@@ -22,6 +22,13 @@ items:
   assemblies:
   - UnityHawk
   namespace: UnityHawk
+  summary: >-
+    The default input provider for a UnityHawk Emulator. By default will try to use built-in default controls for the current system.
+
+    A custom ControlsObject or a control mapping can be provided.
+
+    Supports both the legacy input manager and the new InputSystem on the Unity side, and both button and axis inputs on the BizHawk side.
+  example: []
   syntax:
     content: 'public class BasicInputProvider : InputProvider'
     content.vb: Public Class BasicInputProvider Inherits InputProvider
@@ -184,6 +191,11 @@ items:
   assemblies:
   - UnityHawk
   namespace: UnityHawk
+  summary: >-
+    Return a list of input events for the frame, in chronological order.
+
+    InputProvider implementations should override this.
+  remarks: Should only be called by a single Emulator once per frame - will break if multiple clients use the same InputProvider.
   example: []
   syntax:
     content: public override List<InputEvent> InputForFrame()
