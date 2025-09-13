@@ -12,7 +12,7 @@ using UnityEngine;
 using SharedMemory;
 
 namespace UnityHawk {
-public class ApiCallRpcBuffer : ISharedBuffer {
+internal class ApiCallRpcBuffer : ISharedBuffer {
     string _name;
     RpcBuffer _apiCallRpc;
 

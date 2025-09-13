@@ -3,7 +3,7 @@ using SharedMemory;
 using Plunderludics.UnityHawk.Shared;
 
 namespace UnityHawk {
-public class SharedInputBuffer : ISharedBuffer {
+internal class SharedInputBuffer : ISharedBuffer {
     private string _name;
     private CircularBuffer _buffer;
     public SharedInputBuffer(string name) {

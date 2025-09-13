@@ -8,7 +8,7 @@ using Plunderludics.UnityHawk.Shared;
 
 namespace UnityHawk {
 
-public class CallMethodRpcBuffer : ISharedBuffer {
+internal class CallMethodRpcBuffer : ISharedBuffer {
     /// the buffer name
     string _name;
 

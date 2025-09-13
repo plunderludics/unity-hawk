@@ -4,7 +4,7 @@ using UnityEngine;
 using System.Linq;
 
 namespace UnityHawk {
-public class SharedTextureBuffer : ISharedBuffer {
+internal class SharedTextureBuffer : ISharedBuffer {
     private string _name;
     private string _trueName;
     private int _index;
