@@ -50,7 +50,7 @@ public struct InputEvent {
 }
 
 /// <summary>
-/// Base class for providing input to a UnityHawk Emulator. Override this to create a custom input provider.
+/// Base class for providing input to an Emulator. Override this to create a custom input provider.
 /// </summary>
 public abstract class InputProvider : MonoBehaviour {
     // (derive from monobehaviour so params can be easily tweaked in inspector)

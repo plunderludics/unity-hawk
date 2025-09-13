@@ -18,7 +18,7 @@ items:
   assemblies:
   - UnityHawk
   namespace: UnityHawk
-  summary: Base class for providing input to a UnityHawk Emulator. Override this to create a custom input provider.
+  summary: Base class for providing input to an Emulator. Override this to create a custom input provider.
   example: []
   syntax:
     content: 'public abstract class InputProvider : MonoBehaviour'

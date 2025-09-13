@@ -92,7 +92,7 @@
       "Uid": null,
       "IsMRef": true,
       "Title": "UnityHawk.InputProvider",
-      "Summary": "<p sourcefile=\"api/UnityHawk.InputProvider.yml\" sourcestartlinenumber=\"1\">Base class for providing input to a UnityHawk Emulator. Override this to create a custom input provider.</p>\n"
+      "Summary": "<p sourcefile=\"api/UnityHawk.InputProvider.yml\" sourcestartlinenumber=\"1\">Base class for providing input to an Emulator. Override this to create a custom input provider.</p>\n"
     },
     {
       "type": "ManagedReference",
