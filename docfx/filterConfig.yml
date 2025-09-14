@@ -1,6 +1,15 @@
 ### YamlMime:ManagedReference
 # Only generate docs for Emulator and BasicInputProvider, and only show methods and properties (for now)
 apiRules:
+
+# Exclude anything with EditorBrowsable(Never) attribute
+- exclude:
+    hasAttribute:
+        uid: System.ComponentModel.EditorBrowsableAttribute
+        ctorArguments:
+            - System.ComponentModel.EditorBrowsableState.Never
+
+# Include methods and properties on Emulator, BasicInputProvider, InputProvider, and InputEvent
 - include:
     uidRegex: '^UnityHawk\.Emulator$'
 - exclude:
@@ -27,5 +36,7 @@ apiRules:
     uidRegex: '^UnityHawk\.InputEvent$'
 - include:
     uidRegex: '^UnityHawk\.InputEvent\..*'
+
+# Exclude everything else
 - exclude:
     uidRegex: '.*'

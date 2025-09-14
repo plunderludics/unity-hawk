@@ -304,54 +304,6 @@ references:
   commentId: Overload:UnityHawk.Emulator.Mute
   fullName: UnityHawk.Emulator.Mute
   nameWithType: Emulator.Mute
-- uid: UnityHawk.Emulator.OnDestroy
-  name: OnDestroy()
-  href: api/UnityHawk.Emulator.html#UnityHawk_Emulator_OnDestroy
-  commentId: M:UnityHawk.Emulator.OnDestroy
-  fullName: UnityHawk.Emulator.OnDestroy()
-  nameWithType: Emulator.OnDestroy()
-- uid: UnityHawk.Emulator.OnDestroy*
-  name: OnDestroy
-  href: api/UnityHawk.Emulator.html#UnityHawk_Emulator_OnDestroy_
-  commentId: Overload:UnityHawk.Emulator.OnDestroy
-  fullName: UnityHawk.Emulator.OnDestroy
-  nameWithType: Emulator.OnDestroy
-- uid: UnityHawk.Emulator.OnDisable
-  name: OnDisable()
-  href: api/UnityHawk.Emulator.html#UnityHawk_Emulator_OnDisable
-  commentId: M:UnityHawk.Emulator.OnDisable
-  fullName: UnityHawk.Emulator.OnDisable()
-  nameWithType: Emulator.OnDisable()
-- uid: UnityHawk.Emulator.OnDisable*
-  name: OnDisable
-  href: api/UnityHawk.Emulator.html#UnityHawk_Emulator_OnDisable_
-  commentId: Overload:UnityHawk.Emulator.OnDisable
-  fullName: UnityHawk.Emulator.OnDisable
-  nameWithType: Emulator.OnDisable
-- uid: UnityHawk.Emulator.OnEnable
-  name: OnEnable()
-  href: api/UnityHawk.Emulator.html#UnityHawk_Emulator_OnEnable
-  commentId: M:UnityHawk.Emulator.OnEnable
-  fullName: UnityHawk.Emulator.OnEnable()
-  nameWithType: Emulator.OnEnable()
-- uid: UnityHawk.Emulator.OnEnable*
-  name: OnEnable
-  href: api/UnityHawk.Emulator.html#UnityHawk_Emulator_OnEnable_
-  commentId: Overload:UnityHawk.Emulator.OnEnable
-  fullName: UnityHawk.Emulator.OnEnable
-  nameWithType: Emulator.OnEnable
-- uid: UnityHawk.Emulator.OnValidate
-  name: OnValidate()
-  href: api/UnityHawk.Emulator.html#UnityHawk_Emulator_OnValidate
-  commentId: M:UnityHawk.Emulator.OnValidate
-  fullName: UnityHawk.Emulator.OnValidate()
-  nameWithType: Emulator.OnValidate()
-- uid: UnityHawk.Emulator.OnValidate*
-  name: OnValidate
-  href: api/UnityHawk.Emulator.html#UnityHawk_Emulator_OnValidate_
-  commentId: Overload:UnityHawk.Emulator.OnValidate
-  fullName: UnityHawk.Emulator.OnValidate
-  nameWithType: Emulator.OnValidate
 - uid: UnityHawk.Emulator.Pause
   name: Pause()
   href: api/UnityHawk.Emulator.html#UnityHawk_Emulator_Pause
@@ -565,18 +517,6 @@ references:
   commentId: Overload:UnityHawk.Emulator.Unwatch
   fullName: UnityHawk.Emulator.Unwatch
   nameWithType: Emulator.Unwatch
-- uid: UnityHawk.Emulator.Update
-  name: Update()
-  href: api/UnityHawk.Emulator.html#UnityHawk_Emulator_Update
-  commentId: M:UnityHawk.Emulator.Update
-  fullName: UnityHawk.Emulator.Update()
-  nameWithType: Emulator.Update()
-- uid: UnityHawk.Emulator.Update*
-  name: Update
-  href: api/UnityHawk.Emulator.html#UnityHawk_Emulator_Update_
-  commentId: Overload:UnityHawk.Emulator.Update
-  fullName: UnityHawk.Emulator.Update
-  nameWithType: Emulator.Update
 - uid: UnityHawk.Emulator.Volume
   name: Volume
   href: api/UnityHawk.Emulator.html#UnityHawk_Emulator_Volume

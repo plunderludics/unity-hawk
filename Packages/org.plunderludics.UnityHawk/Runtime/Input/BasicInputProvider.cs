@@ -20,7 +20,7 @@ namespace UnityHawk {
 // Just gets key events directly from Unity
 
 /// <summary>
-/// The default input provider for a UnityHawk Emulator. By default will try to use built-in default controls for the current system.
+/// The default input provider for an Emulator. By default will try to use built-in default controls for the current system.
 /// A custom ControlsObject or a control mapping can be provided.
 /// Supports both the legacy input manager and the new InputSystem on the Unity side, and both button and axis inputs on the BizHawk side.
 /// </summary>

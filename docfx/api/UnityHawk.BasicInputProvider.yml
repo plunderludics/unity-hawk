@@ -23,7 +23,7 @@ items:
   - UnityHawk
   namespace: UnityHawk
   summary: >-
-    The default input provider for a UnityHawk Emulator. By default will try to use built-in default controls for the current system.
+    The default input provider for an Emulator. By default will try to use built-in default controls for the current system.
 
     A custom ControlsObject or a control mapping can be provided.
 

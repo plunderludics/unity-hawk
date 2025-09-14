@@ -12,6 +12,8 @@ using Debug = UnityEngine.Debug;
 using Unity.Profiling;
 using UnityEngine.Assertions;
 using System.Threading;
+using EditorBrowsable = System.ComponentModel.EditorBrowsableAttribute;
+using EditorBrowsableState = System.ComponentModel.EditorBrowsableState;
 
 #if UNITY_EDITOR
 using UnityEditor;
@@ -290,8 +292,8 @@ public partial class Emulator : MonoBehaviour {
     private static extern IntPtr GetForegroundWindow();
 
     ///// MonoBehaviour lifecycle
-    // (These methods are public only for convenient testing)
-
+    // (These methods are public for testing purposes, but use the EditorBrowsable attribute to hide them from docs)
+    [EditorBrowsable(EditorBrowsableState.Never)]
     public void OnValidate() {
 #if UNITY_EDITOR
         // Debug.Log($"OnValidate");
@@ -356,6 +358,7 @@ public partial class Emulator : MonoBehaviour {
 #endif
     }
 
+    [EditorBrowsable(EditorBrowsableState.Never)]
     public void OnEnable() {
         // Debug.Log($"Emulator OnEnable", this);
 #if UNITY_EDITOR && UNITY_2022_2_OR_NEWER
@@ -377,6 +380,7 @@ public partial class Emulator : MonoBehaviour {
         }
     }
 
+    [EditorBrowsable(EditorBrowsableState.Never)]
     public void OnDisable() {
         // Debug.Log($"Emulator OnDisable", this);
 #if UNITY_EDITOR && UNITY_2022_2_OR_NEWER
@@ -388,11 +392,13 @@ public partial class Emulator : MonoBehaviour {
         }
     }
 
+    [EditorBrowsable(EditorBrowsableState.Never)]
     public void OnDestroy() {
         OnStarted = null;
         OnRunning = null;
     }
 
+    [EditorBrowsable(EditorBrowsableState.Never)]
     public void Update() {
         _Update();
     }

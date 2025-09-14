@@ -22,7 +22,7 @@
       "Uid": null,
       "IsMRef": true,
       "Title": "UnityHawk.BasicInputProvider",
-      "Summary": "<p sourcefile=\"api/UnityHawk.BasicInputProvider.yml\" sourcestartlinenumber=\"1\">The default input provider for a UnityHawk Emulator. By default will try to use built-in default controls for the current system.\nA custom ControlsObject or a control mapping can be provided.\nSupports both the legacy input manager and the new InputSystem on the Unity side, and both button and axis inputs on the BizHawk side.</p>\n"
+      "Summary": "<p sourcefile=\"api/UnityHawk.BasicInputProvider.yml\" sourcestartlinenumber=\"1\">The default input provider for an Emulator. By default will try to use built-in default controls for the current system.\nA custom ControlsObject or a control mapping can be provided.\nSupports both the legacy input manager and the new InputSystem on the Unity side, and both button and axis inputs on the BizHawk side.</p>\n"
     },
     {
       "type": "ManagedReference",
