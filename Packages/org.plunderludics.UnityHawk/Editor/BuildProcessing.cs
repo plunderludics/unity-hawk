@@ -10,6 +10,7 @@ using System.IO;
 using System.Linq;
 using UnityEditor.SceneManagement;
 using System.Collections.Generic;
+using System.Reflection;
 
 namespace UnityHawk {
 // This does two main things:
@@ -79,11 +80,8 @@ public class BuildProcessing : IPreprocessBuildWithReport, IProcessSceneWithRepo
 
         // TODO: Look for BuildSettings component in the scene
 
-        // look through all Emulator components in the scene and
-        // locate (external) file dependencies and collect them for later copying
-        var root = scene.GetRootGameObjects();
-        var dependencies = EditorUtility.CollectDependencies(root);
-        var bizhawkDependencies = dependencies.OfType<BizhawkAsset>().ToList();
+        // Find all BizhawkAsset dependencies in scene and collect them for later copying
+        var bizhawkDependencies = CollectBizhawkAssetDependencies();
 
         Debug.Log($"[unity-hawk] collected {bizhawkDependencies.Count} dependencies for scene {scene.path}: \n {string.Join("\n", bizhawkDependencies)}");
 
@@ -192,6 +190,40 @@ public class BuildProcessing : IPreprocessBuildWithReport, IProcessSceneWithRepo
                 }
             }
         }
+    }
+
+    /// Collect all the Bizhawk assets that are used in active scene
+    /// (Mainly reimplements EditorUtility.CollectDependencies to support exluding disabled objects)
+    // includeInactive: include inactive objects and disabled components
+    // TODO: add List<Transform> excludeTransforms arg (?)
+    static HashSet<BizhawkAsset> CollectBizhawkAssetDependencies(bool includeInactive = true) {
+        // Get all components in scene
+        var components = UnityEngine.Object.FindObjectsByType<Component>(
+            includeInactive ? FindObjectsInactive.Include : FindObjectsInactive.Exclude,
+            FindObjectsSortMode.None
+        );
+
+        var bizhawkDependencies = new HashSet<BizhawkAsset>();
+        foreach (var component in components) {
+            if (includeInactive
+            && component is MonoBehaviour mb
+            && !mb.enabled) {
+                continue;
+            }
+            var fields = component.GetType().GetFields(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance);
+            foreach (var field in fields) {
+                var fieldValue = field.GetValue(component);
+                if (fieldValue is BizhawkAsset asset) {
+                    bizhawkDependencies.Add(asset);
+                } else if (fieldValue is IEnumerable<BizhawkAsset> assets) {
+                    foreach (var assetItem in assets.Where(a => a != null)) {
+                        bizhawkDependencies.Add(assetItem);
+                    }
+                }
+            }
+        }
+
+        return bizhawkDependencies;
     }
 
     ///// queries
