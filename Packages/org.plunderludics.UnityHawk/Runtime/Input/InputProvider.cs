@@ -20,8 +20,8 @@ public enum Controller {
 // (basically same as InputEvent in BizHawk, but keep decoupled in case)
 [System.Serializable]
 public struct InputEvent {
-    public string name; // Must correspond to emulator button/axis name E.g. "P1 A"
-    public int value;  // 0 or 1 for buttons, -INT_MAX - INT_MAX for analog (?)
+    public string name; // Must correspond to emulator button/axis name (without controller prefix) E.g. "R2"
+    public int value;  // 0 or 1 for buttons; for analog inputs, range depends on the emulator (0-255 for Nymashock PSX core)
     public Controller controller;
     public bool isAnalog;
     public override string ToString() => $"{name}:{value}";

@@ -2,9 +2,11 @@ using System.Collections;
 using NUnit.Framework;
 using UnityEngine;
 using UnityEngine.TestTools;
+#if UNITY_EDITOR
 using UnityEditor;
-using System;
+#endif
 
+using System;
 
 // (A UnityTest behaves like a coroutine in Play Mode. In Edit Mode you can use
 // `yield return null;` to skip a frame.)
@@ -37,6 +39,7 @@ public class SharedTests
 
     public SharedTests(bool passInputFromUnity, bool captureEmulatorAudio, bool showBizhawkGui)
     {
+#if UNITY_EDITOR
         // This breaks when trying to test in standalone player because AssetDatabase is unavailable
         // Probably have to use Addressables instead
         eliteRom = AssetDatabase.LoadAssetAtPath<Rom>("Packages/org.plunderludics.UnityHawk/Tests/Shared/eliteRomForTests.nes");
@@ -46,7 +49,7 @@ public class SharedTests
         eliteSavestate5000 = AssetDatabase.LoadAssetAtPath<Savestate>("Packages/org.plunderludics.UnityHawk/Tests/Shared/eliteSavestate5000.savestate");
 
         testCallbacksLua = AssetDatabase.LoadAssetAtPath<LuaScript>("Packages/org.plunderludics.UnityHawk/Tests/Shared/testCallbacks.lua");
-
+#endif
         Assert.That(eliteRom, Is.Not.Null);
         Assert.That(swoopRom, Is.Not.Null);
         Assert.That(eliteSavestate2000, Is.Not.Null);
@@ -72,7 +75,7 @@ public class SharedTests
         e.showBizhawkGuiInEditor = _showBizhawkGui;
     }
 
-    void ActivateEmulator() {
+    protected void ActivateEmulator() {
         e.gameObject.SetActive(true);
     }
     
