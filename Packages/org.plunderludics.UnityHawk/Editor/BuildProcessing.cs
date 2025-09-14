@@ -9,93 +9,138 @@ using System;
 using System.IO;
 using System.Linq;
 using UnityEditor.SceneManagement;
+using System.Collections.Generic;
 
 namespace UnityHawk {
     // This does two main things:
     //  - copy the BizHawk directory (which contains gamedb, etc) into the build
     //  - ensure any file dependencies (roms, savestates, etc) from Emulator components are copied into StreamingAssets in the build
 
-
-    // TODO: the way this is set up is not really correct; OnProcessScene should alter the scene (set params on the Emulator components)
-    //       but not actually copy the files. It should just store a list of files that need to be copied and then all the copying should
-    //       happen in OnPostprocessBuild. This would function properly with unity's scene caching behaviour and remove the need for the weird hack
-    //       below in OnPreprocessBuild
+    // OnProcessScene (called only when scene changes) collects file dependencies per scene for later copying in OnPostprocessBuild.
 
     public class BuildProcessing : IPreprocessBuildWithReport, IProcessSceneWithReport, IPostprocessBuildWithReport {
-        /// if the scene was processed or not
-        bool _didProcessScene = false;
+        /// List of assets for each scene that need to be copied into build directory
+        /// (keyed by scene path)
+        Dictionary<string, HashSet<BizhawkAsset>> _filesForScene = new ();
+        
+        /// Track the last processed scene path for fallback when no scenes are in build settings
+        string _lastProcessedScenePath = null;
 
         ///// IOrderedCallback
         public int callbackOrder => 0;
 
         ///// IPreprocessBuildWithReport
         public void OnPreprocessBuild(BuildReport report) {
-            // This is so dumb, but it seems like OnProcessScene only gets called for the first build after a scene is saved
-            // (because incremental build means a scene won't get re-built if it hasn't changed)
-            // So we make some trivial change to the scene so Unity thinks it's changed and calls the OnProcessScene callback
-            for (var i = -1; i < SceneManager.sceneCountInBuildSettings; i++) {
-                var scene = (i == -1) ? SceneManager.GetActiveScene() : SceneManager.GetSceneByBuildIndex(i);
-                const string n = "unityhawk-fake-object-to-force-rebuild-scene";
-                var g = GameObject.Find(n);
-                if (!g) {
-                    g = new GameObject(n);
-                    g.hideFlags = HideFlags.HideInHierarchy;
-                }
-                g.transform.position += Vector3.down;
-
-                // Seems to be necessary
-                EditorSceneManager.SaveScene(scene);
-            }
+            // Don't actually need to do anything here
         }
 
         ///// IProcessSceneWithReport
+        /// This gets called for each scene in the build, but only when changes are made to the scene.
+        /// When changes are made, clear the list of files to copy and regenerate
         public void OnProcessScene(Scene scene, BuildReport report) {
-            if (BuildPipeline.isBuildingPlayer) {
-                ProcessScene(scene, report.summary.outputPath);
-                _didProcessScene = true;
+            Debug.Log($"[unity-hawk] OnProcessScene({scene.path})");
+            if (BuildPipeline.isBuildingPlayer) { // Only process when actually building
+                CollectSceneFiles(scene);
+                _lastProcessedScenePath = scene.path;
             }
         }
 
         ///// IPostprocessBuildWithReport
         public void OnPostprocessBuild(BuildReport report) {
-            Debug.Log("OnPostprocessBuild");
-            if (!_didProcessScene) {
-                throw new BuildFailedException("OnProcessScene was not called");
-            }
+            Debug.Log("[unity-hawk] OnPostprocessBuild");
 
-            // Gotta make sure all the bizhawk stuff gets into the build
-            // Copy over the whole Packages/org.plunderludics.UnityHawk/BizHawk/ directory into xxx_Data/org.plunderludics.UnityHawk/BizHawk/
-            // [kinda sucks but don't know a better way]
             var exePath = report.summary.outputPath;
-            var targetDir = Path.Combine(GetBuildDataDir(exePath), Paths.BizhawkDirRelative);
-            Debug.Log($"from: {Path.GetFullPath(Paths.BizHawkDir)} to {Path.GetFullPath(targetDir)}");
-            Directory.CreateDirectory(targetDir);
-            FileUtil.ReplaceDirectory(Path.GetFullPath(Paths.BizHawkDir), Path.GetFullPath(targetDir)); // [only works with full paths for some reason]
+    
+            // Copy all the collected files to the build directory
+            var nFilesCopied = CopyFilesToBuild(exePath);
+            Debug.Log($"[unity-hawk] copied {nFilesCopied} files to build directory");
+
+            if (nFilesCopied == 0) {
+                // There's no file dependencies so I think we can assume bizhawk is not actually being used, don't copy it into build
+                // (Are there any weird edge cases where this would not be true? I guess if there's an Emulator component that's only used to load assets from external paths)
+                Debug.LogWarning($"[unity-hawk] no UnityHawk assets are used in this build so not copying BizHawk into build");
+            } else {
+                // Gotta make sure all the bizhawk stuff gets into the build
+                // Copy over the whole Packages/org.plunderludics.UnityHawk/BizHawk/ directory into xxx_Data/org.plunderludics.UnityHawk/BizHawk/
+                // [kinda sucks but don't know a better way]
+                var targetDir = Path.Combine(GetBuildDataDir(exePath), Paths.BizhawkDirRelative);
+                Debug.Log($"[unity-hawk] copying bizhawk directory from: {Path.GetFullPath(Paths.BizHawkDir)} to {Path.GetFullPath(targetDir)}");
+                Directory.CreateDirectory(targetDir);
+                FileUtil.ReplaceDirectory(Path.GetFullPath(Paths.BizHawkDir), Path.GetFullPath(targetDir)); // [only works with full paths for some reason]
+            }
         }
 
         ///// commands
-        static void ProcessScene(Scene scene, string exePath) {
-            // Need to create the build dir in advance so we can copy files in there before the build actually happens
-            var bizhawkAssetsPath = Path.Combine(GetBuildDataDir(exePath), Paths.BizHawkAssetsDirName);
-            Directory.CreateDirectory (bizhawkAssetsPath);
+        /// Collect and store all the bizhawk assets that need to be copied for a scene
+        void CollectSceneFiles(Scene scene) {
+            Debug.Log($"[unity-hawk] CollectSceneFiles({scene.path})");
+            // Scene has been modified, clear list of files and regenerate
+            _filesForScene[scene.path] = new();
+
+            // TODO: Look for BuildSettings component in the scene
 
             // look through all Emulator components in the scene and
-            // locate (external) file dependencies, copy them into the build, and (temporarily) update the path references
+            // locate (external) file dependencies and collect them for later copying
             var root = scene.GetRootGameObjects();
             var dependencies = EditorUtility.CollectDependencies(root);
             var bizhawkDependencies = dependencies.OfType<BizhawkAsset>().ToList();
 
-            Debug.Log($"[unity-hawk] build processing, moving dependencies to {bizhawkAssetsPath}: \n {string.Join("\n", bizhawkDependencies)}");
+            Debug.Log($"[unity-hawk] collected {bizhawkDependencies.Count} dependencies for scene {scene.path}: \n {string.Join("\n", bizhawkDependencies)}");
 
+            // Add assets that need to be copied
             foreach (var dependency in bizhawkDependencies) {
-                MoveToDirectory(false, dependency, bizhawkAssetsPath);
+                if (!_filesForScene[scene.path].Contains(dependency)) {
+                    _filesForScene[scene.path].Add(dependency);
+                }
             }
+        }
+
+        /// Copy all collected files for each scene to the build directory
+        /// (This will do multiple copies for assets that are used in multiple scenes,
+        ///  but doesn't really matter - they go to the same path in the build directory)
+        /// returns the number of files copied
+        int CopyFilesToBuild(string exePath) {
+            var bizhawkAssetsPath = Path.Combine(GetBuildDataDir(exePath), Paths.BizHawkAssetsDirName);
+            Directory.CreateDirectory(bizhawkAssetsPath);
+
+            int nFilesCopied = 0;
+
+            var scenePaths = EditorBuildSettings.scenes.Where(s => s.enabled).Select(s => s.path).ToList();
+            if (scenePaths.Count == 0) {
+                // Kinda hacky, but it seems like when there are no scenes in build settings,
+                // Unity falls back to the currently active scene,
+                // Which i /think/ should be the last processed scene
+                // TODO: Is there a more robust way to handle this?
+                if (_lastProcessedScenePath == null) {
+                    throw new Exception($"[unity-hawk] no scenes in build settings and no last processed scene");
+                }
+                scenePaths.Add(_lastProcessedScenePath);
+                Debug.Log($"[unity-hawk] no scenes in build settings, fallback to last processed scene ({_lastProcessedScenePath})");
+            }
+            foreach (var scenePath in scenePaths) {
+                if (!_filesForScene.ContainsKey(scenePath)) {
+                    throw new Exception($"[unity-hawk] scene {scenePath} is in build but has not been processed");
+                }
+
+                var sceneFiles = _filesForScene[scenePath];
+                Debug.Log($"[unity-hawk] for scene {scenePath}: copying {sceneFiles.Count} files to {bizhawkAssetsPath}");
+                foreach (var file in sceneFiles) {
+                    if (!file) {
+                        Debug.LogWarning($"[unity-hawk] for scene {scenePath}: null BizHawkAsset encountered");
+                        continue;
+                    }
+                    MoveToDirectory(false, file, bizhawkAssetsPath);
+                    nFilesCopied++;
+                }
+            }
+
+            return nFilesCopied;
         }
 
         /// moves an asset to a new directory
         static void MoveToDirectory(bool isDir, BizhawkAsset asset, string baseTargetDir) {
             if (!asset) {
-                return;
+                throw new ArgumentNullException($"[unity-hawk] MoveToDirectory: asset is null");
             }
 
             // Get the path that Emulator will actually look for the file
@@ -108,7 +153,7 @@ namespace UnityHawk {
             var outPath = Path.Combine(baseTargetDir, inRelativePath);
             var outDir = Path.GetDirectoryName(outPath);
 
-            Debug.Log($"Copy from: {inPath} to {outPath}");
+            Debug.Log($"[unity-hawk] Copy from: {inPath} to {outPath}");
 
             Directory.CreateDirectory(outDir!);
             if (!File.Exists(outPath)) {
@@ -140,7 +185,7 @@ namespace UnityHawk {
                     var otherNoExt = Path.GetFileNameWithoutExtension(other.FullName);
                     if (string.Equals(otherNoExt, inNoExt, StringComparison.InvariantCultureIgnoreCase)) {
                         var otherOutPath = Path.Combine(outDir, other.Name);
-                        Debug.Log($"Copy from: {other.FullName} to {otherOutPath}");
+                        Debug.Log($"[unity-hawk] Copy from: {other.FullName} to {otherOutPath}");
                         if (!File.Exists(otherOutPath)) {
                             File.Copy(other.FullName, otherOutPath, overwrite: true);
                         }
