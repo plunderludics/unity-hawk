@@ -121,7 +121,12 @@ public class BuildProcessing : IPreprocessBuildWithReport, IProcessSceneWithRepo
         }
         foreach (var scenePath in scenePaths) {
             if (!_filesForScene.ContainsKey(scenePath)) {
-                throw new Exception($"[unity-hawk] scene {scenePath} is in build but has not been processed");
+                // I think this happens when code gets recompiled but there are no changes to the scene
+                // I guess to avoid this we could store the bizhawk asset references somewhere in the scene itself (in BuildSettings component I guess)
+                // - but just re-collecting the dependencies here seems fine
+                Debug.LogWarning($"[unity-hawk] scene {scenePath} is in build but has not been processed. Attempting to re-collect dependencies...");
+                Scene scene = EditorSceneManager.OpenScene(scenePath);
+                CollectSceneFiles(scene);
             }
 
             var sceneFiles = _filesForScene[scenePath];
