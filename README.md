@@ -10,6 +10,8 @@ Only works on Windows currently. Works best with Unity 2022.2 or later.
 
 Under development, may have bugs; issues, feature requests or contributions are welcome.
 
+[API documentation is here.](https://plunderludics.github.io/unity-hawk/api/UnityHawk.Emulator.html)
+
 ## Installation
 Add these two lines under `dependencies` in your `manifest.json`:
 ```
@@ -42,10 +44,9 @@ You will probably also need to install the BizHawk prerequisites, which can be i
 - Enable 'Capture Emulator Audio' to route emulator audio to an AudioSource, allowing you to use Unity's positional audio system or add audio effects
   - (Might produce minor latency or distortion)
 - The live emulator graphics can be grabbed in code via the `Emulator.Texture` property.
-- The `Emulator` component provides an interface to basic Bizhawk API methods.
+- The `Emulator` component provides an interface to basic Bizhawk API methods. See the [API documentation](https://plunderludics.github.io/unity-hawk/api/UnityHawk.Emulator.html) for more info.
   - Basic emulator controls: `Pause()`, `Unpause()`, `FrameAdvance()`, `LoadState(Savestate s)`, `SaveState(string path)`, `LoadRom(Rom r)`, `SetVolume(float v)`, `SetSpeedPercent(int p)`. Use the `BasicApiTool` component to use these methods directly from the Editor.
   - For interacting with console memory: `WatchUnsigned(long address, int size, bool isBigEndian, string domain, Action<uint> callback)` (+ similar methods for Signed and Float types), `WriteUnsigned(long address, uint value, int size, bool isBigEndian, string domain = null)` (+ similar methods for Signed and Float types), `Freeze(long address, int size, string domain = null)`, and `Unfreeze(long address, int size, string domain = null)`. Use the `MemoryApiTool` component to use these methods directly from the Editor.
-  - See `Emulator.Api.cs` for more info on the API methods.
 - Within a BizHawk Lua script, you can use the `unityhawk.callmethod(methodName, argString)` method to send and receive information from Unity. The method must be registered on the Unity side using `Emulator.RegisterLuaCallback`. See `RegisterMethodExample.lua` and `RegisterMethodExample` in the `Demo` sample for a brief example.
 
 
