@@ -1,3 +1,4 @@
+#if UNITY_EDITOR
 using UnityEditor;
 using UnityEngine;
 using UnityEngine.SceneManagement;
@@ -20,12 +21,15 @@ namespace UnityHawk {
 // OnProcessScene (called only when scene changes) collects file dependencies per scene for later copying in OnPostprocessBuild.
 
 public class BuildProcessing : IPreprocessBuildWithReport, IProcessSceneWithReport, IPostprocessBuildWithReport {
+    // (Not really sure what the lifecycle of the BuildProcessing instance is, but it seems like making these two variables
+    // static prevents them from getting wiped out sometimes)
+
     /// List of assets for each scene that need to be copied into build directory
     /// (keyed by scene path)
-    Dictionary<string, HashSet<BizhawkAsset>> _filesForScene = new ();
+    static Dictionary<string, HashSet<BizhawkAsset>> _filesForScene = new ();
     
     /// Track the last processed scene path for fallback when no scenes are in build settings
-    string _lastProcessedScenePath = null;
+    static string _lastProcessedScenePath = null;
 
     ///// IOrderedCallback
     public int callbackOrder => 0;
@@ -194,9 +198,16 @@ public class BuildProcessing : IPreprocessBuildWithReport, IProcessSceneWithRepo
 
     /// Collect all the Bizhawk assets that are used in active scene
     /// (Mainly reimplements EditorUtility.CollectDependencies to support exluding disabled objects)
-    // includeInactive: include inactive objects and disabled components
+    /// Reads build settings from BuildSettings component in the scene if there is one
     // TODO: add List<Transform> excludeTransforms arg (?)
-    static HashSet<BizhawkAsset> CollectBizhawkAssetDependencies(bool includeInactive = true) {
+    public static ISet<BizhawkAsset> CollectBizhawkAssetDependencies() {
+        BuildSettings buildSettings = GetBuildSettings();
+
+        // Whether to include inactive objects and disabled components in dependency search
+        bool includeInactive = buildSettings.includeInactive;
+
+        Debug.Log($"[unity-hawk] CollectBizhawkAssetDependencies: includeInactive: {includeInactive}");
+
         // Get all components in scene
         var components = UnityEngine.Object.FindObjectsByType<Component>(
             includeInactive ? FindObjectsInactive.Include : FindObjectsInactive.Exclude,
@@ -226,6 +237,26 @@ public class BuildProcessing : IPreprocessBuildWithReport, IProcessSceneWithRepo
         return bizhawkDependencies;
     }
 
+    /// Get BuildSettings for current scene if there is exactly one, otherwise return a new component with default values
+    static BuildSettings GetBuildSettings() {
+        BuildSettings buildSettings;
+
+        var allBuildSettings = UnityEngine.Object.FindObjectsByType<BuildSettings>(FindObjectsInactive.Exclude, FindObjectsSortMode.None)
+                                                 .Where(bs => bs.enabled)
+                                                 .ToList();
+                                                
+        if (allBuildSettings.Count == 0) {
+            // Kind of hacky, but create a new GameObject with a BuildSettings component - it doesn't get saved to the scene
+            var gameObject = new GameObject("BuildSettings");
+            buildSettings = gameObject.AddComponent<BuildSettings>(); // Use default values for settings
+        } else if (allBuildSettings.Count > 1) {
+            throw new Exception($"[unity-hawk] {allBuildSettings.Count} active BuildSettings components found in scene, should be at most one");
+        } else { // 1
+            buildSettings = allBuildSettings[0];
+        }
+        return buildSettings;
+    }
+
     ///// queries
     static string GetBuildDataDir(string exePath) {
         return Path.Combine(Path.GetDirectoryName(exePath)!, $"{Path.GetFileNameWithoutExtension(exePath)}_Data");
@@ -233,3 +264,4 @@ public class BuildProcessing : IPreprocessBuildWithReport, IProcessSceneWithRepo
 }
 
 }
+#endif // UNITY_EDITOR
