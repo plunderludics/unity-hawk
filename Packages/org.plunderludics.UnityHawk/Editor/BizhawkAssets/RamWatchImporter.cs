@@ -3,6 +3,6 @@
 namespace UnityHawk.Editor {
 
 [ScriptedImporter(1, "wch")]
-public class RamWatchImporter : BizHawkAssetImporter<RamWatch> { }
+internal class RamWatchImporter : BizHawkAssetImporter<RamWatch> { }
 
 }

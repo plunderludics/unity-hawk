@@ -46,7 +46,7 @@ namespace UnityHawk.Editor {
     /* Music Files: */ "psf", "minipsf", "sid", "nsf", "gbs",
     /* Disc Images: */ "cue", "ccd", "cdi", "mds", "m3u"
 })]
-public class RomImporter : BizHawkAssetImporter<Rom>
+internal class RomImporter : BizHawkAssetImporter<Rom>
 {
     public override void OnImportAsset(AssetImportContext ctx)
     {

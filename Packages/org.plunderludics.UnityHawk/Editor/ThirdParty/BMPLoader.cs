@@ -59,7 +59,7 @@ using System;
 
 namespace B83.Image.BMP
 {
-    public enum BMPComressionMode : int
+    internal enum BMPComressionMode : int
     {
         BI_RGB = 0x00,
         BI_RLE8 = 0x01,
@@ -74,14 +74,14 @@ namespace B83.Image.BMP
         BI_CMYKRLE4 = 0x0D,
 
     }
-    public struct BMPFileHeader
+    internal struct BMPFileHeader
     {
         public ushort magic; // "BM"
         public uint filesize;
         public uint reserved;
         public uint offset;
     }
-    public struct BitmapInfoHeader
+    internal struct BitmapInfoHeader
     {
         public uint size;
         public int width;
@@ -100,7 +100,7 @@ namespace B83.Image.BMP
 
     }
 
-    public class BMPImage
+    internal class BMPImage
     {
         public BMPFileHeader header;
         public BitmapInfoHeader info;
@@ -162,7 +162,7 @@ namespace B83.Image.BMP
     }
 
 
-    public class BMPLoader
+    internal class BMPLoader
     {
         const ushort MAGIC = 0x4D42; // "BM" little endian
         public bool ReadPaletteAlpha = false;
@@ -568,7 +568,7 @@ namespace B83.Image.BMP
         }
 
     }
-    public class BitStreamReader
+    internal class BitStreamReader
     {
         BinaryReader m_Reader;
         byte m_Data = 0;
