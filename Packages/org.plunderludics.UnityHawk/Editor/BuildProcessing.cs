@@ -20,8 +20,8 @@ namespace UnityHawk {
     //       but not actually copy the files. It should just store a list of files that need to be copied and then all the copying should
     //       happen in OnPostprocessBuild. This would function properly with unity's scene caching behaviour and remove the need for the weird hack
     //       below in OnPreprocessBuild
-
-    public class BuildProcessing : IPreprocessBuildWithReport, IProcessSceneWithReport, IPostprocessBuildWithReport {
+ 
+    internal class BuildProcessing : IPreprocessBuildWithReport, IProcessSceneWithReport, IPostprocessBuildWithReport {
         /// if the scene was processed or not
         bool _didProcessScene = false;
 

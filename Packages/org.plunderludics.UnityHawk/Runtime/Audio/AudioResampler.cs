@@ -7,7 +7,7 @@ using System.Collections.Concurrent;
 namespace UnityHawk {
 
 [Serializable]
-public class AudioResampler {
+internal class AudioResampler {
     [AllowNesting]
     [Tooltip("Higher value means more audio latency. Lower value may cause crackles and pops")]
     public int idealBufferSize = 512; // [TODO: this should be much less (maybe half or less) than SharedAudioBuffer.MaxBufferSize - should probably enforce somehow]

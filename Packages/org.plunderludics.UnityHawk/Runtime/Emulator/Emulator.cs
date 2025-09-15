@@ -21,12 +21,6 @@ using UnityEngine.Serialization;
 
 namespace UnityHawk {
 
-public enum EmulatorRenderMode {
-    AttachedRenderer,
-    ExternalRenderer,
-    RenderTexture,
-}
-
 [ExecuteInEditMode]
 public partial class Emulator : MonoBehaviour {
     /// the sample rate for bizhawk audio
@@ -78,13 +72,19 @@ public partial class Emulator : MonoBehaviour {
     public Rom romFile;
 
     ///// Rendering
-    [Header("Rendering")]
-    public EmulatorRenderMode renderMode;
+    public enum RenderMode {
+        AttachedRenderer,
+        ExternalRenderer,
+        RenderTexture,
+    }
 
-    [ShowIf(nameof(renderMode), EmulatorRenderMode.ExternalRenderer)]
+    [Header("Rendering")]
+    public RenderMode renderMode;
+
+    [ShowIf(nameof(renderMode), RenderMode.ExternalRenderer)]
     public Renderer targetRenderer;
 
-    [ShowIf(nameof(renderMode), EmulatorRenderMode.RenderTexture)]
+    [ShowIf(nameof(renderMode), RenderMode.RenderTexture)]
     [Tooltip("render to a specific render texture instead of creating a default one")]
     public bool customRenderTexture = false;
 
@@ -169,7 +169,7 @@ public partial class Emulator : MonoBehaviour {
 
     ///// State
     [Foldout("State")]
-    [ReadOnly, SerializeField] EmulatorStatus _status;
+    [ReadOnly, SerializeField] Status _status;
 
     [Foldout("State")]
     [ReadOnly, SerializeField] int _currentFrame; // The frame index of the most-recently grabbed texture
@@ -341,7 +341,7 @@ public partial class Emulator : MonoBehaviour {
         if (gameObject.activeInHierarchy && enabled) {
             // GameObject and Emulator are active, so check if we need to start the bizhawk process
 
-            if (Status != EmulatorStatus.Inactive) {
+            if (CurrentStatus != Status.Inactive) {
                 if (!Equals(_currentBizhawkArgs, MakeBizhawkArgs())) {
                     // Bizhawk params have changed since bizhawk process was started, needs restart
                     Restart();
@@ -354,7 +354,7 @@ public partial class Emulator : MonoBehaviour {
 
             // [use EditorApplication.isPlayingOrWillChangePlaymode instead of Application.isPlaying
             //  to avoid OnEnable call as play mode is being entered]
-            if (!EditorApplication.isPlayingOrWillChangePlaymode && runInEditMode && Status == EmulatorStatus.Inactive) {
+            if (!EditorApplication.isPlayingOrWillChangePlaymode && runInEditMode && CurrentStatus == Status.Inactive) {
                 // In edit mode, initialize the emulator if it is not already running
                 Initialize();
             }
@@ -379,7 +379,7 @@ public partial class Emulator : MonoBehaviour {
         }
 #endif
 
-        if (ShouldRun && runOnEnable && Status == EmulatorStatus.Inactive) {
+        if (ShouldRun && runOnEnable && CurrentStatus == Status.Inactive) {
             Initialize();
         }
     }
@@ -390,7 +390,7 @@ public partial class Emulator : MonoBehaviour {
         if (Undo.isProcessing) return; // OnDisable gets called after undo/redo, but ignore it
 #endif
 
-        if (Status != EmulatorStatus.Inactive) {
+        if (CurrentStatus != Status.Inactive) {
             Deactivate();
         }
     }
@@ -413,15 +413,15 @@ public partial class Emulator : MonoBehaviour {
         _logger.LogVerbose("Emulator: Initialize");
 
         // Don't allow re-initializing if already initialized
-        if (Status != EmulatorStatus.Inactive) {
+        if (CurrentStatus != Status.Inactive) {
             // TODO: or should we reset in this case?
-            _logger.LogError($"Emulator is already initialized (Status = {Status}), ignoring Initialize() call");
+            _logger.LogError($"Emulator is already initialized (Status = {CurrentStatus}), ignoring Initialize() call");
             return;
         }
 
         // Pre-process inspector params
-        if (renderMode == EmulatorRenderMode.AttachedRenderer || renderMode == EmulatorRenderMode.ExternalRenderer) {
-            if (renderMode == EmulatorRenderMode.AttachedRenderer) {
+        if (renderMode == RenderMode.AttachedRenderer || renderMode == RenderMode.ExternalRenderer) {
+            if (renderMode == RenderMode.AttachedRenderer) {
                 targetRenderer = GetComponent<Renderer>();
             }
 
@@ -502,7 +502,7 @@ public partial class Emulator : MonoBehaviour {
 
         // Run _StartBizhawk in a separate thread to avoid blocking the main thread
         bool applicationIsPlaying = Application.isPlaying;
-        Status = EmulatorStatus.Starting;
+        CurrentStatus = Status.Starting;
 
         if (_initThreadCancellationTokenSource != null) {
             _logger.LogError("Emulator.Activate: _initThreadCancellationTokenSource is not null, this should never happen");
@@ -730,7 +730,7 @@ public partial class Emulator : MonoBehaviour {
 
         _emuhawk = process;
 
-        Status = EmulatorStatus.Started;
+        CurrentStatus = Status.Started;
         _startedTime = SystemTime; // Unity Time.realtimeSinceStartup can't run on non-main thread
 
         StartBizhawkTimer.End();
@@ -759,7 +759,7 @@ public partial class Emulator : MonoBehaviour {
         _deferredForMainThread?.Invoke();
         _deferredForMainThread = null;
 
-        if (Status < EmulatorStatus.Started) {
+        if (CurrentStatus < Status.Started) {
             return;
         }
 
@@ -798,7 +798,7 @@ public partial class Emulator : MonoBehaviour {
 
         if (captureEmulatorAudio && Application.isPlaying) {
             if (_sharedAudioBuffer.IsOpen()) {
-                if (Status == EmulatorStatus.Running && !audioResampler.HasSourceBuffer) {
+                if (CurrentStatus == Status.Running && !audioResampler.HasSourceBuffer) {
                     // Set source buffer directly instead of copying samples
                     audioResampler.SetSourceBuffer(_sharedAudioBuffer.SampleQueue);
                     // short[] samples = _sharedAudioBuffer.GetSamples();
@@ -935,7 +935,7 @@ public partial class Emulator : MonoBehaviour {
                 buf.Close();
             }
         }
-        Status = EmulatorStatus.Inactive;
+        CurrentStatus = Status.Inactive;
     }
 
     /// Init/re-init the textures for rendering the screen - has to be done whenever the source dimensions change (which happens often on PSX for some reason)
@@ -965,7 +965,7 @@ public partial class Emulator : MonoBehaviour {
     void OnAudioFilterRead(float[] outBuffer, int channels) {
         if (!captureEmulatorAudio) return;
         if (_sharedAudioBuffer == null || !_sharedAudioBuffer.IsOpen()) return;
-        if (Status != EmulatorStatus.Running) return;
+        if (CurrentStatus != Status.Running) return;
 
         // _logger.LogVerbose($"OnAudioFilterRead {outBuffer.Length} samples, {channels} channels");
         audioResampler.GetSamples(outBuffer, channels);
@@ -1020,7 +1020,7 @@ public partial class Emulator : MonoBehaviour {
                 case SpecialCommands.OnRomLoaded:
                     // args: $"{systemID}"
                     _systemId = argString;
-                    Status = EmulatorStatus.Running; // This is where the emulator is considered running
+                    CurrentStatus = Status.Running; // This is where the emulator is considered running
                     // (At this point I think we can be confident all the buffers should be open)
                     break;
                 default:

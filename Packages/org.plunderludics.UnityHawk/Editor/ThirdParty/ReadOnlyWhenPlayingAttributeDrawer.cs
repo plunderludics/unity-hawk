@@ -4,7 +4,7 @@ using UnityEditor;
 
 namespace UnityHawk.Editor {
 [CustomPropertyDrawer(typeof(ReadOnlyWhenPlayingAttribute))]
-public class ReadOnlyWhenPlayingAttributeDrawer : PropertyDrawer
+internal class ReadOnlyWhenPlayingAttributeDrawer : PropertyDrawer
 {
 	// Necessary since some properties tend to collapse smaller than their content
 	public override float GetPropertyHeight(SerializedProperty property, GUIContent label)

@@ -7,7 +7,8 @@ using System.Collections.Generic;
 using System.Collections.Concurrent;
 
 namespace UnityHawk {
-public class SharedAudioBuffer : ISharedBuffer {
+
+internal class SharedAudioBuffer : ISharedBuffer {
     string _name;
     RpcBuffer _rpc;
 

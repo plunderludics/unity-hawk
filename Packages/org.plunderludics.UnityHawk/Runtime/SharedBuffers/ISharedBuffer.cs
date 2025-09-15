@@ -1,5 +1,5 @@
 namespace UnityHawk {
-public interface ISharedBuffer {
+internal interface ISharedBuffer {
     public void Open();
 
     public bool IsOpen();

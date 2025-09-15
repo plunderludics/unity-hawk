@@ -9,7 +9,7 @@ using Plunderludics.UnityHawk.Shared;
 
 namespace UnityHawk {
 
-public class ApiCommandBuffer : ISharedBuffer {
+internal class ApiCommandBuffer : ISharedBuffer {
     string _name;
     CircularBuffer _buffer;
     Logger _logger;

@@ -4,7 +4,7 @@ using UnityEditor;
 namespace UnityHawk.Editor {
 
 [InitializeOnLoad]
-public static class EmulatorDragDropHandler {
+internal static class EmulatorDragDropHandler {
     static EmulatorDragDropHandler() {
         // Register for drag and drop events in the hierarchy
         DragAndDrop.AddDropHandler(HierarchyDropHandler);
