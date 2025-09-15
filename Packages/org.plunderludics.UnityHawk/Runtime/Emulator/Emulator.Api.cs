@@ -72,8 +72,6 @@ public partial class Emulator {
     /// (If emulator is not running but savestate is set, show savestate texture)
     public Texture Texture => IsRunning ? renderTexture : saveStateFile?.Screenshot;
 
-    public bool IsStarting => Status == EmulatorStatus.Starting;
-
     /// is the emulator process started
     public bool IsStarted => Status >= EmulatorStatus.Started;
 
@@ -84,21 +82,10 @@ public partial class Emulator {
     /// Returns null if emulator is not running.
     public string SystemId => _systemId;
 
-    /// when the emulator boots up
-    /// (will be a slight delay since this gets deferred to main thread Update)
-    public Action OnStarted;
-
-    /// when the emulator starts running its game
-    /// (will be a slight delay since this gets deferred to main thread Update)
-    public Action OnRunning;
-
     /// the current status of the emulator
     public enum EmulatorStatus {
         /// BizHawk hasn't started yet
         Inactive,
-
-        /// The BizHawk process is starting up but not started yet
-        Starting,
 
         /// BizHawk has been started, but not rendering yet
         Started,
@@ -112,14 +99,13 @@ public partial class Emulator {
         get => _status;
         private set {
             if (_status != value) {
-                // Debug.Log($"Emulator status changed from {_status} to {value}", this);
                 var raise = value switch {
                     EmulatorStatus.Started => OnStarted,
                     EmulatorStatus.Running => OnRunning,
                     _ => null,
                 };
 
-                _deferredForMainThread += () => raise?.Invoke();
+                raise?.Invoke();
             }
             _status = value;
         }
@@ -127,13 +113,6 @@ public partial class Emulator {
 
     /// frame index of latest received texture
     public int CurrentFrame => _currentFrame;
-
-    /// restarts the emulator
-    [Button]
-    public void Restart() {
-        Deactivate();
-        Initialize();
-    }
 
     /// delegate for registering lua callbacks
     // TODO: string-to-string only rn but some automatic de/serialization for different types would be nice
@@ -155,37 +134,31 @@ public partial class Emulator {
 
     /// pauses the emulator
     public void Pause() {
-        ThrowIfNotRunning();
         IsPaused = true;
     }
 
     /// unpauses the emulator
     public void Unpause() {
-        ThrowIfNotRunning();
         IsPaused = false;
     }
 
     /// mutes the emulator (and disables sound engine)
     public void Mute() {
-        ThrowIfNotRunning();
         IsMuted = true;
     }
 
     /// unmutes the emulator (and enables sound engine)
     public void Unmute() {
-        ThrowIfNotRunning();
         IsMuted = false;
     }
 
     /// sets the emulator volume
     public void SetVolume(int value) {
-        ThrowIfNotRunning();
         volume = value;
     }
 
     /// sets the speed of the emulator as integer percentage
     public void SetSpeedPercent(int percent) {
-        ThrowIfNotRunning();
         speedPercent = percent;
     }
 
@@ -193,7 +166,6 @@ public partial class Emulator {
     /// <param name="path"></param>
     /// TODO: how can this return a savestate object?
     public string SaveState(string path) {
-        ThrowIfNotRunning();
         path = Paths.GetFullPath(path);
         if (!path.Contains(".savestate"))
         {
@@ -209,7 +181,6 @@ public partial class Emulator {
     /// loads a state from a given path
     /// <param name="path"></param>
     public void LoadState(string path) {
-        ThrowIfNotRunning();
         // TODO: set emulator savestateFile?
         path = Paths.GetFullPath(path);
         _apiCommandBuffer.CallMethod(ApiCommands.LoadState, path);
@@ -218,7 +189,6 @@ public partial class Emulator {
     /// loads a state from a Savestate asset
     /// <param name="sample"></param>
     public void LoadState(Savestate sample) {
-        ThrowIfNotRunning();
         string path = Paths.GetAssetPath(sample);
         if (path == null) {
             Debug.LogError($"Savestate {sample} not found", this);
@@ -231,14 +201,12 @@ public partial class Emulator {
     /// reloads the current state
     /// <param name="path"></param>
     public void ReloadState() {
-        ThrowIfNotRunning();
         LoadState(saveStateFile);
     }
 
     /// loads a rom from a given path
     /// <param name="path"></param>
     public void LoadRom(string path) {
-        ThrowIfNotRunning();
         path = Paths.GetFullPath(path);
 
         if (string.IsNullOrEmpty(path)) {
@@ -261,13 +229,11 @@ public partial class Emulator {
     /// loads a rom from a Rom asset
     /// <param name="rom"></param>
     public void LoadRom(Rom rom) {
-        ThrowIfNotRunning();
         LoadRom(Paths.GetAssetPath(rom));
     }
 
     /// advances a frame on the emulator
     public void FrameAdvance() {
-        ThrowIfNotRunning();
         _apiCommandBuffer.CallMethod(ApiCommands.FrameAdvance, null);
     }
 
@@ -300,43 +266,40 @@ public partial class Emulator {
     //     return (v == null) ? null : float.Parse(v);
     // }
 
-    // WatchXXX methods allow you to register a callback that will be called whenever the watched value changes
+    // WatchXXX methods allow you to register a callback that will be called after each bizhawk frame with the value of the memory address
     // These methods return an int id which can be used later with Unwatch(id)
-    public int WatchUnsigned(long address, int size, bool isBigEndian, string domain, Action<uint> onChanged) {
-        ThrowIfNotRunning();
+    // (I guess in theory it could be that the callback only gets called when the value changes, but it's just every frame for now)
+    public int WatchUnsigned(long address, int size, bool isBigEndian, string domain, Action<uint> callback) {
         return Watch(WatchType.Unsigned, address, size, isBigEndian, domain, value => {
             if (uint.TryParse(value, out uint result)) {
-                onChanged(result);
+                callback(result);
             } else {
                 Debug.LogError($"Failed to parse unsigned value from Bizhawk watch: {value}", this);
             }
         });
     }
 
-    public int WatchSigned(long address, int size, bool isBigEndian, string domain, Action<int> onChanged) {
-        ThrowIfNotRunning();
+    public int WatchSigned(long address, int size, bool isBigEndian, string domain, Action<int> callback) {
         return Watch(WatchType.Signed, address, size, isBigEndian, domain, value => {
             if (int.TryParse(value, out int result)) {
-                onChanged(result);
+                callback(result);
             } else {
                 Debug.LogError($"Failed to parse signed value from Bizhawk watch: {value}", this);
             }
         });
     }
 
-    public int WatchFloat(long address, bool isBigEndian, string domain, Action<float> onChanged) {
-        ThrowIfNotRunning();
+    public int WatchFloat(long address, bool isBigEndian, string domain, Action<float> callback) {
         return Watch(WatchType.Float, address, 4, isBigEndian, domain, value => {
             if (float.TryParse(value, out float result)) {
-                onChanged(result);
+                callback(result);
             } else {
                 Debug.LogError($"Failed to parse float value from Bizhawk watch: {value}", this);
             }
         });
     }
 
-    private int Watch(WatchType type, long address, int size, bool isBigEndian, string domain, Action<string> onChanged) {
-        ThrowIfNotRunning();
+    private int Watch(WatchType type, long address, int size, bool isBigEndian, string domain, Action<string> callback) {
         string args = $"{address},{size},{isBigEndian},{type}";
         if (domain != null) {
             args += $",{domain}";
@@ -347,12 +310,11 @@ public partial class Emulator {
         if (_watchCallbacks.ContainsKey(hashCode)) {
             Debug.LogWarning($"Overwriting existing watch for key {key}", this);
         }
-        _watchCallbacks[hashCode] = (key, onChanged);
+        _watchCallbacks[hashCode] = (key, callback);
         return hashCode;
     }
 
     public void Unwatch(int id) {
-        ThrowIfNotRunning();
         // Unregister the callback first
         if (_watchCallbacks.ContainsKey(id)) {
             var (key, _) = _watchCallbacks[id];
@@ -370,7 +332,6 @@ public partial class Emulator {
 
     /// Sets a memory address to a given value (for a single frame - to freeze the address, use FreezeBytes)
     public void WriteUnsigned(long address, uint value, int size, bool isBigEndian, string domain = null) {
-        ThrowIfNotRunning();
         string args = $"{address},{value},{size},{isBigEndian}";
         if (domain != null) {
             args += $",{domain}";
@@ -378,7 +339,6 @@ public partial class Emulator {
         _apiCommandBuffer.CallMethod("WriteUnsigned", args);
     }
     public void WriteSigned(long address, int value, int size, bool isBigEndian, string domain = null) {
-        ThrowIfNotRunning();
         string args = $"{address},{value},{size},{isBigEndian}";
         if (domain != null) {
             args += $",{domain}";
@@ -386,7 +346,6 @@ public partial class Emulator {
         _apiCommandBuffer.CallMethod("WriteSigned", args);
     }
     public void WriteFloat(long address, float value, bool isBigEndian, string domain = null) {
-        ThrowIfNotRunning();
         string args = $"{address},{value},{isBigEndian}";
         if (domain != null) {
             args += $",{domain}";
@@ -396,7 +355,6 @@ public partial class Emulator {
 
     /// Freezes a memory address for a given size (1-4 bytes)
     public void Freeze(long address, int size, string domain = null) {
-        ThrowIfNotRunning();
         string args = $"{address},{size}";
         if (domain != null) {
             args += $",{domain}";
@@ -406,7 +364,6 @@ public partial class Emulator {
 
     /// Unfreezes a memory address that was previously frozen
     public void Unfreeze(long address, int size, string domain = null) {
-        ThrowIfNotRunning();
         string args = $"{address},{size}";
         if (domain != null) {
             args += $",{domain}";
@@ -415,39 +372,25 @@ public partial class Emulator {
     }
 
     ///// events
-    /// (These don't throw exception when emulator not running,
-    ///  cause it's still valid to set these fields in the inspector)
-
     /// when the volume changes
     void OnSetVolume() {
-        if (!IsRunning) return;
         _apiCommandBuffer.CallMethod(ApiCommands.SetVolume, $"{volume}");
     }
 
-    /// when the sound is muted or unmuted
+    /// when the sound is muted
     void OnSetIsMuted() {
-        if (!IsRunning) return;
         _apiCommandBuffer.CallMethod(ApiCommands.SetSoundOn, $"{!isMuted}");
     }
 
     /// when the speed percent changes
     void OnSetSpeedPercent() {
-        if (!IsRunning) return;
         _apiCommandBuffer.CallMethod(ApiCommands.SetSpeedPercent, $"{speedPercent}");
     }
 
     /// when emulator is paused or unpaused
     void OnSetIsPaused() {
-        if (!IsRunning) return;
         string command = IsPaused ? ApiCommands.Pause : ApiCommands.Unpause;
         _apiCommandBuffer.CallMethod(command, null);
-    }
-
-    ///// error handling
-    void ThrowIfNotRunning() {
-        if (!IsRunning) {
-            throw new InvalidOperationException("Emulator is not running");
-        }
     }
 }
 }

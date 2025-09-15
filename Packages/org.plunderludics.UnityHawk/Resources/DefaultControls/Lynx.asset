@@ -13,67 +13,40 @@ MonoBehaviour:
   m_Name: Lynx
   m_EditorClassIdentifier: 
   Controls:
-    buttonMappings:
+    mappings:
     - Enabled: 1
-      sourceType: 0
       Key: 273
-      AxisName: 
-      ActionRef: {fileID: 0}
-      EmulatorButtonName: Up
+      Control: Up
       Controller: 0
     - Enabled: 1
-      sourceType: 0
       Key: 274
-      AxisName: 
-      ActionRef: {fileID: 0}
-      EmulatorButtonName: Down
+      Control: Down
       Controller: 0
     - Enabled: 1
-      sourceType: 0
       Key: 276
-      AxisName: 
-      ActionRef: {fileID: 0}
-      EmulatorButtonName: Left
+      Control: Left
       Controller: 0
     - Enabled: 1
-      sourceType: 0
       Key: 275
-      AxisName: 
-      ActionRef: {fileID: 0}
-      EmulatorButtonName: Right
+      Control: Right
       Controller: 0
     - Enabled: 1
-      sourceType: 0
       Key: 120
-      AxisName: 
-      ActionRef: {fileID: 0}
-      EmulatorButtonName: A
+      Control: A
       Controller: 0
     - Enabled: 1
-      sourceType: 0
       Key: 122
-      AxisName: 
-      ActionRef: {fileID: 0}
-      EmulatorButtonName: B
+      Control: B
       Controller: 0
     - Enabled: 1
-      sourceType: 0
       Key: 97
-      AxisName: 
-      ActionRef: {fileID: 0}
-      EmulatorButtonName: Option 1
+      Control: Option 1
       Controller: 0
     - Enabled: 1
-      sourceType: 0
       Key: 115
-      AxisName: 
-      ActionRef: {fileID: 0}
-      EmulatorButtonName: Option 2
+      Control: Option 2
       Controller: 0
     - Enabled: 1
-      sourceType: 0
       Key: 13
-      AxisName: 
-      ActionRef: {fileID: 0}
-      EmulatorButtonName: Pause
+      Control: Pause
       Controller: 0

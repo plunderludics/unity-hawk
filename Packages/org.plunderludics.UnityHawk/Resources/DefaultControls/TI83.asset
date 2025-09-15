@@ -13,361 +13,208 @@ MonoBehaviour:
   m_Name: TI83
   m_EditorClassIdentifier: 
   Controls:
-    buttonMappings:
+    mappings:
     - Enabled: 1
-      sourceType: 0
       Key: 256
-      AxisName: 
-      ActionRef: {fileID: 0}
-      EmulatorButtonName: 0
+      Control: 0
       Controller: 0
     - Enabled: 1
-      sourceType: 0
       Key: 257
-      AxisName: 
-      ActionRef: {fileID: 0}
-      EmulatorButtonName: 1
+      Control: 1
       Controller: 0
     - Enabled: 1
-      sourceType: 0
       Key: 258
-      AxisName: 
-      ActionRef: {fileID: 0}
-      EmulatorButtonName: 2
+      Control: 2
       Controller: 0
     - Enabled: 1
-      sourceType: 0
       Key: 259
-      AxisName: 
-      ActionRef: {fileID: 0}
-      EmulatorButtonName: 3
+      Control: 3
       Controller: 0
     - Enabled: 1
-      sourceType: 0
       Key: 260
-      AxisName: 
-      ActionRef: {fileID: 0}
-      EmulatorButtonName: 4
+      Control: 4
       Controller: 0
     - Enabled: 1
-      sourceType: 0
       Key: 261
-      AxisName: 
-      ActionRef: {fileID: 0}
-      EmulatorButtonName: 5
+      Control: 5
       Controller: 0
     - Enabled: 1
-      sourceType: 0
       Key: 262
-      AxisName: 
-      ActionRef: {fileID: 0}
-      EmulatorButtonName: 6
+      Control: 6
       Controller: 0
     - Enabled: 1
-      sourceType: 0
       Key: 263
-      AxisName: 
-      ActionRef: {fileID: 0}
-      EmulatorButtonName: 7
+      Control: 7
       Controller: 0
     - Enabled: 1
-      sourceType: 0
       Key: 264
-      AxisName: 
-      ActionRef: {fileID: 0}
-      EmulatorButtonName: 8
+      Control: 8
       Controller: 0
     - Enabled: 1
-      sourceType: 0
       Key: 265
-      AxisName: 
-      ActionRef: {fileID: 0}
-      EmulatorButtonName: 9
+      Control: 9
       Controller: 0
     - Enabled: 1
-      sourceType: 0
       Key: 266
-      AxisName: 
-      ActionRef: {fileID: 0}
-      EmulatorButtonName: DOT
+      Control: DOT
       Controller: 0
     - Enabled: 1
-      sourceType: 0
       Key: 32
-      AxisName: 
-      ActionRef: {fileID: 0}
-      EmulatorButtonName: ON
+      Control: ON
       Controller: 0
     - Enabled: 1
-      sourceType: 0
       Key: 13
-      AxisName: 
-      ActionRef: {fileID: 0}
-      EmulatorButtonName: ENTER
+      Control: ENTER
       Controller: 0
     - Enabled: 1
-      sourceType: 0
       Key: 271
-      AxisName: 
-      ActionRef: {fileID: 0}
-      EmulatorButtonName: ENTER
+      Control: ENTER
       Controller: 0
     - Enabled: 1
-      sourceType: 0
       Key: 274
-      AxisName: 
-      ActionRef: {fileID: 0}
-      EmulatorButtonName: DOWN
+      Control: DOWN
       Controller: 0
     - Enabled: 1
-      sourceType: 0
       Key: 273
-      AxisName: 
-      ActionRef: {fileID: 0}
-      EmulatorButtonName: UP
+      Control: UP
       Controller: 0
     - Enabled: 1
-      sourceType: 0
       Key: 276
-      AxisName: 
-      ActionRef: {fileID: 0}
-      EmulatorButtonName: LEFT
+      Control: LEFT
       Controller: 0
     - Enabled: 1
-      sourceType: 0
       Key: 275
-      AxisName: 
-      ActionRef: {fileID: 0}
-      EmulatorButtonName: RIGHT
+      Control: RIGHT
       Controller: 0
     - Enabled: 1
-      sourceType: 0
       Key: 270
-      AxisName: 
-      ActionRef: {fileID: 0}
-      EmulatorButtonName: PLUS
+      Control: PLUS
       Controller: 0
     - Enabled: 1
-      sourceType: 0
       Key: 269
-      AxisName: 
-      ActionRef: {fileID: 0}
-      EmulatorButtonName: MINUS
+      Control: MINUS
       Controller: 0
     - Enabled: 1
-      sourceType: 0
       Key: 268
-      AxisName: 
-      ActionRef: {fileID: 0}
-      EmulatorButtonName: MULTIPLY
+      Control: MULTIPLY
       Controller: 0
     - Enabled: 1
-      sourceType: 0
       Key: 267
-      AxisName: 
-      ActionRef: {fileID: 0}
-      EmulatorButtonName: DIVIDE
+      Control: DIVIDE
       Controller: 0
     - Enabled: 1
-      sourceType: 0
       Key: 27
-      AxisName: 
-      ActionRef: {fileID: 0}
-      EmulatorButtonName: CLEAR
+      Control: CLEAR
       Controller: 0
     - Enabled: 1
-      sourceType: 0
       Key: 54
-      AxisName: 
-      ActionRef: {fileID: 0}
-      EmulatorButtonName: EXP
+      Control: EXP
       Controller: 0
     - Enabled: 1
-      sourceType: 0
       Key: 45
-      AxisName: 
-      ActionRef: {fileID: 0}
-      EmulatorButtonName: DASH
+      Control: DASH
       Controller: 0
     - Enabled: 1
-      sourceType: 0
       Key: 48
-      AxisName: 
-      ActionRef: {fileID: 0}
-      EmulatorButtonName: PARACLOSE
+      Control: PARACLOSE
       Controller: 0
     - Enabled: 1
-      sourceType: 0
       Key: 116
-      AxisName: 
-      ActionRef: {fileID: 0}
-      EmulatorButtonName: TAN
+      Control: TAN
       Controller: 0
     - Enabled: 1
-      sourceType: 0
       Key: 118
-      AxisName: 
-      ActionRef: {fileID: 0}
-      EmulatorButtonName: VARS
+      Control: VARS
       Controller: 0
     - Enabled: 1
-      sourceType: 0
       Key: 57
-      AxisName: 
-      ActionRef: {fileID: 0}
-      EmulatorButtonName: PARAOPEN
+      Control: PARAOPEN
       Controller: 0
     - Enabled: 1
-      sourceType: 0
       Key: 99
-      AxisName: 
-      ActionRef: {fileID: 0}
-      EmulatorButtonName: COS
+      Control: COS
       Controller: 0
     - Enabled: 1
-      sourceType: 0
       Key: 114
-      AxisName: 
-      ActionRef: {fileID: 0}
-      EmulatorButtonName: PRGM
+      Control: PRGM
       Controller: 0
     - Enabled: 1
-      sourceType: 0
       Key: 115
-      AxisName: 
-      ActionRef: {fileID: 0}
-      EmulatorButtonName: STAT
+      Control: STAT
       Controller: 0
     - Enabled: 1
-      sourceType: 0
       Key: 46
-      AxisName: 
-      ActionRef: {fileID: 0}
-      EmulatorButtonName: SIN
+      Control: SIN
       Controller: 0
     - Enabled: 1
-      sourceType: 0
       Key: 91
-      AxisName: 
-      ActionRef: {fileID: 0}
-      EmulatorButtonName: MATRIX
+      Control: MATRIX
       Controller: 0
     - Enabled: 1
-      sourceType: 0
       Key: 120
-      AxisName: 
-      ActionRef: {fileID: 0}
-      EmulatorButtonName: X
+      Control: X
       Controller: 0
     - Enabled: 1
-      sourceType: 0
       Key: 277
-      AxisName: 
-      ActionRef: {fileID: 0}
-      EmulatorButtonName: STO
+      Control: STO
       Controller: 0
     - Enabled: 1
-      sourceType: 0
       Key: 108
-      AxisName: 
-      ActionRef: {fileID: 0}
-      EmulatorButtonName: LN
+      Control: LN
       Controller: 0
     - Enabled: 1
-      sourceType: 0
       Key: 111
-      AxisName: 
-      ActionRef: {fileID: 0}
-      EmulatorButtonName: LOG
+      Control: LOG
       Controller: 0
     - Enabled: 1
-      sourceType: 0
       Key: 50
-      AxisName: 
-      ActionRef: {fileID: 0}
-      EmulatorButtonName: SQUARED
+      Control: SQUARED
       Controller: 0
     - Enabled: 1
-      sourceType: 0
       Key: 49
-      AxisName: 
-      ActionRef: {fileID: 0}
-      EmulatorButtonName: NEG1
+      Control: NEG1
       Controller: 0
     - Enabled: 1
-      sourceType: 0
       Key: 109
-      AxisName: 
-      ActionRef: {fileID: 0}
-      EmulatorButtonName: MATH
+      Control: MATH
       Controller: 0
     - Enabled: 1
-      sourceType: 0
       Key: 97
-      AxisName: 
-      ActionRef: {fileID: 0}
-      EmulatorButtonName: ALPHA
+      Control: ALPHA
       Controller: 0
     - Enabled: 1
-      sourceType: 0
       Key: 103
-      AxisName: 
-      ActionRef: {fileID: 0}
-      EmulatorButtonName: GRAPH
+      Control: GRAPH
       Controller: 0
     - Enabled: 1
-      sourceType: 0
       Key: 278
-      AxisName: 
-      ActionRef: {fileID: 0}
-      EmulatorButtonName: TRACE
+      Control: TRACE
       Controller: 0
     - Enabled: 1
-      sourceType: 0
       Key: 122
-      AxisName: 
-      ActionRef: {fileID: 0}
-      EmulatorButtonName: ZOOM
+      Control: ZOOM
       Controller: 0
     - Enabled: 1
-      sourceType: 0
       Key: 119
-      AxisName: 
-      ActionRef: {fileID: 0}
-      EmulatorButtonName: WINDOW
+      Control: WINDOW
       Controller: 0
     - Enabled: 1
-      sourceType: 0
       Key: 121
-      AxisName: 
-      ActionRef: {fileID: 0}
-      EmulatorButtonName: Y
+      Control: Y
       Controller: 0
     - Enabled: 1
-      sourceType: 0
       Key: 47
-      AxisName: 
-      ActionRef: {fileID: 0}
-      EmulatorButtonName: SECOND
+      Control: SECOND
       Controller: 0
     - Enabled: 1
-      sourceType: 0
       Key: 92
-      AxisName: 
-      ActionRef: {fileID: 0}
-      EmulatorButtonName: MODE
+      Control: MODE
       Controller: 0
     - Enabled: 1
-      sourceType: 0
       Key: 127
-      AxisName: 
-      ActionRef: {fileID: 0}
-      EmulatorButtonName: DEL
+      Control: DEL
       Controller: 0
     - Enabled: 1
-      sourceType: 0
       Key: 44
-      AxisName: 
-      ActionRef: {fileID: 0}
-      EmulatorButtonName: COMMA
+      Control: COMMA
       Controller: 0

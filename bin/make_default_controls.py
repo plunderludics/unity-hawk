@@ -187,9 +187,8 @@ def mapping_to_yaml(system_id, mapping):
         f"  m_Name: {system_id}",
         "  m_EditorClassIdentifier: ",
         "  Controls:",
-        "    buttonMappings:"
+        "    mappings:"
     ]
-    
     for k, v in mapping.items():
         # Strip "P1"/"P2"/etc prefix if it exists, set controller as int
         if k.startswith("P") and len(k) > 2 and k[1].isdigit() and k[2] == " ":
@@ -205,19 +204,12 @@ def mapping_to_yaml(system_id, mapping):
                 keycode = key_name_to_code[key]
             else:
                 print(f"Warning: Key '{key}' not found in key_name_to_code, skipping.")
+                # print(system_id,k,v)
                 continue
-                
             yaml_lines.append(f"    - Enabled: 1")
-            yaml_lines.append(f"      sourceType: 0")  # KeyCode = 0
             yaml_lines.append(f"      Key: {keycode}")
-            yaml_lines.append(f"      AxisName: ")  # Empty for KeyCode
-            yaml_lines.append(f"      ActionRef: {{fileID: 0}}")  # Empty for KeyCode
-            yaml_lines.append(f"      EmulatorButtonName: {k}")
+            yaml_lines.append(f"      Control: {k}")
             yaml_lines.append(f"      Controller: {controller}")
-    
-    # No axis mappings for now
-    # yaml_lines.append("    axisMappings:")
-    
     return "\n".join(yaml_lines)
 
 def main():
@@ -225,7 +217,6 @@ def main():
     with open(config_file, encoding="utf-8") as f:
         config = json.load(f)
     controllers = config["AllTrollers"]
-    # There is also an "AllTrollersAnalog" key for analog controls but seems hard to map, ignore it
     for ctrl_name, mapping in controllers.items():
         if ctrl_name in name_to_system_id:
             system_id = name_to_system_id[ctrl_name] 
@@ -237,14 +228,13 @@ def main():
             print(f"Skipping {system_id}")
             continue
         print(f"Processing {system_id}")
-        print(f"  Found {len(mapping)} control mappings")
-        
         yaml = mapping_to_yaml(system_id, mapping)
         asset_name = system_id + ".asset"
         out_path = os.path.join(controls_dir, asset_name)
 
-        if os.path.exists(out_path):
-            print(f"Warning: {out_path} already exists. Overwriting...")
+        # if os.path.exists(out_path):
+        #     print(f"Skipped {out_path} (already exists)")
+        #     continue
     
         with open(out_path, "w", encoding="utf-8") as f:
             f.write(yaml)

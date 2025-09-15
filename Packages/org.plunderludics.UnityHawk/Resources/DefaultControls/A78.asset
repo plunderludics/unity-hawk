@@ -13,102 +13,60 @@ MonoBehaviour:
   m_Name: A78
   m_EditorClassIdentifier: 
   Controls:
-    buttonMappings:
+    mappings:
     - Enabled: 1
-      sourceType: 0
       Key: 100
-      AxisName: 
-      ActionRef: {fileID: 0}
-      EmulatorButtonName: Reset
+      Control: Reset
       Controller: 0
     - Enabled: 1
-      sourceType: 0
       Key: 115
-      AxisName: 
-      ActionRef: {fileID: 0}
-      EmulatorButtonName: Select
+      Control: Select
       Controller: 0
     - Enabled: 1
-      sourceType: 0
       Key: 273
-      AxisName: 
-      ActionRef: {fileID: 0}
-      EmulatorButtonName: Up
+      Control: Up
       Controller: 1
     - Enabled: 1
-      sourceType: 0
       Key: 274
-      AxisName: 
-      ActionRef: {fileID: 0}
-      EmulatorButtonName: Down
+      Control: Down
       Controller: 1
     - Enabled: 1
-      sourceType: 0
       Key: 276
-      AxisName: 
-      ActionRef: {fileID: 0}
-      EmulatorButtonName: Left
+      Control: Left
       Controller: 1
     - Enabled: 1
-      sourceType: 0
       Key: 275
-      AxisName: 
-      ActionRef: {fileID: 0}
-      EmulatorButtonName: Right
+      Control: Right
       Controller: 1
     - Enabled: 1
-      sourceType: 0
       Key: 122
-      AxisName: 
-      ActionRef: {fileID: 0}
-      EmulatorButtonName: Trigger
+      Control: Trigger
       Controller: 1
     - Enabled: 1
-      sourceType: 0
       Key: 120
-      AxisName: 
-      ActionRef: {fileID: 0}
-      EmulatorButtonName: Trigger 2
+      Control: Trigger 2
       Controller: 1
     - Enabled: 1
-      sourceType: 0
       Key: 264
-      AxisName: 
-      ActionRef: {fileID: 0}
-      EmulatorButtonName: Up
+      Control: Up
       Controller: 2
     - Enabled: 1
-      sourceType: 0
       Key: 258
-      AxisName: 
-      ActionRef: {fileID: 0}
-      EmulatorButtonName: Down
+      Control: Down
       Controller: 2
     - Enabled: 1
-      sourceType: 0
       Key: 260
-      AxisName: 
-      ActionRef: {fileID: 0}
-      EmulatorButtonName: Left
+      Control: Left
       Controller: 2
     - Enabled: 1
-      sourceType: 0
       Key: 262
-      AxisName: 
-      ActionRef: {fileID: 0}
-      EmulatorButtonName: Right
+      Control: Right
       Controller: 2
     - Enabled: 1
-      sourceType: 0
       Key: 257
-      AxisName: 
-      ActionRef: {fileID: 0}
-      EmulatorButtonName: Trigger
+      Control: Trigger
       Controller: 2
     - Enabled: 1
-      sourceType: 0
       Key: 259
-      AxisName: 
-      ActionRef: {fileID: 0}
-      EmulatorButtonName: Trigger 2
+      Control: Trigger 2
       Controller: 2

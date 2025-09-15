@@ -13,130 +13,76 @@ MonoBehaviour:
   m_Name: WSWAN
   m_EditorClassIdentifier: 
   Controls:
-    buttonMappings:
+    mappings:
     - Enabled: 1
-      sourceType: 0
       Key: 273
-      AxisName: 
-      ActionRef: {fileID: 0}
-      EmulatorButtonName: X1
+      Control: X1
       Controller: 1
     - Enabled: 1
-      sourceType: 0
       Key: 274
-      AxisName: 
-      ActionRef: {fileID: 0}
-      EmulatorButtonName: X3
+      Control: X3
       Controller: 1
     - Enabled: 1
-      sourceType: 0
       Key: 276
-      AxisName: 
-      ActionRef: {fileID: 0}
-      EmulatorButtonName: X4
+      Control: X4
       Controller: 1
     - Enabled: 1
-      sourceType: 0
       Key: 275
-      AxisName: 
-      ActionRef: {fileID: 0}
-      EmulatorButtonName: X2
+      Control: X2
       Controller: 1
     - Enabled: 1
-      sourceType: 0
       Key: 264
-      AxisName: 
-      ActionRef: {fileID: 0}
-      EmulatorButtonName: Y1
+      Control: Y1
       Controller: 1
     - Enabled: 1
-      sourceType: 0
       Key: 258
-      AxisName: 
-      ActionRef: {fileID: 0}
-      EmulatorButtonName: Y3
+      Control: Y3
       Controller: 1
     - Enabled: 1
-      sourceType: 0
       Key: 260
-      AxisName: 
-      ActionRef: {fileID: 0}
-      EmulatorButtonName: Y4
+      Control: Y4
       Controller: 1
     - Enabled: 1
-      sourceType: 0
       Key: 262
-      AxisName: 
-      ActionRef: {fileID: 0}
-      EmulatorButtonName: Y2
+      Control: Y2
       Controller: 1
     - Enabled: 1
-      sourceType: 0
       Key: 13
-      AxisName: 
-      ActionRef: {fileID: 0}
-      EmulatorButtonName: Start
+      Control: Start
       Controller: 1
     - Enabled: 1
-      sourceType: 0
       Key: 122
-      AxisName: 
-      ActionRef: {fileID: 0}
-      EmulatorButtonName: B
+      Control: B
       Controller: 1
     - Enabled: 1
-      sourceType: 0
       Key: 120
-      AxisName: 
-      ActionRef: {fileID: 0}
-      EmulatorButtonName: A
+      Control: A
       Controller: 1
     - Enabled: 1
-      sourceType: 0
       Key: 120
-      AxisName: 
-      ActionRef: {fileID: 0}
-      EmulatorButtonName: X3
+      Control: X3
       Controller: 2
     - Enabled: 1
-      sourceType: 0
       Key: 122
-      AxisName: 
-      ActionRef: {fileID: 0}
-      EmulatorButtonName: X4
+      Control: X4
       Controller: 2
     - Enabled: 1
-      sourceType: 0
       Key: 276
-      AxisName: 
-      ActionRef: {fileID: 0}
-      EmulatorButtonName: Y1
+      Control: Y1
       Controller: 2
     - Enabled: 1
-      sourceType: 0
       Key: 275
-      AxisName: 
-      ActionRef: {fileID: 0}
-      EmulatorButtonName: Y3
+      Control: Y3
       Controller: 2
     - Enabled: 1
-      sourceType: 0
       Key: 274
-      AxisName: 
-      ActionRef: {fileID: 0}
-      EmulatorButtonName: Y4
+      Control: Y4
       Controller: 2
     - Enabled: 1
-      sourceType: 0
       Key: 273
-      AxisName: 
-      ActionRef: {fileID: 0}
-      EmulatorButtonName: Y2
+      Control: Y2
       Controller: 2
     - Enabled: 1
-      sourceType: 0
       Key: 13
-      AxisName: 
-      ActionRef: {fileID: 0}
-      EmulatorButtonName: Start
+      Control: Start
       Controller: 2

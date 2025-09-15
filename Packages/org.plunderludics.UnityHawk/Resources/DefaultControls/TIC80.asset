@@ -13,81 +13,48 @@ MonoBehaviour:
   m_Name: TIC80
   m_EditorClassIdentifier: 
   Controls:
-    buttonMappings:
+    mappings:
     - Enabled: 1
-      sourceType: 0
       Key: 273
-      AxisName: 
-      ActionRef: {fileID: 0}
-      EmulatorButtonName: Up
+      Control: Up
       Controller: 1
     - Enabled: 1
-      sourceType: 0
       Key: 274
-      AxisName: 
-      ActionRef: {fileID: 0}
-      EmulatorButtonName: Down
+      Control: Down
       Controller: 1
     - Enabled: 1
-      sourceType: 0
       Key: 276
-      AxisName: 
-      ActionRef: {fileID: 0}
-      EmulatorButtonName: Left
+      Control: Left
       Controller: 1
     - Enabled: 1
-      sourceType: 0
       Key: 275
-      AxisName: 
-      ActionRef: {fileID: 0}
-      EmulatorButtonName: Right
+      Control: Right
       Controller: 1
     - Enabled: 1
-      sourceType: 0
       Key: 120
-      AxisName: 
-      ActionRef: {fileID: 0}
-      EmulatorButtonName: A
+      Control: A
       Controller: 1
     - Enabled: 1
-      sourceType: 0
       Key: 122
-      AxisName: 
-      ActionRef: {fileID: 0}
-      EmulatorButtonName: B
+      Control: B
       Controller: 1
     - Enabled: 1
-      sourceType: 0
       Key: 115
-      AxisName: 
-      ActionRef: {fileID: 0}
-      EmulatorButtonName: X
+      Control: X
       Controller: 1
     - Enabled: 1
-      sourceType: 0
       Key: 97
-      AxisName: 
-      ActionRef: {fileID: 0}
-      EmulatorButtonName: Y
+      Control: Y
       Controller: 1
     - Enabled: 1
-      sourceType: 0
       Key: 122
-      AxisName: 
-      ActionRef: {fileID: 0}
-      EmulatorButtonName: Mouse Left Click
+      Control: Mouse Left Click
       Controller: 0
     - Enabled: 1
-      sourceType: 0
       Key: 120
-      AxisName: 
-      ActionRef: {fileID: 0}
-      EmulatorButtonName: Mouse Middle Click
+      Control: Mouse Middle Click
       Controller: 0
     - Enabled: 1
-      sourceType: 0
       Key: 99
-      AxisName: 
-      ActionRef: {fileID: 0}
-      EmulatorButtonName: Mouse Right Click
+      Control: Mouse Right Click
       Controller: 0

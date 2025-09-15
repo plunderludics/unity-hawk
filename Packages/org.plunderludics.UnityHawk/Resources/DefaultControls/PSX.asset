@@ -13,228 +13,132 @@ MonoBehaviour:
   m_Name: PSX
   m_EditorClassIdentifier: 
   Controls:
-    buttonMappings:
+    mappings:
     - Enabled: 1
-      sourceType: 0
       Key: 273
-      AxisName: 
-      ActionRef: {fileID: 0}
-      EmulatorButtonName: Up
+      Control: Up
       Controller: 1
     - Enabled: 1
-      sourceType: 0
       Key: 273
-      AxisName: 
-      ActionRef: {fileID: 0}
-      EmulatorButtonName: D-Pad Up
+      Control: D-Pad Up
       Controller: 1
     - Enabled: 1
-      sourceType: 0
       Key: 273
-      AxisName: 
-      ActionRef: {fileID: 0}
-      EmulatorButtonName: Thumbstick Up
+      Control: Thumbstick Up
       Controller: 1
     - Enabled: 1
-      sourceType: 0
       Key: 274
-      AxisName: 
-      ActionRef: {fileID: 0}
-      EmulatorButtonName: Down
+      Control: Down
       Controller: 1
     - Enabled: 1
-      sourceType: 0
       Key: 274
-      AxisName: 
-      ActionRef: {fileID: 0}
-      EmulatorButtonName: D-Pad Down
+      Control: D-Pad Down
       Controller: 1
     - Enabled: 1
-      sourceType: 0
       Key: 274
-      AxisName: 
-      ActionRef: {fileID: 0}
-      EmulatorButtonName: Thumbstick Down
+      Control: Thumbstick Down
       Controller: 1
     - Enabled: 1
-      sourceType: 0
       Key: 276
-      AxisName: 
-      ActionRef: {fileID: 0}
-      EmulatorButtonName: Left
+      Control: Left
       Controller: 1
     - Enabled: 1
-      sourceType: 0
       Key: 276
-      AxisName: 
-      ActionRef: {fileID: 0}
-      EmulatorButtonName: D-Pad Left
+      Control: D-Pad Left
       Controller: 1
     - Enabled: 1
-      sourceType: 0
       Key: 276
-      AxisName: 
-      ActionRef: {fileID: 0}
-      EmulatorButtonName: Thumbstick Left
+      Control: Thumbstick Left
       Controller: 1
     - Enabled: 1
-      sourceType: 0
       Key: 275
-      AxisName: 
-      ActionRef: {fileID: 0}
-      EmulatorButtonName: Right
+      Control: Right
       Controller: 1
     - Enabled: 1
-      sourceType: 0
       Key: 275
-      AxisName: 
-      ActionRef: {fileID: 0}
-      EmulatorButtonName: D-Pad Right
+      Control: D-Pad Right
       Controller: 1
     - Enabled: 1
-      sourceType: 0
       Key: 275
-      AxisName: 
-      ActionRef: {fileID: 0}
-      EmulatorButtonName: Thumbstick Right
+      Control: Thumbstick Right
       Controller: 1
     - Enabled: 1
-      sourceType: 0
       Key: 32
-      AxisName: 
-      ActionRef: {fileID: 0}
-      EmulatorButtonName: Select
+      Control: Select
       Controller: 1
     - Enabled: 1
-      sourceType: 0
       Key: 13
-      AxisName: 
-      ActionRef: {fileID: 0}
-      EmulatorButtonName: Start
+      Control: Start
       Controller: 1
     - Enabled: 1
-      sourceType: 0
       Key: 97
-      AxisName: 
-      ActionRef: {fileID: 0}
-      EmulatorButtonName: Square
+      Control: Square
       Controller: 1
     - Enabled: 1
-      sourceType: 0
       Key: 97
-      AxisName: 
-      ActionRef: {fileID: 0}
-      EmulatorButtonName: □
+      Control: □
       Controller: 1
     - Enabled: 1
-      sourceType: 0
       Key: 115
-      AxisName: 
-      ActionRef: {fileID: 0}
-      EmulatorButtonName: Triangle
+      Control: Triangle
       Controller: 1
     - Enabled: 1
-      sourceType: 0
       Key: 115
-      AxisName: 
-      ActionRef: {fileID: 0}
-      EmulatorButtonName: △
+      Control: △
       Controller: 1
     - Enabled: 1
-      sourceType: 0
       Key: 120
-      AxisName: 
-      ActionRef: {fileID: 0}
-      EmulatorButtonName: Circle
+      Control: Circle
       Controller: 1
     - Enabled: 1
-      sourceType: 0
       Key: 120
-      AxisName: 
-      ActionRef: {fileID: 0}
-      EmulatorButtonName: ○
+      Control: ○
       Controller: 1
     - Enabled: 1
-      sourceType: 0
       Key: 122
-      AxisName: 
-      ActionRef: {fileID: 0}
-      EmulatorButtonName: Cross
+      Control: Cross
       Controller: 1
     - Enabled: 1
-      sourceType: 0
       Key: 122
-      AxisName: 
-      ActionRef: {fileID: 0}
-      EmulatorButtonName: X
+      Control: X
       Controller: 1
     - Enabled: 1
-      sourceType: 0
       Key: 113
-      AxisName: 
-      ActionRef: {fileID: 0}
-      EmulatorButtonName: L1
+      Control: L1
       Controller: 1
     - Enabled: 1
-      sourceType: 0
       Key: 119
-      AxisName: 
-      ActionRef: {fileID: 0}
-      EmulatorButtonName: R1
+      Control: R1
       Controller: 1
     - Enabled: 1
-      sourceType: 0
       Key: 101
-      AxisName: 
-      ActionRef: {fileID: 0}
-      EmulatorButtonName: L2
+      Control: L2
       Controller: 1
     - Enabled: 1
-      sourceType: 0
       Key: 114
-      AxisName: 
-      ActionRef: {fileID: 0}
-      EmulatorButtonName: R2
+      Control: R2
       Controller: 1
     - Enabled: 1
-      sourceType: 0
       Key: 116
-      AxisName: 
-      ActionRef: {fileID: 0}
-      EmulatorButtonName: L3
+      Control: L3
       Controller: 1
     - Enabled: 1
-      sourceType: 0
       Key: 116
-      AxisName: 
-      ActionRef: {fileID: 0}
-      EmulatorButtonName: Left Stick, Button
+      Control: Left Stick, Button
       Controller: 1
     - Enabled: 1
-      sourceType: 0
       Key: 121
-      AxisName: 
-      ActionRef: {fileID: 0}
-      EmulatorButtonName: R3
+      Control: R3
       Controller: 1
     - Enabled: 1
-      sourceType: 0
       Key: 121
-      AxisName: 
-      ActionRef: {fileID: 0}
-      EmulatorButtonName: Right Stick, Button
+      Control: Right Stick, Button
       Controller: 1
     - Enabled: 1
-      sourceType: 0
       Key: 100
-      AxisName: 
-      ActionRef: {fileID: 0}
-      EmulatorButtonName: MODE
+      Control: MODE
       Controller: 1
     - Enabled: 1
-      sourceType: 0
       Key: 100
-      AxisName: 
-      ActionRef: {fileID: 0}
-      EmulatorButtonName: Analog
+      Control: Analog
       Controller: 1

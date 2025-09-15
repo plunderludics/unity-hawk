@@ -13,151 +13,88 @@ MonoBehaviour:
   m_Name: Jaguar
   m_EditorClassIdentifier: 
   Controls:
-    buttonMappings:
+    mappings:
     - Enabled: 1
-      sourceType: 0
       Key: 273
-      AxisName: 
-      ActionRef: {fileID: 0}
-      EmulatorButtonName: Up
+      Control: Up
       Controller: 1
     - Enabled: 1
-      sourceType: 0
       Key: 274
-      AxisName: 
-      ActionRef: {fileID: 0}
-      EmulatorButtonName: Down
+      Control: Down
       Controller: 1
     - Enabled: 1
-      sourceType: 0
       Key: 276
-      AxisName: 
-      ActionRef: {fileID: 0}
-      EmulatorButtonName: Left
+      Control: Left
       Controller: 1
     - Enabled: 1
-      sourceType: 0
       Key: 275
-      AxisName: 
-      ActionRef: {fileID: 0}
-      EmulatorButtonName: Right
+      Control: Right
       Controller: 1
     - Enabled: 1
-      sourceType: 0
       Key: 99
-      AxisName: 
-      ActionRef: {fileID: 0}
-      EmulatorButtonName: A
+      Control: A
       Controller: 1
     - Enabled: 1
-      sourceType: 0
       Key: 120
-      AxisName: 
-      ActionRef: {fileID: 0}
-      EmulatorButtonName: B
+      Control: B
       Controller: 1
     - Enabled: 1
-      sourceType: 0
       Key: 122
-      AxisName: 
-      ActionRef: {fileID: 0}
-      EmulatorButtonName: C
+      Control: C
       Controller: 1
     - Enabled: 1
-      sourceType: 0
       Key: 32
-      AxisName: 
-      ActionRef: {fileID: 0}
-      EmulatorButtonName: Option
+      Control: Option
       Controller: 1
     - Enabled: 1
-      sourceType: 0
       Key: 13
-      AxisName: 
-      ActionRef: {fileID: 0}
-      EmulatorButtonName: Pause
+      Control: Pause
       Controller: 1
     - Enabled: 1
-      sourceType: 0
       Key: 256
-      AxisName: 
-      ActionRef: {fileID: 0}
-      EmulatorButtonName: 0
+      Control: 0
       Controller: 1
     - Enabled: 1
-      sourceType: 0
       Key: 257
-      AxisName: 
-      ActionRef: {fileID: 0}
-      EmulatorButtonName: 1
+      Control: 1
       Controller: 1
     - Enabled: 1
-      sourceType: 0
       Key: 258
-      AxisName: 
-      ActionRef: {fileID: 0}
-      EmulatorButtonName: 2
+      Control: 2
       Controller: 1
     - Enabled: 1
-      sourceType: 0
       Key: 259
-      AxisName: 
-      ActionRef: {fileID: 0}
-      EmulatorButtonName: 3
+      Control: 3
       Controller: 1
     - Enabled: 1
-      sourceType: 0
       Key: 260
-      AxisName: 
-      ActionRef: {fileID: 0}
-      EmulatorButtonName: 4
+      Control: 4
       Controller: 1
     - Enabled: 1
-      sourceType: 0
       Key: 261
-      AxisName: 
-      ActionRef: {fileID: 0}
-      EmulatorButtonName: 5
+      Control: 5
       Controller: 1
     - Enabled: 1
-      sourceType: 0
       Key: 262
-      AxisName: 
-      ActionRef: {fileID: 0}
-      EmulatorButtonName: 6
+      Control: 6
       Controller: 1
     - Enabled: 1
-      sourceType: 0
       Key: 263
-      AxisName: 
-      ActionRef: {fileID: 0}
-      EmulatorButtonName: 7
+      Control: 7
       Controller: 1
     - Enabled: 1
-      sourceType: 0
       Key: 264
-      AxisName: 
-      ActionRef: {fileID: 0}
-      EmulatorButtonName: 8
+      Control: 8
       Controller: 1
     - Enabled: 1
-      sourceType: 0
       Key: 265
-      AxisName: 
-      ActionRef: {fileID: 0}
-      EmulatorButtonName: 9
+      Control: 9
       Controller: 1
     - Enabled: 1
-      sourceType: 0
       Key: 268
-      AxisName: 
-      ActionRef: {fileID: 0}
-      EmulatorButtonName: Asterisk
+      Control: Asterisk
       Controller: 1
     - Enabled: 1
-      sourceType: 0
       Key: 267
-      AxisName: 
-      ActionRef: {fileID: 0}
-      EmulatorButtonName: Pound
+      Control: Pound
       Controller: 1

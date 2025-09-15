@@ -1,7 +1,4 @@
 using SharedMemory;
-using Plunderludics.UnityHawk.Shared;
-using UnityEngine;
-using System.Linq;
 
 namespace UnityHawk {
 public class SharedTextureBuffer : ISharedBuffer {
@@ -29,21 +26,8 @@ public class SharedTextureBuffer : ISharedBuffer {
         _buffer = null;
     }
 
-    public int Width => _buffer[_buffer.Length - 1 - TextureBufferLayout.WidthIndexFromEnd];
-    public int Height => _buffer[_buffer.Length - 1 - TextureBufferLayout.HeightIndexFromEnd];
-    public int Frame => _buffer[_buffer.Length - 1 - TextureBufferLayout.FrameIndexFromEnd];
-
-    public int PixelDataLength => _buffer.Length - TextureBufferLayout.MetadataLength;
-    // TODO: Maybe could save a bit of time by only copying (Width*Height*4) ints instead of the whole buffer
-    // [Unclear why the bizhawk video buffer is so much longer than the actual pixel data]
-
-    public void CopyPixelsTo(int[] other) {
-        // // Debug: Write entire texture buffer to file
-        // string filePath = $"texture-dump.txt";
-        // Debug.Log($"Writing texture buffer {_trueName} to file {filePath}");
-        // System.IO.File.WriteAllLines(filePath, _buffer.Select(value => $"{value}"));
-    
-        _buffer.CopyTo(other, startIndex: 0);
+    public void CopyTo(int[] other, int startIndex = 0) {
+        _buffer.CopyTo(other, startIndex);
     }
 
     // This needs to be called after LoadRom since the texture buffer size changes.

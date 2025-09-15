@@ -13,130 +13,76 @@ MonoBehaviour:
   m_Name: Coleco
   m_EditorClassIdentifier: 
   Controls:
-    buttonMappings:
+    mappings:
     - Enabled: 1
-      sourceType: 0
       Key: 273
-      AxisName: 
-      ActionRef: {fileID: 0}
-      EmulatorButtonName: Up
+      Control: Up
       Controller: 1
     - Enabled: 1
-      sourceType: 0
       Key: 274
-      AxisName: 
-      ActionRef: {fileID: 0}
-      EmulatorButtonName: Down
+      Control: Down
       Controller: 1
     - Enabled: 1
-      sourceType: 0
       Key: 276
-      AxisName: 
-      ActionRef: {fileID: 0}
-      EmulatorButtonName: Left
+      Control: Left
       Controller: 1
     - Enabled: 1
-      sourceType: 0
       Key: 275
-      AxisName: 
-      ActionRef: {fileID: 0}
-      EmulatorButtonName: Right
+      Control: Right
       Controller: 1
     - Enabled: 1
-      sourceType: 0
       Key: 122
-      AxisName: 
-      ActionRef: {fileID: 0}
-      EmulatorButtonName: L
+      Control: L
       Controller: 1
     - Enabled: 1
-      sourceType: 0
       Key: 120
-      AxisName: 
-      ActionRef: {fileID: 0}
-      EmulatorButtonName: R
+      Control: R
       Controller: 1
     - Enabled: 1
-      sourceType: 0
       Key: 257
-      AxisName: 
-      ActionRef: {fileID: 0}
-      EmulatorButtonName: Key 1
+      Control: Key 1
       Controller: 1
     - Enabled: 1
-      sourceType: 0
       Key: 258
-      AxisName: 
-      ActionRef: {fileID: 0}
-      EmulatorButtonName: Key 2
+      Control: Key 2
       Controller: 1
     - Enabled: 1
-      sourceType: 0
       Key: 259
-      AxisName: 
-      ActionRef: {fileID: 0}
-      EmulatorButtonName: Key 3
+      Control: Key 3
       Controller: 1
     - Enabled: 1
-      sourceType: 0
       Key: 260
-      AxisName: 
-      ActionRef: {fileID: 0}
-      EmulatorButtonName: Key 4
+      Control: Key 4
       Controller: 1
     - Enabled: 1
-      sourceType: 0
       Key: 261
-      AxisName: 
-      ActionRef: {fileID: 0}
-      EmulatorButtonName: Key 5
+      Control: Key 5
       Controller: 1
     - Enabled: 1
-      sourceType: 0
       Key: 262
-      AxisName: 
-      ActionRef: {fileID: 0}
-      EmulatorButtonName: Key 6
+      Control: Key 6
       Controller: 1
     - Enabled: 1
-      sourceType: 0
       Key: 263
-      AxisName: 
-      ActionRef: {fileID: 0}
-      EmulatorButtonName: Key 7
+      Control: Key 7
       Controller: 1
     - Enabled: 1
-      sourceType: 0
       Key: 264
-      AxisName: 
-      ActionRef: {fileID: 0}
-      EmulatorButtonName: Key 8
+      Control: Key 8
       Controller: 1
     - Enabled: 1
-      sourceType: 0
       Key: 265
-      AxisName: 
-      ActionRef: {fileID: 0}
-      EmulatorButtonName: Key 9
+      Control: Key 9
       Controller: 1
     - Enabled: 1
-      sourceType: 0
       Key: 271
-      AxisName: 
-      ActionRef: {fileID: 0}
-      EmulatorButtonName: Star
+      Control: Star
       Controller: 1
     - Enabled: 1
-      sourceType: 0
       Key: 256
-      AxisName: 
-      ActionRef: {fileID: 0}
-      EmulatorButtonName: Key 0
+      Control: Key 0
       Controller: 1
     - Enabled: 1
-      sourceType: 0
       Key: 266
-      AxisName: 
-      ActionRef: {fileID: 0}
-      EmulatorButtonName: Pound
+      Control: Pound
       Controller: 1
