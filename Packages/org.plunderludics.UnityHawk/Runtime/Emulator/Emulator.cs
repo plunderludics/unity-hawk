@@ -297,12 +297,15 @@ public partial class Emulator : MonoBehaviour {
     // (These methods are public only for convenient testing)
 
     public void OnValidate() {
+#if UNITY_EDITOR
         _logger ??= new(this, logLevel);
         _logger.LogVerbose("OnValidate");
+
         if (!config) {
             config = (UnityHawkConfig)AssetDatabase.LoadAssetAtPath(
                 Paths.defaultUnityHawkConfigPath,
-                typeof(UnityHawkConfig));
+                typeof(UnityHawkConfig)
+            );
 
             if (!config) {
                 _logger.LogError("UnityHawkConfigDefault.asset not found");
@@ -349,15 +352,14 @@ public partial class Emulator : MonoBehaviour {
                 }
             }
 
-#if UNITY_EDITOR
             // [use EditorApplication.isPlayingOrWillChangePlaymode instead of Application.isPlaying
             //  to avoid OnEnable call as play mode is being entered]
             if (!EditorApplication.isPlayingOrWillChangePlaymode && runInEditMode && Status == EmulatorStatus.Inactive) {
                 // In edit mode, initialize the emulator if it is not already running
                 Initialize();
             }
-#endif
         }
+#endif
     }
 
     public void OnEnable() {
@@ -369,7 +371,7 @@ public partial class Emulator : MonoBehaviour {
         _textureCorrectionMat = new Material(Resources.Load<Shader>(TextureCorrectionShaderName));
         _materialProperties = new MaterialPropertyBlock();
 
-# if UNITY_EDITOR
+#if UNITY_EDITOR
         // In Editor when entering play mode OnEnable gets called twice
         // - once immediately before play mode starts, and once after - don't start up the emulator in the first case
         if (EditorApplication.isPlayingOrWillChangePlaymode && !Application.isPlaying) {
