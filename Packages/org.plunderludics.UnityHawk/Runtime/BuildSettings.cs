@@ -28,6 +28,10 @@ public class BuildSettings : MonoBehaviour {
     [Tooltip("These are all the bizhawk assets that will be included in the build")]
     List<BizhawkAsset> includedAssets;
 
+    [SerializeField]
+    [Tooltip("The minimum log level for BuildProcessing logging")]
+    Logger.LogLevel logLevel = Logger.LogLevel.Warning;
+
     // Thought - we could also have multiple ExtraAssets components in the scene,
     // it could be easier to manage in some ways than a single global list. Maybe multiple ExcludeFromBuild components too
     // But ideally still need a place for global config - seems overcomplicated maybe
@@ -41,7 +45,6 @@ public class BuildSettings : MonoBehaviour {
     void Refresh() {
         includedAssets = null; // Clear this so it doesn't get picked up by CollectBizhawkAssetDependencies
         var dependencies = BuildProcessing.CollectBizhawkAssetDependencies();
-        Debug.Log($"[unity-hawk] BuildSettings Refresh: {dependencies.Count} dependencies");
         includedAssets = dependencies.ToList();
     }
 #endif // UNITY_EDITOR

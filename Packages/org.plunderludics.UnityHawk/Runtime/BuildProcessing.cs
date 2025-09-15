@@ -34,16 +34,20 @@ public class BuildProcessing : IPreprocessBuildWithReport, IProcessSceneWithRepo
     ///// IOrderedCallback
     public int callbackOrder => 0;
 
+    Logger _logger = new(null);
+
     ///// IPreprocessBuildWithReport
     public void OnPreprocessBuild(BuildReport report) {
-        // Don't actually need to do anything here
+        // Pretty messy, but if there is a BuildSettings component in whatever scene is active, use the loglevel setting from that
+        var buildSettings = GetBuildSettings();
+        _logger.MinLogLevel = buildSettings.logLevel;
     }
 
     ///// IProcessSceneWithReport
     /// This gets called for each scene in the build, but only when changes are made to the scene.
     /// When changes are made, clear the list of files to copy and regenerate
     public void OnProcessScene(Scene scene, BuildReport report) {
-        Debug.Log($"[unity-hawk] OnProcessScene({scene.path})");
+        _logger.LogVerbose($"OnProcessScene({scene.path})");
         if (BuildPipeline.isBuildingPlayer) { // Only process when actually building
             CollectSceneFiles(scene);
             _lastProcessedScenePath = scene.path;
@@ -52,24 +56,24 @@ public class BuildProcessing : IPreprocessBuildWithReport, IProcessSceneWithRepo
 
     ///// IPostprocessBuildWithReport
     public void OnPostprocessBuild(BuildReport report) {
-        Debug.Log("[unity-hawk] OnPostprocessBuild");
+        _logger.LogVerbose("OnPostprocessBuild");
 
         var exePath = report.summary.outputPath;
 
         // Copy all the collected files to the build directory
         var nFilesCopied = CopyFilesToBuild(exePath);
-        Debug.Log($"[unity-hawk] copied {nFilesCopied} files to build directory");
+        _logger.LogVerbose($"copied {nFilesCopied} files to build directory");
 
         if (nFilesCopied == 0) {
             // There's no file dependencies so I think we can assume bizhawk is not actually being used, don't copy it into build
             // (Are there any weird edge cases where this would not be true? I guess if there's an Emulator component that's only used to load assets from external paths)
-            Debug.LogWarning($"[unity-hawk] no UnityHawk assets are used in this build so not copying BizHawk into build");
+            _logger.LogWarning("no UnityHawk assets are used in this build so not copying BizHawk into build");
         } else {
             // Gotta make sure all the bizhawk stuff gets into the build
             // Copy over the whole Packages/org.plunderludics.UnityHawk/BizHawk/ directory into xxx_Data/org.plunderludics.UnityHawk/BizHawk/
             // [kinda sucks but don't know a better way]
             var targetDir = Path.Combine(GetBuildDataDir(exePath), Paths.BizhawkDirRelative);
-            Debug.Log($"[unity-hawk] copying bizhawk directory from: {Path.GetFullPath(Paths.BizHawkDir)} to {Path.GetFullPath(targetDir)}");
+            _logger.Log($"copying bizhawk directory from: {Path.GetFullPath(Paths.BizHawkDir)} to {Path.GetFullPath(targetDir)}");
             Directory.CreateDirectory(targetDir);
             FileUtil.ReplaceDirectory(Path.GetFullPath(Paths.BizHawkDir), Path.GetFullPath(targetDir)); // [only works with full paths for some reason]
         }
@@ -78,16 +82,14 @@ public class BuildProcessing : IPreprocessBuildWithReport, IProcessSceneWithRepo
     ///// commands
     /// Collect and store all the bizhawk assets that need to be copied for a scene
     void CollectSceneFiles(Scene scene) {
-        Debug.Log($"[unity-hawk] CollectSceneFiles({scene.path})");
+        _logger.LogVerbose($"CollectSceneFiles({scene.path})");
         // Scene has been modified, clear list of files and regenerate
         _filesForScene[scene.path] = new();
-
-        // TODO: Look for BuildSettings component in the scene
 
         // Find all BizhawkAsset dependencies in scene and collect them for later copying
         var bizhawkDependencies = CollectBizhawkAssetDependencies();
 
-        Debug.Log($"[unity-hawk] collected {bizhawkDependencies.Count} dependencies for scene {scene.path}: \n {string.Join("\n", bizhawkDependencies)}");
+        _logger.LogVerbose($"collected {bizhawkDependencies.Count} dependencies for scene {scene.path}: \n {string.Join("\n", bizhawkDependencies)}");
 
         // Add assets that need to be copied
         foreach (var dependency in bizhawkDependencies) {
@@ -117,23 +119,23 @@ public class BuildProcessing : IPreprocessBuildWithReport, IProcessSceneWithRepo
                 throw new Exception($"[unity-hawk] no scenes in build settings and no last processed scene");
             }
             scenePaths.Add(_lastProcessedScenePath);
-            Debug.Log($"[unity-hawk] no scenes in build settings, fallback to last processed scene ({_lastProcessedScenePath})");
+            _logger.Log($"no scenes in build settings, fallback to last processed scene ({_lastProcessedScenePath})");
         }
         foreach (var scenePath in scenePaths) {
             if (!_filesForScene.ContainsKey(scenePath)) {
                 // I think this happens when code gets recompiled but there are no changes to the scene
                 // I guess to avoid this we could store the bizhawk asset references somewhere in the scene itself (in BuildSettings component I guess)
                 // - but just re-collecting the dependencies here seems fine
-                Debug.LogWarning($"[unity-hawk] scene {scenePath} is in build but has not been processed. Attempting to re-collect dependencies...");
+                _logger.LogWarning($"scene {scenePath} is in build but has not been processed. Attempting to re-collect dependencies...");
                 Scene scene = EditorSceneManager.OpenScene(scenePath);
                 CollectSceneFiles(scene);
             }
 
             var sceneFiles = _filesForScene[scenePath];
-            Debug.Log($"[unity-hawk] for scene {scenePath}: copying {sceneFiles.Count} files to {bizhawkAssetsPath}");
+            _logger.LogVerbose($"for scene {scenePath}: copying {sceneFiles.Count} files to {bizhawkAssetsPath}");
             foreach (var file in sceneFiles) {
                 if (!file) {
-                    Debug.LogWarning($"[unity-hawk] for scene {scenePath}: null BizHawkAsset encountered");
+                    _logger.LogWarning($"for scene {scenePath}: null BizHawkAsset encountered");
                     continue;
                 }
                 MoveToDirectory(false, file, bizhawkAssetsPath);
@@ -160,7 +162,7 @@ public class BuildProcessing : IPreprocessBuildWithReport, IProcessSceneWithRepo
         var outPath = Path.Combine(baseTargetDir, inRelativePath);
         var outDir = Path.GetDirectoryName(outPath);
 
-        Debug.Log($"[unity-hawk] Copy from: {inPath} to {outPath}");
+        _logger.LogVerbose($"Copy from: {inPath} to {outPath}");
 
         Directory.CreateDirectory(outDir!);
         if (!File.Exists(outPath)) {
@@ -192,7 +194,7 @@ public class BuildProcessing : IPreprocessBuildWithReport, IProcessSceneWithRepo
                 var otherNoExt = Path.GetFileNameWithoutExtension(other.FullName);
                 if (string.Equals(otherNoExt, inNoExt, StringComparison.InvariantCultureIgnoreCase)) {
                     var otherOutPath = Path.Combine(outDir, other.Name);
-                    Debug.Log($"[unity-hawk] Copy from: {other.FullName} to {otherOutPath}");
+                    _logger.LogVerbose($"Copy from: {other.FullName} to {otherOutPath}");
                     if (!File.Exists(otherOutPath)) {
                         File.Copy(other.FullName, otherOutPath, overwrite: true);
                     }
@@ -204,14 +206,13 @@ public class BuildProcessing : IPreprocessBuildWithReport, IProcessSceneWithRepo
     /// Collect all the Bizhawk assets that are used in active scene
     /// (Mainly reimplements EditorUtility.CollectDependencies to support exluding disabled objects)
     /// Reads build settings from BuildSettings component in the scene if there is one
-    // TODO: add List<Transform> excludeTransforms arg (?)
     public static ISet<BizhawkAsset> CollectBizhawkAssetDependencies() {
         BuildSettings buildSettings = GetBuildSettings();
 
         // Whether to include inactive objects and disabled components in dependency search
         bool includeInactive = buildSettings.includeInactive;
 
-        Debug.Log($"[unity-hawk] CollectBizhawkAssetDependencies: includeInactive: {includeInactive}");
+        _logger.LogVerbose($"CollectBizhawkAssetDependencies: includeInactive: {includeInactive}");
 
         // Get all components in scene
         var components = UnityEngine.Object.FindObjectsByType<Component>(
@@ -255,7 +256,7 @@ public class BuildProcessing : IPreprocessBuildWithReport, IProcessSceneWithRepo
             var gameObject = new GameObject("BuildSettings");
             buildSettings = gameObject.AddComponent<BuildSettings>(); // Use default values for settings
         } else if (allBuildSettings.Count > 1) {
-            throw new Exception($"[unity-hawk] {allBuildSettings.Count} active BuildSettings components found in scene, should be at most one");
+            throw new Exception($"{allBuildSettings.Count} active BuildSettings components found in scene, should be at most one");
         } else { // 1
             buildSettings = allBuildSettings[0];
         }
