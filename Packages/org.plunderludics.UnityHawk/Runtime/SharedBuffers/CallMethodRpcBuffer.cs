@@ -19,9 +19,12 @@ internal class CallMethodRpcBuffer : ISharedBuffer {
     public delegate void Callback(string methodName, string argString, out string output);
     Callback _callback;
 
-    public CallMethodRpcBuffer(string name, Callback callRegisteredMethod) {
+    Logger _logger;
+
+    public CallMethodRpcBuffer(string name, Callback callRegisteredMethod, Logger logger) {
         _name = name;
         _callback = callRegisteredMethod;
+        _logger = logger;
     }
 
     public void Open() {
@@ -30,7 +33,7 @@ internal class CallMethodRpcBuffer : ISharedBuffer {
             (msgId, payload) => {
                 string returnString;
                 try { // Because this runs outside the main threads, we have to catch all exceptions to force them to display in the console
-                    // Debug.Log($"callmethod rpc request {string.Join(", ", payload)}");
+                    _logger.LogVerbose($"callmethod rpc request {string.Join(", ", payload)}");
 
                     // Deserialize the payload to a MethodCall struct
                     MethodCall methodCall = Serialization.RawDeserialize<MethodCall>(payload);
@@ -41,7 +44,7 @@ internal class CallMethodRpcBuffer : ISharedBuffer {
 
                     // [messy hack] don't allow returning null because it seems to break things on the other side of the RPC
                     if (returnString == null) {
-                        Debug.LogWarning($"{methodName} returned null but null return values are not supported, converting to empty string");
+                        _logger.LogWarning($"{methodName} returned null but null return values are not supported, converting to empty string");
                         returnString = "";
                     }
                 } catch (Exception e) {

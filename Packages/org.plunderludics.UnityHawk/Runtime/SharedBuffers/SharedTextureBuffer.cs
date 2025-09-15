@@ -4,15 +4,20 @@ using UnityEngine;
 using System.Linq;
 
 namespace UnityHawk {
+
 internal class SharedTextureBuffer : ISharedBuffer {
-    private string _name;
-    private string _trueName;
-    private int _index;
-    private SharedArray<int> _buffer;
+    string _name;
+    string _trueName;
+    int _index;
+    SharedArray<int> _buffer;
+    Logger _logger;
+
     public int Length => _buffer.Length;
-    public SharedTextureBuffer(string name) {
+
+    public SharedTextureBuffer(string name, Logger logger) {
         _index = 0;
         _name = name;
+        _logger = logger;
         UpdateSize();
     }
 
@@ -40,7 +45,7 @@ internal class SharedTextureBuffer : ISharedBuffer {
     public void CopyPixelsTo(int[] other) {
         // // Debug: Write entire texture buffer to file
         // string filePath = $"texture-dump.txt";
-        // Debug.Log($"Writing texture buffer {_trueName} to file {filePath}");
+        // _logger.Log($"Writing texture buffer {_trueName} to file {filePath}");
         // System.IO.File.WriteAllLines(filePath, _buffer.Select(value => $"{value}"));
     
         _buffer.CopyTo(other, startIndex: 0);

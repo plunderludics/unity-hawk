@@ -1,3 +1,5 @@
+// For any tests we want to run in edit mode but not play mode
+
 using System.Collections;
 using System.Collections.Generic;
 using NUnit.Framework;
@@ -9,8 +11,7 @@ using System;
 
 namespace UnityHawk.Tests {
 
-// For any extra tests we need to run in edit mode but not play mode
-public class EditModeTests: SharedTests
+public class EditModeTests : SharedTests
 {
     public EditModeTests(bool passInputFromUnity, bool captureEmulatorAudio, bool showBizhawkGui)
         : base(passInputFromUnity, captureEmulatorAudio, showBizhawkGui)
@@ -21,7 +22,7 @@ public class EditModeTests: SharedTests
     public IEnumerator TestNotRunningInEditMode()
     {
         e.runInEditMode = false;
-        e.OnValidate();
+        ActivateEmulator();
 
         yield return WaitForAWhile(e);
         Assert.That(e.CurrentStatus, Is.EqualTo(Emulator.Status.Inactive));

@@ -146,6 +146,10 @@ public partial class Emulator : MonoBehaviour {
 
     ///// Debug
     [Foldout("Debug")]
+    [OnValueChanged(nameof(OnSetLogLevel))]
+    [SerializeField] Logger.LogLevel logLevel = Logger.LogLevel.Warning;
+
+    [Foldout("Debug")]
     [SerializeField] UnityHawkConfig config;
 
     [Foldout("Debug")]
@@ -264,6 +268,10 @@ public partial class Emulator : MonoBehaviour {
     /// writes bizhawk output into a file
     StreamWriter _bizHawkLogWriter;
 
+    /// Logger for unity-side logs
+    Logger _logger;
+    public Logger Logger => _logger;
+
     /// the time the emulator started running
     float _startedTime;
     float SystemTime => (float)System.DateTime.Now.Ticks / System.TimeSpan.TicksPerSecond;
@@ -290,7 +298,9 @@ public partial class Emulator : MonoBehaviour {
 
     public void OnValidate() {
 #if UNITY_EDITOR
-        // Debug.Log($"OnValidate");
+        _logger ??= new(this, logLevel);
+        _logger.LogVerbose("OnValidate");
+
         if (!config) {
             config = (UnityHawkConfig)AssetDatabase.LoadAssetAtPath(
                 Paths.defaultUnityHawkConfigPath,
@@ -298,7 +308,7 @@ public partial class Emulator : MonoBehaviour {
             );
 
             if (!config) {
-                Debug.LogError("UnityHawkConfigDefault.asset not found", this);
+                _logger.LogError("UnityHawkConfigDefault.asset not found");
             }
         }
 
@@ -313,11 +323,11 @@ public partial class Emulator : MonoBehaviour {
             if (roms.Any()) {
                 var rom = roms.First();
                 if (roms.Count() > 1) {
-                    Debug.LogWarning($"Multiple roms found matching savestate {saveStateFile.name}, using first match: {rom}", this);
+                    _logger.LogWarning($"Multiple roms found matching savestate {saveStateFile.name}, using first match: {rom}");
                 }
                 romFile = rom;
             } else {
-                Debug.LogWarning($"No rom found matching savestate {saveStateFile.name}", this);
+                _logger.LogWarning($"No rom found matching savestate {saveStateFile.name}");
             }
         }
 
@@ -353,7 +363,8 @@ public partial class Emulator : MonoBehaviour {
     }
 
     public void OnEnable() {
-        // Debug.Log($"Emulator OnEnable", this);
+        _logger ??= new(this, logLevel);
+        _logger.LogVerbose("OnEnable");
 #if UNITY_EDITOR && UNITY_2022_2_OR_NEWER
         if (Undo.isProcessing) return; // OnEnable gets called after undo/redo, but ignore it
 #endif
@@ -374,7 +385,7 @@ public partial class Emulator : MonoBehaviour {
     }
 
     public void OnDisable() {
-        // Debug.Log($"Emulator OnDisable", this);
+        _logger.LogVerbose("OnDisable");
 #if UNITY_EDITOR && UNITY_2022_2_OR_NEWER
         if (Undo.isProcessing) return; // OnDisable gets called after undo/redo, but ignore it
 #endif
@@ -399,12 +410,12 @@ public partial class Emulator : MonoBehaviour {
     CancellationTokenSource _initThreadCancellationTokenSource;
 
     void Initialize() {
-        // Debug.Log("Emulator Initialize", this);
+        _logger.LogVerbose("Emulator: Initialize");
 
         // Don't allow re-initializing if already initialized
         if (CurrentStatus != Status.Inactive) {
             // TODO: or should we reset in this case?
-            Debug.LogError($"Emulator is already initialized (Status = {CurrentStatus}), ignoring Initialize() call", this);
+            _logger.LogError($"Emulator is already initialized (Status = {CurrentStatus}), ignoring Initialize() call");
             return;
         }
 
@@ -415,13 +426,13 @@ public partial class Emulator : MonoBehaviour {
             }
 
             if (!targetRenderer) {
-                Debug.LogWarning("No Renderer attached, will not display emulator graphics", this);
+                _logger.LogWarning("No Renderer attached, will not display emulator graphics");
             }
         }
 
         if (customRenderTexture) {
             if (renderTexture == null) {
-                Debug.LogWarning("customRenderTexture is enabled but no RenderTexture is set, will create a default one", this);
+                _logger.LogWarning("customRenderTexture is enabled but no RenderTexture is set, will create a default one");
             }
         } else {
             // Clear texture so that it's forced to be reinitialized
@@ -440,14 +451,14 @@ public partial class Emulator : MonoBehaviour {
 
         if (captureEmulatorAudio) {
             if (!GetComponent<AudioSource>()) {
-                Debug.LogWarning("captureEmulatorAudio is enabled but no AudioSource is attached, will not play audio", this);
+                _logger.LogWarning("captureEmulatorAudio is enabled but no AudioSource is attached, will not play audio");
             }
 
             if (runInEditMode && !Application.isPlaying) {
-                Debug.LogWarning("Emulator audio cannot be captured in edit mode", this);
+                _logger.LogWarning("Emulator audio cannot be captured in edit mode");
             } else {
                 if (audioResampler == null) {
-                    audioResampler = new();
+                    audioResampler = new(_logger);
                 }
 
                 audioResampler.Init(BizhawkSampleRate/AudioSettings.outputSampleRate);
@@ -461,7 +472,7 @@ public partial class Emulator : MonoBehaviour {
         if (romFile) {
             romPath = Paths.GetAssetPath(romFile);
         } else {
-            Debug.LogError("No rom file set, cannot start emulator", this);
+            _logger.LogError("No rom file set, cannot start emulator");
             return;
         }
 
@@ -470,10 +481,10 @@ public partial class Emulator : MonoBehaviour {
 
         if (baseConfigFile) {
             configPath = Paths.GetAssetPath(baseConfigFile);
-            // Debug.Log($"[emulator] found config at {configPath}");
+            _logger.LogVerbose($"found config at {configPath}");
         } else {
             configPath = Path.GetFullPath(Paths.defaultBizhawkConfigPath);
-            // Debug.Log($"[emulator] {name} using default config file at {configPath}");
+            _logger.LogVerbose($"{name} using default config file at {configPath}");
         }
 
         string saveStatePath = saveStateFile ? Paths.GetAssetPath(saveStateFile) : null;
@@ -494,7 +505,7 @@ public partial class Emulator : MonoBehaviour {
         CurrentStatus = Status.Starting;
 
         if (_initThreadCancellationTokenSource != null) {
-            Debug.LogError("Emulator.Activate: _initThreadCancellationTokenSource is not null, this should never happen");
+            _logger.LogError("Emulator.Activate: _initThreadCancellationTokenSource is not null, this should never happen");
         }
 
         _initThreadCancellationTokenSource = new CancellationTokenSource();
@@ -502,7 +513,7 @@ public partial class Emulator : MonoBehaviour {
         if (_initThread != null && _initThread.IsAlive) {
             // This can happen if previous thread has been cancelled (from Deactivate()) but not yet finished running
             // TODO: What should we do here? Wait for thread to finish? Force kill it? Or just ignore - seems like nothing bad happens
-            Debug.LogWarning("Emulator.Initialize: starting a new _initThread while previous one is still running");
+            _logger.LogWarning("Emulator.Initialize: starting a new _initThread while previous one is still running");
         }
 
         _initThread = new(() => _StartBizhawk(
@@ -535,7 +546,7 @@ public partial class Emulator : MonoBehaviour {
         // mainly just moving anything that has to run on the main thread into Initialize
         // Would probably be better to make _StartBizhawk as small as possible, just the config loading and the process start
 
-        // Debug.Log("Emulator._StartBizhawk()", this);
+        _logger.LogVerbose("_StartBizhawk");
 
         StartBizhawkTimer.Begin();
 
@@ -560,7 +571,7 @@ public partial class Emulator : MonoBehaviour {
             process.StartInfo.EnvironmentVariables["MONO_PATH"] = Paths.dllDir;
             process.StartInfo.FileName = "/Library/Frameworks/Mono.framework/Versions/Current/Commands/mono";
             if (ShowBizhawkGui) {
-                Debug.LogWarning("'Show Bizhawk Gui' is not supported on Mac'", this);
+                _logger.LogWarning("'Show Bizhawk Gui' is not supported on Mac'");
             }
             args.Add(exePath);
         } else {
@@ -629,17 +640,17 @@ public partial class Emulator : MonoBehaviour {
         // create & register sharedTextureBuffer
         var sharedTextureBufferName = $"texture-{guid}";
         userData.Add($"{Args.TextureBuffer}:{sharedTextureBufferName}");
-        _sharedTextureBuffer = new SharedTextureBuffer(sharedTextureBufferName);
+        _sharedTextureBuffer = new SharedTextureBuffer(sharedTextureBufferName, _logger);
 
         // create & register callbacks rpc (used for lua callbacks and also the Watch memory api)
         var callMethodRpcBufferName = $"call-method-{guid}";
         userData.Add($"{Args.CallMethodRpc}:{callMethodRpcBufferName}");
-        _callMethodRpcBuffer = new CallMethodRpcBuffer(callMethodRpcBufferName, ProcessRpcCallback);
+        _callMethodRpcBuffer = new CallMethodRpcBuffer(callMethodRpcBufferName, ProcessRpcCallback, _logger);
 
         // create & register api call buffers
         var apiCommandBufferName = $"api-command-{guid}";
         userData.Add($"{Args.ApiCommandBuffer}:{apiCommandBufferName}");
-        _apiCommandBuffer = new ApiCommandBuffer(apiCommandBufferName);
+        _apiCommandBuffer = new ApiCommandBuffer(apiCommandBufferName, _logger);
 
         // var apiCallRpcBufferName = $"api-call-rpc-{guid}";
         // userData.Add($"{Args.ApiCallRpc}:{apiCallRpcBufferName}");
@@ -649,7 +660,7 @@ public partial class Emulator : MonoBehaviour {
         if (shareAudio) {
             var sharedAudioBufferName = $"audio-{guid}";
             userData.Add($"{Args.AudioRpc}:{sharedAudioBufferName}");
-            _sharedAudioBuffer = new SharedAudioBuffer(sharedAudioBufferName);
+            _sharedAudioBuffer = new SharedAudioBuffer(sharedAudioBufferName, _logger);
         }
 
         if (muteBizhawkInEditMode && !applicationIsPlaying) {
@@ -662,7 +673,7 @@ public partial class Emulator : MonoBehaviour {
                 var sharedInputBufferName = $"input-{guid}";
                 // args.Add($"--read-input-from-shared-buffer={sharedKeyInputBufferName}");
                 userData.Add($"{Args.InputBuffer}:{sharedInputBufferName}");
-                _sharedInputBuffer = new SharedInputBuffer(sharedInputBufferName);
+                _sharedInputBuffer = new SharedInputBuffer(sharedInputBufferName, _logger);
                 args.Add($"--accept-background-input=false");
             } else {
                 // Always accept background input in play mode if not getting input from unity (otherwise would be no input at all)
@@ -694,11 +705,12 @@ public partial class Emulator : MonoBehaviour {
             process.ErrorDataReceived += (sender, e) => LogBizHawk(sender, e, true);
         }
 
-        // Debug.Log($"[unity-hawk] {exePath} {string.Join(' ', args)}");
+        _logger.Log("Starting EmuHawk process");
+        _logger.Log($"{exePath} {string.Join(' ', args)}");
 
         if (cancellationToken.IsCancellationRequested) {
             // Startup cancelled, don't start the process
-            // Debug.Log("Startup thread cancelled, not starting bizhawk");
+            _logger.LogVerbose("Startup thread cancelled, not starting bizhawk process");
             return;
         }
 
@@ -711,7 +723,7 @@ public partial class Emulator : MonoBehaviour {
 
         if (cancellationToken.IsCancellationRequested) {
             // Startup cancelled, kill the process
-            // Debug.Log("Startup thread cancelled, killing bizhawk process");
+            _logger.LogVerbose("Startup thread cancelled, killing bizhawk process");
             process.Kill();
             return;
         }
@@ -742,6 +754,8 @@ public partial class Emulator : MonoBehaviour {
     }
 
     void _Update() {
+        // _logger.LogVerbose("_Update");
+
         _deferredForMainThread?.Invoke();
         _deferredForMainThread = null;
 
@@ -758,9 +772,8 @@ public partial class Emulator : MonoBehaviour {
             IntPtr unityWindow = Process.GetCurrentProcess().MainWindowHandle;
             IntPtr bizhawkWindow = _emuhawk.MainWindowHandle;
             IntPtr focusedWindow = GetForegroundWindow();
-            // Debug.Log($"unityWindow = {unityWindow}; bizhawkWindow = {bizhawkWindow}; focusedWindow = {focusedWindow}");
             if (focusedWindow != unityWindow) {
-                // Debug.Log("refocusing unity window");
+                // _logger.LogVerbose("refocusing unity window");
                 ShowWindow(unityWindow, 5);
                 SetForegroundWindow(unityWindow);
             }
@@ -804,7 +817,7 @@ public partial class Emulator : MonoBehaviour {
         }
 
         if (!IsEmuHawkProcessAlive) {
-            Debug.LogWarning("EmuHawk process was unexpectedly killed, restarting", this);
+            _logger.LogWarning("EmuHawk process was unexpectedly killed, restarting");
             // TODO: maybe we want an option to not restart bizhawk here?
             Deactivate();
             if (ShouldRun) {
@@ -862,7 +875,7 @@ public partial class Emulator : MonoBehaviour {
         bool newDimensions = bWidth != width || bHeight != height;
 
         if (newDimensions) {
-            // Debug.Log($"new width and height received : {width} x {height} (was {bWidth}x{bHeight})");
+            _logger.LogVerbose($"new width and height received : {width} x {height} (was {bWidth}x{bHeight})");
         }
 
         // resize textures if necessary
@@ -876,7 +889,7 @@ public partial class Emulator : MonoBehaviour {
         }
 
         if (bSize > _localTextureBuffer.Length) {
-            Debug.LogWarning($"emulator: texture bigger than buffer size {bSize} > {_localTextureBuffer.Length}", this);
+            _logger.LogWarning($"emulator: texture bigger than buffer size {bSize} > {_localTextureBuffer.Length}");
             return;
         }
 
@@ -884,7 +897,7 @@ public partial class Emulator : MonoBehaviour {
             _localTexture.SetPixelData(_localTextureBuffer, 0);
             _localTexture.Apply(/*updateMipmaps: false*/);
         } catch (Exception e) {
-            Debug.LogError($"{e}", this);
+            _logger.LogError($"{e}");
         }
 
         // Correct issues with the texture by applying a shader and blitting to a separate render texture:
@@ -892,12 +905,12 @@ public partial class Emulator : MonoBehaviour {
     }
 
     void Deactivate() {
-        // Debug.Log("Emulator Deactivate", this);
+        _logger.LogVerbose("Deactivate");
 
         // Cancel _initThread if it's running
         if (_initThread != null && _initThread.IsAlive) {
             if (_initThreadCancellationTokenSource == null) {
-                Debug.LogError("_initThread is running but_initThreadCancellationTokenSource is null, this should never happen");
+                _logger.LogError("_initThread is running but_initThreadCancellationTokenSource is null, this should never happen");
             }
             _initThreadCancellationTokenSource.Cancel();
             _initThreadCancellationTokenSource.Dispose();
@@ -927,7 +940,7 @@ public partial class Emulator : MonoBehaviour {
 
     /// Init/re-init the textures for rendering the screen - has to be done whenever the source dimensions change (which happens often on PSX for some reason)
     void InitTextures(int width, int height) {
-        // Debug.Log($"[emulator] creating new textures with dimensions {width}x{height}");
+        _logger.LogVerbose($"creating new textures with dimensions {width}x{height}");
 
         // TODO: cache textures
         _localTexture = new Texture2D(width, height, TextureFormat, false);
@@ -954,16 +967,16 @@ public partial class Emulator : MonoBehaviour {
         if (_sharedAudioBuffer == null || !_sharedAudioBuffer.IsOpen()) return;
         if (CurrentStatus != Status.Running) return;
 
-        // Debug.Log($"[emulator] OnAudioFilterRead {outBuffer.Length} samples, {channels} channels", this);
+        // _logger.LogVerbose($"OnAudioFilterRead {outBuffer.Length} samples, {channels} channels");
         audioResampler.GetSamples(outBuffer, channels);
     }
 
     /// try opening a shared buffer
     void AttemptOpenBuffer(ISharedBuffer buf) {
-        // Debug.Log($"Attempting to open buffer {buf} ({buf.GetType().Name})");
+        // _logger.LogVerbose($"Attempting to open buffer {buf} ({buf.GetType().Name})");
         try {
             buf.Open();
-            // Debug.Log($"Connected to {buf}");
+            // _logger.LogVerbose($"Connected to {buf}");
         } catch (FileNotFoundException) {
         }
     }
@@ -972,7 +985,7 @@ public partial class Emulator : MonoBehaviour {
         if (!_callMethodRpcBuffer.IsOpen()) {
             throw new Exception("Emulator.ProcessRpcCallback: _callMethodRpcBuffer is not open but should be");
         }
-        // Debug.Log($"Rpc callback from bizhawk: {callbackName}({argString})");
+        // _logger.LogVerbose($"Rpc callback from bizhawk: {callbackName}({argString})");
 
         // This is either a lua callback, or a 'special' bizhawk->unity call
         // (Should probably use a separate buffer but they share one for now)
@@ -984,7 +997,7 @@ public partial class Emulator : MonoBehaviour {
                     var args = argString.Split(',');
                     if (args.Length != 6)
                     {
-                        Debug.LogWarning($"Expected 6 arguments for callback '{callbackName}', but got {args.Length}: {argString}", this);
+                        _logger.LogWarning($"Expected 6 arguments for callback '{callbackName}', but got {args.Length}: {argString}");
                         returnString = "";
                         break;
                     }
@@ -1001,7 +1014,7 @@ public partial class Emulator : MonoBehaviour {
                         var callback = v.Callback;
                         v.Callback(value);
                     } else {
-                        Debug.LogWarning($"Bizhawk tried to call a watch callback for key {key} but no callback was registered", this);
+                        _logger.LogWarning($"Bizhawk tried to call a watch callback for key {key} but no callback was registered");
                     }
                     break;
                 case SpecialCommands.OnRomLoaded:
@@ -1011,7 +1024,7 @@ public partial class Emulator : MonoBehaviour {
                     // (At this point I think we can be confident all the buffers should be open)
                     break;
                 default:
-                    Debug.LogWarning($"Bizhawk tried to call unknown special method {callbackName}", this);
+                    _logger.LogWarning($"Bizhawk tried to call unknown special method {callbackName}");
                     break;
             }
         } else {
@@ -1025,7 +1038,7 @@ public partial class Emulator : MonoBehaviour {
 
             // add to set of called methods to not spam this warning every frame
             if (!exists && !_invokedLuaCallbacks.Contains(callbackName)){
-                Debug.LogWarning($"Tried to call a method named {callbackName} from lua but none was registered", this);
+                _logger.LogWarning($"Tried to call a method named {callbackName} from lua but none was registered");
             }
 
             _invokedLuaCallbacks.Add(callbackName);
@@ -1040,7 +1053,7 @@ public partial class Emulator : MonoBehaviour {
             _bizHawkLogWriter.WriteLine(msg);
             _bizHawkLogWriter.Flush();
             if (isError) {
-                Debug.LogWarning(msg /*, this*/); // Don't pass context object cause it breaks in non-main thread
+                _logger.LogWarning(msg, context: null); // Don't pass context object cause it breaks in non-main thread
                 // TODO: Probably should add to a queue here and log the queue in the main thread
             }
         }
