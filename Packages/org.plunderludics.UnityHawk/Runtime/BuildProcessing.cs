@@ -34,13 +34,14 @@ public class BuildProcessing : IPreprocessBuildWithReport, IProcessSceneWithRepo
     ///// IOrderedCallback
     public int callbackOrder => 0;
 
-    Logger _logger = new(null);
+    const Logger.LogLevel LogLevel = Logger.LogLevel.Info;
+    static Logger _logger = new(null);
+    // TODO: Any way we can configure the log level from the editor conveniently?
+    // Some kind of global UnityHawk settings object
 
     ///// IPreprocessBuildWithReport
     public void OnPreprocessBuild(BuildReport report) {
-        // Pretty messy, but if there is a BuildSettings component in whatever scene is active, use the loglevel setting from that
-        var buildSettings = GetBuildSettings();
-        _logger.MinLogLevel = buildSettings.logLevel;
+        // No need to do anything here
     }
 
     ///// IProcessSceneWithReport
@@ -89,7 +90,7 @@ public class BuildProcessing : IPreprocessBuildWithReport, IProcessSceneWithRepo
         // Find all BizhawkAsset dependencies in scene and collect them for later copying
         var bizhawkDependencies = CollectBizhawkAssetDependencies();
 
-        _logger.LogVerbose($"collected {bizhawkDependencies.Count} dependencies for scene {scene.path}: \n {string.Join("\n", bizhawkDependencies)}");
+        _logger.Log($"collected {bizhawkDependencies.Count} dependencies for scene {scene.path}: \n {string.Join("\n", bizhawkDependencies)}");
 
         // Add assets that need to be copied
         foreach (var dependency in bizhawkDependencies) {
@@ -256,7 +257,7 @@ public class BuildProcessing : IPreprocessBuildWithReport, IProcessSceneWithRepo
             var gameObject = new GameObject("BuildSettings");
             buildSettings = gameObject.AddComponent<BuildSettings>(); // Use default values for settings
         } else if (allBuildSettings.Count > 1) {
-            throw new Exception($"{allBuildSettings.Count} active BuildSettings components found in scene, should be at most one");
+            throw new Exception($"[unity-hawk] {allBuildSettings.Count} active BuildSettings components found in scene, should be at most one");
         } else { // 1
             buildSettings = allBuildSettings[0];
         }

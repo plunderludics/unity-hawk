@@ -28,10 +28,6 @@ public class BuildSettings : MonoBehaviour {
     [Tooltip("These are all the bizhawk assets that will be included in the build")]
     List<BizhawkAsset> includedAssets;
 
-    [SerializeField]
-    [Tooltip("The minimum log level for BuildProcessing logging")]
-    Logger.LogLevel logLevel = Logger.LogLevel.Warning;
-
     // Thought - we could also have multiple ExtraAssets components in the scene,
     // it could be easier to manage in some ways than a single global list. Maybe multiple ExcludeFromBuild components too
     // But ideally still need a place for global config - seems overcomplicated maybe
