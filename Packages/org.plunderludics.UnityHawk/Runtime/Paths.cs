@@ -7,7 +7,7 @@ using System.Runtime.CompilerServices;
 // Paths is needed by BuildProcessing in the UnityHawk.Editor assembly, so
 // make it visible to that despite the 'internal' modifier
 [assembly: InternalsVisibleTo("UnityHawk.Editor")]
-
+[assembly: InternalsVisibleTo("UnityHawk.Tests.PlayMode")]
 
 namespace UnityHawk {
 

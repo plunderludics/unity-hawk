@@ -31,7 +31,6 @@ internal class RingBuffer<T>
     public int AvailableWrite => _capacity - Count - 1;
 
     public void Write(T[] source, int offset, int length) {
-        int written = 0;
         for (int i = 0; i < length && AvailableWrite > 0; i++) {
             int nextHead = (_head + 1) % _capacity;
 
