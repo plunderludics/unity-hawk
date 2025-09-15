@@ -40,7 +40,7 @@ public class SavestateImporter : BizHawkAssetImporter<Savestate> {
                 BMPLoader bmpLoader = new BMPLoader();
                 BMPImage bmpImg = bmpLoader.LoadBMP(bmpBytes);
 
-                //Convert the Color32 array into a Texture2D
+                // Convert the Color32 array into a Texture2D
                 screenshot = bmpImg.ToTexture2D(TextureFormat.RGB24); // Ensure no alpha channel
             }
         }
@@ -52,6 +52,7 @@ public class SavestateImporter : BizHawkAssetImporter<Savestate> {
         savestate.RomInfo.NotInDatabase = gameInfo.NotInDatabase;
         savestate.RomInfo.Core = gameInfo.ForcedCore;
 
+        screenshot.name = Path.GetFileNameWithoutExtension(ctx.assetPath);
         ctx.AddObjectToAsset("screenshot", screenshot);
         savestate.Screenshot = screenshot;
     }

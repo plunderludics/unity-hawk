@@ -13,24 +13,39 @@ MonoBehaviour:
   m_Name: C64
   m_EditorClassIdentifier: 
   Controls:
-    mappings:
+    buttonMappings:
     - Enabled: 1
+      sourceType: 0
       Key: 264
-      Control: Up
+      AxisName: 
+      ActionRef: {fileID: 0}
+      EmulatorButtonName: Up
       Controller: 1
     - Enabled: 1
+      sourceType: 0
       Key: 258
-      Control: Down
+      AxisName: 
+      ActionRef: {fileID: 0}
+      EmulatorButtonName: Down
       Controller: 1
     - Enabled: 1
+      sourceType: 0
       Key: 260
-      Control: Left
+      AxisName: 
+      ActionRef: {fileID: 0}
+      EmulatorButtonName: Left
       Controller: 1
     - Enabled: 1
+      sourceType: 0
       Key: 262
-      Control: Right
+      AxisName: 
+      ActionRef: {fileID: 0}
+      EmulatorButtonName: Right
       Controller: 1
     - Enabled: 1
+      sourceType: 0
       Key: 257
-      Control: Button
+      AxisName: 
+      ActionRef: {fileID: 0}
+      EmulatorButtonName: Button
       Controller: 1

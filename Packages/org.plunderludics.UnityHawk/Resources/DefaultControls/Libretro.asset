@@ -13,52 +13,88 @@ MonoBehaviour:
   m_Name: Libretro
   m_EditorClassIdentifier: 
   Controls:
-    mappings:
+    buttonMappings:
     - Enabled: 1
+      sourceType: 0
       Key: 273
-      Control: RetroPad Up
+      AxisName: 
+      ActionRef: {fileID: 0}
+      EmulatorButtonName: RetroPad Up
       Controller: 1
     - Enabled: 1
+      sourceType: 0
       Key: 274
-      Control: RetroPad Down
+      AxisName: 
+      ActionRef: {fileID: 0}
+      EmulatorButtonName: RetroPad Down
       Controller: 1
     - Enabled: 1
+      sourceType: 0
       Key: 276
-      Control: RetroPad Left
+      AxisName: 
+      ActionRef: {fileID: 0}
+      EmulatorButtonName: RetroPad Left
       Controller: 1
     - Enabled: 1
+      sourceType: 0
       Key: 275
-      Control: RetroPad Right
+      AxisName: 
+      ActionRef: {fileID: 0}
+      EmulatorButtonName: RetroPad Right
       Controller: 1
     - Enabled: 1
+      sourceType: 0
       Key: 32
-      Control: RetroPad Select
+      AxisName: 
+      ActionRef: {fileID: 0}
+      EmulatorButtonName: RetroPad Select
       Controller: 1
     - Enabled: 1
+      sourceType: 0
       Key: 13
-      Control: RetroPad Start
+      AxisName: 
+      ActionRef: {fileID: 0}
+      EmulatorButtonName: RetroPad Start
       Controller: 1
     - Enabled: 1
+      sourceType: 0
       Key: 97
-      Control: RetroPad Y
+      AxisName: 
+      ActionRef: {fileID: 0}
+      EmulatorButtonName: RetroPad Y
       Controller: 1
     - Enabled: 1
+      sourceType: 0
       Key: 122
-      Control: RetroPad B
+      AxisName: 
+      ActionRef: {fileID: 0}
+      EmulatorButtonName: RetroPad B
       Controller: 1
     - Enabled: 1
+      sourceType: 0
       Key: 115
-      Control: RetroPad X
+      AxisName: 
+      ActionRef: {fileID: 0}
+      EmulatorButtonName: RetroPad X
       Controller: 1
     - Enabled: 1
+      sourceType: 0
       Key: 120
-      Control: RetroPad A
+      AxisName: 
+      ActionRef: {fileID: 0}
+      EmulatorButtonName: RetroPad A
       Controller: 1
     - Enabled: 1
+      sourceType: 0
       Key: 119
-      Control: RetroPad L
+      AxisName: 
+      ActionRef: {fileID: 0}
+      EmulatorButtonName: RetroPad L
       Controller: 1
     - Enabled: 1
+      sourceType: 0
       Key: 101
-      Control: RetroPad R
+      AxisName: 
+      ActionRef: {fileID: 0}
+      EmulatorButtonName: RetroPad R
       Controller: 1

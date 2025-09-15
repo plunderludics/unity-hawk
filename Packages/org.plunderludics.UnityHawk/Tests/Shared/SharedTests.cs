@@ -62,13 +62,18 @@ public class SharedTests
     public void SetUp() {
         // Set up Emulator object
         var o = new GameObject();
+
+        o.SetActive(false); // Minor hack to prevent OnEnable from firing within AddComponent
         e = o.AddComponent<Emulator>();
         e.romFile = eliteRom;
         e.runInEditMode = true;
         e.passInputFromUnity = _passInputFromUnity;
         e.captureEmulatorAudio = _captureEmulatorAudio;
         e.showBizhawkGuiInEditor = _showBizhawkGui;
-        e.OnValidate();
+    }
+
+    void ActivateEmulator() {
+        e.gameObject.SetActive(true);
     }
     
     [TearDown]
@@ -79,6 +84,7 @@ public class SharedTests
     [UnityTest]
     public IEnumerator TestEmulatorIsRunning()
     {
+        ActivateEmulator();
         yield return WaitForAWhile(e);
         
         AssertEmulatorIsRunning(e);
@@ -88,7 +94,7 @@ public class SharedTests
     public IEnumerator TestWithSavestate()
     {
         e.saveStateFile = eliteSavestate2000;
-        e.Reset();
+        ActivateEmulator();
 
         yield return WaitForAWhile(e);
         
@@ -99,6 +105,7 @@ public class SharedTests
     [UnityTest]
     public IEnumerator TestPauseAndUnpause()
     {
+        ActivateEmulator();
         yield return WaitForAWhile(e);
         AssertEmulatorIsRunning(e);
 
@@ -118,6 +125,7 @@ public class SharedTests
     [UnityTest]
     public IEnumerator TestFrameAdvance()
     {
+        ActivateEmulator();
         yield return WaitForAWhile(e);
         AssertEmulatorIsRunning(e);
 
@@ -147,6 +155,7 @@ public class SharedTests
     [UnityTest]
     public IEnumerator TestLoadState()
     {
+        ActivateEmulator();
         yield return WaitForAWhile(e);
         AssertEmulatorIsRunning(e);
 
@@ -164,6 +173,7 @@ public class SharedTests
     [UnityTest]
     public IEnumerator TestLoadRom()
     {
+        ActivateEmulator();
         yield return WaitForAWhile(e);
         AssertEmulatorIsRunning(e);
 
@@ -180,6 +190,7 @@ public class SharedTests
     [UnityTest]
     public IEnumerator TestRamWatch()
     {
+        ActivateEmulator();
         yield return WaitForAWhile(e);
         AssertEmulatorIsRunning(e);
 
@@ -202,6 +213,7 @@ public class SharedTests
     [UnityTest]
     public IEnumerator TestRamWrite()
     {
+        ActivateEmulator();
         yield return WaitForAWhile(e);
         AssertEmulatorIsRunning(e);
 
@@ -231,6 +243,7 @@ public class SharedTests
     [UnityTest]
     public IEnumerator TestRamFreeze()
     {
+        ActivateEmulator();
         yield return WaitForAWhile(e);
         AssertEmulatorIsRunning(e);
 
@@ -281,12 +294,24 @@ public class SharedTests
             return "";
         });
         
-        e.Reset();
+        ActivateEmulator();
 
-        // yield return WaitForAWhile(e);
-        yield return WaitForDuration(e, 10f, null); // Not really sure why but 5s is not long enough here
+        yield return WaitForAWhile(e);
         AssertEmulatorIsRunning(e);
         Assert.That(_submittedResult, Is.EqualTo("tseT"));
+    }
+
+    [UnityTest]
+    public IEnumerator TestRestart()
+    {
+        ActivateEmulator();
+        yield return WaitForAWhile(e);
+        AssertEmulatorIsRunning(e);
+
+        e.Restart();
+        yield return WaitForAWhile(e);
+        yield return WaitForAWhile(e); // Have to wait longer after restart for some reason
+        AssertEmulatorIsRunning(e);
     }
 
     
@@ -298,23 +323,22 @@ public class SharedTests
         Assert.That(e.Texture, Is.Not.Null);
     }
 
-    public static IEnumerator WaitForDuration(Emulator emulator, float duration, Action action = null) {
+    public static IEnumerator WaitForDuration(Emulator emulator, float duration) {
         float beginTime = Time.realtimeSinceStartup;
         while (Time.realtimeSinceStartup - beginTime < duration) {
             System.Threading.Thread.Sleep(10);
             if (!Application.isPlaying) {
                 emulator.Update(); // Have to force the monobehavior to update in edit mode
             }
-            action?.Invoke();
             yield return null;
         }
     }
 
-    public static IEnumerator WaitForAMoment(Emulator emulator, Action action = null) {
-        yield return WaitForDuration(emulator, MomentDuration, action);
+    public static IEnumerator WaitForAMoment(Emulator emulator) {
+        yield return WaitForDuration(emulator, MomentDuration);
     }
-    public static IEnumerator WaitForAWhile(Emulator emulator, Action action = null) {
-        yield return WaitForDuration(emulator, WhileDuration, action);
+    public static IEnumerator WaitForAWhile(Emulator emulator) {
+        yield return WaitForDuration(emulator, WhileDuration);
     }
 }
 
