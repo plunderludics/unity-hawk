@@ -1,5 +1,6 @@
-#if UNITY_EDITOR // This component only used in editor
-
+// [This component is only used at build-time, but out of convenience
+//  it gets included in the build so we put it in the Runtime assembly]
+// [Probably some way to strip it out of build I guess?]
 using UnityEngine;
 using System.Collections.Generic;
 using NaughtyAttributes;
@@ -9,6 +10,10 @@ using System.Linq;
 
 namespace UnityHawk {
 
+/// <summary>
+/// Used to configure build settings for the UnityHawk package.
+/// At most one BuildSettings component should be present in each scene.
+/// </summary>
 [ExecuteInEditMode]
 public class BuildSettings : MonoBehaviour {
     [Tooltip("Whether to include inactive objects and disabled components when searching for asset dependencies")]
@@ -27,6 +32,8 @@ public class BuildSettings : MonoBehaviour {
     // it could be easier to manage in some ways than a single global list. Maybe multiple ExcludeFromBuild components too
     // But ideally still need a place for global config - seems overcomplicated maybe
 
+#if UNITY_EDITOR
+
     void OnValidate() {
         Refresh();
     }
@@ -37,8 +44,7 @@ public class BuildSettings : MonoBehaviour {
         Debug.Log($"[unity-hawk] BuildSettings Refresh: {dependencies.Count} dependencies");
         includedAssets = dependencies.ToList();
     }
-}
-
-}
-
 #endif // UNITY_EDITOR
+}
+
+}
