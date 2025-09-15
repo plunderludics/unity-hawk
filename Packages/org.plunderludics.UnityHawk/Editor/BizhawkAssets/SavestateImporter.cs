@@ -9,7 +9,7 @@ using B83.Image.BMP;
 namespace UnityHawk.Editor {
 
 [ScriptedImporter(1, "savestate")]
-public class SavestateImporter : BizHawkAssetImporter<Savestate> {
+internal class SavestateImporter : BizHawkAssetImporter<Savestate> {
     const string k_GameInfoFile = "GameInfo.json";
     const string k_FramebufferFile = "Framebuffer.bmp";
 

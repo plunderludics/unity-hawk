@@ -4,7 +4,7 @@
 using System.Threading;
 
 namespace UnityHawk {
-public class RingBuffer<T>
+internal class RingBuffer<T>
 {
     private readonly T[] _buffer;
     private int _head;

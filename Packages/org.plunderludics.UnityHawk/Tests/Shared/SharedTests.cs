@@ -322,7 +322,7 @@ public class SharedTests
 
     public static void AssertEmulatorIsRunning(Emulator e) {
         Assert.That(e.IsRunning, Is.True);
-        Assert.That(e.Status, Is.EqualTo(Emulator.EmulatorStatus.Running));
+        Assert.That(e.CurrentStatus, Is.EqualTo(Emulator.Status.Running));
         Assert.That(e.Texture, Is.Not.Null);
     }
 

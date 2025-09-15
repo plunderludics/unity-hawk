@@ -67,18 +67,32 @@ public partial class Emulator {
             OnSetSpeedPercent();
         }
     }
+    
+    /// the emulator log level (for unity-side logs)
+    public Logger.LogLevel LogLevel {
+        get => logLevel;
+        set {
+            logLevel = value;
+            OnSetLogLevel();
+        }
+    }
 
     /// Currently displayed emulator texture.
     /// (If emulator is not running but savestate is set, show savestate texture)
     public Texture Texture => IsRunning ? renderTexture : saveStateFile?.Screenshot;
 
-    public bool IsStarting => Status == EmulatorStatus.Starting;
+    /// <summary>
+    /// is the emulator process currently starting up?
+    /// </summary>
+    public bool IsStarting => CurrentStatus == Status.Starting;
 
-    /// is the emulator process started
-    public bool IsStarted => Status >= EmulatorStatus.Started;
+    /// <summary>
+    /// is the emulator process started?
+    /// </summary>
+    public bool IsStarted => CurrentStatus >= Status.Started;
 
     /// is the emulator process running a game?
-    public bool IsRunning => Status >= EmulatorStatus.Running;
+    public bool IsRunning => CurrentStatus >= Status.Running;
 
     /// ID of the current emulator platform (e.g. "N64", "PSX", etc.)
     /// Returns null if emulator is not running.
@@ -91,9 +105,11 @@ public partial class Emulator {
     /// when the emulator starts running its game
     /// (will be a slight delay since this gets deferred to main thread Update)
     public Action OnRunning;
-
-    /// the current status of the emulator
-    public enum EmulatorStatus {
+ 
+    /// <summary>
+    /// possible values for the emulator status
+    /// </summary>
+    public enum Status {
         /// BizHawk hasn't started yet
         Inactive,
 
@@ -108,14 +124,14 @@ public partial class Emulator {
     }
 
     /// the current status of the emulator
-    public EmulatorStatus Status {
+    public Status CurrentStatus {
         get => _status;
         private set {
             if (_status != value) {
-                // Debug.Log($"Emulator status changed from {_status} to {value}", this);
+                _logger.LogVerbose($"Emulator status changed from {_status} to {value}", this);
                 var raise = value switch {
-                    EmulatorStatus.Started => OnStarted,
-                    EmulatorStatus.Running => OnRunning,
+                    Status.Started => OnStarted,
+                    Status.Running => OnRunning,
                     _ => null,
                 };
 
@@ -142,7 +158,7 @@ public partial class Emulator {
     /// Register a callback that can be called via `unityhawk.callmethod('MethodName')` in BizHawk lua
     public void RegisterLuaCallback(string methodName, LuaCallback luaCallback) {
         if (SpecialCommands.All.Contains(methodName)) {
-            Debug.LogWarning($"Tried to register a Lua callback for reserved method name '{methodName}', this will not work!", this);
+            _logger.LogWarning($"Tried to register a Lua callback for reserved method name '{methodName}', this will not work!", this);
             return;
         }
         _registeredLuaCallbacks[methodName] = luaCallback;
@@ -221,7 +237,7 @@ public partial class Emulator {
         ThrowIfNotRunning();
         string path = Paths.GetAssetPath(sample);
         if (path == null) {
-            Debug.LogError($"Savestate {sample} not found", this);
+            _logger.LogError($"Savestate {sample} not found", this);
             return;
         }
 
@@ -242,11 +258,11 @@ public partial class Emulator {
         path = Paths.GetFullPath(path);
 
         if (string.IsNullOrEmpty(path)) {
-            Debug.LogWarning("[emulator] attempting to load rom with invalid path, ignoring...", this);
+            _logger.LogWarning("[emulator] attempting to load rom with invalid path, ignoring...", this);
             return;
         }
 
-        if (_status == EmulatorStatus.Inactive) {
+        if (_status == Status.Inactive) {
             return;
         }
 
@@ -255,7 +271,7 @@ public partial class Emulator {
         // Need to update texture buffer size in case platform has changed:
         _sharedTextureBuffer.UpdateSize();
 
-        Status = EmulatorStatus.Started; // Not running until new texture buffer is set up
+        CurrentStatus = Status.Started; // Not running until new texture buffer is set up
     }
 
     /// loads a rom from a Rom asset
@@ -308,7 +324,7 @@ public partial class Emulator {
             if (uint.TryParse(value, out uint result)) {
                 onChanged(result);
             } else {
-                Debug.LogError($"Failed to parse unsigned value from Bizhawk watch: {value}", this);
+                _logger.LogError($"Failed to parse unsigned value from Bizhawk watch: {value}", this);
             }
         });
     }
@@ -319,7 +335,7 @@ public partial class Emulator {
             if (int.TryParse(value, out int result)) {
                 onChanged(result);
             } else {
-                Debug.LogError($"Failed to parse signed value from Bizhawk watch: {value}", this);
+                _logger.LogError($"Failed to parse signed value from Bizhawk watch: {value}", this);
             }
         });
     }
@@ -330,7 +346,7 @@ public partial class Emulator {
             if (float.TryParse(value, out float result)) {
                 onChanged(result);
             } else {
-                Debug.LogError($"Failed to parse float value from Bizhawk watch: {value}", this);
+                _logger.LogError($"Failed to parse float value from Bizhawk watch: {value}", this);
             }
         });
     }
@@ -345,7 +361,7 @@ public partial class Emulator {
         var key = (address, size, isBigEndian, type, domain);
         var hashCode = key.GetHashCode();
         if (_watchCallbacks.ContainsKey(hashCode)) {
-            Debug.LogWarning($"Overwriting existing watch for key {key}", this);
+            _logger.LogWarning($"Overwriting existing watch for key {key}", this);
         }
         _watchCallbacks[hashCode] = (key, onChanged);
         return hashCode;
@@ -364,7 +380,7 @@ public partial class Emulator {
             _apiCommandBuffer.CallMethod("Unwatch", args);
             _watchCallbacks.Remove(id);
         } else {
-            Debug.LogWarning($"Unwatch called for id {id} that was not being watched.", this);
+            _logger.LogWarning($"Unwatch called for id {id} that was not being watched.", this);
         }
     }
 
@@ -441,6 +457,11 @@ public partial class Emulator {
         if (!IsRunning) return;
         string command = IsPaused ? ApiCommands.Pause : ApiCommands.Unpause;
         _apiCommandBuffer.CallMethod(command, null);
+    }
+
+    /// when the log level changes
+    void OnSetLogLevel() {
+        _logger.MinLogLevel = logLevel;
     }
 
     ///// error handling
