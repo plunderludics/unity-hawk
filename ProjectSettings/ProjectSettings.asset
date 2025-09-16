@@ -670,8 +670,7 @@ PlayerSettings:
     XboxOne: UNITY_POST_PROCESSING_STACK_V2
     tvOS: UNITY_POST_PROCESSING_STACK_V2
   additionalCompilerArguments:
-    Standalone:
-    - -doc:Library/ScriptAssemblies/UnityHawk.xml
+    Standalone: []
   platformArchitecture: {}
   scriptingBackend: {}
   il2cppCompilerConfiguration: {}
