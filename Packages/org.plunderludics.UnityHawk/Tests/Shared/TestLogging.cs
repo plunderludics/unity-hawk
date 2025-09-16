@@ -12,22 +12,26 @@ public class TestLogging : ITestRunCallback
 {
     public void RunStarted(ITest testsToRun)
     {
-        Debug.Log($"Starting test run with {testsToRun.TestCaseCount} cases");
+        Debug.Log($"[unity-hawk] [test] Starting test run with {testsToRun.TestCaseCount} cases");
     }
 
     public void TestStarted(ITest test)
     {
-        Debug.Log($"Running: {test.FullName}");
+        Debug.Log($"[unity-hawk] [test] Running: {test.FullName}");
     }
 
     public void TestFinished(ITestResult result)
     {
-        Debug.Log($"{result.Test.FullName}: {result.ResultState}");
+        Debug.Log($"[unity-hawk] [test] {result.Test.FullName}: {result.ResultState}");
+        if (result.ResultState == ResultState.Failure || result.ResultState == ResultState.Error) {
+            Debug.Log($"[unity-hawk] [test] {result.Test.FullName}: {result.Message}");
+            Debug.Log($"{result.StackTrace}");
+        }
     }
 
     public void RunFinished(ITestResult result)
     {
-        Debug.Log($"Test run finished: {result.ResultState}");
+        Debug.Log($"[unity-hawk] [test] Test run finished: {result.ResultState}");
     }
 }
 }
