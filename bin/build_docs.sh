@@ -1,10 +1,25 @@
 # Usage: ./bin/build_docs.sh
 
-# TODO: Actually open unity project and compile
-# (Has to be compiled from the unity-hawk project since that has a special compiler arg configured)
-# (Also annoyingly seems like it has to be compiled twice in order for the xml to be produced correctly...?)
+# TODO: Unify this part with run_tests.sh
+: "${UNITY_VERSION:=$(grep '^m_EditorVersion:' ProjectSettings/ProjectVersion.txt | awk '{print $2}')}"
+: "${UNITY_EXE:=/c/Program Files/Unity/Hub/Editor/${UNITY_VERSION}/Editor/Unity.exe}"
 
-# Generate html docs based on Library/ScriptAssemblies/UnityHawk.xml
+### Compile unity project to generate xml docstrings file
+xmlTarget=Library/ScriptAssemblies/UnityHawk.xml
+
+# Clean
+rm -f ${xmlTarget};
+
+cmd="\"${UNITY_EXE}\" -projectPath . -batchmode -logFile build_docs.log -executeMethod RecompileForcer.ForceRecompile -quit";
+echo $cmd;
+eval $cmd;
+
+if [ ! -f "${xmlTarget}" ]; then
+    echo "Error: XML docstrings file '${xmlTarget}' was not generated. Exiting without building docs."
+    exit 1
+fi
+
+### Generate html docs based on generated xml
 rm -rf docs/ # clean
 cd ./docfx
 docfx docfx.json
