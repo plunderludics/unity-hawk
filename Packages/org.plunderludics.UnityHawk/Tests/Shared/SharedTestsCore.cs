@@ -15,10 +15,15 @@ using UnityEditor.SceneManagement;
 namespace UnityHawk.Tests {
 
 // bool passInputFromUnity, bool captureEmulatorAudio, bool showBizhawkGui
-[TestFixture(true, false, false)]
-[TestFixture(true, true, false)]
-[TestFixture(false, false, false)]
-[TestFixture(false, false, true)]
+[TestFixture(true, true, true)]
+// Eh, having all these different combinations seems a bit overkill, makes the tests take forever to run
+// and we don't actually do any tests that OS input or audio capture are actually working
+// Think this whole TextFixture infrastructure is kinda unnecessary and would be better to just use (true, true, true) for most tests
+// and have a few tests that at least the emulator runs fine with other param combinations
+// But ok, the infra is here for now so can uncomment these lines if we want to do a big sweeping test
+// [TestFixture(true, true, false)]
+// [TestFixture(false, false, false)]
+// [TestFixture(false, false, true)]
 public class SharedTestsCore
 {
     protected bool _passInputFromUnity;

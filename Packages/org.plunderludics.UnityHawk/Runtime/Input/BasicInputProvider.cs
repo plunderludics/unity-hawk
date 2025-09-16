@@ -320,7 +320,11 @@ public class BasicInputProvider : InputProvider {
         var baseInputs = base.InputForFrame();
         var myInputs = new List<InputEvent>(eventsThisFrame);
         eventsThisFrame.Clear(); // TODO: Not ideal because will break if multiple clients use the same InputProvider, should clear at the end of the frame
-        return baseInputs.Concat(myInputs).ToList();
+        var allInputs = baseInputs.Concat(myInputs).ToList();
+        // if (allInputs.Count > 0) {
+        //     Debug.Log($"InputForFrame: {string.Join(", ", allInputs)}");
+        // }
+        return allInputs;
     }
 
 #if ENABLE_INPUT_SYSTEM

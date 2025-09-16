@@ -54,9 +54,12 @@ public class PlayModeTests : SharedTestsCore {
         yield return WaitForAMoment(e);
         Assert.That(u, Is.EqualTo(72));
 
+        // Actually need press + release to move past the title screen
         e.inputProvider.AddInputEvent(new InputEvent("Start", 1, Controller.P1, false));
+        yield return WaitForAMoment(e);
+        e.inputProvider.AddInputEvent(new InputEvent("Start", 0, Controller.P1, false));
+        yield return WaitForAMoment(e);
 
-        yield return WaitForAWhile(e);
         Assert.That(u, Is.Not.EqualTo(72));
     }
 }
