@@ -1,0 +1,4 @@
+# For docs branch - ignore everything except docs/ folder
+*
+!docs/
+!/.gitignore
