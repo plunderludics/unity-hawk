@@ -51,12 +51,10 @@ internal class AudioResampler {
 
     Logger _logger;
 
-    public AudioResampler(Logger logger) {
-        _logger = logger;
-    }
-
     /// Restart resampler from clean slate
-    public void Init(double defaultResampleRatio) {
+    public void Init(double defaultResampleRatio, Logger logger) {
+        _logger = logger;
+
         _defaultResampleRatio = defaultResampleRatio;
         // _sourceBuffer = new();
         _sourceBuffer = null;
@@ -71,7 +69,6 @@ internal class AudioResampler {
     public void SetSourceBuffer(RingBuffer<short> sourceBuffer) {
         _sourceBuffer = sourceBuffer;
     }
-
 
     public void GetSamples(float[] out_buffer, int channels) {
         if (_sourceBuffer == null) {
