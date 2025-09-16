@@ -12,6 +12,8 @@ using Debug = UnityEngine.Debug;
 using Unity.Profiling;
 using UnityEngine.Assertions;
 using System.Threading;
+using EditorBrowsable = System.ComponentModel.EditorBrowsableAttribute;
+using EditorBrowsableState = System.ComponentModel.EditorBrowsableState;
 
 #if UNITY_EDITOR
 using UnityEditor;
@@ -21,6 +23,10 @@ using UnityEngine.Serialization;
 
 namespace UnityHawk {
 
+/// <summary>
+/// The component responsible for initializing,
+/// running, and managing a single BizHawk emulator instance.
+/// </summary>
 [ExecuteInEditMode]
 public partial class Emulator : MonoBehaviour {
     /// the sample rate for bizhawk audio
@@ -294,8 +300,8 @@ public partial class Emulator : MonoBehaviour {
     private static extern IntPtr GetForegroundWindow();
 
     ///// MonoBehaviour lifecycle
-    // (These methods are public only for convenient testing)
-
+    // (These methods are public for testing purposes, but use the EditorBrowsable attribute to hide them from docs)
+    [EditorBrowsable(EditorBrowsableState.Never)]
     public void OnValidate() {
 #if UNITY_EDITOR
         _logger ??= new(this, logLevel);
@@ -362,6 +368,7 @@ public partial class Emulator : MonoBehaviour {
 #endif
     }
 
+    [EditorBrowsable(EditorBrowsableState.Never)]
     public void OnEnable() {
         _logger ??= new(this, logLevel);
         _logger.LogVerbose("OnEnable");
@@ -384,6 +391,7 @@ public partial class Emulator : MonoBehaviour {
         }
     }
 
+    [EditorBrowsable(EditorBrowsableState.Never)]
     public void OnDisable() {
         _logger.LogVerbose("OnDisable");
 #if UNITY_EDITOR && UNITY_2022_2_OR_NEWER
@@ -395,17 +403,19 @@ public partial class Emulator : MonoBehaviour {
         }
     }
 
+    [EditorBrowsable(EditorBrowsableState.Never)]
     public void OnDestroy() {
         OnStarted = null;
         OnRunning = null;
     }
 
+    [EditorBrowsable(EditorBrowsableState.Never)]
     public void Update() {
         _Update();
     }
 
     ////// Core methods
-
+ 
     Thread _initThread;
     CancellationTokenSource _initThreadCancellationTokenSource;
 

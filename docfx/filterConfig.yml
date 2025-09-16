@@ -1,0 +1,42 @@
+### YamlMime:ManagedReference
+# Only generate docs for Emulator and BasicInputProvider, and only show methods and properties (for now)
+apiRules:
+
+# Exclude anything with EditorBrowsable(Never) attribute
+- exclude:
+    hasAttribute:
+        uid: System.ComponentModel.EditorBrowsableAttribute
+        ctorArguments:
+            - System.ComponentModel.EditorBrowsableState.Never
+
+# Include methods and properties on Emulator, BasicInputProvider, InputProvider, and InputEvent
+- include:
+    uidRegex: '^UnityHawk\.Emulator$'
+- exclude:
+    uidRegex: '^UnityHawk\.Emulator.#ctor$' # exclude constructor
+- include:
+    uidRegex: '^UnityHawk\.Emulator\..*'
+    type: Method
+- include:
+    uidRegex: '^UnityHawk\.Emulator\..*'
+    type: Property
+- include:
+    uidRegex: '^UnityHawk\.Emulator\..*'
+    type: Type
+
+- include:
+    uidRegex: '^UnityHawk\.BasicInputProvider$'
+- include:
+    uidRegex: '^UnityHawk\.BasicInputProvider\..*'
+- include:
+    uidRegex: '^UnityHawk\.InputProvider$'
+- include:
+    uidRegex: '^UnityHawk\.InputProvider\..*'
+- include:
+    uidRegex: '^UnityHawk\.InputEvent$'
+- include:
+    uidRegex: '^UnityHawk\.InputEvent\..*'
+
+# Exclude everything else
+- exclude:
+    uidRegex: '.*'
