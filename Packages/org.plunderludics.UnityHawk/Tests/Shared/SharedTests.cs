@@ -51,17 +51,7 @@ public class SharedTests
     [UnitySetUp]
     public IEnumerator SetUp() {
         // Load the test scene
-        if (Application.isPlaying) {
-            SceneManager.LoadScene(Paths.testSceneName);
-            yield return null; // Wait for scene to load
-            if (SceneManager.GetActiveScene().name != Paths.testSceneName) {
-                Debug.LogError($"[unity-hawk] Test scene failed to load - probably needs to be included in build settings");
-            }
-        } else {
-#if UNITY_EDITOR
-            EditorSceneManager.OpenScene(Paths.testScenePath);
-#endif
-        }
+        yield return LoadScene("UnityHawkTestScene");
 
         // Test scene contains:
         // - Emulator with swoop rom and no savestate, on a disabled game object
@@ -75,10 +65,7 @@ public class SharedTests
 
         // Set up Emulator object
         e = Object.FindObjectOfType<Emulator>(includeInactive: true);
-        e.runInEditMode = true;
-        e.passInputFromUnity = _passInputFromUnity;
-        e.captureEmulatorAudio = _captureEmulatorAudio;
-        e.showBizhawkGuiInEditor = _showBizhawkGui;
+        SetParamsOnEmulator(e);
     }
 
     protected void ActivateEmulator() {
@@ -306,9 +293,9 @@ public class SharedTests
         });
         
         ActivateEmulator();
-
         yield return WaitForAWhile(e);
         AssertEmulatorIsRunning(e);
+
         Assert.That(_submittedResult, Is.EqualTo("tseT"));
     }
 
@@ -365,9 +352,25 @@ public class SharedTests
         Assert.That(File.Exists(savestatePath));
     }
 
+    [UnityTest]
+    public IEnumerator TestMultipleScenes() {
+        // First scene is already loaded and tested.
+        // Load a second scene and test
+        yield return LoadScene("UnityHawkTestScene2");
+        // This scene has an emulator with a savestate that's not referenced in the first scene
+
+        e = Object.FindObjectOfType<Emulator>(includeInactive: true);
+        SetParamsOnEmulator(e);
+
+        ActivateEmulator();
+        yield return WaitForAWhile(e);
+        AssertEmulatorIsRunning(e);
+
+        Assert.That(e.CurrentFrame, Is.GreaterThan(3000)); // Check if the savestate was loaded correctly
+    }
+
     // TODO More tests:
     // - test .cue files are copied into build
-    // - test building multiple scenes
     // - test extraAssets and includeInactive params on BuildSettings
     // - test with mocked InputSystem input (?)
     // - test auto-restart when emuhawk proc killed
@@ -398,6 +401,31 @@ public class SharedTests
     }
     public static IEnumerator WaitForAWhile(Emulator emulator) {
         yield return WaitForDuration(emulator, WhileDuration);
+    }
+
+    protected static IEnumerator LoadScene(string sceneName) {
+        if (Application.isPlaying) {
+            SceneManager.LoadScene(sceneName);
+            yield return null; // Wait for scene to load
+            if (SceneManager.GetActiveScene().name != sceneName) {
+                Debug.LogError($"[unity-hawk] Test scene failed to load - probably needs to be included in build settings");
+            }
+        } else {
+#if UNITY_EDITOR
+            // Have to load by full path
+            var scenePath = Path.Join("Packages/org.plunderludics.UnityHawk/Tests/Shared/", sceneName + ".unity");
+            EditorSceneManager.OpenScene(scenePath);
+#else
+            throw new System.Exception("How can Application.isPlaying be false in a build");
+#endif
+        }
+    }
+
+    protected void SetParamsOnEmulator(Emulator e) {
+        e.runInEditMode = true;
+        e.passInputFromUnity = _passInputFromUnity;
+        e.captureEmulatorAudio = _captureEmulatorAudio;
+        e.showBizhawkGuiInEditor = _showBizhawkGui;
     }
 }
 

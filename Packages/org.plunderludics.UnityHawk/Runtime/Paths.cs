@@ -44,10 +44,6 @@ internal static class Paths {
     public static readonly string defaultUnityHawkConfigPath = Path.Combine(_packagesDirName, packageName, "Runtime/UnityHawkConfigDefault.asset");
     public static readonly string defaultControlsResourceDir = "DefaultControls/"; // Controls assets are inside Resources/DefaultControls but get loaded relative to Resources
 
-    public static readonly string testSceneName = "UnityHawkTestScene";
-    private static readonly string testSceneFilename = $"{testSceneName}.unity";
-    public static readonly string testScenePath = Path.Combine(_packagesDirName, packageName, "Tests/Shared", testSceneFilename);
-
     public static readonly string dllDir = Path.Combine(BizHawkDir, "dll");
     public static readonly string externalToolsDir = Path.Combine(BizHawkDir, "ExternalTools");
 
