@@ -64,7 +64,7 @@ public class SharedTests
         }
 
         // Test scene contains:
-        // - Emulator on a disabled object with swoop rom and no savestate
+        // - Emulator with swoop rom and no savestate, on a disabled game object
         // - SharedTestAssets with other needed assets
 
         SharedTestAssets assets = Object.FindObjectOfType<SharedTestAssets>();
