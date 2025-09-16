@@ -1,4 +1,5 @@
-# For docs branch - ignore everything except docs/ folder
+# For docs branch - ignore everything except docs/ folder and all contents
 *
-!docs/
+!/docs/
+!/docs/**
 !/.gitignore

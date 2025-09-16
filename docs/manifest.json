@@ -1,0 +1,150 @@
+{
+  "source_base_path": "C:/Users/darwi/Desktop/projs/pludics/unity-hawk/docfx",
+  "xrefmap": "xrefmap.yml",
+  "files": [
+    {
+      "type": "Resource",
+      "output": {
+        "resource": {
+          "relative_path": "index.json"
+        }
+      }
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/UnityHawk.BasicInputProvider.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/UnityHawk.BasicInputProvider.html"
+        }
+      },
+      "version": "",
+      "Uid": null,
+      "IsMRef": true,
+      "Title": "UnityHawk.BasicInputProvider",
+      "Summary": "<p sourcefile=\"api/UnityHawk.BasicInputProvider.yml\" sourcestartlinenumber=\"1\">The default input provider for an Emulator. By default will try to use built-in default controls for the current system.\nA custom ControlsObject or a control mapping can be provided.\nSupports both the legacy input manager and the new InputSystem on the Unity side, and both button and axis inputs on the BizHawk side.</p>\n"
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/UnityHawk.Emulator.EmulatorStatus.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/UnityHawk.Emulator.EmulatorStatus.html"
+        }
+      },
+      "version": "",
+      "Uid": null,
+      "IsMRef": true,
+      "Title": "UnityHawk.Emulator.EmulatorStatus",
+      "Summary": "<p sourcefile=\"api/UnityHawk.Emulator.EmulatorStatus.yml\" sourcestartlinenumber=\"1\">the current status of the emulator</p>\n"
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/UnityHawk.Emulator.LuaCallback.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/UnityHawk.Emulator.LuaCallback.html"
+        }
+      },
+      "version": "",
+      "Uid": null,
+      "IsMRef": true,
+      "Title": "UnityHawk.Emulator.LuaCallback",
+      "Summary": "<p sourcefile=\"api/UnityHawk.Emulator.LuaCallback.yml\" sourcestartlinenumber=\"1\">delegate for registering lua callbacks</p>\n"
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/UnityHawk.Emulator.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/UnityHawk.Emulator.html"
+        }
+      },
+      "version": "",
+      "Uid": null,
+      "IsMRef": true,
+      "Title": "UnityHawk.Emulator",
+      "Summary": "<p sourcefile=\"api/UnityHawk.Emulator.yml\" sourcestartlinenumber=\"1\">The component responsible for initializing,\nrunning, and managing a single BizHawk emulator instance.</p>\n"
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/UnityHawk.InputEvent.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/UnityHawk.InputEvent.html"
+        }
+      },
+      "version": "",
+      "Uid": null,
+      "IsMRef": true,
+      "Title": "UnityHawk.InputEvent",
+      "Summary": "<p sourcefile=\"api/UnityHawk.InputEvent.yml\" sourcestartlinenumber=\"1\">Represents an input event (button press or axis value) to send to the BizHawk emulator.</p>\n"
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/UnityHawk.InputProvider.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/UnityHawk.InputProvider.html"
+        }
+      },
+      "version": "",
+      "Uid": null,
+      "IsMRef": true,
+      "Title": "UnityHawk.InputProvider",
+      "Summary": "<p sourcefile=\"api/UnityHawk.InputProvider.yml\" sourcestartlinenumber=\"1\">Base class for providing input to an Emulator. Override this to create a custom input provider.</p>\n"
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/UnityHawk.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/UnityHawk.html"
+        }
+      },
+      "version": "",
+      "Uid": null,
+      "IsMRef": true,
+      "Title": "UnityHawk",
+      "Summary": null
+    },
+    {
+      "type": "Toc",
+      "source_relative_path": "api/toc.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/toc.html"
+        },
+        ".json": {
+          "relative_path": "api/toc.json"
+        }
+      },
+      "version": ""
+    },
+    {
+      "type": "Resource",
+      "source_relative_path": "images/mario.png",
+      "output": {
+        "resource": {
+          "relative_path": "images/mario.png"
+        }
+      },
+      "version": ""
+    },
+    {
+      "type": "Redirection",
+      "source_relative_path": "index.md",
+      "output": {
+        ".html": {
+          "relative_path": "index.html"
+        }
+      },
+      "version": ""
+    }
+  ],
+  "groups": [
+    {
+      "xrefmap": "xrefmap.yml"
+    }
+  ]
+}

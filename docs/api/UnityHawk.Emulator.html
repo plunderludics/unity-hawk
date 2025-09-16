@@ -1,0 +1,1412 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+      <title>Class Emulator | UnityHawk </title>
+      <meta name="viewport" content="width=device-width, initial-scale=1.0">
+      <meta name="title" content="Class Emulator | UnityHawk ">
+      
+      <meta name="description" content="The component responsible for initializing, running, and managing a single BizHawk emulator instance.">
+      <link rel="icon" href="../favicon.ico">
+      <link rel="stylesheet" href="../public/docfx.min.css">
+      <link rel="stylesheet" href="../public/main.css">
+      <meta name="docfx:navrel" content="">
+      <meta name="docfx:tocrel" content="toc.html">
+      
+      <meta name="docfx:rel" content="../">
+      
+      
+      
+      <meta name="loc:inThisArticle" content="In this article">
+      <meta name="loc:searchResultsCount" content="{count} results for &quot;{query}&quot;">
+      <meta name="loc:searchNoResults" content="No results for &quot;{query}&quot;">
+      <meta name="loc:tocFilter" content="Filter by title">
+      <meta name="loc:nextArticle" content="Next">
+      <meta name="loc:prevArticle" content="Previous">
+      <meta name="loc:themeLight" content="Light">
+      <meta name="loc:themeDark" content="Dark">
+      <meta name="loc:themeAuto" content="Auto">
+      <meta name="loc:changeTheme" content="Change theme">
+      <meta name="loc:copy" content="Copy">
+      <meta name="loc:downloadPdf" content="Download PDF">
+
+      <script type="module" src="./../public/docfx.min.js"></script>
+
+      <script>
+        const theme = localStorage.getItem('theme') || 'auto'
+        document.documentElement.setAttribute('data-bs-theme', theme === 'auto' ? (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light') : theme)
+      </script>
+
+  </head>
+
+  <body class="tex2jax_ignore" data-layout="" data-yaml-mime="ManagedReference">
+    <header class="bg-body border-bottom">
+      <nav id="autocollapse" class="navbar navbar-expand-md" role="navigation">
+        <div class="container-xxl flex-nowrap">
+          <a class="navbar-brand" href="../index.html">
+            <img id="logo" class="svg" src="../images/mario.png" alt="UnityHawk">
+            UnityHawk
+          </a>
+          <button class="btn btn-lg d-md-none border-0" type="button" data-bs-toggle="collapse" data-bs-target="#navpanel" aria-controls="navpanel" aria-expanded="false" aria-label="Toggle navigation">
+            <i class="bi bi-three-dots"></i>
+          </button>
+          <div class="collapse navbar-collapse" id="navpanel">
+            <div id="navbar">
+              <form class="search" role="search" id="search">
+                <i class="bi bi-search"></i>
+                <input class="form-control" id="search-query" type="search" disabled placeholder="Search" autocomplete="off" aria-label="Search">
+              </form>
+            </div>
+          </div>
+        </div>
+      </nav>
+    </header>
+
+    <main class="container-xxl">
+      <div class="toc-offcanvas">
+        <div class="offcanvas-md offcanvas-start" tabindex="-1" id="tocOffcanvas" aria-labelledby="tocOffcanvasLabel">
+          <div class="offcanvas-header">
+            <h5 class="offcanvas-title" id="tocOffcanvasLabel">Table of Contents</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="offcanvas" data-bs-target="#tocOffcanvas" aria-label="Close"></button>
+          </div>
+          <div class="offcanvas-body">
+            <nav class="toc" id="toc"></nav>
+          </div>
+        </div>
+      </div>
+
+      <div class="content">
+        <div class="actionbar">
+          <button class="btn btn-lg border-0 d-md-none" type="button" data-bs-toggle="offcanvas" data-bs-target="#tocOffcanvas" aria-controls="tocOffcanvas" aria-expanded="false" aria-label="Show table of contents">
+            <i class="bi bi-list"></i>
+          </button>
+
+          <nav id="breadcrumb"></nav>
+        </div>
+
+        <article data-uid="UnityHawk.Emulator">
+
+
+
+  <h1 id="UnityHawk_Emulator" data-uid="UnityHawk.Emulator" class="text-break">
+Class Emulator  
+  </h1>
+
+  <div class="facts text-secondary">
+    <dl><dt>Namespace</dt><dd><a class="xref" href="UnityHawk.html">UnityHawk</a></dd></dl>
+  <dl><dt>Assembly</dt><dd>UnityHawk.dll</dd></dl>
+  </div>
+
+  <div class="markdown summary"><p>The component responsible for initializing,
+running, and managing a single BizHawk emulator instance.</p>
+</div>
+  <div class="markdown conceptual"></div>
+
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public class Emulator : MonoBehaviour</code></pre>
+  </div>
+
+
+
+
+  <dl class="typelist inheritance">
+    <dt>Inheritance</dt>
+    <dd>
+      <div><span class="xref">object</span></div>
+      <div><span class="xref">Emulator</span></div>
+    </dd>
+  </dl>
+
+
+
+
+
+
+
+
+
+  <h2 class="section" id="properties">Properties
+</h2>
+
+
+  <a id="UnityHawk_Emulator_CurrentFrame_" data-uid="UnityHawk.Emulator.CurrentFrame*"></a>
+
+  <h3 id="UnityHawk_Emulator_CurrentFrame" data-uid="UnityHawk.Emulator.CurrentFrame">
+  CurrentFrame
+  
+  </h3>
+
+  <div class="markdown level1 summary"><p>frame index of latest received texture</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public int CurrentFrame { get; }</code></pre>
+  </div>
+
+
+
+
+
+  <h4 class="section">Property Value</h4>
+  <dl class="parameters">
+    <dt><span class="xref">int</span></dt>
+    <dd></dd>
+  </dl>
+
+
+
+
+
+
+
+
+  <a id="UnityHawk_Emulator_IsMuted_" data-uid="UnityHawk.Emulator.IsMuted*"></a>
+
+  <h3 id="UnityHawk_Emulator_IsMuted" data-uid="UnityHawk.Emulator.IsMuted">
+  IsMuted
+  
+  </h3>
+
+  <div class="markdown level1 summary"><p>if the emulator is muted</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public bool IsMuted { get; set; }</code></pre>
+  </div>
+
+
+
+
+
+  <h4 class="section">Property Value</h4>
+  <dl class="parameters">
+    <dt><span class="xref">bool</span></dt>
+    <dd></dd>
+  </dl>
+
+
+
+
+
+
+
+
+  <a id="UnityHawk_Emulator_IsPaused_" data-uid="UnityHawk.Emulator.IsPaused*"></a>
+
+  <h3 id="UnityHawk_Emulator_IsPaused" data-uid="UnityHawk.Emulator.IsPaused">
+  IsPaused
+  
+  </h3>
+
+  <div class="markdown level1 summary"><p>if the emulator is paused</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public bool IsPaused { get; set; }</code></pre>
+  </div>
+
+
+
+
+
+  <h4 class="section">Property Value</h4>
+  <dl class="parameters">
+    <dt><span class="xref">bool</span></dt>
+    <dd></dd>
+  </dl>
+
+
+
+
+
+
+
+
+  <a id="UnityHawk_Emulator_IsRunning_" data-uid="UnityHawk.Emulator.IsRunning*"></a>
+
+  <h3 id="UnityHawk_Emulator_IsRunning" data-uid="UnityHawk.Emulator.IsRunning">
+  IsRunning
+  
+  </h3>
+
+  <div class="markdown level1 summary"><p>is the emulator process running a game?</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public bool IsRunning { get; }</code></pre>
+  </div>
+
+
+
+
+
+  <h4 class="section">Property Value</h4>
+  <dl class="parameters">
+    <dt><span class="xref">bool</span></dt>
+    <dd></dd>
+  </dl>
+
+
+
+
+
+
+
+
+  <a id="UnityHawk_Emulator_IsStarted_" data-uid="UnityHawk.Emulator.IsStarted*"></a>
+
+  <h3 id="UnityHawk_Emulator_IsStarted" data-uid="UnityHawk.Emulator.IsStarted">
+  IsStarted
+  
+  </h3>
+
+  <div class="markdown level1 summary"><p>is the emulator process started?</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public bool IsStarted { get; }</code></pre>
+  </div>
+
+
+
+
+
+  <h4 class="section">Property Value</h4>
+  <dl class="parameters">
+    <dt><span class="xref">bool</span></dt>
+    <dd></dd>
+  </dl>
+
+
+
+
+
+
+
+
+  <a id="UnityHawk_Emulator_IsStarting_" data-uid="UnityHawk.Emulator.IsStarting*"></a>
+
+  <h3 id="UnityHawk_Emulator_IsStarting" data-uid="UnityHawk.Emulator.IsStarting">
+  IsStarting
+  
+  </h3>
+
+  <div class="markdown level1 summary"><p>is the emulator process currently starting up?</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public bool IsStarting { get; }</code></pre>
+  </div>
+
+
+
+
+
+  <h4 class="section">Property Value</h4>
+  <dl class="parameters">
+    <dt><span class="xref">bool</span></dt>
+    <dd></dd>
+  </dl>
+
+
+
+
+
+
+
+
+  <a id="UnityHawk_Emulator_SpeedPercent_" data-uid="UnityHawk.Emulator.SpeedPercent*"></a>
+
+  <h3 id="UnityHawk_Emulator_SpeedPercent" data-uid="UnityHawk.Emulator.SpeedPercent">
+  SpeedPercent
+  
+  </h3>
+
+  <div class="markdown level1 summary"><p>the emulator speed as a percentage</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public int SpeedPercent { get; set; }</code></pre>
+  </div>
+
+
+
+
+
+  <h4 class="section">Property Value</h4>
+  <dl class="parameters">
+    <dt><span class="xref">int</span></dt>
+    <dd></dd>
+  </dl>
+
+
+
+
+
+
+
+
+  <a id="UnityHawk_Emulator_Status_" data-uid="UnityHawk.Emulator.Status*"></a>
+
+  <h3 id="UnityHawk_Emulator_Status" data-uid="UnityHawk.Emulator.Status">
+  Status
+  
+  </h3>
+
+  <div class="markdown level1 summary"><p>the current status of the emulator</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public Emulator.EmulatorStatus Status { get; }</code></pre>
+  </div>
+
+
+
+
+
+  <h4 class="section">Property Value</h4>
+  <dl class="parameters">
+    <dt><a class="xref" href="UnityHawk.Emulator.html">Emulator</a>.<a class="xref" href="UnityHawk.Emulator.EmulatorStatus.html">EmulatorStatus</a></dt>
+    <dd></dd>
+  </dl>
+
+
+
+
+
+
+
+
+  <a id="UnityHawk_Emulator_SystemId_" data-uid="UnityHawk.Emulator.SystemId*"></a>
+
+  <h3 id="UnityHawk_Emulator_SystemId" data-uid="UnityHawk.Emulator.SystemId">
+  SystemId
+  
+  </h3>
+
+  <div class="markdown level1 summary"><p>ID of the current emulator platform (e.g. &quot;N64&quot;, &quot;PSX&quot;, etc.)
+Returns null if emulator is not running.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public string SystemId { get; }</code></pre>
+  </div>
+
+
+
+
+
+  <h4 class="section">Property Value</h4>
+  <dl class="parameters">
+    <dt><span class="xref">string</span></dt>
+    <dd></dd>
+  </dl>
+
+
+
+
+
+
+
+
+  <a id="UnityHawk_Emulator_Texture_" data-uid="UnityHawk.Emulator.Texture*"></a>
+
+  <h3 id="UnityHawk_Emulator_Texture" data-uid="UnityHawk.Emulator.Texture">
+  Texture
+  
+  </h3>
+
+  <div class="markdown level1 summary"><p>Currently displayed emulator texture.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public Texture Texture { get; }</code></pre>
+  </div>
+
+
+
+
+
+  <h4 class="section">Property Value</h4>
+  <dl class="parameters">
+    <dt><span class="xref">Texture</span></dt>
+    <dd></dd>
+  </dl>
+
+
+
+
+  <h4 class="section" id="UnityHawk_Emulator_Texture_remarks">Remarks</h4>
+  <div class="markdown level1 remarks"><p>If emulator is not running but a savestate is set, will return the savestate preview texture</p>
+</div>
+
+
+
+
+  <a id="UnityHawk_Emulator_Volume_" data-uid="UnityHawk.Emulator.Volume*"></a>
+
+  <h3 id="UnityHawk_Emulator_Volume" data-uid="UnityHawk.Emulator.Volume">
+  Volume
+  
+  </h3>
+
+  <div class="markdown level1 summary"><p>the emulator current volume</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public int Volume { get; set; }</code></pre>
+  </div>
+
+
+
+
+
+  <h4 class="section">Property Value</h4>
+  <dl class="parameters">
+    <dt><span class="xref">int</span></dt>
+    <dd></dd>
+  </dl>
+
+
+
+
+
+
+
+
+  <h2 class="section" id="methods">Methods
+</h2>
+
+
+  <a id="UnityHawk_Emulator_FrameAdvance_" data-uid="UnityHawk.Emulator.FrameAdvance*"></a>
+
+  <h3 id="UnityHawk_Emulator_FrameAdvance" data-uid="UnityHawk.Emulator.FrameAdvance">
+  FrameAdvance()
+  
+  </h3>
+
+  <div class="markdown level1 summary"><p>advances a frame on the emulator</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public void FrameAdvance()</code></pre>
+  </div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+  <a id="UnityHawk_Emulator_Freeze_" data-uid="UnityHawk.Emulator.Freeze*"></a>
+
+  <h3 id="UnityHawk_Emulator_Freeze_System_Int64_System_Int32_System_String_" data-uid="UnityHawk.Emulator.Freeze(System.Int64,System.Int32,System.String)">
+  Freeze(long, int, string)
+  
+  </h3>
+
+  <div class="markdown level1 summary"><p>Freezes an address in emulated memory</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public void Freeze(long address, int size, string domain = null)</code></pre>
+  </div>
+
+  <h4 class="section">Parameters</h4>
+  <dl class="parameters">
+    <dt><code>address</code> <span class="xref">long</span></dt>
+    <dd><p>The address to freeze</p>
+</dd>
+    <dt><code>size</code> <span class="xref">int</span></dt>
+    <dd><p>The size of the value to freeze (1-4 bytes)</p>
+</dd>
+    <dt><code>domain</code> <span class="xref">string</span></dt>
+    <dd><p>The memory domain. If null, defaults to main memory.</p>
+</dd>
+  </dl>
+
+
+
+
+
+
+
+
+
+
+
+
+  <a id="UnityHawk_Emulator_LoadRom_" data-uid="UnityHawk.Emulator.LoadRom*"></a>
+
+  <h3 id="UnityHawk_Emulator_LoadRom_System_String_" data-uid="UnityHawk.Emulator.LoadRom(System.String)">
+  LoadRom(string)
+  
+  </h3>
+
+  <div class="markdown level1 summary"><p>loads a rom from a given path</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public void LoadRom(string path)</code></pre>
+  </div>
+
+  <h4 class="section">Parameters</h4>
+  <dl class="parameters">
+    <dt><code>path</code> <span class="xref">string</span></dt>
+    <dd></dd>
+  </dl>
+
+
+
+
+
+
+
+
+
+
+
+
+  <a id="UnityHawk_Emulator_LoadRom_" data-uid="UnityHawk.Emulator.LoadRom*"></a>
+
+  <h3 id="UnityHawk_Emulator_LoadRom_UnityHawk_Rom_" data-uid="UnityHawk.Emulator.LoadRom(UnityHawk.Rom)">
+  LoadRom(Rom)
+  
+  </h3>
+
+  <div class="markdown level1 summary"><p>loads a rom from a Rom asset</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public void LoadRom(Rom rom)</code></pre>
+  </div>
+
+  <h4 class="section">Parameters</h4>
+  <dl class="parameters">
+    <dt><code>rom</code> <span class="xref">Rom</span></dt>
+    <dd></dd>
+  </dl>
+
+
+
+
+
+
+
+
+
+
+
+
+  <a id="UnityHawk_Emulator_LoadState_" data-uid="UnityHawk.Emulator.LoadState*"></a>
+
+  <h3 id="UnityHawk_Emulator_LoadState_System_String_" data-uid="UnityHawk.Emulator.LoadState(System.String)">
+  LoadState(string)
+  
+  </h3>
+
+  <div class="markdown level1 summary"><p>loads a state from a given path</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public void LoadState(string path)</code></pre>
+  </div>
+
+  <h4 class="section">Parameters</h4>
+  <dl class="parameters">
+    <dt><code>path</code> <span class="xref">string</span></dt>
+    <dd></dd>
+  </dl>
+
+
+
+
+
+
+
+
+
+
+
+
+  <a id="UnityHawk_Emulator_LoadState_" data-uid="UnityHawk.Emulator.LoadState*"></a>
+
+  <h3 id="UnityHawk_Emulator_LoadState_UnityHawk_Savestate_" data-uid="UnityHawk.Emulator.LoadState(UnityHawk.Savestate)">
+  LoadState(Savestate)
+  
+  </h3>
+
+  <div class="markdown level1 summary"><p>loads a state from a Savestate asset</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public void LoadState(Savestate sample)</code></pre>
+  </div>
+
+  <h4 class="section">Parameters</h4>
+  <dl class="parameters">
+    <dt><code>sample</code> <span class="xref">Savestate</span></dt>
+    <dd></dd>
+  </dl>
+
+
+
+
+
+
+
+
+
+
+
+
+  <a id="UnityHawk_Emulator_Mute_" data-uid="UnityHawk.Emulator.Mute*"></a>
+
+  <h3 id="UnityHawk_Emulator_Mute" data-uid="UnityHawk.Emulator.Mute">
+  Mute()
+  
+  </h3>
+
+  <div class="markdown level1 summary"><p>mutes the emulator (and disables sound engine)</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public void Mute()</code></pre>
+  </div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+  <a id="UnityHawk_Emulator_Pause_" data-uid="UnityHawk.Emulator.Pause*"></a>
+
+  <h3 id="UnityHawk_Emulator_Pause" data-uid="UnityHawk.Emulator.Pause">
+  Pause()
+  
+  </h3>
+
+  <div class="markdown level1 summary"><p>pauses the emulator</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public void Pause()</code></pre>
+  </div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+  <a id="UnityHawk_Emulator_RegisterLuaCallback_" data-uid="UnityHawk.Emulator.RegisterLuaCallback*"></a>
+
+  <h3 id="UnityHawk_Emulator_RegisterLuaCallback_System_String_UnityHawk_Emulator_LuaCallback_" data-uid="UnityHawk.Emulator.RegisterLuaCallback(System.String,UnityHawk.Emulator.LuaCallback)">
+  RegisterLuaCallback(string, LuaCallback)
+  
+  </h3>
+
+  <div class="markdown level1 summary"><p>Register a callback that can be called via <code>unityhawk.callmethod('MethodName', argString)</code> in BizHawk lua</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public void RegisterLuaCallback(string methodName, Emulator.LuaCallback luaCallback)</code></pre>
+  </div>
+
+  <h4 class="section">Parameters</h4>
+  <dl class="parameters">
+    <dt><code>methodName</code> <span class="xref">string</span></dt>
+    <dd><p>The name of the method to register</p>
+</dd>
+    <dt><code>luaCallback</code> <a class="xref" href="UnityHawk.Emulator.html">Emulator</a>.<a class="xref" href="UnityHawk.Emulator.LuaCallback.html">LuaCallback</a></dt>
+    <dd><p>The Unity-side callback</p>
+</dd>
+  </dl>
+
+
+
+
+
+
+
+
+
+
+
+
+  <a id="UnityHawk_Emulator_RegisterMethod_" data-uid="UnityHawk.Emulator.RegisterMethod*"></a>
+
+  <h3 id="UnityHawk_Emulator_RegisterMethod_System_String_UnityHawk_Emulator_LuaCallback_" data-uid="UnityHawk.Emulator.RegisterMethod(System.String,UnityHawk.Emulator.LuaCallback)">
+  RegisterMethod(string, LuaCallback)
+  
+  </h3>
+
+  <div class="markdown level1 summary"><p>[Obsolete: use RegisterLuaCallback instead]
+Register a callback that can be called via <code>unityhawk.callmethod('MethodName')</code> in BizHawk lua</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">[Obsolete(&quot;use RegisterLuaCallback instead&quot;)]
+public void RegisterMethod(string methodName, Emulator.LuaCallback luaCallback)</code></pre>
+  </div>
+
+  <h4 class="section">Parameters</h4>
+  <dl class="parameters">
+    <dt><code>methodName</code> <span class="xref">string</span></dt>
+    <dd></dd>
+    <dt><code>luaCallback</code> <a class="xref" href="UnityHawk.Emulator.html">Emulator</a>.<a class="xref" href="UnityHawk.Emulator.LuaCallback.html">LuaCallback</a></dt>
+    <dd></dd>
+  </dl>
+
+
+
+
+
+
+
+
+
+
+
+
+  <a id="UnityHawk_Emulator_ReloadState_" data-uid="UnityHawk.Emulator.ReloadState*"></a>
+
+  <h3 id="UnityHawk_Emulator_ReloadState" data-uid="UnityHawk.Emulator.ReloadState">
+  ReloadState()
+  
+  </h3>
+
+  <div class="markdown level1 summary"><p>reloads the current state</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public void ReloadState()</code></pre>
+  </div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+  <a id="UnityHawk_Emulator_Restart_" data-uid="UnityHawk.Emulator.Restart*"></a>
+
+  <h3 id="UnityHawk_Emulator_Restart" data-uid="UnityHawk.Emulator.Restart">
+  Restart()
+  
+  </h3>
+
+  <div class="markdown level1 summary"><p>restarts the emulator</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">[Button(null, EButtonEnableMode.Always)]
+public void Restart()</code></pre>
+  </div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+  <a id="UnityHawk_Emulator_SaveState_" data-uid="UnityHawk.Emulator.SaveState*"></a>
+
+  <h3 id="UnityHawk_Emulator_SaveState_System_String_" data-uid="UnityHawk.Emulator.SaveState(System.String)">
+  SaveState(string)
+  
+  </h3>
+
+  <div class="markdown level1 summary"><p>saves a state to a given path</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public string SaveState(string path)</code></pre>
+  </div>
+
+  <h4 class="section">Parameters</h4>
+  <dl class="parameters">
+    <dt><code>path</code> <span class="xref">string</span></dt>
+    <dd></dd>
+  </dl>
+
+  <h4 class="section">Returns</h4>
+  <dl class="parameters">
+    <dt><span class="xref">string</span></dt>
+    <dd></dd>
+  </dl>
+
+
+
+
+
+
+
+
+
+
+
+  <a id="UnityHawk_Emulator_SetSpeedPercent_" data-uid="UnityHawk.Emulator.SetSpeedPercent*"></a>
+
+  <h3 id="UnityHawk_Emulator_SetSpeedPercent_System_Int32_" data-uid="UnityHawk.Emulator.SetSpeedPercent(System.Int32)">
+  SetSpeedPercent(int)
+  
+  </h3>
+
+  <div class="markdown level1 summary"><p>sets the speed of the emulator as integer percentage</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public void SetSpeedPercent(int percent)</code></pre>
+  </div>
+
+  <h4 class="section">Parameters</h4>
+  <dl class="parameters">
+    <dt><code>percent</code> <span class="xref">int</span></dt>
+    <dd></dd>
+  </dl>
+
+
+
+
+
+
+
+
+  <h4 class="section" id="UnityHawk_Emulator_SetSpeedPercent_System_Int32__remarks">Remarks</h4>
+  <div class="markdown level1 remarks"><p>This is the 'target' speed for the emulator - in reality might be slower if cpu-constrained</p>
+</div>
+
+
+
+
+  <a id="UnityHawk_Emulator_SetVolume_" data-uid="UnityHawk.Emulator.SetVolume*"></a>
+
+  <h3 id="UnityHawk_Emulator_SetVolume_System_Int32_" data-uid="UnityHawk.Emulator.SetVolume(System.Int32)">
+  SetVolume(int)
+  
+  </h3>
+
+  <div class="markdown level1 summary"><p>sets the emulator volume</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public void SetVolume(int value)</code></pre>
+  </div>
+
+  <h4 class="section">Parameters</h4>
+  <dl class="parameters">
+    <dt><code>value</code> <span class="xref">int</span></dt>
+    <dd></dd>
+  </dl>
+
+
+
+
+
+
+
+
+
+
+
+
+  <a id="UnityHawk_Emulator_Unfreeze_" data-uid="UnityHawk.Emulator.Unfreeze*"></a>
+
+  <h3 id="UnityHawk_Emulator_Unfreeze_System_Int64_System_Int32_System_String_" data-uid="UnityHawk.Emulator.Unfreeze(System.Int64,System.Int32,System.String)">
+  Unfreeze(long, int, string)
+  
+  </h3>
+
+  <div class="markdown level1 summary"><p>Unfreezes an address that was previously frozen</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public void Unfreeze(long address, int size, string domain = null)</code></pre>
+  </div>
+
+  <h4 class="section">Parameters</h4>
+  <dl class="parameters">
+    <dt><code>address</code> <span class="xref">long</span></dt>
+    <dd><p>The address to unfreeze</p>
+</dd>
+    <dt><code>size</code> <span class="xref">int</span></dt>
+    <dd><p>The size of the value to unfreeze (1-4 bytes)</p>
+</dd>
+    <dt><code>domain</code> <span class="xref">string</span></dt>
+    <dd><p>The memory domain. If null, defaults to main memory.</p>
+</dd>
+  </dl>
+
+
+
+
+
+
+
+
+
+
+
+
+  <a id="UnityHawk_Emulator_Unmute_" data-uid="UnityHawk.Emulator.Unmute*"></a>
+
+  <h3 id="UnityHawk_Emulator_Unmute" data-uid="UnityHawk.Emulator.Unmute">
+  Unmute()
+  
+  </h3>
+
+  <div class="markdown level1 summary"><p>unmutes the emulator (and enables sound engine)</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public void Unmute()</code></pre>
+  </div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+  <a id="UnityHawk_Emulator_Unpause_" data-uid="UnityHawk.Emulator.Unpause*"></a>
+
+  <h3 id="UnityHawk_Emulator_Unpause" data-uid="UnityHawk.Emulator.Unpause">
+  Unpause()
+  
+  </h3>
+
+  <div class="markdown level1 summary"><p>unpauses the emulator</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public void Unpause()</code></pre>
+  </div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+  <a id="UnityHawk_Emulator_Unwatch_" data-uid="UnityHawk.Emulator.Unwatch*"></a>
+
+  <h3 id="UnityHawk_Emulator_Unwatch_System_Int32_" data-uid="UnityHawk.Emulator.Unwatch(System.Int32)">
+  Unwatch(int)
+  
+  </h3>
+
+  <div class="markdown level1 summary"><p>Unwatch a value that was previously watched</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public void Unwatch(int id)</code></pre>
+  </div>
+
+  <h4 class="section">Parameters</h4>
+  <dl class="parameters">
+    <dt><code>id</code> <span class="xref">int</span></dt>
+    <dd><p>The id of the watch to stop</p>
+</dd>
+  </dl>
+
+
+
+
+
+
+
+
+
+
+
+
+  <a id="UnityHawk_Emulator_WatchFloat_" data-uid="UnityHawk.Emulator.WatchFloat*"></a>
+
+  <h3 id="UnityHawk_Emulator_WatchFloat_System_Int64_System_Boolean_System_String_System_Action_System_Single__" data-uid="UnityHawk.Emulator.WatchFloat(System.Int64,System.Boolean,System.String,System.Action{System.Single})">
+  WatchFloat(long, bool, string, Action&lt;float&gt;)
+  
+  </h3>
+
+  <div class="markdown level1 summary"><p>Watch a float value in emulated memory at a given address</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public int WatchFloat(long address, bool isBigEndian, string domain, Action&lt;float&gt; onChanged)</code></pre>
+  </div>
+
+  <h4 class="section">Parameters</h4>
+  <dl class="parameters">
+    <dt><code>address</code> <span class="xref">long</span></dt>
+    <dd><p>The address to watch</p>
+</dd>
+    <dt><code>isBigEndian</code> <span class="xref">bool</span></dt>
+    <dd><p>Whether the value is big endian</p>
+</dd>
+    <dt><code>domain</code> <span class="xref">string</span></dt>
+    <dd><p>The domain to watch. If null, defaults to main memory.</p>
+</dd>
+    <dt><code>onChanged</code> <span class="xref">Action</span>&lt;<span class="xref">float</span>&gt;</dt>
+    <dd><p>The callback to call when the value changes</p>
+</dd>
+  </dl>
+
+  <h4 class="section">Returns</h4>
+  <dl class="parameters">
+    <dt><span class="xref">int</span></dt>
+    <dd><p>The id of the watch, can be used with Unwatch(id) to stop watching</p>
+</dd>
+  </dl>
+
+
+
+
+
+
+
+
+
+
+
+  <a id="UnityHawk_Emulator_WatchSigned_" data-uid="UnityHawk.Emulator.WatchSigned*"></a>
+
+  <h3 id="UnityHawk_Emulator_WatchSigned_System_Int64_System_Int32_System_Boolean_System_String_System_Action_System_Int32__" data-uid="UnityHawk.Emulator.WatchSigned(System.Int64,System.Int32,System.Boolean,System.String,System.Action{System.Int32})">
+  WatchSigned(long, int, bool, string, Action&lt;int&gt;)
+  
+  </h3>
+
+  <div class="markdown level1 summary"><p>Watch a signed integer value in emulated memory at a given address</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public int WatchSigned(long address, int size, bool isBigEndian, string domain, Action&lt;int&gt; onChanged)</code></pre>
+  </div>
+
+  <h4 class="section">Parameters</h4>
+  <dl class="parameters">
+    <dt><code>address</code> <span class="xref">long</span></dt>
+    <dd><p>The address to watch</p>
+</dd>
+    <dt><code>size</code> <span class="xref">int</span></dt>
+    <dd><p>The size of the value to watch</p>
+</dd>
+    <dt><code>isBigEndian</code> <span class="xref">bool</span></dt>
+    <dd><p>Whether the value is big endian</p>
+</dd>
+    <dt><code>domain</code> <span class="xref">string</span></dt>
+    <dd><p>The domain to watch. If null, defaults to main memory.</p>
+</dd>
+    <dt><code>onChanged</code> <span class="xref">Action</span>&lt;<span class="xref">int</span>&gt;</dt>
+    <dd><p>The callback to call when the value changes</p>
+</dd>
+  </dl>
+
+  <h4 class="section">Returns</h4>
+  <dl class="parameters">
+    <dt><span class="xref">int</span></dt>
+    <dd><p>The id of the watch, can be used with Unwatch(id) to stop watching</p>
+</dd>
+  </dl>
+
+
+
+
+
+
+
+
+
+
+
+  <a id="UnityHawk_Emulator_WatchUnsigned_" data-uid="UnityHawk.Emulator.WatchUnsigned*"></a>
+
+  <h3 id="UnityHawk_Emulator_WatchUnsigned_System_Int64_System_Int32_System_Boolean_System_String_System_Action_System_UInt32__" data-uid="UnityHawk.Emulator.WatchUnsigned(System.Int64,System.Int32,System.Boolean,System.String,System.Action{System.UInt32})">
+  WatchUnsigned(long, int, bool, string, Action&lt;uint&gt;)
+  
+  </h3>
+
+  <div class="markdown level1 summary"><p>Watch an unsigned integer value in emulated memory at a given address</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public int WatchUnsigned(long address, int size, bool isBigEndian, string domain, Action&lt;uint&gt; onChanged)</code></pre>
+  </div>
+
+  <h4 class="section">Parameters</h4>
+  <dl class="parameters">
+    <dt><code>address</code> <span class="xref">long</span></dt>
+    <dd><p>The address to watch</p>
+</dd>
+    <dt><code>size</code> <span class="xref">int</span></dt>
+    <dd><p>The size of the value to watch</p>
+</dd>
+    <dt><code>isBigEndian</code> <span class="xref">bool</span></dt>
+    <dd><p>Whether the value is big endian</p>
+</dd>
+    <dt><code>domain</code> <span class="xref">string</span></dt>
+    <dd><p>The domain to watch. If null, defaults to main memory.</p>
+</dd>
+    <dt><code>onChanged</code> <span class="xref">Action</span>&lt;<span class="xref">uint</span>&gt;</dt>
+    <dd><p>The callback to call when the value changes</p>
+</dd>
+  </dl>
+
+  <h4 class="section">Returns</h4>
+  <dl class="parameters">
+    <dt><span class="xref">int</span></dt>
+    <dd><p>The id of the watch, can be used with Unwatch(id) to stop watching</p>
+</dd>
+  </dl>
+
+
+
+
+
+
+
+
+
+
+
+  <a id="UnityHawk_Emulator_WriteFloat_" data-uid="UnityHawk.Emulator.WriteFloat*"></a>
+
+  <h3 id="UnityHawk_Emulator_WriteFloat_System_Int64_System_Single_System_Boolean_System_String_" data-uid="UnityHawk.Emulator.WriteFloat(System.Int64,System.Single,System.Boolean,System.String)">
+  WriteFloat(long, float, bool, string)
+  
+  </h3>
+
+  <div class="markdown level1 summary"><p>Sets a float value at a given address</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public void WriteFloat(long address, float value, bool isBigEndian, string domain = null)</code></pre>
+  </div>
+
+  <h4 class="section">Parameters</h4>
+  <dl class="parameters">
+    <dt><code>address</code> <span class="xref">long</span></dt>
+    <dd><p>The address to write to</p>
+</dd>
+    <dt><code>value</code> <span class="xref">float</span></dt>
+    <dd><p>The value to write</p>
+</dd>
+    <dt><code>isBigEndian</code> <span class="xref">bool</span></dt>
+    <dd><p>Whether the value is big endian</p>
+</dd>
+    <dt><code>domain</code> <span class="xref">string</span></dt>
+    <dd><p>The domain to write to. If null, defaults to main memory.</p>
+</dd>
+  </dl>
+
+
+
+
+
+
+
+
+  <h4 class="section" id="UnityHawk_Emulator_WriteFloat_System_Int64_System_Single_System_Boolean_System_String__remarks">Remarks</h4>
+  <div class="markdown level1 remarks"><p>Only sets the value for a single frame - to freeze the address, use Freeze</p>
+</div>
+
+
+
+
+  <a id="UnityHawk_Emulator_WriteSigned_" data-uid="UnityHawk.Emulator.WriteSigned*"></a>
+
+  <h3 id="UnityHawk_Emulator_WriteSigned_System_Int64_System_Int32_System_Int32_System_Boolean_System_String_" data-uid="UnityHawk.Emulator.WriteSigned(System.Int64,System.Int32,System.Int32,System.Boolean,System.String)">
+  WriteSigned(long, int, int, bool, string)
+  
+  </h3>
+
+  <div class="markdown level1 summary"><p>Sets a signed integer value at a given address</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public void WriteSigned(long address, int value, int size, bool isBigEndian, string domain = null)</code></pre>
+  </div>
+
+  <h4 class="section">Parameters</h4>
+  <dl class="parameters">
+    <dt><code>address</code> <span class="xref">long</span></dt>
+    <dd><p>The address to write to</p>
+</dd>
+    <dt><code>value</code> <span class="xref">int</span></dt>
+    <dd><p>The value to write</p>
+</dd>
+    <dt><code>size</code> <span class="xref">int</span></dt>
+    <dd><p>The size of the value to write</p>
+</dd>
+    <dt><code>isBigEndian</code> <span class="xref">bool</span></dt>
+    <dd><p>Whether the value is big endian</p>
+</dd>
+    <dt><code>domain</code> <span class="xref">string</span></dt>
+    <dd><p>The domain to write to. If null, defaults to main memory.</p>
+</dd>
+  </dl>
+
+
+
+
+
+
+
+
+  <h4 class="section" id="UnityHawk_Emulator_WriteSigned_System_Int64_System_Int32_System_Int32_System_Boolean_System_String__remarks">Remarks</h4>
+  <div class="markdown level1 remarks"><p>Only sets the value for a single frame - to freeze the address, use Freeze</p>
+</div>
+
+
+
+
+  <a id="UnityHawk_Emulator_WriteUnsigned_" data-uid="UnityHawk.Emulator.WriteUnsigned*"></a>
+
+  <h3 id="UnityHawk_Emulator_WriteUnsigned_System_Int64_System_UInt32_System_Int32_System_Boolean_System_String_" data-uid="UnityHawk.Emulator.WriteUnsigned(System.Int64,System.UInt32,System.Int32,System.Boolean,System.String)">
+  WriteUnsigned(long, uint, int, bool, string)
+  
+  </h3>
+
+  <div class="markdown level1 summary"><p>Sets an unsigned integer value at a given address</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public void WriteUnsigned(long address, uint value, int size, bool isBigEndian, string domain = null)</code></pre>
+  </div>
+
+  <h4 class="section">Parameters</h4>
+  <dl class="parameters">
+    <dt><code>address</code> <span class="xref">long</span></dt>
+    <dd><p>The address to write to</p>
+</dd>
+    <dt><code>value</code> <span class="xref">uint</span></dt>
+    <dd><p>The value to write</p>
+</dd>
+    <dt><code>size</code> <span class="xref">int</span></dt>
+    <dd><p>The size of the value to write</p>
+</dd>
+    <dt><code>isBigEndian</code> <span class="xref">bool</span></dt>
+    <dd><p>Whether the value is big endian</p>
+</dd>
+    <dt><code>domain</code> <span class="xref">string</span></dt>
+    <dd><p>The domain to write to. If null, defaults to main memory.</p>
+</dd>
+  </dl>
+
+
+
+
+
+
+
+
+  <h4 class="section" id="UnityHawk_Emulator_WriteUnsigned_System_Int64_System_UInt32_System_Int32_System_Boolean_System_String__remarks">Remarks</h4>
+  <div class="markdown level1 remarks"><p>Only sets the value for a single frame - to freeze the address, use Freeze</p>
+</div>
+
+
+
+
+
+</article>
+
+        <div class="contribution d-print-none">
+        </div>
+
+
+      </div>
+
+      <div class="affix">
+        <nav id="affix"></nav>
+      </div>
+    </main>
+
+    <div class="container-xxl search-results" id="search-results"></div>
+
+    <footer class="border-top text-secondary">
+      <div class="container-xxl">
+        <div class="flex-fill">
+          <span>Made with <a href="https://dotnet.github.io/docfx">docfx</a></span>
+        </div>
+      </div>
+    </footer>
+  </body>
+</html>
