@@ -2,11 +2,16 @@ using System.Collections;
 using NUnit.Framework;
 using UnityEngine;
 using UnityEngine.TestTools;
+using UnityEngine.SceneManagement;
+
+using System.IO;
+
 #if UNITY_EDITOR
 using UnityEditor;
+using UnityEditor.SceneManagement;
 #endif
 
-using System;
+// using System;
 
 // (A UnityTest behaves like a coroutine in Play Mode. In Edit Mode you can use
 // `yield return null;` to skip a frame.)
@@ -25,7 +30,7 @@ public class SharedTests
 {
     private const float WhileDuration = 5f;
     private const float MomentDuration = 0.5f;
-    private Rom eliteRom;
+    // private Rom eliteRom;
     private Rom swoopRom;
     private Savestate eliteSavestate2000;
     private Savestate eliteSavestate5000;
@@ -37,38 +42,39 @@ public class SharedTests
     private bool _captureEmulatorAudio;
     private bool _showBizhawkGui;
 
-    public SharedTests(bool passInputFromUnity, bool captureEmulatorAudio, bool showBizhawkGui)
-    {
-#if UNITY_EDITOR
-        // This breaks when trying to test in standalone player because AssetDatabase is unavailable
-        // Probably have to use Addressables instead
-        eliteRom = AssetDatabase.LoadAssetAtPath<Rom>("Packages/org.plunderludics.UnityHawk/Tests/Shared/eliteRomForTests.nes");
-        swoopRom = AssetDatabase.LoadAssetAtPath<Rom>("Packages/org.plunderludics.UnityHawk/Tests/Shared/swoopRomForTests.n64");
-
-        eliteSavestate2000 = AssetDatabase.LoadAssetAtPath<Savestate>("Packages/org.plunderludics.UnityHawk/Tests/Shared/eliteSavestate2000.savestate");
-        eliteSavestate5000 = AssetDatabase.LoadAssetAtPath<Savestate>("Packages/org.plunderludics.UnityHawk/Tests/Shared/eliteSavestate5000.savestate");
-
-        testCallbacksLua = AssetDatabase.LoadAssetAtPath<LuaScript>("Packages/org.plunderludics.UnityHawk/Tests/Shared/testCallbacks.lua");
-#endif
-        Assert.That(eliteRom, Is.Not.Null);
-        Assert.That(swoopRom, Is.Not.Null);
-        Assert.That(eliteSavestate2000, Is.Not.Null);
-        Assert.That(eliteSavestate5000, Is.Not.Null);
-        Assert.That(testCallbacksLua, Is.Not.Null);
-
+    public SharedTests(bool passInputFromUnity, bool captureEmulatorAudio, bool showBizhawkGui) {
         _passInputFromUnity = passInputFromUnity;
         _captureEmulatorAudio = captureEmulatorAudio;
         _showBizhawkGui = showBizhawkGui;
     }
 
-    [SetUp]
-    public void SetUp() {
-        // Set up Emulator object
-        var o = new GameObject();
+    [UnitySetUp]
+    public IEnumerator SetUp() {
+        // Load the test scene
+        if (Application.isPlaying) {
+            SceneManager.LoadScene(Paths.testSceneName);
+            yield return null; // Wait for scene to load
+            if (SceneManager.GetActiveScene().name != Paths.testSceneName) {
+                Debug.LogError($"[unity-hawk] Test scene failed to load - probably needs to be included in build settings");
+            }
+        } else {
+#if UNITY_EDITOR
+            EditorSceneManager.OpenScene(Paths.testScenePath);
+#endif
+        }
 
-        o.SetActive(false); // Minor hack to prevent OnEnable from firing within AddComponent
-        e = o.AddComponent<Emulator>();
-        e.romFile = eliteRom;
+        // Test scene contains:
+        // - Emulator on a disabled object with swoop rom and no savestate
+        // - SharedTestAssets with other needed assets
+
+        SharedTestAssets assets = Object.FindObjectOfType<SharedTestAssets>();
+        swoopRom = assets.swoopRom;
+        eliteSavestate2000 = assets.eliteSavestate2000;
+        eliteSavestate5000 = assets.eliteSavestate5000;
+        testCallbacksLua = assets.testCallbacksLua;
+
+        // Set up Emulator object
+        e = Object.FindObjectOfType<Emulator>(includeInactive: true);
         e.runInEditMode = true;
         e.passInputFromUnity = _passInputFromUnity;
         e.captureEmulatorAudio = _captureEmulatorAudio;
@@ -78,11 +84,11 @@ public class SharedTests
     protected void ActivateEmulator() {
         e.gameObject.SetActive(true);
     }
-    
-    [TearDown]
-    public void TearDown() {
-        GameObject.DestroyImmediate(e.gameObject);
-    }
+
+    // [TearDown]
+    // public void TearDown() {
+    //     GameObject.DestroyImmediate(e.gameObject);
+    // }
 
     [UnityTest]
     public IEnumerator TestEmulatorIsRunning()
@@ -97,11 +103,11 @@ public class SharedTests
     public IEnumerator TestWithSavestate()
     {
         e.saveStateFile = eliteSavestate2000;
-        ActivateEmulator();
 
+        ActivateEmulator();
         yield return WaitForAWhile(e);
-        
         AssertEmulatorIsRunning(e);
+
         Assert.That(e.CurrentFrame, Is.GreaterThan(2000)); // Hacky way of checking if the savestate actually got loaded
     }
 
@@ -288,7 +294,7 @@ public class SharedTests
         e.RegisterLuaCallback("reverseString", (arg) => {
             Debug.Log("reverseString");
             char[] cs = arg.ToCharArray();
-            Array.Reverse(cs);
+            System.Array.Reverse(cs);
             return new string(cs);
         });
         
@@ -319,7 +325,54 @@ public class SharedTests
         AssertEmulatorIsRunning(e);
     }
 
-    
+    [UnityTest]
+    // Test that the rom and savestatefiles are actually present
+    // This test should work correctly in both editor and standalone player (?)
+    public IEnumerator TestAssetPaths() {
+        yield return null;
+
+        var rom = e.romFile;
+        // Hard to actually test that emulator is using the correct path but at least check that the Paths.GetAssetPath method
+        // (which Emulator.cs uses) returns what we expect
+        var romPath = Path.GetFullPath(
+            Paths.GetAssetPath(rom)
+        );
+        var expectedRomPath = Path.GetFullPath(
+#if UNITY_EDITOR
+            // In editor, asset should be in <project_root>/Packages/...
+            "Packages/org.plunderludics.UnityHawk/Tests/Shared/eliteRomForTests.nes"
+#else
+            // In build, it's in <build_dir>/<project_name>_Data/Packages/...
+            Path.Combine(Application.dataPath, "./Packages/org.plunderludics.UnityHawk/Tests/Shared/eliteRomForTests.nes")
+#endif
+        );
+        Assert.That(romPath, Is.EqualTo(expectedRomPath));
+        Assert.That(File.Exists(romPath));
+
+        var savestate = eliteSavestate5000;
+        // Check that the savestate file path is correct and the file exists
+        var savestatePath = Path.GetFullPath(
+            Paths.GetAssetPath(savestate)
+        );
+        var expectedSavestatePath = Path.GetFullPath(
+#if UNITY_EDITOR
+            "Packages/org.plunderludics.UnityHawk/Tests/Shared/eliteSavestate5000.savestate"
+#else
+            Path.Combine(Application.dataPath, "./Packages/org.plunderludics.UnityHawk/Tests/Shared/eliteSavestate5000.savestate")
+#endif
+        );
+        Assert.That(savestatePath, Is.EqualTo(expectedSavestatePath));
+        Assert.That(File.Exists(savestatePath));
+    }
+
+    // TODO More tests:
+    // - test .cue files are copied into build
+    // - test extraAssets and includeInactive params on BuildSettings
+    // - test with mocked InputSystem input (?)
+    // - test auto-restart when emuhawk proc killed
+    // - test auto-restart in editor when params change
+    // - test SetVolume, Mute, SetSpeed etc? Who cares I guess
+
     // Helpers
 
     public static void AssertEmulatorIsRunning(Emulator e) {

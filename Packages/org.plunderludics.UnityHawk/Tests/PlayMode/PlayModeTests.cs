@@ -23,8 +23,20 @@ public class PlayModeTests : SharedTests {
 
         // No custom input provider set so by default should add a BasicInputProvider, and select the default NES controls after startup
         Debug.Log(e.inputProvider);
-        Assert.That(e.inputProvider is BasicInputProvider);
-        Assert.That((e.inputProvider as BasicInputProvider).controlsObject.name == "NES");
+        var bip = e.inputProvider as BasicInputProvider;
+        Assert.IsNotNull(bip);
+        Assert.That(bip.useDefaultControls, Is.True);
+        Assert.IsNotNull(bip.controlsObject);
+        Assert.That(bip.controlsObject.name, Is.EqualTo("NES"));
+        Assert.IsNotNull(bip.controlsObject.Controls);
+        // First mapping should be Up Arrow -> P1 Up
+        Assert.That(bip.controlsObject.Controls.ButtonMappings.Count, Is.GreaterThanOrEqualTo(1));
+        var buttonMapping1 = bip.controlsObject.Controls.ButtonMappings[0];
+        Assert.That(buttonMapping1.Enabled, Is.True);
+        Assert.That(buttonMapping1.sourceType, Is.EqualTo(Controls.InputSourceType.KeyCode));
+        Assert.That(buttonMapping1.Key, Is.EqualTo(KeyCode.UpArrow));
+        Assert.That(buttonMapping1.EmulatorButtonName, Is.EqualTo("Up"));
+        Assert.That(buttonMapping1.Controller, Is.EqualTo(Controller.P1));
     }
 
     // Not very comprehensive but at least check that sending inputs via the InputProvider API does something

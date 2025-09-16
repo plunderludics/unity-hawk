@@ -157,8 +157,8 @@ Camera:
   m_GameObject: {fileID: 750853819}
   m_Enabled: 1
   serializedVersion: 2
-  m_ClearFlags: 1
-  m_BackGroundColor: {r: 0.19215687, g: 0.3019608, b: 0.4745098, a: 0}
+  m_ClearFlags: 2
+  m_BackGroundColor: {r: 0.740566, g: 0.24452652, b: 0.24452652, a: 0}
   m_projectionMatrixMode: 1
   m_GateFitMode: 2
   m_FOVAxisMode: 0
@@ -214,44 +214,6 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!84 &1335549695
-RenderTexture:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_Name: Emulator
-  m_ImageContentsHash:
-    serializedVersion: 2
-    Hash: 00000000000000000000000000000000
-  m_ForcedFallbackFormat: 4
-  m_DownscaleFallback: 0
-  m_IsAlphaChannelOptional: 0
-  serializedVersion: 5
-  m_Width: 256
-  m_Height: 224
-  m_AntiAliasing: 1
-  m_MipCount: -1
-  m_DepthStencilFormat: 0
-  m_ColorFormat: 57
-  m_MipMap: 0
-  m_GenerateMips: 1
-  m_SRGB: 1
-  m_UseDynamicScale: 0
-  m_BindMS: 0
-  m_EnableCompatibleFormat: 1
-  m_EnableRandomWrite: 0
-  m_TextureSettings:
-    serializedVersion: 2
-    m_FilterMode: 1
-    m_Aniso: 1
-    m_MipBias: 0
-    m_WrapU: 1
-    m_WrapV: 1
-    m_WrapW: 1
-  m_Dimension: 2
-  m_VolumeDepth: 1
-  m_ShadowSamplingMode: 2
 --- !u!1 &1385237208
 GameObject:
   m_ObjectHideFlags: 0
@@ -270,7 +232,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!114 &1385237209
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -292,9 +254,9 @@ MonoBehaviour:
   autoSelectRomFile: 1
   romFile: {fileID: 5022602860645237092, guid: 3ffde77fbdc869d40a69c60e45600bdc, type: 3}
   renderMode: 0
-  targetRenderer: {fileID: 0}
+  targetRenderer: {fileID: 1385237210}
   customRenderTexture: 0
-  renderTexture: {fileID: 1335549695}
+  renderTexture: {fileID: 1899826092}
   passInputFromUnity: 1
   inputProvider: {fileID: 0}
   captureEmulatorAudio: 0
@@ -308,17 +270,18 @@ MonoBehaviour:
   ramWatchFile: {fileID: 0}
   baseConfigFile: {fileID: 0}
   showBizhawkGuiInEditor: 0
-  runInEditMode: 0
+  runInEditMode: 1
   acceptBackgroundInput: 1
   muteBizhawkInEditMode: 1
+  logLevel: 2
   config: {fileID: 11400000, guid: 9fa2e33569d57e04898072f8638bc5dd, type: 2}
   showBizhawkGuiInBuild: 0
   suppressBizhawkPopups: 1
   writeBizhawkLogs: 1
-  bizhawkLogLocation: 
+  bizhawkLogLocation: Logs/BizHawk\Emulator-20120.log
   _status: 0
-  _currentFrame: 0
-  _systemId: 
+  _currentFrame: 5281
+  _systemId: NES
 --- !u!23 &1385237210
 MeshRenderer:
   m_ObjectHideFlags: 0
@@ -384,9 +347,97 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &1722123773
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1722123775}
+  - component: {fileID: 1722123776}
+  m_Layer: 0
+  m_Name: Assets
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &1722123775
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1722123773}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &1722123776
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1722123773}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a530bd7136a5dce48af4135506c2a4cc, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  eliteRom: {fileID: 5022602860645237092, guid: 3ffde77fbdc869d40a69c60e45600bdc, type: 3}
+  swoopRom: {fileID: 5022602860645237092, guid: a7151e2017a607a4b889cebee160a462, type: 3}
+  eliteSavestate2000: {fileID: 5022602860645237092, guid: d722373b8935ef446921e7884bb7eac5, type: 3}
+  eliteSavestate5000: {fileID: 5022602860645237092, guid: 8e3d291e8dd01304d874b57ee32dabea, type: 3}
+  testCallbacksLua: {fileID: 5022602860645237092, guid: ae9fc12e962496848af5bda455a403af, type: 3}
+--- !u!84 &1899826092
+RenderTexture:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_Name: Emulator
+  m_ImageContentsHash:
+    serializedVersion: 2
+    Hash: 00000000000000000000000000000000
+  m_ForcedFallbackFormat: 4
+  m_DownscaleFallback: 0
+  m_IsAlphaChannelOptional: 0
+  serializedVersion: 5
+  m_Width: 256
+  m_Height: 224
+  m_AntiAliasing: 1
+  m_MipCount: -1
+  m_DepthStencilFormat: 0
+  m_ColorFormat: 57
+  m_MipMap: 0
+  m_GenerateMips: 1
+  m_SRGB: 1
+  m_UseDynamicScale: 0
+  m_BindMS: 0
+  m_EnableCompatibleFormat: 1
+  m_EnableRandomWrite: 0
+  m_TextureSettings:
+    serializedVersion: 2
+    m_FilterMode: 1
+    m_Aniso: 1
+    m_MipBias: 0
+    m_WrapU: 1
+    m_WrapV: 1
+    m_WrapW: 1
+  m_Dimension: 2
+  m_VolumeDepth: 1
+  m_ShadowSamplingMode: 2
 --- !u!1660057539 &9223372036854775807
 SceneRoots:
   m_ObjectHideFlags: 0
   m_Roots:
   - {fileID: 750853822}
   - {fileID: 1385237212}
+  - {fileID: 1722123775}
