@@ -7,7 +7,8 @@ using UnityEngine;
 using UnityEngine.TestTools;
 
 namespace UnityHawk.Tests {
-public class PlayModeTests : SharedTests {
+public class PlayModeTests : SharedTestsCore {
+    // (Inherit from SharedTestsCore instead of SharedTests so that the shared tests aren't listed twice in the PlayMode assembly)
     public PlayModeTests(bool passInputFromUnity, bool captureEmulatorAudio, bool showBizhawkGui)
         : base(passInputFromUnity, captureEmulatorAudio, showBizhawkGui)
     {
