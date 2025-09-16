@@ -22,7 +22,6 @@ public class PlayModeTests : SharedTests {
         AssertEmulatorIsRunning(e);
 
         // No custom input provider set so by default should add a BasicInputProvider, and select the default NES controls after startup
-        Debug.Log(e.inputProvider);
         var bip = e.inputProvider as BasicInputProvider;
         Assert.IsNotNull(bip);
         Assert.That(bip.useDefaultControls, Is.True);

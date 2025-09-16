@@ -267,7 +267,7 @@ MonoBehaviour:
     sourceBufferCount: 0
     resampleRatio: 1
   luaScriptFile: {fileID: 0}
-  ramWatchFile: {fileID: 5022602860645237092, guid: 1440a3dfa3509fe4c8d4f4a4ad1b9913, type: 3}
+  ramWatchFile: {fileID: 0}
   baseConfigFile: {fileID: 0}
   showBizhawkGuiInEditor: 1
   runInEditMode: 1

@@ -367,6 +367,7 @@ public class SharedTests
 
     // TODO More tests:
     // - test .cue files are copied into build
+    // - test building multiple scenes
     // - test extraAssets and includeInactive params on BuildSettings
     // - test with mocked InputSystem input (?)
     // - test auto-restart when emuhawk proc killed
