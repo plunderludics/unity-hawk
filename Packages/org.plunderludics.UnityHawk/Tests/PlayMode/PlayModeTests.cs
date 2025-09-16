@@ -42,6 +42,12 @@ public class PlayModeTests : SharedTestsCore {
     // Not very comprehensive but at least check that sending inputs via the InputProvider API does something
     [UnityTest]
     public IEnumerator TestAddInputEvent() {
+        if (!_passInputFromUnity) {
+            // Sort of hacky, but just skip this test when input from unity is not enabled
+            Assert.Ignore("'Pass Input From Unity' is disabled in this fixture, skipping this test");
+            yield break;
+        }
+
         ActivateEmulator();
         yield return WaitForAWhile(e);
         AssertEmulatorIsRunning(e);
