@@ -2,11 +2,17 @@ using System;
 using System.IO;
 using UnityEditor;
 using UnityEngine;
+using System.Runtime.CompilerServices;
+
+// Paths is needed by BuildProcessing in the UnityHawk.Editor assembly, so
+// make it visible to that despite the 'internal' modifier
+[assembly: InternalsVisibleTo("UnityHawk.Editor")]
+[assembly: InternalsVisibleTo("UnityHawk.Tests.PlayMode")]
 
 namespace UnityHawk {
 
 // TODO: make a bunch of these paths configurable in some config file
-public static class Paths {
+internal static class Paths {
     ///// exe
     private static readonly string packageName = "org.plunderludics.UnityHawk";
     public static readonly string BizhawkDirRelative = Path.Combine(packageName, "BizHawk~");

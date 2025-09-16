@@ -3,6 +3,6 @@
 namespace UnityHawk.Editor {
     
 [ScriptedImporter(1, "lua")]
-public class LuaScriptImporter : BizHawkAssetImporter<LuaScript> { }
+internal class LuaScriptImporter : BizHawkAssetImporter<LuaScript> { }
 
 }

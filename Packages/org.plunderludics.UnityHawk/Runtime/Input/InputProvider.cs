@@ -29,12 +29,12 @@ public enum Controller {
 [System.Serializable]
 public struct InputEvent {
     /// <summary>
-    /// The name of the input event. Must correspond to emulator button/axis name E.g. "D-Pad Up", etc
+    /// The name of the input event. Must correspond to emulator button/axis name (without controller prefix) E.g. "D-Pad Up"
     /// </summary>
     public string name;
 
     /// <summary>
-    /// The value of the input event. 0 or 1 for buttons. Analog value depends on emulator - e.g. 0-255 for Nymashock (PSX)
+    /// The value of the input event. 0 or 1 for buttons. Analog value depends on emulator (e.g. 0-255 for Nymashock PSX code)
     /// </summary>
     public int value;
     public Controller controller;

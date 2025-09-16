@@ -12,14 +12,16 @@ using UnityEngine;
 using SharedMemory;
 
 namespace UnityHawk {
-public class ApiCallRpcBuffer : ISharedBuffer {
+internal class ApiCallRpcBuffer : ISharedBuffer {
     string _name;
     RpcBuffer _apiCallRpc;
+    Logger _logger;
 
     const int TimeoutMs = 1000; // No point waiting more than a second I feel like
 
-    public ApiCallRpcBuffer(string bufferName) {
+    public ApiCallRpcBuffer(string bufferName, Logger logger) {
         _name = bufferName;
+        _logger = logger;
     }
 
     public void Open() {
@@ -28,7 +30,7 @@ public class ApiCallRpcBuffer : ISharedBuffer {
 
     public string CallMethod(string methodName, string arg = null) {
         if (_apiCallRpc == null) {
-            Debug.LogWarning($"Tried to call method {methodName} but the api call buffer is not yet open");
+            _logger.LogWarning($"Tried to call method {methodName} but the api call buffer is not yet open");
             return null;
         }
         // serialize (methodName, input) into a MethodCall struct
@@ -38,19 +40,19 @@ public class ApiCallRpcBuffer : ISharedBuffer {
         };
         byte[] bytes = Serialization.Serialize(methodCall);
 
-        // Debug.Log($"Sending callmethod RPC request to Bizhawk ({methodName}, {args})");
+        _logger.LogVerbose($"Sending callmethod RPC request to Bizhawk ({methodName}, {arg})");
         // TODO async version of this?
         var response = _apiCallRpc.RemoteRequest(bytes, TimeoutMs);
         if (response == null) {
-            Debug.LogWarning($"Tried to call method {methodCall} but Bizhawk didn't respond");
+            _logger.LogWarning($"Tried to call method {methodCall} but Bizhawk didn't respond");
             return null;
         }
         if (!response.Success) {
-            Debug.LogWarning($"Bizhawk failed to return a value for callmethod {methodCall}");
+            _logger.LogWarning($"Bizhawk failed to return a value for callmethod {methodCall}");
             return null;
         }
         if (response.Data == null) {
-            Debug.LogWarning($"Bizhawk returned an empty response for callmethod {methodCall}");
+            _logger.LogWarning($"Bizhawk returned an empty response for callmethod {methodCall}");
             return null;
         }
         string responseString = System.Text.Encoding.ASCII.GetString(response.Data);
@@ -60,7 +62,6 @@ public class ApiCallRpcBuffer : ISharedBuffer {
     public bool IsOpen() {
         return _apiCallRpc != null;
     }
-
     
     public void Close() {
         _apiCallRpc.Dispose();

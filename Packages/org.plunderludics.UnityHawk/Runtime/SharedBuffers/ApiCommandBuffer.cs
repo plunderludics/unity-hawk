@@ -9,11 +9,13 @@ using Plunderludics.UnityHawk.Shared;
 
 namespace UnityHawk {
 
-public class ApiCommandBuffer : ISharedBuffer {
-    private string _name;
-    private CircularBuffer _buffer;
-    public ApiCommandBuffer(string name) {
+internal class ApiCommandBuffer : ISharedBuffer {
+    string _name;
+    CircularBuffer _buffer;
+    Logger _logger;
+    public ApiCommandBuffer(string name, Logger logger) {
         _name = name;
+        _logger = logger;
     }
 
     public void Open() {
@@ -30,7 +32,7 @@ public class ApiCommandBuffer : ISharedBuffer {
     }
     public void CallMethod(string methodName, string arg) {
         if (!IsOpen()) {
-            Debug.LogWarning($"Could not call api method {methodName} since api buffer is not open");
+            _logger.LogWarning($"Could not call api method {methodName} since api buffer is not open");
             return;
         }
 
@@ -38,11 +40,11 @@ public class ApiCommandBuffer : ISharedBuffer {
             MethodName = methodName,
             Argument = arg ?? string.Empty,
         };
-        // Debug.Log($"Attempting api method call: {methodCall}");
+        _logger.LogVerbose($"Attempting api method call: {methodCall}");
         byte[] bytes = Serialization.Serialize(methodCall);
         int amount = _buffer.Write(bytes, timeout: 0);
         if (amount <= 0) {
-            Debug.LogWarning("Failed to write method call to shared buffer");
+            _logger.LogWarning("Failed to write method call to shared buffer");
         }
     }
 }

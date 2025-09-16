@@ -6,7 +6,7 @@ using UnityEngine;
 
 namespace UnityHawk.Editor {
 
-public abstract class BizHawkAssetImporter<T> : ScriptedImporter where T : BizhawkAsset
+internal abstract class BizHawkAssetImporter<T> : ScriptedImporter where T : BizhawkAsset
 {
     public override void OnImportAsset(AssetImportContext ctx) {
         var a = ScriptableObject.CreateInstance<T>();

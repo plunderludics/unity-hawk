@@ -3,6 +3,6 @@
 namespace UnityHawk.Editor {
 
 [ScriptedImporter(1, "ini")]
-public class ConfigImporter : BizHawkAssetImporter<Config> { }
+internal class ConfigImporter : BizHawkAssetImporter<Config> { }
 
 }

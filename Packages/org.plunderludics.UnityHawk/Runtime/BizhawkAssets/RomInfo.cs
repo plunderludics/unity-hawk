@@ -2,27 +2,28 @@
 using BizHawk.Emulation.Common;
 
 namespace UnityHawk {
-    [Serializable]
-    public struct RomInfo {
-        public string Name;
 
-        public string Hash;
+[Serializable]
+public struct RomInfo {
+    public string Name;
 
-        public string System;
+    public string Hash;
 
-        public string Region;
+    public string System;
 
-        public bool NotInDatabase;
+    public string Region;
 
-        public string Core;
+    public bool NotInDatabase;
 
-        public RomInfo(GameInfo gameInfo) {
-            Name = gameInfo.Name;
-            Hash = gameInfo.Hash;
-            Region = gameInfo.Region;
-            System = gameInfo.System;
-            NotInDatabase = gameInfo.NotInDatabase;
-            Core = gameInfo.ForcedCore;
-        }
+    public string Core;
+
+    public RomInfo(GameInfo gameInfo) {
+        Name = gameInfo.Name;
+        Hash = gameInfo.Hash;
+        Region = gameInfo.Region;
+        System = gameInfo.System;
+        NotInDatabase = gameInfo.NotInDatabase;
+        Core = gameInfo.ForcedCore;
     }
+}
 }

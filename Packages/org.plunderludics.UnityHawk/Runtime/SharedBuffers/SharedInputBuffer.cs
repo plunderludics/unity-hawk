@@ -3,11 +3,15 @@ using SharedMemory;
 using Plunderludics.UnityHawk.Shared;
 
 namespace UnityHawk {
-public class SharedInputBuffer : ISharedBuffer {
-    private string _name;
-    private CircularBuffer _buffer;
-    public SharedInputBuffer(string name) {
+
+internal class SharedInputBuffer : ISharedBuffer {
+    string _name;
+    Logger _logger;
+    CircularBuffer _buffer;
+
+    public SharedInputBuffer(string name, Logger logger) {
         _name = name;
+        _logger = logger;
     }
 
     public void Open() {
@@ -25,10 +29,10 @@ public class SharedInputBuffer : ISharedBuffer {
 
     public void Write(Plunderludics.UnityHawk.Shared.InputEvent bie) {
         byte[] serialized = Serialization.Serialize(bie);
-        // Debug.Log($"[unity-hawk] Writing buffer: {bie}");
+        _logger.LogVerbose($"Writing buffer: {bie}");
         int amount = _buffer.Write(serialized, timeout: 0);
         if (amount <= 0) {
-            Debug.LogWarning("Failed to write input event to shared buffer");
+            _logger.LogWarning("Failed to write input event to shared buffer");
         }
     }
 }
