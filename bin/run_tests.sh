@@ -23,7 +23,8 @@ echo "Running PlayMode tests"
 cmd2="${cmd} -testPlatform PlayMode -testResults test_results_playmode.xml"
 eval $cmd2
 
-echo "Running standalone (win64) tests"
+# For some reason nothing gets logged from standalone player when running from cli - fine, can just check the xml or run from editor
+echo "Running standalone (win64) tests (no console output for these)"
 cmd3="${cmd} -testPlatform StandaloneWindows64 -testResults test_results_standalonewindows64.xml"
 eval $cmd3
 
