@@ -183,11 +183,13 @@ public class SharedTests
         // Checking texture size is a hacky way of knowing if the rom really got loaded
         // Since nes and n64 texture sizes are different
         Assert.That(e.Texture.width, Is.EqualTo(256));
+        Assert.That(e.SystemId, Is.EqualTo("NES"));
         
         e.LoadRom(swoopRom);
         yield return WaitForAWhile(e);
         AssertEmulatorIsRunning(e);
         Assert.That(e.Texture.width, Is.EqualTo(320));
+        Assert.That(e.SystemId, Is.EqualTo("N64"));
     }
 
     [UnityTest]
