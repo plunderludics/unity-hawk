@@ -3,6 +3,7 @@
     "com.unity.ai.navigation": "1.1.5",
     "com.unity.inputsystem": "1.14.0",
     "com.unity.test-framework": "1.1.33",
+    "com.unity.postprocessing": "3.4.0",
     "com.unity.modules.animation": "1.0.0",
     "com.unity.modules.audio": "1.0.0",
     "com.unity.modules.imgui": "1.0.0"

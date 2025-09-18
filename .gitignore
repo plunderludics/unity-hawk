@@ -1,3 +1,8 @@
+# Ignore docs html files and generated metadata
+# (These files are not ignored on the docs branch, which is where github-pages points to)
+/docs/
+/docfx/api
+
 # Ignore bizhawk logs
 /BizHawkLogs/
 /Assets/StreamingAssets/Firmware/
