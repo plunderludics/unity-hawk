@@ -674,6 +674,9 @@ public partial class Emulator : MonoBehaviour {
             var sharedAudioBufferName = $"audio-{guid}";
             userData.Add($"{Args.AudioRpc}:{sharedAudioBufferName}");
             _sharedAudioBuffer = new SharedAudioBuffer(sharedAudioBufferName, _logger);
+
+            // Set source buffer directly instead of having to copy samples
+            audioResampler.SetSourceBuffer(_sharedAudioBuffer.SampleQueue);
         }
 
         if (muteBizhawkInEditMode && !applicationIsPlaying) {
@@ -810,14 +813,7 @@ public partial class Emulator : MonoBehaviour {
         }
 
         if (captureEmulatorAudio && Application.isPlaying) {
-            if (_sharedAudioBuffer.IsOpen()) {
-                if (CurrentStatus == Status.Running && !audioResampler.HasSourceBuffer) {
-                    // Set source buffer directly instead of copying samples
-                    audioResampler.SetSourceBuffer(_sharedAudioBuffer.SampleQueue);
-                    // short[] samples = _sharedAudioBuffer.GetSamples();
-                    // audioResampler.PushSamples(samples);
-                }
-            } else {
+            if (!_sharedAudioBuffer.IsOpen()) {
                 AttemptOpenBuffer(_sharedAudioBuffer);
             }
         }
