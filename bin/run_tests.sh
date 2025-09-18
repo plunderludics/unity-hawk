@@ -1,5 +1,7 @@
 # Usage: ./bin/run_tests.sh
 
+# Heads up - the TestRamXXX tests seem to be flaky when run from this script, sometimes fail, but they seem fine when run from editor, not sure why 
+
 : "${UNITY_VERSION:=$(grep '^m_EditorVersion:' ProjectSettings/ProjectVersion.txt | awk '{print $2}')}"
 : "${UNITY_EXE:=/c/Program Files/Unity/Hub/Editor/${UNITY_VERSION}/Editor/Unity.exe}"
 
@@ -9,23 +11,21 @@
 cmd="\"${UNITY_EXE}\"
   -runTests \
   -batchmode \
-  -projectPath . \
-  -testResults test_results.xml \
-  -logFile test_log.txt"
+  -projectPath ."
 
 tail -f test_log.txt | grep "\[unity-hawk\] \[test\]" &
 
 echo "Running EditMode tests"
-cmd2="${cmd} -testPlatform EditMode -testResults test_results_editmode.xml"
+cmd2="${cmd} -testPlatform EditMode -testResults test_results_editmode.xml -logFile test_log_editmode.txt"
 eval $cmd2
 
 echo "Running PlayMode tests"
-cmd2="${cmd} -testPlatform PlayMode -testResults test_results_playmode.xml"
+cmd2="${cmd} -testPlatform PlayMode -testResults test_results_playmode.xml -logFile test_log_playmode.txt"
 eval $cmd2
 
 # For some reason nothing gets logged from standalone player when running from cli - fine, can just check the xml or run from editor
 echo "Running standalone (win64) tests (no console output for these)"
-cmd3="${cmd} -testPlatform StandaloneWindows64 -testResults test_results_standalonewindows64.xml"
+cmd3="${cmd} -testPlatform StandaloneWindows64 -testResults test_results_standalonewindows64.xml -logFile test_log_standalonewindows64.txt"
 eval $cmd3
 
 echo "Tests complete"
