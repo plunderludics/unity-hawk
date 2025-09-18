@@ -1,0 +1,47 @@
+{
+  "api/UnityHawk.BasicInputProvider.html": {
+    "href": "api/UnityHawk.BasicInputProvider.html",
+    "title": "Class BasicInputProvider | UnityHawk",
+    "summary": "Class BasicInputProvider Namespace UnityHawk Assembly UnityHawk.dll public class BasicInputProvider : InputProvider Inheritance object InputProvider BasicInputProvider Inherited Members InputProvider.AddInputEvent(InputEvent) Constructors BasicInputProvider() public BasicInputProvider() Fields controls [HideIf(\"useControlsObject\")] public Controls controls Field Value Controls controlsObject [DisableIf(\"useDefaultControls\")] [ShowIf(\"useControlsObject\")] public ControlsObject controlsObject Field Value ControlsObject emulator public Emulator emulator Field Value Emulator useControlsObject [HideIf(\"useDefaultControls\")] public bool useControlsObject Field Value bool useDefaultControls public bool useDefaultControls Field Value bool Methods InputForFrame() public override List<InputEvent> InputForFrame() Returns List<InputEvent>"
+  },
+  "api/UnityHawk.Emulator.LuaCallback.html": {
+    "href": "api/UnityHawk.Emulator.LuaCallback.html",
+    "title": "Delegate Emulator.LuaCallback | UnityHawk",
+    "summary": "Delegate Emulator.LuaCallback Namespace UnityHawk Assembly UnityHawk.dll public delegate string Emulator.LuaCallback(string arg) Parameters arg string Returns string Constructors LuaCallback(object, nint) public LuaCallback(object @object, nint method) Parameters object object method nint Methods BeginInvoke(string, AsyncCallback, object) public virtual IAsyncResult BeginInvoke(string arg, AsyncCallback callback, object @object) Parameters arg string callback AsyncCallback object object Returns IAsyncResult EndInvoke(IAsyncResult) public virtual string EndInvoke(IAsyncResult result) Parameters result IAsyncResult Returns string Invoke(string) public virtual string Invoke(string arg) Parameters arg string Returns string"
+  },
+  "api/UnityHawk.Emulator.RenderMode.html": {
+    "href": "api/UnityHawk.Emulator.RenderMode.html",
+    "title": "Enum Emulator.RenderMode | UnityHawk",
+    "summary": "Enum Emulator.RenderMode Namespace UnityHawk Assembly UnityHawk.dll public enum Emulator.RenderMode"
+  },
+  "api/UnityHawk.Emulator.Status.html": {
+    "href": "api/UnityHawk.Emulator.Status.html",
+    "title": "Enum Emulator.Status | UnityHawk",
+    "summary": "Enum Emulator.Status Namespace UnityHawk Assembly UnityHawk.dll public enum Emulator.Status"
+  },
+  "api/UnityHawk.Emulator.html": {
+    "href": "api/UnityHawk.Emulator.html",
+    "title": "Class Emulator | UnityHawk",
+    "summary": "Class Emulator Namespace UnityHawk Assembly UnityHawk.dll public class Emulator : MonoBehaviour Inheritance object Emulator Properties CurrentFrame public int CurrentFrame { get; } Property Value int CurrentStatus public Emulator.Status CurrentStatus { get; } Property Value Emulator.Status IsMuted public bool IsMuted { get; set; } Property Value bool IsPaused public bool IsPaused { get; set; } Property Value bool IsRunning public bool IsRunning { get; } Property Value bool IsStarted public bool IsStarted { get; } Property Value bool IsStarting public bool IsStarting { get; } Property Value bool LogLevel public Logger.LogLevel LogLevel { get; set; } Property Value Logger.LogLevel Logger public Logger Logger { get; } Property Value Logger SpeedPercent public int SpeedPercent { get; set; } Property Value int SystemId public string SystemId { get; } Property Value string Texture public Texture Texture { get; } Property Value Texture Volume public int Volume { get; set; } Property Value int Methods FrameAdvance() public void FrameAdvance() Freeze(long, int, string) public void Freeze(long address, int size, string domain = null) Parameters address long size int domain string LoadRom(string) public void LoadRom(string path) Parameters path string LoadRom(Rom) public void LoadRom(Rom rom) Parameters rom Rom LoadState(string) public void LoadState(string path) Parameters path string LoadState(Savestate) public void LoadState(Savestate sample) Parameters sample Savestate Mute() public void Mute() Pause() public void Pause() RegisterLuaCallback(string, LuaCallback) public void RegisterLuaCallback(string methodName, Emulator.LuaCallback luaCallback) Parameters methodName string luaCallback Emulator.LuaCallback RegisterMethod(string, LuaCallback) [Obsolete(\"use RegisterLuaCallback instead\")] public void RegisterMethod(string methodName, Emulator.LuaCallback luaCallback) Parameters methodName string luaCallback Emulator.LuaCallback ReloadState() public void ReloadState() Restart() [Button(null, EButtonEnableMode.Always)] public void Restart() SaveState(string) public string SaveState(string path) Parameters path string Returns string SetSpeedPercent(int) public void SetSpeedPercent(int percent) Parameters percent int SetVolume(int) public void SetVolume(int value) Parameters value int Unfreeze(long, int, string) public void Unfreeze(long address, int size, string domain = null) Parameters address long size int domain string Unmute() public void Unmute() Unpause() public void Unpause() Unwatch(int) public void Unwatch(int id) Parameters id int WatchFloat(long, bool, string, Action<float>) public int WatchFloat(long address, bool isBigEndian, string domain, Action<float> onChanged) Parameters address long isBigEndian bool domain string onChanged Action<float> Returns int WatchSigned(long, int, bool, string, Action<int>) public int WatchSigned(long address, int size, bool isBigEndian, string domain, Action<int> onChanged) Parameters address long size int isBigEndian bool domain string onChanged Action<int> Returns int WatchUnsigned(long, int, bool, string, Action<uint>) public int WatchUnsigned(long address, int size, bool isBigEndian, string domain, Action<uint> onChanged) Parameters address long size int isBigEndian bool domain string onChanged Action<uint> Returns int WriteFloat(long, float, bool, string) public void WriteFloat(long address, float value, bool isBigEndian, string domain = null) Parameters address long value float isBigEndian bool domain string WriteSigned(long, int, int, bool, string) public void WriteSigned(long address, int value, int size, bool isBigEndian, string domain = null) Parameters address long value int size int isBigEndian bool domain string WriteUnsigned(long, uint, int, bool, string) public void WriteUnsigned(long address, uint value, int size, bool isBigEndian, string domain = null) Parameters address long value uint size int isBigEndian bool domain string"
+  },
+  "api/UnityHawk.InputEvent.html": {
+    "href": "api/UnityHawk.InputEvent.html",
+    "title": "Struct InputEvent | UnityHawk",
+    "summary": "Struct InputEvent Namespace UnityHawk Assembly UnityHawk.dll public struct InputEvent Constructors InputEvent(string, int, Controller, bool) public InputEvent(string name, int value, Controller controller = Controller.P1, bool isAnalog = false) Parameters name string value int controller Controller isAnalog bool Fields controller public Controller controller Field Value Controller isAnalog public bool isAnalog Field Value bool name public string name Field Value string value public int value Field Value int Methods ToString() public override string ToString() Returns string"
+  },
+  "api/UnityHawk.InputProvider.html": {
+    "href": "api/UnityHawk.InputProvider.html",
+    "title": "Class InputProvider | UnityHawk",
+    "summary": "Class InputProvider Namespace UnityHawk Assembly UnityHawk.dll public abstract class InputProvider : MonoBehaviour Inheritance object InputProvider Derived BasicInputProvider Constructors InputProvider() protected InputProvider() Methods AddInputEvent(InputEvent) public void AddInputEvent(InputEvent ie) Parameters ie InputEvent InputForFrame() public virtual List<InputEvent> InputForFrame() Returns List<InputEvent>"
+  },
+  "api/UnityHawk.html": {
+    "href": "api/UnityHawk.html",
+    "title": "Namespace UnityHawk | UnityHawk",
+    "summary": "Namespace UnityHawk Classes BasicInputProvider Emulator InputProvider Structs InputEvent Enums Emulator.RenderMode Emulator.Status Delegates Emulator.LuaCallback"
+  },
+  "index.html": {
+    "href": "index.html",
+    "title": "",
+    "summary": ""
+  }
+}
