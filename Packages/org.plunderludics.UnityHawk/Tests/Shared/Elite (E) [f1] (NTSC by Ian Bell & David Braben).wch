@@ -1,0 +1,5 @@
+SystemID NES
+00E2	b	u	1	RAM	u
+00A2	d	s	0	RAM	s
+00E2	d	f	0	RAM	f
+

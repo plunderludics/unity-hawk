@@ -7,7 +7,7 @@ using System.Collections.Concurrent;
 namespace UnityHawk {
 
 [Serializable]
-public class AudioResampler {
+internal class AudioResampler {
     [AllowNesting]
     [Tooltip("Higher value means more audio latency. Lower value may cause crackles and pops")]
     public int idealBufferSize = 512; // [TODO: this should be much less (maybe half or less) than SharedAudioBuffer.MaxBufferSize - should probably enforce somehow]
@@ -49,8 +49,12 @@ public class AudioResampler {
 
     int _samplesConsumedLastFrame;
 
+    Logger _logger;
+
     /// Restart resampler from clean slate
-    public void Init(double defaultResampleRatio) {
+    public void Init(double defaultResampleRatio, Logger logger) {
+        _logger = logger;
+
         _defaultResampleRatio = defaultResampleRatio;
         // _sourceBuffer = new();
         _sourceBuffer = null;
@@ -66,31 +70,14 @@ public class AudioResampler {
         _sourceBuffer = sourceBuffer;
     }
 
-    // No longer used - get samples directly from SampleQueue instead
-    // public void PushSamples(short [] samples) {
-    //     if (samples == null) return;
-
-    //     _samplesProvidedThisFrame += samples.Length/ChannelCount;
-    //     // Debug.Log($"Capturing audio, received {_samplesProvidedThisFrame} samples");
-
-    //     // Append samples to running audio buffer to be played back later
-    //     // [Doing an Array.Copy here instead would probably be way faster but not a big deal]
-    //     for (int i = 0; i < samples.Length; i++) {
-    //         // TODO may want to cap the size of the queue
-    //         _sourceBuffer.Enqueue(samples[i]);
-    //     }
-        
-    //     sourceBufferCount = _sourceBuffer.Count/ChannelCount;
-    // }
-
     public void GetSamples(float[] out_buffer, int channels) {
         if (_sourceBuffer == null) {
-            Debug.LogError("[unity-hawk] AudioResampler source buffer has not been set");
+            _logger.LogError("[unity-hawk] AudioResampler source buffer has not been set");
             return;
         }
 
         if (channels != 2) {
-            Debug.LogError("[unity-hawk] AudioSource must be set to 2 channels");
+            _logger.LogError("[unity-hawk] AudioSource must be set to 2 channels");
             return;
         }
 
@@ -140,12 +127,11 @@ public class AudioResampler {
 
         stereoSamplesToConsume += extraStereoSamplesToConsume;
 
-        // Debug.Log($"Want {stereoSamplesToConsume} samples, {availableStereoSamples} are available");
+        // _logger.LogVerbose($"Want {stereoSamplesToConsume} samples, {availableStereoSamples} are available");
         if (stereoSamplesToConsume > availableStereoSamples) {
-            // Debug.LogWarning($"Starved of bizhawk samples");
             _inputSampleDeficit += stereoSamplesToConsume - availableStereoSamples;
             if (_inputSampleDeficit > DeficitSampleCountForWarning) {
-                Debug.LogWarning($"Starved of audio samples, consider increasing idealBufferSize");
+                _logger.LogWarning($"Starved of audio samples, consider increasing idealBufferSize");
                 _inputSampleDeficit = 0;
             }
             stereoSamplesToConsume = availableStereoSamples;
@@ -165,7 +151,7 @@ public class AudioResampler {
         //     rawSamples[i] = x;
         // }
 
-        // Debug.Log($"Resampling from {stereoSamplesToConsume} to {stereoSamplesNeeded} ({ratio})");
+        _logger.LogVerbose($"Resampling from {stereoSamplesToConsume} to {stereoSamplesNeeded} ({ratio})");
         short[] resampled = Resample(rawSamples, stereoSamplesToConsume, stereoSamplesNeeded);
 
         // copy from the local running audio buffer into unity's buffer, convert short to float
@@ -174,7 +160,7 @@ public class AudioResampler {
             if (out_i < resampled.Length) {
                 out_buffer[out_i] = resampled[out_i]/32767f;
             } else {
-                Debug.LogError("[unity-hawk] Ran out of resampled audio, this should never happen");
+                _logger.LogError("[unity-hawk] Ran out of resampled audio, this should never happen");
                 break;
             }
         }

@@ -2,8 +2,9 @@ using UnityEditor;
 using UnityEngine;
 
 namespace UnityHawk.Editor {
+
 [CustomEditor(typeof(Savestate))]
-public class SavestateEditor : UnityEditor.Editor {
+internal class SavestateEditor : UnityEditor.Editor {
     public override bool HasPreviewGUI() => target is Savestate { Screenshot: not null };
 
     public override void OnPreviewGUI(Rect r, GUIStyle background) {

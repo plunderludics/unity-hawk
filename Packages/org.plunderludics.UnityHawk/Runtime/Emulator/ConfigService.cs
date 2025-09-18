@@ -6,7 +6,7 @@ using BizHawkConfigService = BizHawk.Client.Common.ConfigService;
 
 namespace UnityHawk {
 
-public static class ConfigService {
+internal static class ConfigService {
     public static BizHawkConfig Load(string path) {
         JsonSerializerSettings settings = new () {
             Error = (sender, error) => error.ErrorContext.Handled = true,
@@ -15,7 +15,9 @@ public static class ConfigService {
             ConstructorHandling = ConstructorHandling.Default,
             ObjectCreationHandling = ObjectCreationHandling.Replace,
             ContractResolver = new DefaultContractResolver {
+#pragma warning disable CS0618 // DefaultMembersSearchFlags is obsolete, but this code is copied from BizHawk and we want to keep it identical
                 DefaultMembersSearchFlags = (BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic)
+#pragma warning restore CS0618
             }
         };
 

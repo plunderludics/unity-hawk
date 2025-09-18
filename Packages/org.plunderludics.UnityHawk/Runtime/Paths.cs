@@ -2,15 +2,23 @@ using System;
 using System.IO;
 using UnityEditor;
 using UnityEngine;
+using System.Runtime.CompilerServices;
+
+// Paths is needed by BuildProcessing in the UnityHawk.Editor assembly, and tests,
+// so make it visible to those despite the 'internal' modifier
+[assembly: InternalsVisibleTo("UnityHawk.Editor")]
+[assembly: InternalsVisibleTo("UnityHawk.Tests.PlayMode")]
+[assembly: InternalsVisibleTo("UnityHawk.Tests.Shared")]
 
 namespace UnityHawk {
 
 // TODO: make a bunch of these paths configurable in some config file
-public static class Paths {
+internal static class Paths {
     ///// exe
     private static readonly string packageName = "org.plunderludics.UnityHawk";
     public static readonly string BizhawkDirRelative = Path.Combine(packageName, "BizHawk~");
-    private static readonly string _bizhawkDirForEditor = Path.Combine("Packages", BizhawkDirRelative);
+    private static readonly string _packagesDirName = "Packages";
+    private static readonly string _bizhawkDirForEditor = Path.Combine(_packagesDirName, BizhawkDirRelative);
     // [^ seems insane but somehow Unity makes this work whether the package is in the Library/PackageCache/ dir or the Packages/ dir
     //  maybe not the best idea to rely on this dark behaviour though..]
 
@@ -33,7 +41,7 @@ public static class Paths {
 
     public static readonly string defaultBizhawkConfigPath = Path.Combine(BizHawkDir, "config.ini");
     // [Don't really like having to hardcode these paths for default assets, is there a better way?]
-    public static readonly string defaultUnityHawkConfigPath = Path.Combine("Packages", packageName, "Runtime/UnityHawkConfigDefault.asset");
+    public static readonly string defaultUnityHawkConfigPath = Path.Combine(_packagesDirName, packageName, "Runtime/UnityHawkConfigDefault.asset");
     public static readonly string defaultControlsResourceDir = "DefaultControls/"; // Controls assets are inside Resources/DefaultControls but get loaded relative to Resources
 
     public static readonly string dllDir = Path.Combine(BizHawkDir, "dll");
@@ -78,6 +86,7 @@ public static class Paths {
         return Path.GetFullPath(Path.Combine(Application.dataPath, "..", assetPath));
         #endif
 
+#pragma warning disable CS0162 // Unreachable code (only in editor)
         // For build:
         if (asset == null || string.IsNullOrEmpty(asset.Location)) {
             Debug.LogError($"Asset {asset} has no location");
@@ -85,6 +94,7 @@ public static class Paths {
         }
         return Path.Combine(BizHawkAssetsDirForBuild, asset.Location);
     }
+#pragma warning restore CS0162
 }
 
 }

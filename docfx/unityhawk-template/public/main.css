@@ -1,0 +1,5 @@
+/* Hacky fix cause defauly docfx styling allows large image to overflow */
+#logo {
+  max-height: 30px;
+  margin-right: 10px;
+}

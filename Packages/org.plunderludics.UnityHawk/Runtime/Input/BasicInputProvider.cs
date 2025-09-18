@@ -18,6 +18,12 @@ using UnityEditor.EditorTools;
 namespace UnityHawk {
 
 // Just gets key events directly from Unity
+
+/// <summary>
+/// The default input provider for an Emulator. By default will try to use built-in default controls for the current system.
+/// A custom ControlsObject or a control mapping can be provided.
+/// Supports both the legacy input manager and the new InputSystem on the Unity side, and both button and axis inputs on the BizHawk side.
+/// </summary>
 [DefaultExecutionOrder(-1000)] // Kinda hacky but this has to run before Emulator or there will be a 1-frame input delay.
 public class BasicInputProvider : InputProvider {
     [Tooltip("Emulator to use. If null, will look for attached Emulator")]
@@ -38,6 +44,8 @@ public class BasicInputProvider : InputProvider {
     
     List<InputEvent> eventsThisFrame;
 
+    Logger _logger;
+
     void OnEnable() {
         eventsThisFrame = new();
     
@@ -45,8 +53,10 @@ public class BasicInputProvider : InputProvider {
             emulator = GetComponent<Emulator>();
             if (!emulator) {
                 Debug.LogWarning("BasicInputProvider has no specified or attached Emulator, will not be able to set controls correctly");
+                _logger = new Logger(this);
                 return;
             }
+            _logger = emulator.Logger;
         }
         emulator.OnRunning += OnNewRom;
         if (emulator.IsRunning) {
@@ -57,17 +67,16 @@ public class BasicInputProvider : InputProvider {
 
     // Runs when emulator starts or changes rom
     void OnNewRom() {
-        // Debug.Log("BasicInputProvider: New rom started, setting controls");
         if (!useDefaultControls) return;
 
         string systemId = emulator.SystemId;
         controlsObject = Controls.GetDefaultControlsObject(systemId);
         if (controlsObject == null) {
-            Debug.LogError($"No default controls found for platform '{systemId}', controls will not work");
+            _logger.LogError($"No default controls found for platform '{systemId}', controls will not work");
         }
 
         EnableInputActions();
-        // Debug.Log($"Setting controls to {controls} for system {systemId}");
+        _logger.Log($"New rom: Setting controls to {controls} for system {systemId}");
     }
 
     // Poll for events in Update / FixedUpdate rather than in InputForFrame directly,
@@ -161,11 +170,11 @@ public class BasicInputProvider : InputProvider {
 
 #if ENABLE_INPUT_SYSTEM
         Key key = KeyCodeToKey(mapping.Key);
-        if (Keyboard.current[key].wasPressedThisFrame) {
+        if (Keyboard.current != null && Keyboard.current[key].wasPressedThisFrame) {
             interaction = true;
             isPressed = true;
         }
-        if (Keyboard.current[key].wasReleasedThisFrame) {
+        if (Keyboard.current != null && Keyboard.current[key].wasReleasedThisFrame) {
             interaction = true;
             isPressed = false;
         }
@@ -216,18 +225,15 @@ public class BasicInputProvider : InputProvider {
             });
         }
 #else
-        Debug.LogWarning("LegacyAxis mappings are not supported because legacy input manager is not enabled");
+        _logger.LogWarning("LegacyAxis mappings are not supported because legacy input manager is not enabled");
 #endif
     }
 
     private void HandleButtonInputActionReferenceMapping(Controls.ButtonMapping mapping) {
-        // Debug.Log($"Handling button input action reference mapping: {mapping.EmulatorButtonName}");
 #if ENABLE_INPUT_SYSTEM
         if (mapping.ActionRef != null && mapping.ActionRef.action != null) {
             bool isPressed = mapping.ActionRef.action.WasPressedThisFrame();
             bool isReleased = mapping.ActionRef.action.WasReleasedThisFrame();
-
-            // Debug.Log($"Button {mapping.ActionRef.action.name} was pressed: {isPressed}, released: {isReleased}");
             
             if (isPressed || isReleased) {
                 eventsThisFrame.Add(new InputEvent {
@@ -239,7 +245,7 @@ public class BasicInputProvider : InputProvider {
             }
         }
 #else
-        Debug.LogWarning("InputActionReference mappings are not supported because new InputSystem is not enabled");
+        _logger.LogWarning("InputActionReference mappings are not supported because new InputSystem is not enabled");
 #endif
     }
 
@@ -251,8 +257,8 @@ public class BasicInputProvider : InputProvider {
         Key negativeKey = KeyCodeToKey(mapping.NegativeKey);
         Key positiveKey = KeyCodeToKey(mapping.PositiveKey);
             
-        key1Pressed = Keyboard.current[negativeKey].isPressed;
-        key2Pressed = Keyboard.current[positiveKey].isPressed;
+        key1Pressed = Keyboard.current != null && Keyboard.current[negativeKey].isPressed;
+        key2Pressed = Keyboard.current != null && Keyboard.current[positiveKey].isPressed;
 #else
         key1Pressed = Input.GetKey(mapping.NegativeKey);
         key2Pressed = Input.GetKey(mapping.PositiveKey);
@@ -293,7 +299,7 @@ public class BasicInputProvider : InputProvider {
             isAnalog = true
         });
 #else
-        Debug.LogWarning("LegacyAxis mappings are not supported because legacy input manager is not enabled");
+        _logger.LogWarning("LegacyAxis mappings are not supported because legacy input manager is not enabled");
 #endif
     }
 
@@ -301,8 +307,6 @@ public class BasicInputProvider : InputProvider {
 #if ENABLE_INPUT_SYSTEM
         if (mapping.ActionRef != null && mapping.ActionRef.action != null) {
             float axisValue = mapping.ActionRef.action.ReadValue<float>();
-
-            // Debug.Log($"Axis {mapping.ActionRef.action.name} value: {axisValue}");
             
             // Map from [-1, 1] to [MinValue, MaxValue]
             int mappedValue = Mathf.RoundToInt(Mathf.Lerp(mapping.MinValue, mapping.MaxValue, (axisValue + 1f) / 2f));
@@ -315,7 +319,7 @@ public class BasicInputProvider : InputProvider {
             });
         }
 #else
-        Debug.LogWarning("InputActionReference mappings are not supported because new InputSystem is not enabled");
+        _logger.LogWarning("InputActionReference mappings are not supported because new InputSystem is not enabled");
 #endif
     }
 
@@ -323,7 +327,11 @@ public class BasicInputProvider : InputProvider {
         var baseInputs = base.InputForFrame();
         var myInputs = new List<InputEvent>(eventsThisFrame);
         eventsThisFrame.Clear(); // TODO: Not ideal because will break if multiple clients use the same InputProvider, should clear at the end of the frame
-        return baseInputs.Concat(myInputs).ToList();
+        var allInputs = baseInputs.Concat(myInputs).ToList();
+        // if (allInputs.Count > 0) {
+        //     Debug.Log($"InputForFrame: {string.Join(", ", allInputs)}");
+        // }
+        return allInputs;
     }
 
 #if ENABLE_INPUT_SYSTEM

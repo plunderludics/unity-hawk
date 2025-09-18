@@ -4,5 +4,11 @@
 EditorBuildSettings:
   m_ObjectHideFlags: 0
   serializedVersion: 2
-  m_Scenes: []
+  m_Scenes:
+  - enabled: 1
+    path: Packages/org.plunderludics.unityhawk/Tests/Shared/UnityHawkTestScene.unity
+    guid: 410605fe9a5ba9a4fbe31f7377484e65
+  - enabled: 1
+    path: Packages/org.plunderludics.unityhawk/Tests/Shared/UnityHawkTestScene2.unity
+    guid: 21e5d40167fa7564aa6bbac2ce222ab5
   m_configObjects: {}
