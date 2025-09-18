@@ -16,12 +16,15 @@ if [ ! -d "docs" ]; then
 fi
 
 
-# Backup current docs folder
+# Backup current docs folder from main
 cp -r docs/ /tmp/unityhawk_docs
 
 git checkout docs &&
 git pull &&
 # Restore the latest docs from main
+# (Clean existing docs to ensure old files get removed)
+rm -rf docs/ &&
+mkdir docs/ &&
 cp -r /tmp/unityhawk_docs/* docs/ &&
 git add -A docs/ &&
 git commit -m "Update docs" &&
