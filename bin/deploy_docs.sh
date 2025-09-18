@@ -17,6 +17,7 @@ fi
 
 
 # Backup current docs folder from main
+rm -rf /tmp/unityhawk_docs/
 cp -r docs/ /tmp/unityhawk_docs
 
 git checkout docs &&
