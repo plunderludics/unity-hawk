@@ -22,21 +22,7 @@
       "Uid": null,
       "IsMRef": true,
       "Title": "UnityHawk.BasicInputProvider",
-      "Summary": "<p sourcefile=\"api/UnityHawk.BasicInputProvider.yml\" sourcestartlinenumber=\"1\">The default input provider for an Emulator. By default will try to use built-in default controls for the current system.\nA custom ControlsObject or a control mapping can be provided.\nSupports both the legacy input manager and the new InputSystem on the Unity side, and both button and axis inputs on the BizHawk side.</p>\n"
-    },
-    {
-      "type": "ManagedReference",
-      "source_relative_path": "api/UnityHawk.Emulator.EmulatorStatus.yml",
-      "output": {
-        ".html": {
-          "relative_path": "api/UnityHawk.Emulator.EmulatorStatus.html"
-        }
-      },
-      "version": "",
-      "Uid": null,
-      "IsMRef": true,
-      "Title": "UnityHawk.Emulator.EmulatorStatus",
-      "Summary": "<p sourcefile=\"api/UnityHawk.Emulator.EmulatorStatus.yml\" sourcestartlinenumber=\"1\">the current status of the emulator</p>\n"
+      "Summary": null
     },
     {
       "type": "ManagedReference",
@@ -50,7 +36,35 @@
       "Uid": null,
       "IsMRef": true,
       "Title": "UnityHawk.Emulator.LuaCallback",
-      "Summary": "<p sourcefile=\"api/UnityHawk.Emulator.LuaCallback.yml\" sourcestartlinenumber=\"1\">delegate for registering lua callbacks</p>\n"
+      "Summary": null
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/UnityHawk.Emulator.RenderMode.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/UnityHawk.Emulator.RenderMode.html"
+        }
+      },
+      "version": "",
+      "Uid": null,
+      "IsMRef": true,
+      "Title": "UnityHawk.Emulator.RenderMode",
+      "Summary": null
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/UnityHawk.Emulator.Status.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/UnityHawk.Emulator.Status.html"
+        }
+      },
+      "version": "",
+      "Uid": null,
+      "IsMRef": true,
+      "Title": "UnityHawk.Emulator.Status",
+      "Summary": null
     },
     {
       "type": "ManagedReference",
@@ -64,7 +78,7 @@
       "Uid": null,
       "IsMRef": true,
       "Title": "UnityHawk.Emulator",
-      "Summary": "<p sourcefile=\"api/UnityHawk.Emulator.yml\" sourcestartlinenumber=\"1\">The component responsible for initializing,\nrunning, and managing a single BizHawk emulator instance.</p>\n"
+      "Summary": null
     },
     {
       "type": "ManagedReference",
@@ -78,7 +92,7 @@
       "Uid": null,
       "IsMRef": true,
       "Title": "UnityHawk.InputEvent",
-      "Summary": "<p sourcefile=\"api/UnityHawk.InputEvent.yml\" sourcestartlinenumber=\"1\">Represents an input event (button press or axis value) to send to the BizHawk emulator.</p>\n"
+      "Summary": null
     },
     {
       "type": "ManagedReference",
@@ -92,7 +106,7 @@
       "Uid": null,
       "IsMRef": true,
       "Title": "UnityHawk.InputProvider",
-      "Summary": "<p sourcefile=\"api/UnityHawk.InputProvider.yml\" sourcestartlinenumber=\"1\">Base class for providing input to an Emulator. Override this to create a custom input provider.</p>\n"
+      "Summary": null
     },
     {
       "type": "ManagedReference",

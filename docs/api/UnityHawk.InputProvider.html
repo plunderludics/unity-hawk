@@ -6,7 +6,7 @@
       <meta name="viewport" content="width=device-width, initial-scale=1.0">
       <meta name="title" content="Class InputProvider | UnityHawk ">
       
-      <meta name="description" content="Base class for providing input to an Emulator. Override this to create a custom input provider.">
+      
       <link rel="icon" href="../favicon.ico">
       <link rel="stylesheet" href="../public/docfx.min.css">
       <link rel="stylesheet" href="../public/main.css">
@@ -97,8 +97,7 @@ Class InputProvider
   <dl><dt>Assembly</dt><dd>UnityHawk.dll</dd></dl>
   </div>
 
-  <div class="markdown summary"><p>Base class for providing input to an Emulator. Override this to create a custom input provider.</p>
-</div>
+  <div class="markdown summary"></div>
   <div class="markdown conceptual"></div>
 
   <div class="codewrapper">
@@ -171,9 +170,7 @@ Class InputProvider
   
   </h3>
 
-  <div class="markdown level1 summary"><p>Add an input event to the input provider.
-(This can be used as an alternative way of providing custom input without creating an InputProvider implementation.)</p>
-</div>
+  <div class="markdown level1 summary"></div>
   <div class="markdown level1 conceptual"></div>
 
   <div class="codewrapper">
@@ -183,8 +180,7 @@ Class InputProvider
   <h4 class="section">Parameters</h4>
   <dl class="parameters">
     <dt><code>ie</code> <a class="xref" href="UnityHawk.InputEvent.html">InputEvent</a></dt>
-    <dd><p>The input event to add.</p>
-</dd>
+    <dd></dd>
   </dl>
 
 
@@ -205,9 +201,7 @@ Class InputProvider
   
   </h3>
 
-  <div class="markdown level1 summary"><p>Return a list of input events for the frame, in chronological order.
-InputProvider implementations should override this.</p>
-</div>
+  <div class="markdown level1 summary"></div>
   <div class="markdown level1 conceptual"></div>
 
   <div class="codewrapper">
@@ -227,9 +221,6 @@ InputProvider implementations should override this.</p>
 
 
 
-  <h4 class="section" id="UnityHawk_InputProvider_InputForFrame_remarks">Remarks</h4>
-  <div class="markdown level1 remarks"><p>Should only be called by a single Emulator once per frame - will break if multiple clients use the same InputProvider.</p>
-</div>
 
 
 

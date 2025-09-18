@@ -6,7 +6,7 @@
       <meta name="viewport" content="width=device-width, initial-scale=1.0">
       <meta name="title" content="Class BasicInputProvider | UnityHawk ">
       
-      <meta name="description" content="The default input provider for an Emulator. By default will try to use built-in default controls for the current system. A custom ControlsObject or a control mapping can be provided. Supports both the legacy input manager and the new InputSystem on the Unity side, and both button and axis inputs on the BizHawk side.">
+      
       <link rel="icon" href="../favicon.ico">
       <link rel="stylesheet" href="../public/docfx.min.css">
       <link rel="stylesheet" href="../public/main.css">
@@ -97,10 +97,7 @@ Class BasicInputProvider
   <dl><dt>Assembly</dt><dd>UnityHawk.dll</dd></dl>
   </div>
 
-  <div class="markdown summary"><p>The default input provider for an Emulator. By default will try to use built-in default controls for the current system.
-A custom ControlsObject or a control mapping can be provided.
-Supports both the legacy input manager and the new InputSystem on the Unity side, and both button and axis inputs on the BizHawk side.</p>
-</div>
+  <div class="markdown summary"></div>
   <div class="markdown conceptual"></div>
 
   <div class="codewrapper">
@@ -333,9 +330,7 @@ public bool useControlsObject</code></pre>
   
   </h3>
 
-  <div class="markdown level1 summary"><p>Return a list of input events for the frame, in chronological order.
-InputProvider implementations should override this.</p>
-</div>
+  <div class="markdown level1 summary"></div>
   <div class="markdown level1 conceptual"></div>
 
   <div class="codewrapper">
@@ -355,9 +350,6 @@ InputProvider implementations should override this.</p>
 
 
 
-  <h4 class="section" id="UnityHawk_BasicInputProvider_InputForFrame_remarks">Remarks</h4>
-  <div class="markdown level1 remarks"><p>Should only be called by a single Emulator once per frame - will break if multiple clients use the same InputProvider.</p>
-</div>
 
 
 

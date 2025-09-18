@@ -91,12 +91,18 @@ references:
   commentId: Overload:UnityHawk.Emulator.CurrentFrame
   fullName: UnityHawk.Emulator.CurrentFrame
   nameWithType: Emulator.CurrentFrame
-- uid: UnityHawk.Emulator.EmulatorStatus
-  name: Emulator.EmulatorStatus
-  href: api/UnityHawk.Emulator.EmulatorStatus.html
-  commentId: T:UnityHawk.Emulator.EmulatorStatus
-  fullName: UnityHawk.Emulator.EmulatorStatus
-  nameWithType: Emulator.EmulatorStatus
+- uid: UnityHawk.Emulator.CurrentStatus
+  name: CurrentStatus
+  href: api/UnityHawk.Emulator.html#UnityHawk_Emulator_CurrentStatus
+  commentId: P:UnityHawk.Emulator.CurrentStatus
+  fullName: UnityHawk.Emulator.CurrentStatus
+  nameWithType: Emulator.CurrentStatus
+- uid: UnityHawk.Emulator.CurrentStatus*
+  name: CurrentStatus
+  href: api/UnityHawk.Emulator.html#UnityHawk_Emulator_CurrentStatus_
+  commentId: Overload:UnityHawk.Emulator.CurrentStatus
+  fullName: UnityHawk.Emulator.CurrentStatus
+  nameWithType: Emulator.CurrentStatus
 - uid: UnityHawk.Emulator.FrameAdvance
   name: FrameAdvance()
   href: api/UnityHawk.Emulator.html#UnityHawk_Emulator_FrameAdvance
@@ -226,6 +232,30 @@ references:
   commentId: Overload:UnityHawk.Emulator.LoadState
   fullName: UnityHawk.Emulator.LoadState
   nameWithType: Emulator.LoadState
+- uid: UnityHawk.Emulator.LogLevel
+  name: LogLevel
+  href: api/UnityHawk.Emulator.html#UnityHawk_Emulator_LogLevel
+  commentId: P:UnityHawk.Emulator.LogLevel
+  fullName: UnityHawk.Emulator.LogLevel
+  nameWithType: Emulator.LogLevel
+- uid: UnityHawk.Emulator.LogLevel*
+  name: LogLevel
+  href: api/UnityHawk.Emulator.html#UnityHawk_Emulator_LogLevel_
+  commentId: Overload:UnityHawk.Emulator.LogLevel
+  fullName: UnityHawk.Emulator.LogLevel
+  nameWithType: Emulator.LogLevel
+- uid: UnityHawk.Emulator.Logger
+  name: Logger
+  href: api/UnityHawk.Emulator.html#UnityHawk_Emulator_Logger
+  commentId: P:UnityHawk.Emulator.Logger
+  fullName: UnityHawk.Emulator.Logger
+  nameWithType: Emulator.Logger
+- uid: UnityHawk.Emulator.Logger*
+  name: Logger
+  href: api/UnityHawk.Emulator.html#UnityHawk_Emulator_Logger_
+  commentId: Overload:UnityHawk.Emulator.Logger
+  fullName: UnityHawk.Emulator.Logger
+  nameWithType: Emulator.Logger
 - uid: UnityHawk.Emulator.LuaCallback
   name: Emulator.LuaCallback
   href: api/UnityHawk.Emulator.LuaCallback.html
@@ -358,6 +388,12 @@ references:
   commentId: Overload:UnityHawk.Emulator.ReloadState
   fullName: UnityHawk.Emulator.ReloadState
   nameWithType: Emulator.ReloadState
+- uid: UnityHawk.Emulator.RenderMode
+  name: Emulator.RenderMode
+  href: api/UnityHawk.Emulator.RenderMode.html
+  commentId: T:UnityHawk.Emulator.RenderMode
+  fullName: UnityHawk.Emulator.RenderMode
+  nameWithType: Emulator.RenderMode
 - uid: UnityHawk.Emulator.Restart
   name: Restart()
   href: api/UnityHawk.Emulator.html#UnityHawk_Emulator_Restart
@@ -428,15 +464,9 @@ references:
   fullName: UnityHawk.Emulator.SpeedPercent
   nameWithType: Emulator.SpeedPercent
 - uid: UnityHawk.Emulator.Status
-  name: Status
-  href: api/UnityHawk.Emulator.html#UnityHawk_Emulator_Status
-  commentId: P:UnityHawk.Emulator.Status
-  fullName: UnityHawk.Emulator.Status
-  nameWithType: Emulator.Status
-- uid: UnityHawk.Emulator.Status*
-  name: Status
-  href: api/UnityHawk.Emulator.html#UnityHawk_Emulator_Status_
-  commentId: Overload:UnityHawk.Emulator.Status
+  name: Emulator.Status
+  href: api/UnityHawk.Emulator.Status.html
+  commentId: T:UnityHawk.Emulator.Status
   fullName: UnityHawk.Emulator.Status
   nameWithType: Emulator.Status
 - uid: UnityHawk.Emulator.SystemId
