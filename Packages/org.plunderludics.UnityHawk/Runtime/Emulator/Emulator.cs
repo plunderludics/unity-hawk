@@ -138,10 +138,13 @@ public partial class Emulator : MonoBehaviour {
     [Foldout("Development")]
     [ReadOnlyWhenPlaying]
     [Tooltip("whether bizhawk should run when in edit mode")]
+#pragma warning disable CS0109
+    // Hides inherited member; new keyword is not required
+    // (I don't get why but unity seems to flip-flop between complaining the new keyword is missing or that it's redundant - just ignore)
     public new bool runInEditMode = false;
+#pragma warning restore CS0109
 
     [Foldout("Development")]
-
     [ShowIf(nameof(runInEditMode))]
     [ReadOnlyWhenPlaying]
     [Tooltip("Whether BizHawk will accept input when window is unfocused (in edit mode)")]
@@ -160,7 +163,9 @@ public partial class Emulator : MonoBehaviour {
 
     [Foldout("Debug")]
     [Tooltip("if the bizhawk gui should be visible in the build")]
+#pragma warning disable CS0414 // Suppress 'assigned but never used' - only unused in editor
     [SerializeField] bool showBizhawkGuiInBuild = false;
+#pragma warning restore CS0414
 
     [Foldout("Debug")]
     [Tooltip("Prevent BizHawk from popping up windows for warnings and errors; these will still appear in logs")]
@@ -572,6 +577,7 @@ public partial class Emulator : MonoBehaviour {
         process.StartInfo.UseShellExecute = false;
         var args = process.StartInfo.ArgumentList;
         if (IsTargetMac) {
+#pragma warning disable CS0162 // (Unreachable code)
             // Doesn't really work yet, need to make some more changes in the bizhawk executable
             process.StartInfo.EnvironmentVariables["LD_LIBRARY_PATH"] = Paths.dllDir;
             process.StartInfo.EnvironmentVariables["MONO_PATH"] = Paths.dllDir;
@@ -580,6 +586,7 @@ public partial class Emulator : MonoBehaviour {
                 _logger.LogWarning("'Show Bizhawk Gui' is not supported on Mac'");
             }
             args.Add(exePath);
+#pragma warning restore CS0162
         } else {
             // Windows
             process.StartInfo.FileName = exePath;

@@ -86,6 +86,7 @@ internal static class Paths {
         return Path.GetFullPath(Path.Combine(Application.dataPath, "..", assetPath));
         #endif
 
+#pragma warning disable CS0162 // Unreachable code (only in editor)
         // For build:
         if (asset == null || string.IsNullOrEmpty(asset.Location)) {
             Debug.LogError($"Asset {asset} has no location");
@@ -93,6 +94,7 @@ internal static class Paths {
         }
         return Path.Combine(BizHawkAssetsDirForBuild, asset.Location);
     }
+#pragma warning restore CS0162
 }
 
 }
