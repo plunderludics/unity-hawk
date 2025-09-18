@@ -467,11 +467,7 @@ public partial class Emulator : MonoBehaviour {
             if (runInEditMode && !Application.isPlaying) {
                 _logger.LogWarning("Emulator audio cannot be captured in edit mode");
             } else {
-                if (audioResampler == null) {
-                    audioResampler = new(_logger);
-                }
-
-                audioResampler.Init(BizhawkSampleRate/AudioSettings.outputSampleRate);
+                audioResampler.Init(BizhawkSampleRate/AudioSettings.outputSampleRate, _logger);
             }
         }
         bool shareAudio = captureEmulatorAudio && Application.isPlaying;

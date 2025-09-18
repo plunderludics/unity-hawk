@@ -169,11 +169,11 @@ public class BasicInputProvider : InputProvider {
 
 #if ENABLE_INPUT_SYSTEM
         Key key = KeyCodeToKey(mapping.Key);
-        if (Keyboard.current[key].wasPressedThisFrame) {
+        if (Keyboard.current != null && Keyboard.current[key].wasPressedThisFrame) {
             interaction = true;
             isPressed = true;
         }
-        if (Keyboard.current[key].wasReleasedThisFrame) {
+        if (Keyboard.current != null && Keyboard.current[key].wasReleasedThisFrame) {
             interaction = true;
             isPressed = false;
         }
@@ -256,8 +256,8 @@ public class BasicInputProvider : InputProvider {
         Key negativeKey = KeyCodeToKey(mapping.NegativeKey);
         Key positiveKey = KeyCodeToKey(mapping.PositiveKey);
             
-        key1Pressed = Keyboard.current[negativeKey].isPressed;
-        key2Pressed = Keyboard.current[positiveKey].isPressed;
+        key1Pressed = Keyboard.current != null && Keyboard.current[negativeKey].isPressed;
+        key2Pressed = Keyboard.current != null && Keyboard.current[positiveKey].isPressed;
 #else
         key1Pressed = Input.GetKey(mapping.NegativeKey);
         key2Pressed = Input.GetKey(mapping.PositiveKey);
@@ -326,7 +326,11 @@ public class BasicInputProvider : InputProvider {
         var baseInputs = base.InputForFrame();
         var myInputs = new List<InputEvent>(eventsThisFrame);
         eventsThisFrame.Clear(); // TODO: Not ideal because will break if multiple clients use the same InputProvider, should clear at the end of the frame
-        return baseInputs.Concat(myInputs).ToList();
+        var allInputs = baseInputs.Concat(myInputs).ToList();
+        // if (allInputs.Count > 0) {
+        //     Debug.Log($"InputForFrame: {string.Join(", ", allInputs)}");
+        // }
+        return allInputs;
     }
 
 #if ENABLE_INPUT_SYSTEM

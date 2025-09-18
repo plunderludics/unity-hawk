@@ -7,7 +7,8 @@ using UnityEngine;
 using UnityEngine.TestTools;
 
 namespace UnityHawk.Tests {
-public class PlayModeTests : SharedTests {
+public class PlayModeTests : SharedTestsCore {
+    // (Inherit from SharedTestsCore instead of SharedTests so that the shared tests aren't listed twice in the PlayMode assembly)
     public PlayModeTests(bool passInputFromUnity, bool captureEmulatorAudio, bool showBizhawkGui)
         : base(passInputFromUnity, captureEmulatorAudio, showBizhawkGui)
     {
@@ -22,14 +23,31 @@ public class PlayModeTests : SharedTests {
         AssertEmulatorIsRunning(e);
 
         // No custom input provider set so by default should add a BasicInputProvider, and select the default NES controls after startup
-        Debug.Log(e.inputProvider);
-        Assert.That(e.inputProvider is BasicInputProvider);
-        Assert.That((e.inputProvider as BasicInputProvider).controlsObject.name == "NES");
+        var bip = e.inputProvider as BasicInputProvider;
+        Assert.IsNotNull(bip);
+        Assert.That(bip.useDefaultControls, Is.True);
+        Assert.IsNotNull(bip.controlsObject);
+        Assert.That(bip.controlsObject.name, Is.EqualTo("NES"));
+        Assert.IsNotNull(bip.controlsObject.Controls);
+        // First mapping should be Up Arrow -> P1 Up
+        Assert.That(bip.controlsObject.Controls.ButtonMappings.Count, Is.GreaterThanOrEqualTo(1));
+        var buttonMapping1 = bip.controlsObject.Controls.ButtonMappings[0];
+        Assert.That(buttonMapping1.Enabled, Is.True);
+        Assert.That(buttonMapping1.sourceType, Is.EqualTo(Controls.InputSourceType.KeyCode));
+        Assert.That(buttonMapping1.Key, Is.EqualTo(KeyCode.UpArrow));
+        Assert.That(buttonMapping1.EmulatorButtonName, Is.EqualTo("Up"));
+        Assert.That(buttonMapping1.Controller, Is.EqualTo(Controller.P1));
     }
 
     // Not very comprehensive but at least check that sending inputs via the InputProvider API does something
     [UnityTest]
     public IEnumerator TestAddInputEvent() {
+        if (!_passInputFromUnity) {
+            // Sort of hacky, but just skip this test when input from unity is not enabled
+            Assert.Ignore("'Pass Input From Unity' is disabled in this fixture, skipping this test");
+            yield break;
+        }
+
         ActivateEmulator();
         yield return WaitForAWhile(e);
         AssertEmulatorIsRunning(e);
@@ -42,9 +60,12 @@ public class PlayModeTests : SharedTests {
         yield return WaitForAMoment(e);
         Assert.That(u, Is.EqualTo(72));
 
+        // Actually need press + release to move past the title screen
         e.inputProvider.AddInputEvent(new InputEvent("Start", 1, Controller.P1, false));
+        yield return WaitForAMoment(e);
+        e.inputProvider.AddInputEvent(new InputEvent("Start", 0, Controller.P1, false));
+        yield return WaitForAMoment(e);
 
-        yield return WaitForAWhile(e);
         Assert.That(u, Is.Not.EqualTo(72));
     }
 }
