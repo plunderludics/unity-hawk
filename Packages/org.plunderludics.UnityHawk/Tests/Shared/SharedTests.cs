@@ -301,6 +301,39 @@ public class SharedTests : SharedTestsCore
         Assert.That(File.Exists(savestatePath));
     }
 
+    // We can't actually test the PSX emulator runs because we can't include firmware in the package
+    // But at least test that the cue file dependencies get copied into the build (similar to TestAssetPaths above)
+    // (Use fake bin/cue files, no point using an actual rom for this)
+    // UnityHawkTestScene2 has a BuildSettings component with extraAssets field that includes a psx cue file,
+    // so this also kind of serves as a test for BuildSettings extraAssets
+    // This test is only really meaningful in standalone player
+    [UnityTest]
+    public IEnumerator TestCueFileDependencies() {
+        yield return null;
+
+        var cueFilePath = Path.GetFullPath(
+#if UNITY_EDITOR
+            // In editor, asset should be in <project_root>/Packages/...
+            "Packages/org.plunderludics.UnityHawk/Tests/Shared/fakePsxCue.cue"
+#else
+            // In build, it's in <build_dir>/<project_name>_Data/Packages/...
+            Path.Combine(Application.dataPath, "./Packages/org.plunderludics.UnityHawk/Tests/Shared/fakePsxCue.cue")
+#endif
+        );
+        Assert.That(File.Exists(cueFilePath));
+
+        var binFilePath = Path.GetFullPath(
+#if UNITY_EDITOR
+            // In editor, asset should be in <project_root>/Packages/...
+            "Packages/org.plunderludics.UnityHawk/Tests/Shared/fakePsxBin.bin"
+#else
+            // In build, it's in <build_dir>/<project_name>_Data/Packages/...
+            Path.Combine(Application.dataPath, "./Packages/org.plunderludics.UnityHawk/Tests/Shared/fakePsxBin.bin")
+#endif
+        );
+        Assert.That(File.Exists(binFilePath));
+    }
+
     [UnityTest]
     public IEnumerator TestMultipleScenes() {
         // First scene is already loaded and tested.

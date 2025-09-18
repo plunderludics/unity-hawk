@@ -13,6 +13,8 @@ using UnityEditor.SceneManagement;
 using System.Collections.Generic;
 using System.Reflection;
 
+using CueSharp;
+
 namespace UnityHawk {
 // This does two main things:
 //  - copy the BizHawk directory (which contains gamedb, etc) into the build
@@ -35,13 +37,23 @@ public class BuildProcessing : IPreprocessBuildWithReport, IProcessSceneWithRepo
     public int callbackOrder => 0;
 
     const Logger.LogLevel LogLevel = Logger.LogLevel.Info;
-    static Logger _logger = new(null);
+    static Logger _logger = new(null, LogLevel);
     // TODO: Any way we can configure the log level from the editor conveniently?
     // Some kind of global UnityHawk settings object
 
     ///// IPreprocessBuildWithReport
     public void OnPreprocessBuild(BuildReport report) {
-        // No need to do anything here
+        // Clean the bizhawk + bizhawk assets directories so that roms etc from old builds don't stay there
+        // (Don't clean the entire data directory cause I think Unity does some incremental build stuff to save time)
+        var bizhawkDir = GetBizhawkDir(report.summary.outputPath);
+        if (Directory.Exists(bizhawkDir)) {
+            Directory.Delete(bizhawkDir, recursive: true);
+        }
+
+        var bizhawkAssetsDir = GetBizhawkAssetsDir(report.summary.outputPath);
+        if (Directory.Exists(bizhawkAssetsDir)) {
+            Directory.Delete(bizhawkAssetsDir, recursive: true);
+        }
     }
 
     ///// IProcessSceneWithReport
@@ -73,7 +85,7 @@ public class BuildProcessing : IPreprocessBuildWithReport, IProcessSceneWithRepo
             // Gotta make sure all the bizhawk stuff gets into the build
             // Copy over the whole Packages/org.plunderludics.UnityHawk/BizHawk/ directory into xxx_Data/org.plunderludics.UnityHawk/BizHawk/
             // [kinda sucks but don't know a better way]
-            var targetDir = Path.Combine(GetBuildDataDir(exePath), Paths.BizhawkDirRelative);
+            var targetDir = GetBizhawkDir(exePath);
             _logger.Log($"copying bizhawk directory from: {Path.GetFullPath(Paths.BizHawkDir)} to {Path.GetFullPath(targetDir)}");
             Directory.CreateDirectory(targetDir);
             FileUtil.ReplaceDirectory(Path.GetFullPath(Paths.BizHawkDir), Path.GetFullPath(targetDir)); // [only works with full paths for some reason]
@@ -105,7 +117,7 @@ public class BuildProcessing : IPreprocessBuildWithReport, IProcessSceneWithRepo
     ///  but doesn't really matter - they go to the same path in the build directory)
     /// returns the number of files copied
     int CopyFilesToBuild(string exePath) {
-        var bizhawkAssetsPath = Path.Combine(GetBuildDataDir(exePath), Paths.BizHawkAssetsDirName);
+        var bizhawkAssetsPath = GetBizhawkAssetsDir(exePath);
         Directory.CreateDirectory(bizhawkAssetsPath);
 
         int nFilesCopied = 0;
@@ -174,32 +186,34 @@ public class BuildProcessing : IPreprocessBuildWithReport, IProcessSceneWithRepo
             }
         }
 
-        var inExt = Path.GetExtension(inPath).ToLowerInvariant();
         // This is annoying, but some roms (e.g. for PSX) are .cue files, and those point to other file dependencies,
-        // so we need to copy those files over as well (without renaming)
+        // so we need to copy those files over as well
         // [if there are other special cases we have to handle like this we should probably rethink this whole approach tbh - too much work]
-        // [definitely at least need an alternative in case this has issues (one way would be to just use StreamingAssets)]
-        // this cuefile resolver seems to basically find files with similar names and correct extensions in the same directory
+
+        var inExt = Path.GetExtension(inPath).ToLowerInvariant();
         if (inExt is ".cue" or ".ccd") {
-            var inNoExt = Path.GetFileNameWithoutExtension(inPath);
+            if (inExt is ".ccd") {
+                _logger.LogWarning("Attempting to read .ccd file as a cuesheet - may break");
+            }
+            var cueSheet = new CueSheet(inPath);
+            // Copy all the .bin (or whatever) files that are referenced
+            var cueFileParentDir = Path.GetDirectoryName(inPath);
+            foreach (var t in cueSheet.Tracks) {
+                var binFileRelativePath = t.DataFile.Filename; // Assume bin filepath is relative to cue file
 
-            var fileInfos = new FileInfo(inPath).Directory?.GetFiles();
-            foreach (var other in fileInfos!) {
-                var otherExt = Path.GetExtension(other.FullName).ToLowerInvariant();
+                // referenced file pathname is relative to the directory of the cue file
+                var binSourcePath = Path.Combine(cueFileParentDir, binFileRelativePath);
 
-                // ignore self, archives and unity meta files
-                if (otherExt is ".cue" or ".ccd" or ".meta" or ".7z" or ".rar" or ".zip" or ".bz2" or ".gz") {
-                    continue;
+                // Check referenced source file actually exists
+                if (!File.Exists(binSourcePath)) {
+                    throw new Exception($"[unity-hawk] Could not find file {binFileRelativePath} referenced in .cue file {inPath}");
                 }
 
-                var otherNoExt = Path.GetFileNameWithoutExtension(other.FullName);
-                if (string.Equals(otherNoExt, inNoExt, StringComparison.InvariantCultureIgnoreCase)) {
-                    var otherOutPath = Path.Combine(outDir, other.Name);
-                    _logger.LogVerbose($"Copy from: {other.FullName} to {otherOutPath}");
-                    if (!File.Exists(otherOutPath)) {
-                        File.Copy(other.FullName, otherOutPath, overwrite: true);
-                    }
-                }
+                var binFileTargetPath = Path.Combine(outDir, binFileRelativePath);
+                _logger.LogVerbose($"Copy .cue file dependency from: {binSourcePath} to {binFileTargetPath}");
+                // Create target subdirectory in case it doesn't exist
+                Directory.CreateDirectory(Path.GetDirectoryName(binFileTargetPath)!);
+                File.Copy(binSourcePath, binFileTargetPath, overwrite: true);
             }
         }
     }
@@ -266,7 +280,22 @@ public class BuildProcessing : IPreprocessBuildWithReport, IProcessSceneWithRepo
 
     ///// queries
     static string GetBuildDataDir(string exePath) {
+        // Seems to be no api that returns the _Data directory, so hardcode it here
+        // TODO: More robust way to do this
         return Path.Combine(Path.GetDirectoryName(exePath)!, $"{Path.GetFileNameWithoutExtension(exePath)}_Data");
+    }
+
+
+    // Directory within the build that contains bizhawk assets (roms, savestates, etc)
+    // e.g. xxx_Data/BizhawkAssets
+    static string GetBizhawkAssetsDir(string exePath) {
+        return Path.Combine(GetBuildDataDir(exePath), Paths.BizHawkAssetsDirName);
+    }
+
+    // Directory within the build that contains EmuHawk.exe and other bizhawk files
+    // e.g. xxx_Data/org.plunderludics.UnityHawk/BizHawk~
+    static string GetBizhawkDir(string exePath) {
+        return Path.Combine(GetBuildDataDir(exePath), Paths.BizhawkDirRelative);
     }
 }
 

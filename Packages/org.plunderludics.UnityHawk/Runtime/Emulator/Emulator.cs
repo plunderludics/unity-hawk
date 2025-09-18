@@ -281,7 +281,7 @@ public partial class Emulator : MonoBehaviour {
 
     /// Logger for unity-side logs
     Logger _logger;
-    public Logger Logger => _logger;
+    public Logger Logger => _logger ??= new(this, logLevel);
 
     /// the time the emulator started running
     float _startedTime;
@@ -308,8 +308,8 @@ public partial class Emulator : MonoBehaviour {
     // (These methods are public for testing purposes, but use the EditorBrowsable attribute to hide them from docs)
     [EditorBrowsable(EditorBrowsableState.Never)]
     public void OnValidate() {
+        _logger ??= Logger; // ensure logger is initialized
 #if UNITY_EDITOR
-        _logger ??= new(this, logLevel);
         _logger.LogVerbose("OnValidate");
 
         if (!config) {
@@ -375,7 +375,7 @@ public partial class Emulator : MonoBehaviour {
 
     [EditorBrowsable(EditorBrowsableState.Never)]
     public void OnEnable() {
-        _logger ??= new(this, logLevel);
+        _logger ??= Logger; // ensure logger is initialized
         _logger.LogVerbose("OnEnable");
 #if UNITY_EDITOR && UNITY_2022_2_OR_NEWER
         if (Undo.isProcessing) return; // OnEnable gets called after undo/redo, but ignore it

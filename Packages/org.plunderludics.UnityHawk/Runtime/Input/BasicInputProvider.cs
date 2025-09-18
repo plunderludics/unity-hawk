@@ -53,6 +53,7 @@ public class BasicInputProvider : InputProvider {
             emulator = GetComponent<Emulator>();
             if (!emulator) {
                 Debug.LogWarning("BasicInputProvider has no specified or attached Emulator, will not be able to set controls correctly");
+                _logger = new Logger(this);
                 return;
             }
             _logger = emulator.Logger;
