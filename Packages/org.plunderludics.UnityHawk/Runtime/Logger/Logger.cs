@@ -1,6 +1,15 @@
 using UnityEngine;
 using System;
 
+// HideInCallstackAttribute only defined in 2022.2+
+// (I think actually defined in 2021.2 too, but not 2022.1 - whatever)
+#if UNITY_2022_2_OR_NEWER
+using HideInCallstackAttribute = UnityEngine.HideInCallstackAttribute;
+#else
+using HideInCallstackAttribute = System.Diagnostics.DebuggerHiddenAttribute;
+#endif
+
+
 namespace UnityHawk {
     public class Logger {    
         public enum LogLevel {
