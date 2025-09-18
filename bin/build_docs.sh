@@ -16,6 +16,8 @@ eval $cmd;
 
 if [ ! -f "${xmlTarget}" ]; then
     echo "Error: XML docstrings file '${xmlTarget}' was not generated. Exiting without building docs."
+    # This happens sometimes, not sure why
+    echo "(Try re-running ./bin/build_docs.sh)"
     exit 1
 fi
 
