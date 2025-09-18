@@ -36,7 +36,7 @@ You will probably also need to install the BizHawk prerequisites, which can be i
 - Hit play
   
 ## Features
-- Enable 'Pass Input From Unity' to send keyboard input from Unity to Bizhawk (gamepad input not supported yet). If this isn't enabled Bizhawk will get input directly from the operating system.
+- Enable 'Pass Input From Unity' to send input from Unity to Bizhawk. If this isn't enabled Bizhawk will get input directly from the operating system.
   - You can specify the component used to handle input under 'Input Provider'. If unspecified it will default to a `BasicInputProvider` with default controls according to the platform. If you want to configure controls, add your own `BasicInputProvider` component.
   - Alternatively you can create your own component that inherits from `InputProvider`.
   - `InputProvider` also provides an `AddInputEvent` method which can be used to programmatically add inputs.
