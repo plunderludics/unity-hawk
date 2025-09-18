@@ -1,6 +1,15 @@
 using UnityEngine;
 using System;
 
+// HideInCallstackAttribute only defined in 2022.2+
+// (I think actually defined in 2021.2 too, but not 2022.1 - whatever)
+#if UNITY_2022_2_OR_NEWER
+using HideInCallstackAttribute = UnityEngine.HideInCallstackAttribute;
+#else
+using HideInCallstackAttribute = System.Diagnostics.DebuggerHiddenAttribute;
+#endif
+
+
 namespace UnityHawk {
     public class Logger {    
         public enum LogLevel {
@@ -19,6 +28,7 @@ namespace UnityHawk {
             _defaultContext = defaultContext;
         }
 
+        [HideInCallstack]
         public void Log(LogLevel level, string message, UnityEngine.Object context = null) {
             context ??= _defaultContext;
             // TODO: avoid context when logging in non-main thread?
@@ -38,21 +48,32 @@ namespace UnityHawk {
         }
 
         // Support lazy message evaluation to avoid unnecessary string interpolation / function calls for disabled log levels
+        [HideInCallstack]
         public void Log(LogLevel level, Func<string> message, UnityEngine.Object context = null) {
             if (level >= MinLogLevel) {
                 Log(level, message(), context);
             }
         }
-        
+        [HideInCallstack]
         public void LogVerbose(string message, UnityEngine.Object context = null) => Log(LogLevel.Verbose, message, context);
+        [HideInCallstack]
         public void Log(string message, UnityEngine.Object context = null) => Log(LogLevel.Info, message, context);
+        [HideInCallstack]
         public void LogInfo(string message, UnityEngine.Object context = null) => Log(LogLevel.Info, message, context);
+        [HideInCallstack]
         public void LogWarning(string message, UnityEngine.Object context = null) => Log(LogLevel.Warning, message, context);
+        [HideInCallstack]
         public void LogError(string message, UnityEngine.Object context = null) => Log(LogLevel.Error, message, context);        
 
+        [HideInCallstack]
         public void LogVerbose(Func<string> message, UnityEngine.Object context = null) => Log(LogLevel.Verbose, message, context);
+        [HideInCallstack]
         public void Log(Func<string> message, UnityEngine.Object context = null) => Log(LogLevel.Info, message, context);
+        [HideInCallstack]
         public void LogInfo(Func<string> message, UnityEngine.Object context = null) => Log(LogLevel.Info, message, context);
+        [HideInCallstack]
         public void LogWarning(Func<string> message, UnityEngine.Object context = null) => Log(LogLevel.Warning, message, context);
+        [HideInCallstack]
+        public void LogError(Func<string> message, UnityEngine.Object context = null) => Log(LogLevel.Error, message, context);
     }
 }
