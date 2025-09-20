@@ -647,32 +647,41 @@ public partial class Emulator : MonoBehaviour {
             process.StartInfo.WindowStyle = ProcessWindowStyle.Hidden;
         }
 
-        List<string> userData = new(); // Userdata args get used by UnityHawk external tool
+        // Args for UnityHawk external tool are passed via the --userdata arg
+        // Userdata gets saved into savestate files, so we need to pass empty strings
+        // for any unused args to override any saved values 
+        Dictionary<string, string> userData = new() {
+            [Args.TextureBuffer] = "",
+            [Args.CallMethodRpc] = "",
+            [Args.ApiCommandBuffer] = "",
+            [Args.AudioRpc] = "",
+            [Args.InputBuffer] = ""
+        };
 
         // add buffers
         // create & register sharedTextureBuffer
         var sharedTextureBufferName = $"texture-{guid}";
-        userData.Add($"{Args.TextureBuffer}:{sharedTextureBufferName}");
+        userData[Args.TextureBuffer] = sharedTextureBufferName;
         _sharedTextureBuffer = new SharedTextureBuffer(sharedTextureBufferName, _logger);
 
         // create & register callbacks rpc (used for lua callbacks and also the Watch memory api)
         var callMethodRpcBufferName = $"call-method-{guid}";
-        userData.Add($"{Args.CallMethodRpc}:{callMethodRpcBufferName}");
+        userData[Args.CallMethodRpc] = callMethodRpcBufferName;
         _callMethodRpcBuffer = new CallMethodRpcBuffer(callMethodRpcBufferName, ProcessRpcCallback, _logger);
 
         // create & register api call buffers
         var apiCommandBufferName = $"api-command-{guid}";
-        userData.Add($"{Args.ApiCommandBuffer}:{apiCommandBufferName}");
+        userData[Args.ApiCommandBuffer] = apiCommandBufferName;
         _apiCommandBuffer = new ApiCommandBuffer(apiCommandBufferName, _logger);
 
         // var apiCallRpcBufferName = $"api-call-rpc-{guid}";
-        // userData.Add($"{Args.ApiCallRpc}:{apiCallRpcBufferName}");
+        // userData[Args.ApiCallRpc] = apiCallRpcBufferName;
         // _apiCallRpcBuffer = new ApiCallRpcBuffer(apiCallRpcBufferName);
 
         // create & register audio buffer
         if (shareAudio) {
             var sharedAudioBufferName = $"audio-{guid}";
-            userData.Add($"{Args.AudioRpc}:{sharedAudioBufferName}");
+            userData[Args.AudioRpc] = sharedAudioBufferName;
             _sharedAudioBuffer = new SharedAudioBuffer(sharedAudioBufferName, _logger);
 
             // Set source buffer directly instead of having to copy samples
@@ -688,7 +697,7 @@ public partial class Emulator : MonoBehaviour {
             if (passInputFromUnity) {
                 var sharedInputBufferName = $"input-{guid}";
                 // args.Add($"--read-input-from-shared-buffer={sharedKeyInputBufferName}");
-                userData.Add($"{Args.InputBuffer}:{sharedInputBufferName}");
+                userData[Args.InputBuffer] = sharedInputBufferName;
                 _sharedInputBuffer = new SharedInputBuffer(sharedInputBufferName, _logger);
                 args.Add($"--accept-background-input=false");
             } else {
@@ -703,7 +712,8 @@ public partial class Emulator : MonoBehaviour {
             args.Add("--suppress-popups"); // Don't pop up windows for messages/exceptions (they will still appear in the logs)
         }
 
-        if (userData.Count > 0) args.Add($"--userdata={string.Join(";", userData)}"); // Userdata args get used by UnityHawk external tool
+        string userDataArgs = string.Join(";", userData.Select(kvp => $"{kvp.Key}:{kvp.Value}"));
+        args.Add($"--userdata={userDataArgs}");
 
         args.Add("--open-ext-tool-dll=UnityHawk"); // Open unityhawk external tool
         args.Add($"--ext-tools-dir={Path.GetFullPath(Paths.externalToolsDir)}"); // Has to be set since not running from the bizhawk directory
