@@ -180,7 +180,11 @@ public partial class Emulator : MonoBehaviour {
 
     ///// State
     [Foldout("State")]
-    [ReadOnly, SerializeField] Status _status;
+    [ReadOnly, SerializeField] Status status; // Just for displaying in inspector - the actual internal state is _status but we don't want to serialize that
+
+    /// the actual internal state of the emulator
+    Status _status;
+
 
     [Foldout("State")]
     [ReadOnly, SerializeField] int _currentFrame; // The frame index of the most-recently grabbed texture
@@ -380,11 +384,6 @@ public partial class Emulator : MonoBehaviour {
 #if UNITY_EDITOR && UNITY_2022_2_OR_NEWER
         if (Undo.isProcessing) return; // OnEnable gets called after undo/redo, but ignore it
 #endif
-        
-        // (Because we serialize _status as a hacky way of showing it in the inspector,
-        //  we need to make sure we ignore the serialized value - I think we can assume emulator is always inactive
-        //  when the component is enabled (since it gets killed in OnDisable))
-        _status = Status.Inactive;
 
         _textureCorrectionMat = new Material(Resources.Load<Shader>(TextureCorrectionShaderName));
         _materialProperties = new MaterialPropertyBlock();
