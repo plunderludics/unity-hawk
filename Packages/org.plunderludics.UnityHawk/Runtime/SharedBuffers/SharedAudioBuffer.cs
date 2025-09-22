@@ -62,7 +62,7 @@ internal class SharedAudioBuffer : ISharedBuffer {
         // Write all samples into local buffer
         _localBuffer.Write(samples, 0, samples.Length);
 
-        _logger.LogVerbose($"Received {samples.Length} samples from bizhawk");
+        // _logger.LogVerbose($"Received {samples.Length} samples from bizhawk");
         // Add to local buffer
         // for (int i = 0; i < samples.Length; i++) {
         //     // _localBuffer.Enqueue(samples[i]);

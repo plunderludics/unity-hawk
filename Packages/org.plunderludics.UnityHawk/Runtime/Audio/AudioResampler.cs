@@ -149,7 +149,7 @@ internal class AudioResampler {
 
         _samplesConsumedLastFrame = stereoSamplesToConsume;
 
-        _logger.LogVerbose($"Resampling from {stereoSamplesToConsume} to {stereoSamplesNeeded} ({ratio})");
+        // _logger.LogVerbose($"Resampling from {stereoSamplesToConsume} to {stereoSamplesNeeded} ({ratio})");
         short[] resampled = Resample(rawSamples, stereoSamplesToConsume, stereoSamplesNeeded);
 
         // copy from the local running audio buffer into unity's buffer, convert short to float

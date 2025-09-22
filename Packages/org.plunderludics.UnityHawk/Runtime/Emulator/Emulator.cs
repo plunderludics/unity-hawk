@@ -209,7 +209,7 @@ public partial class Emulator : MonoBehaviour {
 
     /// Basically these are the params which, if changed, we want to reset the bizhawk process
     // Don't include the path params here, because then the process gets reset for every character typed/deleted
-    struct BizhawkArgs {
+    class BizhawkArgs {
         public Rom RomFile;
         public Savestate SaveStateFile;
         public Config ConfigFile;
@@ -353,7 +353,8 @@ public partial class Emulator : MonoBehaviour {
             // GameObject and Emulator are active, so check if we need to start the bizhawk process
 
             if (CurrentStatus != Status.Inactive) {
-                if (!Equals(_currentBizhawkArgs, MakeBizhawkArgs())) {
+                if (_currentBizhawkArgs != null && !Equals(_currentBizhawkArgs, MakeBizhawkArgs())) {
+                    _logger.LogVerbose($"Bizhawk params have changed since bizhawk process was started, needs restart");
                     // Bizhawk params have changed since bizhawk process was started, needs restart
                     Restart();
                 }
@@ -375,6 +376,11 @@ public partial class Emulator : MonoBehaviour {
 
     [EditorBrowsable(EditorBrowsableState.Never)]
     public void OnEnable() {
+        // (Because we serialize _status as a hacky way of showing it in the inspector,
+        //  we need to make sure we ignore the serialized value - I think we can assume emulator is always inactive
+        //  when the component is enabled (since it gets killed in OnDisable))
+        _status = Status.Inactive;
+
         _logger ??= Logger; // ensure logger is initialized
         _logger.LogVerbose("OnEnable");
 #if UNITY_EDITOR && UNITY_2022_2_OR_NEWER
@@ -475,7 +481,6 @@ public partial class Emulator : MonoBehaviour {
                 // TODO: Would be nice if we could support an audio source on a different game object
                 // But that would require moving OnFilterAudioRead into a separate "EmulatorAudio" component I guess
                 if (audioSource == null) {
-                    // _logger.LogWarning("captureEmulatorAudio is enabled but no AudioSource is attached, will not play audio");
                     audioSource = gameObject.AddComponent<AudioSource>();
                     audioSource.loop = true;
                 }
