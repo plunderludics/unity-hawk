@@ -51,7 +51,9 @@ internal class SharedAudioBuffer : ISharedBuffer {
     public void ReceiveBizhawkSamples(byte[] bytes) {
         // Bizhawk calls this method each frame to send samples to unity
         if (bytes == null || bytes.Length == 0) {
-            _logger.LogVerbose("BizHawk sent empty samples array");
+            // Idk exactly why but this happens very frequently,
+            // so don't log it even in verbose
+            // _logger.LogVerbose("BizHawk sent empty samples array");
             return;
         }
 
