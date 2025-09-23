@@ -357,7 +357,7 @@ public partial class Emulator : MonoBehaviour {
             // GameObject and Emulator are active, so check if we need to start the bizhawk process
 
             if (CurrentStatus != Status.Inactive) {
-                if (!EditorApplication.isPlayingOrWillChangePlaymode && !Equals(_currentBizhawkArgs, MakeBizhawkArgs())) {
+                if (!Equals(_currentBizhawkArgs, MakeBizhawkArgs())) {
                     // Bizhawk params have changed since bizhawk process was started, needs restart
                     Restart();
                 }
