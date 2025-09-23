@@ -481,7 +481,6 @@ public partial class Emulator : MonoBehaviour {
                 // But that would require moving OnFilterAudioRead into a separate "EmulatorAudio" component I guess
                 if (audioSource == null) {
                     audioSource = gameObject.AddComponent<AudioSource>();
-                    audioSource.loop = true;
                 }
 
                 // Hack for better audio spatialization: create a fake audio clip with a constant 1.0f signal
@@ -490,6 +489,7 @@ public partial class Emulator : MonoBehaviour {
                 var clip = AudioClip.Create("Emulator audio", lengthSamples: 1, channels: 1, frequency: (int)BizhawkSampleRate, stream: false);
                 clip.SetData(new float[] { 1 }, 0);
                 audioSource.clip = clip;
+                audioSource.loop = true;
                 audioSource.Play();
             }
         }
