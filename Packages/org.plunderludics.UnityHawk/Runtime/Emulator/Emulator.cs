@@ -180,7 +180,11 @@ public partial class Emulator : MonoBehaviour {
 
     ///// State
     [Foldout("State")]
-    [ReadOnly, SerializeField] Status _status;
+    [ReadOnly, SerializeField] Status status; // Just for displaying in inspector - the actual internal state is _status but we don't want to serialize that
+
+    /// the actual internal state of the emulator
+    Status _status;
+
 
     [Foldout("State")]
     [ReadOnly, SerializeField] int _currentFrame; // The frame index of the most-recently grabbed texture
@@ -380,6 +384,7 @@ public partial class Emulator : MonoBehaviour {
 #if UNITY_EDITOR && UNITY_2022_2_OR_NEWER
         if (Undo.isProcessing) return; // OnEnable gets called after undo/redo, but ignore it
 #endif
+
         _textureCorrectionMat = new Material(Resources.Load<Shader>(TextureCorrectionShaderName));
         _materialProperties = new MaterialPropertyBlock();
 
@@ -465,14 +470,27 @@ public partial class Emulator : MonoBehaviour {
         }
 
         if (captureEmulatorAudio) {
-            if (!GetComponent<AudioSource>()) {
-                _logger.LogWarning("captureEmulatorAudio is enabled but no AudioSource is attached, will not play audio");
-            }
-
             if (runInEditMode && !Application.isPlaying) {
-                _logger.LogWarning("Emulator audio cannot be captured in edit mode");
-            } else {
+                // I don't think this warning is really needed
+                // _logger.LogWarning("Emulator audio cannot be captured in edit mode");
+            }
+            if (Application.isPlaying) {
                 audioResampler.Init(BizhawkSampleRate/AudioSettings.outputSampleRate, _logger);
+                var audioSource = GetComponent<AudioSource>();
+                // TODO: Would be nice if we could support an audio source on a different game object
+                // But that would require moving OnFilterAudioRead into a separate "EmulatorAudio" component I guess
+                if (audioSource == null) {
+                    audioSource = gameObject.AddComponent<AudioSource>();
+                }
+
+                // Hack for better audio spatialization: create a fake audio clip with a constant 1.0f signal
+                // Which gets spatialized by the engine and then we multiply with emulator audio in OnAudioFilterRead
+                // (https://discussions.unity.com/t/onaudiofilterread-sound-spatialisation/602467/6)
+                var clip = AudioClip.Create("Emulator audio", lengthSamples: 1, channels: 1, frequency: (int)BizhawkSampleRate, stream: false);
+                clip.SetData(new float[] { 1 }, 0);
+                audioSource.clip = clip;
+                audioSource.loop = true;
+                audioSource.Play();
             }
         }
         bool shareAudio = captureEmulatorAudio && Application.isPlaying;
@@ -987,7 +1005,9 @@ public partial class Emulator : MonoBehaviour {
         if (CurrentStatus != Status.Running) return;
 
         // _logger.LogVerbose($"OnAudioFilterRead {outBuffer.Length} samples, {channels} channels");
-        audioResampler.GetSamples(outBuffer, channels);
+        // Hack for better audio spatialization: multiply pre-spatialized constant signal with emulator audio
+        // (https://discussions.unity.com/t/onaudiofilterread-sound-spatialisation/602467/6)
+        audioResampler.GetSamples(outBuffer, channels, multiply: true);
     }
 
     /// try opening a shared buffer
