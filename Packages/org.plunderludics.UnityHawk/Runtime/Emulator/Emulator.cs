@@ -487,7 +487,7 @@ public partial class Emulator : MonoBehaviour {
                 // Which gets spatialized by the engine and then we multiply with emulator audio in OnAudioFilterRead
                 // (https://discussions.unity.com/t/onaudiofilterread-sound-spatialisation/602467/6)
                 var clip = AudioClip.Create("Emulator audio", lengthSamples: 1, channels: 1, frequency: (int)BizhawkSampleRate, stream: false);
-                clip.SetData(new float[] { 1 }, 0);
+                clip.SetData(new float[] { 1.0f }, 0);
                 audioSource.clip = clip;
                 audioSource.loop = true;
                 audioSource.Play();
@@ -1000,14 +1000,26 @@ public partial class Emulator : MonoBehaviour {
     /// Send audio from the emulator to the AudioSource
     /// (this method gets called by Unity if there is an AudioSource component attached)
     void OnAudioFilterRead(float[] outBuffer, int channels) {
-        if (!captureEmulatorAudio) return;
-        if (_sharedAudioBuffer == null || !_sharedAudioBuffer.IsOpen()) return;
-        if (CurrentStatus != Status.Running) return;
-
         // _logger.LogVerbose($"OnAudioFilterRead {outBuffer.Length} samples, {channels} channels");
-        // Hack for better audio spatialization: multiply pre-spatialized constant signal with emulator audio
-        // (https://discussions.unity.com/t/onaudiofilterread-sound-spatialisation/602467/6)
-        audioResampler.GetSamples(outBuffer, channels, multiply: true);
+
+        if (!captureEmulatorAudio) return; // audio capture is disabled, if there's an audio source attached we won't interfere with it
+
+        int consumed = 0;
+        if (CurrentStatus == Status.Running
+        && _sharedAudioBuffer != null && _sharedAudioBuffer.IsOpen()) {
+            // Bizhawk process is running and audio buffer is open - stream emulator audio to the audio source
+
+            // Hack for better audio spatialization: multiply pre-spatialized constant signal with emulator audio
+            // (https://discussions.unity.com/t/onaudiofilterread-sound-spatialisation/602467/6)
+            consumed = audioResampler.GetSamples(outBuffer, channels, multiply: true);
+        }
+
+        if (consumed == 0) {
+            // No bizhawk samples were consumed - either emulator is not running at all,
+            // or it's running but not sending any audio (maybe still starting up rom or paused etc)
+            // Fill with silence because we don't want the 1.0f signal to be audible
+            Array.Clear(outBuffer, 0, outBuffer.Length);
+        }
     }
 
     /// try opening a shared buffer

@@ -74,15 +74,16 @@ internal class AudioResampler {
     // Multichannel samples are interleaved
     // If multiply == true, the resampled audio from the source buffer is multiplied with whatever is already in the samples array
     // If false will overwrite
-    public void GetSamples(float[] samples, int channels, bool multiply = false) {
+    // Returns the number of bizhawk samples consumed
+    public int GetSamples(float[] samples, int channels, bool multiply = false) {
         if (_sourceBuffer == null) {
             _logger.LogError("[unity-hawk] AudioResampler source buffer has not been set");
-            return;
+            return 0;
         }
 
         if (channels != 2) {
             _logger.LogError("[unity-hawk] AudioSource must be set to 2 channels");
-            return;
+            return 0;
         }
 
         int newSourceBufferCount = _sourceBuffer.Count/ChannelCount;
@@ -97,7 +98,8 @@ internal class AudioResampler {
             _consecutiveEmptyFrames++;
             if (_consecutiveEmptyFrames > ConsecutiveEmptyFramesToStopAudio) {
                 // Sometimes bizhawk just stops sending sound (e.g. when paused), we don't want this to affect the moving average resample ratio
-                return;
+                // _logger.LogVerbose($"No new samples for {_consecutiveEmptyFrames} frames, stopping audio");
+                return 0; // 0 bizhawk samples consumed
             }
         } else {
             _consecutiveEmptyFrames = 0;
@@ -167,6 +169,8 @@ internal class AudioResampler {
                 break;
             }
         }
+
+        return stereoSamplesToConsume; // Number of bizhawk (stereo) samples consumed
    }
 
     // Simple linear interpolation, based on SoundOutputProvider.cs in Bizhawk
