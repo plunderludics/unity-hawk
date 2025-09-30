@@ -1001,7 +1001,6 @@ public partial class Emulator : MonoBehaviour {
     /// (this method gets called by Unity if there is an AudioSource component attached)
     void OnAudioFilterRead(float[] outBuffer, int channels) {
         // _logger.LogVerbose($"OnAudioFilterRead {outBuffer.Length} samples, {channels} channels");
-
         if (!captureEmulatorAudio) return; // audio capture is disabled, if there's an audio source attached we won't interfere with it
 
         int consumed = 0;
