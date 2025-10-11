@@ -29,7 +29,7 @@ internal class SharedInputBuffer : ISharedBuffer {
 
     public void Write(Plunderludics.UnityHawk.Shared.InputEvent bie) {
         byte[] serialized = Serialization.Serialize(bie);
-        _logger.LogVerbose($"Writing buffer: {bie}");
+        _logger.LogVerbose($"Writing input buffer: {bie}");
         int amount = _buffer.Write(serialized, timeout: 0);
         if (amount <= 0) {
             _logger.LogWarning("Failed to write input event to shared buffer");
