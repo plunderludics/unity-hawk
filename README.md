@@ -1,6 +1,6 @@
 # UnityHawk
 
-![demo](https://github.com/plunderludics/unity-hawk/assets/8207025/24774607-7bb0-4ba1-9130-4073f39bb883)
+![demo](https://github.com/user-attachments/assets/f4c55af2-8224-40db-8166-4678cb937422)
 
 UnityHawk lets you run emulated games within a Unity project, using [BizHawk](https://tasvideos.org/BizHawk).
 
