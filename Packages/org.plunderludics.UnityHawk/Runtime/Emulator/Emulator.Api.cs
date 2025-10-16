@@ -134,6 +134,7 @@ public partial class Emulator {
     /// possible values for the emulator status
     /// </summary>
     public enum Status {
+        /// <summary>
         /// BizHawk hasn't started yet
         /// </summary>
         Inactive,
@@ -149,7 +150,7 @@ public partial class Emulator {
         Started,
 
         /// <summary>
-        /// Bizhawk is running and sending textures [technically gets set when shared texture channel is open]
+        /// Bizhawk is running [all shared buffers are open]
         /// </summary>
         Running
     }
@@ -455,6 +456,8 @@ public partial class Emulator {
         });
     }
 
+    // TODO: would be nice to expose sth like this, but should be Action<object> instead.. Parse stays internal.
+    // And probably need a unity hawk WatchType method in that case, idk - don't want to expose bizhawk types to users.
     private int Watch(WatchType type, long address, int size, bool isBigEndian, string domain, Action<string> onChanged) {
         ThrowIfNotRunning();
         string args = $"{address},{size},{isBigEndian},{type}";
