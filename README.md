@@ -10,8 +10,6 @@ Only works on Windows currently. Works best with Unity 2022.2 or later.
 
 Under development, may have bugs; issues, feature requests or contributions are welcome.
 
-[API documentation is here.](https://plunderludics.github.io/unity-hawk/api/UnityHawk.Emulator.html)
-
 ## Installation
 Add these two lines under `dependencies` in your `manifest.json`:
 ```
@@ -60,6 +58,8 @@ UnityHawk uses a modified fork of BizHawk which is here: https://github.com/plun
 
 ## Attribution
 The included demo scene contains [this shader](https://github.com/yunoda-3DCG/Simple-CRT-Shader), [this model of a TV](https://sketchfab.com/3d-models/crt-tv-9ba4baa106e64319a0b540cf0af5aa9e), and [a rom of Elite for the NES](http://www.iancgbell.clara.net/elite/nes/index.htm).
+
+UnityHawk is inspired by [Multibowl](https://www.foddy.net/2016/08/multibowl/), [the Bizhawk Ring Shuffler](https://www.alistairaitcheson.com/games/magicbox.html) and [a lot of other things](https://plunderludics.github.io/references.html).
 
 ## Contact
 If you want help setting up the tool, or you are interested in contributing, or have any other questions, feel free to join our discord: https://discord.gg/ATJSh8W8dp.
