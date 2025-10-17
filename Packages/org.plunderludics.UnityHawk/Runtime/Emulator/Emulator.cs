@@ -121,7 +121,7 @@ public partial class Emulator : MonoBehaviour {
     [Tooltip("a lua script file that will be loaded by the emulator (.lua)")]
     public LuaScript luaScriptFile;
 
-    [Tooltip("a lua script file that will be loaded by the emulator (.lua)")]
+    [Tooltip("a bizhawk ram watch file to open alongside the emulator (.wch)")]
     public RamWatch ramWatchFile;
 
     ///// Bizhawk Config
@@ -823,25 +823,30 @@ public partial class Emulator : MonoBehaviour {
             }
         }
 
+        bool allBuffersOpen = true;
         if (passInputFromUnity && Application.isPlaying) {
             List<InputEvent> inputEvents = inputProvider.InputForFrame();
             if (_sharedInputBuffer.IsOpen()) {
                 WriteInputToBuffer(inputEvents);
             } else {
+                allBuffersOpen = false;
                 AttemptOpenBuffer(_sharedInputBuffer);
             }
         }
 
         if (!_callMethodRpcBuffer.IsOpen()) {
+            allBuffersOpen = false;
             AttemptOpenBuffer(_callMethodRpcBuffer);
         }
 
         if (!_apiCommandBuffer.IsOpen()) {
+            allBuffersOpen = false;
             AttemptOpenBuffer(_apiCommandBuffer);
         }
 
         if (captureEmulatorAudio && Application.isPlaying) {
             if (!_sharedAudioBuffer.IsOpen()) {
+                allBuffersOpen = false;
                 AttemptOpenBuffer(_sharedAudioBuffer);
             }
         }
@@ -850,7 +855,14 @@ public partial class Emulator : MonoBehaviour {
         if (_sharedTextureBuffer.IsOpen()) {
             UpdateTextureFromBuffer();
         } else {
+            allBuffersOpen = false;
             AttemptOpenBuffer(_sharedTextureBuffer);
+        }
+
+        // Consider the emulator to be running if all buffers have been opened successfully
+        // (Which means api calls, input, & texture+audio sharing should all be working)
+        if (CurrentStatus == Status.Started && allBuffersOpen) {
+            CurrentStatus = Status.Running;
         }
 
         if (!IsEmuHawkProcessAlive) {
@@ -1070,8 +1082,6 @@ public partial class Emulator : MonoBehaviour {
                 case SpecialCommands.OnRomLoaded:
                     // args: $"{systemID}"
                     _systemId = argString;
-                    CurrentStatus = Status.Running; // This is where the emulator is considered running
-                    // (At this point I think we can be confident all the buffers should be open)
                     break;
                 default:
                     _logger.LogWarning($"Bizhawk tried to call unknown special method {callbackName}");
