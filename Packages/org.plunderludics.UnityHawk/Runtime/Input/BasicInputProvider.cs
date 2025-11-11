@@ -1,5 +1,3 @@
-// TODO some analog input support would be nice
-
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
