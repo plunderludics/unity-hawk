@@ -97,7 +97,7 @@ public partial class Emulator {
     
     [Group("BizHawk Config")]
     [OnValueChanged(nameof(OnSetSpeedPercent))]
-    [Range(0, 200)]
+    [Range(1, 200)]
     [Tooltip("emulator speed as a percentage")]
     [SerializeField] int speedPercent = 100;
 
