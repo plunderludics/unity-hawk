@@ -5,7 +5,7 @@
   "description": "Run emulated games within Unity via BizHawk",
   "dependencies": {
     "com.unity.nuget.newtonsoft-json": "3.0.2",
-    "com.dbrizov.naughtyattributes": "2.1.4"
+    "com.codewriter.triinspector": "1.15.1"
   },
   "documentationUrl": "https://github.com/plunderludics/unity-hawk",
   "keywords": [
@@ -22,16 +22,15 @@
       "name": "package.openupm.com",
       "url": "https://package.openupm.com",
       "scopes": [
-        "com.dbrizov.naughtyattributes",
         "com.openupm"
       ]
     }
   ],
   "samples": [
     {
-        "displayName": "Demo",
-        "description": "Demo scene with emulator on tv",
-        "path": "Samples~/Demo"
+      "displayName": "Demo",
+      "description": "Demo scene with emulator on tv",
+      "path": "Samples~/Demo"
     }
   ]
 }

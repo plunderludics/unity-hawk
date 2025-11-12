@@ -4,33 +4,11 @@
 using System;
 using UnityEngine;
 
-using NaughtyAttributes;
 using System.Linq;
+
 
 namespace UnityHawk {
 public partial class Emulator {
-    ///// props
-    [Foldout("BizHawk Config")]
-    [OnValueChanged(nameof(OnSetVolume))]
-    [Range(0, 100)]
-    [Tooltip("the volume of the emulator, 0-100")]
-    [SerializeField] int volume = 100;
-
-    [Foldout("BizHawk Config")]
-    [OnValueChanged(nameof(OnSetIsMuted))]
-    [Tooltip("if the emulator is muted")]
-    [SerializeField] bool isMuted;
-
-    [Foldout("BizHawk Config")]
-    [OnValueChanged(nameof(OnSetIsPaused))]
-    [Tooltip("if the emulator is paused")]
-    [SerializeField] bool isPaused;
-    
-    [Foldout("BizHawk Config")]
-    [OnValueChanged(nameof(OnSetSpeedPercent))]
-    [Range(0, 200)]
-    [Tooltip("emulator speed as a percentage")]
-    [SerializeField] int speedPercent = 100;
 
     /// <summary>
     /// if the emulator is paused
@@ -184,7 +162,6 @@ public partial class Emulator {
     /// <summary>
     /// restarts the emulator
     /// </summary>
-    [Button]
     public void Restart() {
         Deactivate();
         Initialize();
