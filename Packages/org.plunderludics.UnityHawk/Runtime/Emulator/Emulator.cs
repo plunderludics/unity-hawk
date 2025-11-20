@@ -52,13 +52,6 @@ public partial class Emulator : MonoBehaviour {
         false;
 #endif
 
-    /// Helper property for inspector conditional display
-    bool SaveStateFileIsNull => saveStateFile is null;
-
-    /// Helper property for inspector conditional display
-    //TODO: even if the rom is not in the db, in theory we can still match to a savestate using hash or filename? Not very concerned about this edge case though
-    bool EnableRomFileSelection => !autoSelectRomFile || SaveStateFileIsNull || saveStateFile.RomInfo.NotInDatabase;
-
     ///// Rendering
     public enum RenderMode {
         AttachedRenderer,

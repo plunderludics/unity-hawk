@@ -23,12 +23,17 @@ public partial class Emulator {
     [Header("Game")]
     [Tooltip("Savestate file to load")]
     public Savestate saveStateFile;
+    bool SaveStateFileIsNull => saveStateFile is null;
 
     [HideIf(nameof(SaveStateFileIsNull))]
     [Tooltip("select rom file automatically based on savestate")]
     public bool autoSelectRomFile = true;
 
+    bool EnableRomFileSelection => !autoSelectRomFile || SaveStateFileIsNull || saveStateFile.RomInfo.NotInDatabase;
+    //TODO: even if the rom is not in the db, in theory we can still match to a savestate using hash or filename? Not very concerned about this edge case though
+
     [EnableIf(nameof(EnableRomFileSelection))]
+    [Required]
     [Tooltip("Rom file to run")]
     public Rom romFile;
 
@@ -73,7 +78,7 @@ public partial class Emulator {
     [Tooltip("a bizhawk ram watch file to open alongside the emulator (.wch)")]
     public RamWatch ramWatchFile;
 
-    ///// BizHawk Config Group
+    ///// BizHawk Config
     [FormerlySerializedAs("configFile")]
     [Group("BizHawk Config")]
     [Tooltip("a BizHawk config file (.ini) that will be copied for this instance")]
@@ -101,7 +106,7 @@ public partial class Emulator {
     [Tooltip("emulator speed as a percentage")]
     [SerializeField] int speedPercent = 100;
 
-    ///// Development Group
+    ///// Development
     [Group("Development")]
     [Tooltip("if the bizhawk gui should be visible while running in unity editor")]
     public bool showBizhawkGuiInEditor = false;
@@ -124,7 +129,7 @@ public partial class Emulator {
     [Group("Development")]
     [SerializeField] bool muteBizhawkInEditMode = true;
 
-    ///// Debug Group
+    ///// Debug
     [Group("Debug")]
     [OnValueChanged(nameof(OnSetLogLevel))]
     [SerializeField] Logger.LogLevel logLevel = Logger.LogLevel.Warning;
@@ -148,8 +153,16 @@ public partial class Emulator {
     [ShowIf(nameof(writeBizhawkLogs))]
     [Group("Debug")]
     [ReadOnly, ShowInInspector] string bizhawkLogLocation;
+    
+#if UNITY_EDITOR
+    [Group("Debug")]
+    [Button]
+    void ShowBizhawkLogInOS() {
+        EditorUtility.RevealInFinder(bizhawkLogLocation);
+    }
+#endif
 
-    ///// State Group
+    ///// State
     [Group("State")]
     [ReadOnly, ShowInInspector] Status status; // Just for displaying in inspector - the actual internal state is _status but we don't want to serialize that
 
@@ -159,17 +172,8 @@ public partial class Emulator {
     [Group("State")]
     [ReadOnly, SerializeField] string _systemId; // The system ID of the current core (e.g. "N64", "PSX", etc.)
 
-
-
     [Button("Restart")]
     void _Restart() => Restart();
-
-#if UNITY_EDITOR
-    [Button]
-    void ShowBizhawkLogInOS() {
-        EditorUtility.RevealInFinder(bizhawkLogLocation);
-    }
-#endif
 }
 
 }

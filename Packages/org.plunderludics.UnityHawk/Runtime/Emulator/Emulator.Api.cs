@@ -244,6 +244,9 @@ public partial class Emulator {
     /// </remarks>
     public void SetSpeedPercent(int percent) {
         ThrowIfNotRunning();
+        if (percent <= 0) {
+            throw new ArgumentException("Speed percentage must be greater than 0");
+        }
         speedPercent = percent;
     }
 
