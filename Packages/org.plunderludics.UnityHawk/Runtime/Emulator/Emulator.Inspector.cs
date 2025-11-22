@@ -150,8 +150,8 @@ public partial class Emulator {
     [Group("Debug")]
     [SerializeField] bool writeBizhawkLogs = true;
 
-    [ShowIf(nameof(writeBizhawkLogs))]
     [Group("Debug")]
+    [ShowIf(nameof(writeBizhawkLogs))]
     [ReadOnly, ShowInInspector] string bizhawkLogLocation;
     
 #if UNITY_EDITOR
@@ -164,13 +164,13 @@ public partial class Emulator {
 
     ///// State
     [Group("State")]
-    [ReadOnly, ShowInInspector] Status status; // Just for displaying in inspector - the actual internal state is _status but we don't want to serialize that
+    [ShowInInspector] Status _Status => CurrentStatus;
 
     [Group("State")]
-    [ReadOnly, ShowInInspector] int _currentFrame; // The frame index of the most-recently grabbed texture
+    [ShowInInspector] int _CurrentFrame => CurrentFrame;
 
     [Group("State")]
-    [ReadOnly, SerializeField] string _systemId; // The system ID of the current core (e.g. "N64", "PSX", etc.)
+    [ShowInInspector] string _SystemId => SystemId;
 
     [Button("Restart")]
     void _Restart() => Restart();

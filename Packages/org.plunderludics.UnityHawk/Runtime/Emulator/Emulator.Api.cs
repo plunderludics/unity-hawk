@@ -150,7 +150,6 @@ public partial class Emulator {
                 _deferredForMainThread += () => raise?.Invoke();
             }
             _status = value;
-            status = value; // Serialized value for displaying in inspector
         }
     }
 

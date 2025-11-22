@@ -59,13 +59,19 @@ public partial class Emulator : MonoBehaviour {
         RenderTexture,
     }
 
-    /// the actual internal state of the emulator
-    Status _status;
-
     ///// props
     /// the bizhawk emulator process
     Process _emuhawk;
     
+    /// the current emulator status
+    Status _status;
+
+    /// the current frame index (of most-recently grabbed texture)
+    int _currentFrame;
+
+    /// the system ID of the current core (e.g. "N64", "PSX", etc.)
+    string _systemId;
+
     /// Helper method to check if the emulator process is alive
     bool IsEmuHawkProcessAlive {
         get {
