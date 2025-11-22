@@ -1,5 +1,5 @@
 fileFormatVersion: 2
-guid: 6a26b449aab0f0c4c82fa58e0663fb71
+guid: 00d75a31aa186cc4bbb511d71390ec62
 PluginImporter:
   externalObjects: {}
   serializedVersion: 2
@@ -8,8 +8,8 @@ PluginImporter:
   defineConstraints: []
   isPreloaded: 0
   isOverridable: 1
-  isExplicitlyReferenced: 1
-  validateReferences: 1
+  isExplicitlyReferenced: 0
+  validateReferences: 0
   platformData:
   - first:
       : Any
@@ -31,33 +31,27 @@ PluginImporter:
     second:
       enabled: 1
       settings:
-        CPU: AnyCPU
         DefaultValueInitialized: true
-        OS: AnyOS
   - first:
       Standalone: Linux64
     second:
       enabled: 1
-      settings:
-        CPU: AnyCPU
+      settings: {}
   - first:
       Standalone: OSXUniversal
     second:
       enabled: 1
-      settings:
-        CPU: AnyCPU
+      settings: {}
   - first:
       Standalone: Win
     second:
       enabled: 1
-      settings:
-        CPU: AnyCPU
+      settings: {}
   - first:
       Standalone: Win64
     second:
       enabled: 1
-      settings:
-        CPU: AnyCPU
+      settings: {}
   - first:
       Windows Store Apps: WindowsStoreApps
     second:

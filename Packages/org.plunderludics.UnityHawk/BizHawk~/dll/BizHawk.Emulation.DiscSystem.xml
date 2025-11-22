@@ -1,0 +1,3522 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>BizHawk.Emulation.DiscSystem</name>
+    </assembly>
+    <members>
+        <member name="T:System.Diagnostics.CodeAnalysis.DynamicDependencyAttribute">
+            <summary>
+            States a dependency that one member has on another.
+            </summary>
+            <remarks>
+            This can be used to inform tooling of a dependency that is otherwise not evident purely from
+            metadata and IL, for example a member relied on via reflection.
+            </remarks>
+        </member>
+        <member name="M:System.Diagnostics.CodeAnalysis.DynamicDependencyAttribute.#ctor(System.String)">
+            <summary>
+            Initializes a new instance of the <see cref="T:System.Diagnostics.CodeAnalysis.DynamicDependencyAttribute"/> class
+            with the specified signature of a member on the same type as the consumer.
+            </summary>
+            <param name="memberSignature">The signature of the member depended on.</param>
+        </member>
+        <member name="M:System.Diagnostics.CodeAnalysis.DynamicDependencyAttribute.#ctor(System.String,System.Type)">
+            <summary>
+            Initializes a new instance of the <see cref="T:System.Diagnostics.CodeAnalysis.DynamicDependencyAttribute"/> class
+            with the specified signature of a member on a <see cref="T:System.Type"/>.
+            </summary>
+            <param name="memberSignature">The signature of the member depended on.</param>
+            <param name="type">The <see cref="T:System.Type"/> containing <paramref name="memberSignature"/>.</param>
+        </member>
+        <member name="M:System.Diagnostics.CodeAnalysis.DynamicDependencyAttribute.#ctor(System.String,System.String,System.String)">
+            <summary>
+            Initializes a new instance of the <see cref="T:System.Diagnostics.CodeAnalysis.DynamicDependencyAttribute"/> class
+            with the specified signature of a member on a type in an assembly.
+            </summary>
+            <param name="memberSignature">The signature of the member depended on.</param>
+            <param name="typeName">The full name of the type containing the specified member.</param>
+            <param name="assemblyName">The assembly name of the type containing the specified member.</param>
+        </member>
+        <member name="M:System.Diagnostics.CodeAnalysis.DynamicDependencyAttribute.#ctor(System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes,System.Type)">
+            <summary>
+            Initializes a new instance of the <see cref="T:System.Diagnostics.CodeAnalysis.DynamicDependencyAttribute"/> class
+            with the specified types of members on a <see cref="T:System.Type"/>.
+            </summary>
+            <param name="memberTypes">The types of members depended on.</param>
+            <param name="type">The <see cref="T:System.Type"/> containing the specified members.</param>
+        </member>
+        <member name="M:System.Diagnostics.CodeAnalysis.DynamicDependencyAttribute.#ctor(System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes,System.String,System.String)">
+            <summary>
+            Initializes a new instance of the <see cref="T:System.Diagnostics.CodeAnalysis.DynamicDependencyAttribute"/> class
+            with the specified types of members on a type in an assembly.
+            </summary>
+            <param name="memberTypes">The types of members depended on.</param>
+            <param name="typeName">The full name of the type containing the specified members.</param>
+            <param name="assemblyName">The assembly name of the type containing the specified members.</param>
+        </member>
+        <member name="P:System.Diagnostics.CodeAnalysis.DynamicDependencyAttribute.MemberSignature">
+            <summary>
+            Gets the signature of the member depended on.
+            </summary>
+            <remarks>
+            Either <see cref="P:System.Diagnostics.CodeAnalysis.DynamicDependencyAttribute.MemberSignature"/> must be a valid string or <see cref="P:System.Diagnostics.CodeAnalysis.DynamicDependencyAttribute.MemberTypes"/>
+            must not equal <see cref="F:System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.None"/>, but not both.
+            </remarks>
+        </member>
+        <member name="P:System.Diagnostics.CodeAnalysis.DynamicDependencyAttribute.MemberTypes">
+            <summary>
+            Gets the <see cref="T:System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes"/> which specifies the type
+            of members depended on.
+            </summary>
+            <remarks>
+            Either <see cref="P:System.Diagnostics.CodeAnalysis.DynamicDependencyAttribute.MemberSignature"/> must be a valid string or <see cref="P:System.Diagnostics.CodeAnalysis.DynamicDependencyAttribute.MemberTypes"/>
+            must not equal <see cref="F:System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.None"/>, but not both.
+            </remarks>
+        </member>
+        <member name="P:System.Diagnostics.CodeAnalysis.DynamicDependencyAttribute.Type">
+            <summary>
+            Gets the <see cref="T:System.Type"/> containing the specified member.
+            </summary>
+            <remarks>
+            If neither <see cref="P:System.Diagnostics.CodeAnalysis.DynamicDependencyAttribute.Type"/> nor <see cref="P:System.Diagnostics.CodeAnalysis.DynamicDependencyAttribute.TypeName"/> are specified,
+            the type of the consumer is assumed.
+            </remarks>
+        </member>
+        <member name="P:System.Diagnostics.CodeAnalysis.DynamicDependencyAttribute.TypeName">
+            <summary>
+            Gets the full name of the type containing the specified member.
+            </summary>
+            <remarks>
+            If neither <see cref="P:System.Diagnostics.CodeAnalysis.DynamicDependencyAttribute.Type"/> nor <see cref="P:System.Diagnostics.CodeAnalysis.DynamicDependencyAttribute.TypeName"/> are specified,
+            the type of the consumer is assumed.
+            </remarks>
+        </member>
+        <member name="P:System.Diagnostics.CodeAnalysis.DynamicDependencyAttribute.AssemblyName">
+            <summary>
+            Gets the assembly name of the specified type.
+            </summary>
+            <remarks>
+            <see cref="P:System.Diagnostics.CodeAnalysis.DynamicDependencyAttribute.AssemblyName"/> is only valid when <see cref="P:System.Diagnostics.CodeAnalysis.DynamicDependencyAttribute.TypeName"/> is specified.
+            </remarks>
+        </member>
+        <member name="P:System.Diagnostics.CodeAnalysis.DynamicDependencyAttribute.Condition">
+            <summary>
+            Gets or sets the condition in which the dependency is applicable, e.g. "DEBUG".
+            </summary>
+        </member>
+        <member name="T:System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes">
+             <summary>
+             Specifies the types of members that are dynamically accessed.
+            
+             This enumeration has a <see cref="T:System.FlagsAttribute"/> attribute that allows a
+             bitwise combination of its member values.
+             </summary>
+        </member>
+        <member name="F:System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.None">
+            <summary>
+            Specifies no members.
+            </summary>
+        </member>
+        <member name="F:System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.PublicParameterlessConstructor">
+            <summary>
+            Specifies the default, parameterless public constructor.
+            </summary>
+        </member>
+        <member name="F:System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.PublicConstructors">
+            <summary>
+            Specifies all public constructors.
+            </summary>
+        </member>
+        <member name="F:System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.NonPublicConstructors">
+            <summary>
+            Specifies all non-public constructors.
+            </summary>
+        </member>
+        <member name="F:System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.PublicMethods">
+            <summary>
+            Specifies all public methods.
+            </summary>
+        </member>
+        <member name="F:System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.NonPublicMethods">
+            <summary>
+            Specifies all non-public methods.
+            </summary>
+        </member>
+        <member name="F:System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.PublicFields">
+            <summary>
+            Specifies all public fields.
+            </summary>
+        </member>
+        <member name="F:System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.NonPublicFields">
+            <summary>
+            Specifies all non-public fields.
+            </summary>
+        </member>
+        <member name="F:System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.PublicNestedTypes">
+            <summary>
+            Specifies all public nested types.
+            </summary>
+        </member>
+        <member name="F:System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.NonPublicNestedTypes">
+            <summary>
+            Specifies all non-public nested types.
+            </summary>
+        </member>
+        <member name="F:System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.PublicProperties">
+            <summary>
+            Specifies all public properties.
+            </summary>
+        </member>
+        <member name="F:System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.NonPublicProperties">
+            <summary>
+            Specifies all non-public properties.
+            </summary>
+        </member>
+        <member name="F:System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.PublicEvents">
+            <summary>
+            Specifies all public events.
+            </summary>
+        </member>
+        <member name="F:System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.NonPublicEvents">
+            <summary>
+            Specifies all non-public events.
+            </summary>
+        </member>
+        <member name="F:System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.Interfaces">
+            <summary>
+            Specifies all interfaces implemented by the type.
+            </summary>
+        </member>
+        <member name="F:System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.All">
+            <summary>
+            Specifies all members.
+            </summary>
+        </member>
+        <member name="T:System.Diagnostics.CodeAnalysis.DynamicallyAccessedMembersAttribute">
+             <summary>
+             Indicates that certain members on a specified <see cref="T:System.Type"/> are accessed dynamically,
+             for example through <see cref="N:System.Reflection"/>.
+             </summary>
+             <remarks>
+             This allows tools to understand which members are being accessed during the execution
+             of a program.
+            
+             This attribute is valid on members whose type is <see cref="T:System.Type"/> or <see cref="T:System.String"/>.
+            
+             When this attribute is applied to a location of type <see cref="T:System.String"/>, the assumption is
+             that the string represents a fully qualified type name.
+            
+             When this attribute is applied to a class, interface, or struct, the members specified
+             can be accessed dynamically on <see cref="T:System.Type"/> instances returned from calling
+             <see cref="M:System.Object.GetType"/> on instances of that class, interface, or struct.
+            
+             If the attribute is applied to a method it's treated as a special case and it implies
+             the attribute should be applied to the "this" parameter of the method. As such the attribute
+             should only be used on instance methods of types assignable to System.Type (or string, but no methods
+             will use it there).
+             </remarks>
+        </member>
+        <member name="M:System.Diagnostics.CodeAnalysis.DynamicallyAccessedMembersAttribute.#ctor(System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes)">
+            <summary>
+            Initializes a new instance of the <see cref="T:System.Diagnostics.CodeAnalysis.DynamicallyAccessedMembersAttribute"/> class
+            with the specified member types.
+            </summary>
+            <param name="memberTypes">The types of members dynamically accessed.</param>
+        </member>
+        <member name="P:System.Diagnostics.CodeAnalysis.DynamicallyAccessedMembersAttribute.MemberTypes">
+            <summary>
+            Gets the <see cref="T:System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes"/> which specifies the type
+            of members dynamically accessed.
+            </summary>
+        </member>
+        <member name="T:System.Diagnostics.CodeAnalysis.RequiresAssemblyFilesAttribute">
+            <summary>
+            Indicates that the specified member requires assembly files to be on disk.
+            </summary>
+        </member>
+        <member name="M:System.Diagnostics.CodeAnalysis.RequiresAssemblyFilesAttribute.#ctor">
+            <summary>
+            Initializes a new instance of the <see cref="!:global::System.RequiresAssemblyFilesAttribute"/> class.
+            </summary>
+        </member>
+        <member name="M:System.Diagnostics.CodeAnalysis.RequiresAssemblyFilesAttribute.#ctor(System.String)">
+            <summary>
+            Initializes a new instance of the <see cref="!:global::System.RequiresAssemblyFilesAttribute"/> class.
+            </summary>
+            <param name="message">
+            A message that contains information about the need for assembly files to be on disk.
+            </param>
+        </member>
+        <member name="P:System.Diagnostics.CodeAnalysis.RequiresAssemblyFilesAttribute.Message">
+            <summary>
+            Gets an optional message that contains information about the need for
+            assembly files to be on disk.
+            </summary>
+        </member>
+        <member name="P:System.Diagnostics.CodeAnalysis.RequiresAssemblyFilesAttribute.Url">
+            <summary>
+            Gets or sets an optional URL that contains more information about the member,
+            why it requires assembly files to be on disk, and what options a consumer has
+            to deal with it.
+            </summary>
+        </member>
+        <member name="T:System.Diagnostics.CodeAnalysis.RequiresDynamicCodeAttribute">
+            <summary>
+            Indicates that the specified method requires the ability to generate new code at runtime,
+            for example through <see cref="N:System.Reflection"/>.
+            </summary>
+            <remarks>
+            This allows tools to understand which methods are unsafe to call when compiling ahead of time.
+            </remarks>
+        </member>
+        <member name="M:System.Diagnostics.CodeAnalysis.RequiresDynamicCodeAttribute.#ctor(System.String)">
+            <summary>
+            Initializes a new instance of the <see cref="T:System.Diagnostics.CodeAnalysis.RequiresDynamicCodeAttribute"/> class
+            with the specified message.
+            </summary>
+            <param name="message">
+            A message that contains information about the usage of dynamic code.
+            </param>
+        </member>
+        <member name="P:System.Diagnostics.CodeAnalysis.RequiresDynamicCodeAttribute.Message">
+            <summary>
+            Gets a message that contains information about the usage of dynamic code.
+            </summary>
+        </member>
+        <member name="P:System.Diagnostics.CodeAnalysis.RequiresDynamicCodeAttribute.Url">
+            <summary>
+            Gets or sets an optional URL that contains more information about the method,
+            why it requires dynamic code, and what options a consumer has to deal with it.
+            </summary>
+        </member>
+        <member name="T:System.Diagnostics.CodeAnalysis.RequiresUnreferencedCodeAttribute">
+            <summary>
+            Indicates that the specified method requires dynamic access to code that is not referenced
+            statically, for example through <see cref="N:System.Reflection"/>.
+            </summary>
+            <remarks>
+            This allows tools to understand which methods are unsafe to call when removing unreferenced
+            code from an application.
+            </remarks>
+        </member>
+        <member name="M:System.Diagnostics.CodeAnalysis.RequiresUnreferencedCodeAttribute.#ctor(System.String)">
+            <summary>
+            Initializes a new instance of the <see cref="T:System.Diagnostics.CodeAnalysis.RequiresUnreferencedCodeAttribute"/> class
+            with the specified message.
+            </summary>
+            <param name="message">
+            A message that contains information about the usage of unreferenced code.
+            </param>
+        </member>
+        <member name="P:System.Diagnostics.CodeAnalysis.RequiresUnreferencedCodeAttribute.Message">
+            <summary>
+            Gets a message that contains information about the usage of unreferenced code.
+            </summary>
+        </member>
+        <member name="P:System.Diagnostics.CodeAnalysis.RequiresUnreferencedCodeAttribute.Url">
+            <summary>
+            Gets or sets an optional URL that contains more information about the method,
+            why it requires unreferenced code, and what options a consumer has to deal with it.
+            </summary>
+        </member>
+        <member name="T:System.Diagnostics.CodeAnalysis.UnconditionalSuppressMessageAttribute">
+            <summary>
+            Suppresses reporting of a specific rule violation, allowing multiple suppressions on a
+            single code artifact.
+            </summary>
+            <remarks>
+            <see cref="T:System.Diagnostics.CodeAnalysis.UnconditionalSuppressMessageAttribute"/> is different than
+            <see cref="T:System.Diagnostics.CodeAnalysis.SuppressMessageAttribute"/> in that it doesn't have a
+            <see cref="T:System.Diagnostics.ConditionalAttribute"/>. So it is always preserved in the compiled assembly.
+            </remarks>
+        </member>
+        <member name="M:System.Diagnostics.CodeAnalysis.UnconditionalSuppressMessageAttribute.#ctor(System.String,System.String)">
+            <summary>
+            Initializes a new instance of the <see cref="T:System.Diagnostics.CodeAnalysis.UnconditionalSuppressMessageAttribute"/>
+            class, specifying the category of the tool and the identifier for an analysis rule.
+            </summary>
+            <param name="category">The category for the attribute.</param>
+            <param name="checkId">The identifier of the analysis rule the attribute applies to.</param>
+        </member>
+        <member name="P:System.Diagnostics.CodeAnalysis.UnconditionalSuppressMessageAttribute.Category">
+            <summary>
+            Gets the category identifying the classification of the attribute.
+            </summary>
+            <remarks>
+            The <see cref="P:System.Diagnostics.CodeAnalysis.UnconditionalSuppressMessageAttribute.Category"/> property describes the tool or tool analysis category
+            for which a message suppression attribute applies.
+            </remarks>
+        </member>
+        <member name="P:System.Diagnostics.CodeAnalysis.UnconditionalSuppressMessageAttribute.CheckId">
+            <summary>
+            Gets the identifier of the analysis tool rule to be suppressed.
+            </summary>
+            <remarks>
+            Concatenated together, the <see cref="P:System.Diagnostics.CodeAnalysis.UnconditionalSuppressMessageAttribute.Category"/> and <see cref="P:System.Diagnostics.CodeAnalysis.UnconditionalSuppressMessageAttribute.CheckId"/>
+            properties form a unique check identifier.
+            </remarks>
+        </member>
+        <member name="P:System.Diagnostics.CodeAnalysis.UnconditionalSuppressMessageAttribute.Scope">
+            <summary>
+            Gets or sets the scope of the code that is relevant for the attribute.
+            </summary>
+            <remarks>
+            The Scope property is an optional argument that specifies the metadata scope for which
+            the attribute is relevant.
+            </remarks>
+        </member>
+        <member name="P:System.Diagnostics.CodeAnalysis.UnconditionalSuppressMessageAttribute.Target">
+            <summary>
+            Gets or sets a fully qualified path that represents the target of the attribute.
+            </summary>
+            <remarks>
+            The <see cref="P:System.Diagnostics.CodeAnalysis.UnconditionalSuppressMessageAttribute.Target"/> property is an optional argument identifying the analysis target
+            of the attribute. An example value is "System.IO.Stream.ctor():System.Void".
+            Because it is fully qualified, it can be long, particularly for targets such as parameters.
+            The analysis tool user interface should be capable of automatically formatting the parameter.
+            </remarks>
+        </member>
+        <member name="P:System.Diagnostics.CodeAnalysis.UnconditionalSuppressMessageAttribute.MessageId">
+            <summary>
+            Gets or sets an optional argument expanding on exclusion criteria.
+            </summary>
+            <remarks>
+            The <see cref="P:System.Diagnostics.CodeAnalysis.UnconditionalSuppressMessageAttribute.MessageId"/> property is an optional argument that specifies additional
+            exclusion where the literal metadata target is not sufficiently precise. For example,
+            the <see cref="T:System.Diagnostics.CodeAnalysis.UnconditionalSuppressMessageAttribute"/> cannot be applied within a method,
+            and it may be desirable to suppress a violation against a statement in the method that will
+            give a rule violation, but not against all statements in the method.
+            </remarks>
+        </member>
+        <member name="P:System.Diagnostics.CodeAnalysis.UnconditionalSuppressMessageAttribute.Justification">
+            <summary>
+            Gets or sets the justification for suppressing the code analysis message.
+            </summary>
+        </member>
+        <member name="T:System.Diagnostics.StackTraceHiddenAttribute">
+            <summary>
+            Types and Methods attributed with StackTraceHidden will be omitted from the stack trace text shown in StackTrace.ToString()
+            and Exception.StackTrace
+            </summary>
+        </member>
+        <member name="M:System.Diagnostics.StackTraceHiddenAttribute.#ctor">
+            <summary>
+            Initializes a new instance of the <see cref="T:System.Diagnostics.StackTraceHiddenAttribute"/> class.
+            </summary>
+        </member>
+        <member name="T:System.Collections.Generic.PriorityQueue`2">
+            <summary>
+             Represents a min priority queue.
+            </summary>
+            <typeparam name="TElement">Specifies the type of elements in the queue.</typeparam>
+            <typeparam name="TPriority">Specifies the type of priority associated with enqueued elements.</typeparam>
+            <remarks>
+             Implements an array-backed quaternary min-heap. Each element is enqueued with an associated priority
+             that determines the dequeue order: elements with the lowest priority get dequeued first.
+            </remarks>
+        </member>
+        <member name="F:System.Collections.Generic.PriorityQueue`2._nodes">
+            <summary>
+            Represents an implicit heap-ordered complete d-ary tree, stored as an array.
+            </summary>
+        </member>
+        <member name="F:System.Collections.Generic.PriorityQueue`2._comparer">
+            <summary>
+            Custom comparer used to order the heap.
+            </summary>
+        </member>
+        <member name="F:System.Collections.Generic.PriorityQueue`2._unorderedItems">
+            <summary>
+            Lazily-initialized collection used to expose the contents of the queue.
+            </summary>
+        </member>
+        <member name="F:System.Collections.Generic.PriorityQueue`2._size">
+            <summary>
+            The number of nodes in the heap.
+            </summary>
+        </member>
+        <member name="F:System.Collections.Generic.PriorityQueue`2._version">
+            <summary>
+            Version updated on mutation to help validate enumerators operate on a consistent state.
+            </summary>
+        </member>
+        <member name="F:System.Collections.Generic.PriorityQueue`2.Arity">
+            <summary>
+            Specifies the arity of the d-ary heap, which here is quaternary.
+            It is assumed that this value is a power of 2.
+            </summary>
+        </member>
+        <member name="F:System.Collections.Generic.PriorityQueue`2.Log2Arity">
+            <summary>
+            The binary logarithm of <see cref="F:System.Collections.Generic.PriorityQueue`2.Arity" />.
+            </summary>
+        </member>
+        <member name="M:System.Collections.Generic.PriorityQueue`2.#ctor">
+            <summary>
+             Initializes a new instance of the <see cref="T:System.Collections.Generic.PriorityQueue`2"/> class.
+            </summary>
+        </member>
+        <member name="M:System.Collections.Generic.PriorityQueue`2.#ctor(System.Int32)">
+            <summary>
+             Initializes a new instance of the <see cref="T:System.Collections.Generic.PriorityQueue`2"/> class
+             with the specified initial capacity.
+            </summary>
+            <param name="initialCapacity">Initial capacity to allocate in the underlying heap array.</param>
+            <exception cref="T:System.ArgumentOutOfRangeException">
+             The specified <paramref name="initialCapacity"/> was negative.
+            </exception>
+        </member>
+        <member name="M:System.Collections.Generic.PriorityQueue`2.#ctor(System.Collections.Generic.IComparer{`1})">
+            <summary>
+             Initializes a new instance of the <see cref="T:System.Collections.Generic.PriorityQueue`2"/> class
+             with the specified custom priority comparer.
+            </summary>
+            <param name="comparer">
+             Custom comparer dictating the ordering of elements.
+             Uses <see cref="P:System.Collections.Generic.Comparer`1.Default" /> if the argument is <see langword="null"/>.
+            </param>
+        </member>
+        <member name="M:System.Collections.Generic.PriorityQueue`2.#ctor(System.Int32,System.Collections.Generic.IComparer{`1})">
+            <summary>
+             Initializes a new instance of the <see cref="T:System.Collections.Generic.PriorityQueue`2"/> class
+             with the specified initial capacity and custom priority comparer.
+            </summary>
+            <param name="initialCapacity">Initial capacity to allocate in the underlying heap array.</param>
+            <param name="comparer">
+             Custom comparer dictating the ordering of elements.
+             Uses <see cref="P:System.Collections.Generic.Comparer`1.Default" /> if the argument is <see langword="null"/>.
+            </param>
+            <exception cref="T:System.ArgumentOutOfRangeException">
+             The specified <paramref name="initialCapacity"/> was negative.
+            </exception>
+        </member>
+        <member name="M:System.Collections.Generic.PriorityQueue`2.#ctor(System.Collections.Generic.IEnumerable{System.ValueTuple{`0,`1}})">
+            <summary>
+             Initializes a new instance of the <see cref="T:System.Collections.Generic.PriorityQueue`2"/> class
+             that is populated with the specified elements and priorities.
+            </summary>
+            <param name="items">The pairs of elements and priorities with which to populate the queue.</param>
+            <exception cref="T:System.ArgumentNullException">
+             The specified <paramref name="items"/> argument was <see langword="null"/>.
+            </exception>
+            <remarks>
+             Constructs the heap using a heapify operation,
+             which is generally faster than enqueuing individual elements sequentially.
+            </remarks>
+        </member>
+        <member name="M:System.Collections.Generic.PriorityQueue`2.#ctor(System.Collections.Generic.IEnumerable{System.ValueTuple{`0,`1}},System.Collections.Generic.IComparer{`1})">
+            <summary>
+             Initializes a new instance of the <see cref="T:System.Collections.Generic.PriorityQueue`2"/> class
+             that is populated with the specified elements and priorities,
+             and with the specified custom priority comparer.
+            </summary>
+            <param name="items">The pairs of elements and priorities with which to populate the queue.</param>
+            <param name="comparer">
+             Custom comparer dictating the ordering of elements.
+             Uses <see cref="P:System.Collections.Generic.Comparer`1.Default" /> if the argument is <see langword="null"/>.
+            </param>
+            <exception cref="T:System.ArgumentNullException">
+             The specified <paramref name="items"/> argument was <see langword="null"/>.
+            </exception>
+            <remarks>
+             Constructs the heap using a heapify operation,
+             which is generally faster than enqueuing individual elements sequentially.
+            </remarks>
+        </member>
+        <member name="P:System.Collections.Generic.PriorityQueue`2.Count">
+            <summary>
+             Gets the number of elements contained in the <see cref="T:System.Collections.Generic.PriorityQueue`2"/>.
+            </summary>
+        </member>
+        <member name="P:System.Collections.Generic.PriorityQueue`2.Comparer">
+            <summary>
+             Gets the priority comparer used by the <see cref="T:System.Collections.Generic.PriorityQueue`2"/>.
+            </summary>
+        </member>
+        <member name="P:System.Collections.Generic.PriorityQueue`2.UnorderedItems">
+            <summary>
+             Gets a collection that enumerates the elements of the queue in an unordered manner.
+            </summary>
+            <remarks>
+             The enumeration does not order items by priority, since that would require N * log(N) time and N space.
+             Items are instead enumerated following the internal array heap layout.
+            </remarks>
+        </member>
+        <member name="M:System.Collections.Generic.PriorityQueue`2.Enqueue(`0,`1)">
+            <summary>
+             Adds the specified element with associated priority to the <see cref="T:System.Collections.Generic.PriorityQueue`2"/>.
+            </summary>
+            <param name="element">The element to add to the <see cref="T:System.Collections.Generic.PriorityQueue`2"/>.</param>
+            <param name="priority">The priority with which to associate the new element.</param>
+        </member>
+        <member name="M:System.Collections.Generic.PriorityQueue`2.Peek">
+            <summary>
+             Returns the minimal element from the <see cref="T:System.Collections.Generic.PriorityQueue`2"/> without removing it.
+            </summary>
+            <exception cref="T:System.InvalidOperationException">The <see cref="T:System.Collections.Generic.PriorityQueue`2"/> is empty.</exception>
+            <returns>The minimal element of the <see cref="T:System.Collections.Generic.PriorityQueue`2"/>.</returns>
+        </member>
+        <member name="M:System.Collections.Generic.PriorityQueue`2.Dequeue">
+            <summary>
+             Removes and returns the minimal element from the <see cref="T:System.Collections.Generic.PriorityQueue`2"/>.
+            </summary>
+            <exception cref="T:System.InvalidOperationException">The queue is empty.</exception>
+            <returns>The minimal element of the <see cref="T:System.Collections.Generic.PriorityQueue`2"/>.</returns>
+        </member>
+        <member name="M:System.Collections.Generic.PriorityQueue`2.DequeueEnqueue(`0,`1)">
+            <summary>
+             Removes the minimal element and then immediately adds the specified element with associated priority to the <see cref="T:System.Collections.Generic.PriorityQueue`2"/>,
+            </summary>
+            <param name="element">The element to add to the <see cref="T:System.Collections.Generic.PriorityQueue`2"/>.</param>
+            <param name="priority">The priority with which to associate the new element.</param>
+            <exception cref="T:System.InvalidOperationException">The queue is empty.</exception>
+            <returns>The minimal element removed before performing the enqueue operation.</returns>
+            <remarks>
+             Implements an extract-then-insert heap operation that is generally more efficient
+             than sequencing Dequeue and Enqueue operations: in the worst case scenario only one
+             shift-down operation is required.
+            </remarks>
+        </member>
+        <member name="M:System.Collections.Generic.PriorityQueue`2.TryDequeue(`0@,`1@)">
+            <summary>
+             Removes the minimal element from the <see cref="T:System.Collections.Generic.PriorityQueue`2"/>,
+             and copies it to the <paramref name="element"/> parameter,
+             and its associated priority to the <paramref name="priority"/> parameter.
+            </summary>
+            <param name="element">The removed element.</param>
+            <param name="priority">The priority associated with the removed element.</param>
+            <returns>
+             <see langword="true"/> if the element is successfully removed;
+             <see langword="false"/> if the <see cref="T:System.Collections.Generic.PriorityQueue`2"/> is empty.
+            </returns>
+        </member>
+        <member name="M:System.Collections.Generic.PriorityQueue`2.TryPeek(`0@,`1@)">
+            <summary>
+             Returns a value that indicates whether there is a minimal element in the <see cref="T:System.Collections.Generic.PriorityQueue`2"/>,
+             and if one is present, copies it to the <paramref name="element"/> parameter,
+             and its associated priority to the <paramref name="priority"/> parameter.
+             The element is not removed from the <see cref="T:System.Collections.Generic.PriorityQueue`2"/>.
+            </summary>
+            <param name="element">The minimal element in the queue.</param>
+            <param name="priority">The priority associated with the minimal element.</param>
+            <returns>
+             <see langword="true"/> if there is a minimal element;
+             <see langword="false"/> if the <see cref="T:System.Collections.Generic.PriorityQueue`2"/> is empty.
+            </returns>
+        </member>
+        <member name="M:System.Collections.Generic.PriorityQueue`2.EnqueueDequeue(`0,`1)">
+            <summary>
+             Adds the specified element with associated priority to the <see cref="T:System.Collections.Generic.PriorityQueue`2"/>,
+             and immediately removes the minimal element, returning the result.
+            </summary>
+            <param name="element">The element to add to the <see cref="T:System.Collections.Generic.PriorityQueue`2"/>.</param>
+            <param name="priority">The priority with which to associate the new element.</param>
+            <returns>The minimal element removed after the enqueue operation.</returns>
+            <remarks>
+             Implements an insert-then-extract heap operation that is generally more efficient
+             than sequencing Enqueue and Dequeue operations: in the worst case scenario only one
+             shift-down operation is required.
+            </remarks>
+        </member>
+        <member name="M:System.Collections.Generic.PriorityQueue`2.EnqueueRange(System.Collections.Generic.IEnumerable{System.ValueTuple{`0,`1}})">
+            <summary>
+             Enqueues a sequence of element/priority pairs to the <see cref="T:System.Collections.Generic.PriorityQueue`2"/>.
+            </summary>
+            <param name="items">The pairs of elements and priorities to add to the queue.</param>
+            <exception cref="T:System.ArgumentNullException">
+             The specified <paramref name="items"/> argument was <see langword="null"/>.
+            </exception>
+        </member>
+        <member name="M:System.Collections.Generic.PriorityQueue`2.EnqueueRange(System.Collections.Generic.IEnumerable{`0},`1)">
+            <summary>
+             Enqueues a sequence of elements pairs to the <see cref="T:System.Collections.Generic.PriorityQueue`2"/>,
+             all associated with the specified priority.
+            </summary>
+            <param name="elements">The elements to add to the queue.</param>
+            <param name="priority">The priority to associate with the new elements.</param>
+            <exception cref="T:System.ArgumentNullException">
+             The specified <paramref name="elements"/> argument was <see langword="null"/>.
+            </exception>
+        </member>
+        <member name="M:System.Collections.Generic.PriorityQueue`2.Clear">
+            <summary>
+             Removes all items from the <see cref="T:System.Collections.Generic.PriorityQueue`2"/>.
+            </summary>
+        </member>
+        <member name="M:System.Collections.Generic.PriorityQueue`2.EnsureCapacity(System.Int32)">
+            <summary>
+             Ensures that the <see cref="T:System.Collections.Generic.PriorityQueue`2"/> can hold up to
+             <paramref name="capacity"/> items without further expansion of its backing storage.
+            </summary>
+            <param name="capacity">The minimum capacity to be used.</param>
+            <exception cref="T:System.ArgumentOutOfRangeException">
+             The specified <paramref name="capacity"/> is negative.
+            </exception>
+            <returns>The current capacity of the <see cref="T:System.Collections.Generic.PriorityQueue`2"/>.</returns>
+        </member>
+        <member name="M:System.Collections.Generic.PriorityQueue`2.TrimExcess">
+            <summary>
+             Sets the capacity to the actual number of items in the <see cref="T:System.Collections.Generic.PriorityQueue`2"/>,
+             if that is less than 90 percent of current capacity.
+            </summary>
+            <remarks>
+             This method can be used to minimize a collection's memory overhead
+             if no new elements will be added to the collection.
+            </remarks>
+        </member>
+        <member name="M:System.Collections.Generic.PriorityQueue`2.Grow(System.Int32)">
+            <summary>
+            Grows the priority queue to match the specified min capacity.
+            </summary>
+        </member>
+        <member name="M:System.Collections.Generic.PriorityQueue`2.RemoveRootNode">
+            <summary>
+            Removes the node from the root of the heap
+            </summary>
+        </member>
+        <member name="M:System.Collections.Generic.PriorityQueue`2.GetParentIndex(System.Int32)">
+            <summary>
+            Gets the index of an element's parent.
+            </summary>
+        </member>
+        <member name="M:System.Collections.Generic.PriorityQueue`2.GetFirstChildIndex(System.Int32)">
+            <summary>
+            Gets the index of the first child of an element.
+            </summary>
+        </member>
+        <member name="M:System.Collections.Generic.PriorityQueue`2.Heapify">
+            <summary>
+            Converts an unordered list into a heap.
+            </summary>
+        </member>
+        <member name="M:System.Collections.Generic.PriorityQueue`2.MoveUpDefaultComparer(System.ValueTuple{`0,`1},System.Int32)">
+            <summary>
+            Moves a node up in the tree to restore heap order.
+            </summary>
+        </member>
+        <member name="M:System.Collections.Generic.PriorityQueue`2.MoveUpCustomComparer(System.ValueTuple{`0,`1},System.Int32)">
+            <summary>
+            Moves a node up in the tree to restore heap order.
+            </summary>
+        </member>
+        <member name="M:System.Collections.Generic.PriorityQueue`2.MoveDownDefaultComparer(System.ValueTuple{`0,`1},System.Int32)">
+            <summary>
+            Moves a node down in the tree to restore heap order.
+            </summary>
+        </member>
+        <member name="M:System.Collections.Generic.PriorityQueue`2.MoveDownCustomComparer(System.ValueTuple{`0,`1},System.Int32)">
+            <summary>
+            Moves a node down in the tree to restore heap order.
+            </summary>
+        </member>
+        <member name="M:System.Collections.Generic.PriorityQueue`2.InitializeComparer(System.Collections.Generic.IComparer{`1})">
+            <summary>
+            Initializes the custom comparer to be used internally by the heap.
+            </summary>
+        </member>
+        <member name="T:System.Collections.Generic.PriorityQueue`2.UnorderedItemsCollection">
+            <summary>
+             Enumerates the contents of a <see cref="T:System.Collections.Generic.PriorityQueue`2"/>, without any ordering guarantees.
+            </summary>
+        </member>
+        <member name="T:System.Collections.Generic.PriorityQueue`2.UnorderedItemsCollection.Enumerator">
+            <summary>
+             Enumerates the element and priority pairs of a <see cref="T:System.Collections.Generic.PriorityQueue`2"/>,
+             without any ordering guarantees.
+            </summary>
+        </member>
+        <member name="M:System.Collections.Generic.PriorityQueue`2.UnorderedItemsCollection.Enumerator.Dispose">
+            <summary>
+            Releases all resources used by the <see cref="T:System.Collections.Generic.PriorityQueue`2.UnorderedItemsCollection.Enumerator"/>.
+            </summary>
+        </member>
+        <member name="M:System.Collections.Generic.PriorityQueue`2.UnorderedItemsCollection.Enumerator.MoveNext">
+            <summary>
+            Advances the enumerator to the next element of the <see cref="P:System.Collections.Generic.PriorityQueue`2.UnorderedItems"/>.
+            </summary>
+            <returns><see langword="true"/> if the enumerator was successfully advanced to the next element; <see langword="false"/> if the enumerator has passed the end of the collection.</returns>
+        </member>
+        <member name="P:System.Collections.Generic.PriorityQueue`2.UnorderedItemsCollection.Enumerator.Current">
+            <summary>
+            Gets the element at the current position of the enumerator.
+            </summary>
+        </member>
+        <member name="M:System.Collections.Generic.PriorityQueue`2.UnorderedItemsCollection.GetEnumerator">
+            <summary>
+            Returns an enumerator that iterates through the <see cref="P:System.Collections.Generic.PriorityQueue`2.UnorderedItems"/>.
+            </summary>
+            <returns>An <see cref="T:System.Collections.Generic.PriorityQueue`2.UnorderedItemsCollection.Enumerator"/> for the <see cref="P:System.Collections.Generic.PriorityQueue`2.UnorderedItems"/>.</returns>
+        </member>
+        <member name="T:System.Collections.Generic.ReferenceEqualityComparer">
+            <summary>
+            An <see cref="T:System.Collections.Generic.IEqualityComparer`1"/> that uses reference equality (<see cref="M:System.Object.ReferenceEquals(System.Object,System.Object)"/>)
+            instead of value equality (<see cref="M:System.Object.Equals(System.Object)"/>) when comparing two object instances.
+            </summary>
+            <remarks>
+            The <see cref="T:System.Collections.Generic.ReferenceEqualityComparer"/> type cannot be instantiated. Instead, use the <see cref="P:System.Collections.Generic.ReferenceEqualityComparer.Instance"/> property
+            to access the singleton instance of this type.
+            </remarks>
+        </member>
+        <member name="P:System.Collections.Generic.ReferenceEqualityComparer.Instance">
+            <summary>
+            Gets the singleton <see cref="T:System.Collections.Generic.ReferenceEqualityComparer"/> instance.
+            </summary>
+        </member>
+        <member name="M:System.Collections.Generic.ReferenceEqualityComparer.Equals(System.Object,System.Object)">
+            <summary>
+            Determines whether two object references refer to the same object instance.
+            </summary>
+            <param name="x">The first object to compare.</param>
+            <param name="y">The second object to compare.</param>
+            <returns>
+            <see langword="true"/> if both <paramref name="x"/> and <paramref name="y"/> refer to the same object instance
+            or if both are <see langword="null"/>; otherwise, <see langword="false"/>.
+            </returns>
+            <remarks>
+            This API is a wrapper around <see cref="M:System.Object.ReferenceEquals(System.Object,System.Object)"/>.
+            It is not necessarily equivalent to calling <see cref="M:System.Object.Equals(System.Object,System.Object)"/>.
+            </remarks>
+        </member>
+        <member name="M:System.Collections.Generic.ReferenceEqualityComparer.GetHashCode(System.Object)">
+            <summary>
+            Returns a hash code for the specified object. The returned hash code is based on the object
+            identity, not on the contents of the object.
+            </summary>
+            <param name="obj">The object for which to retrieve the hash code.</param>
+            <returns>A hash code for the identity of <paramref name="obj"/>.</returns>
+            <remarks>
+            This API is a wrapper around <see cref="M:System.Runtime.CompilerServices.RuntimeHelpers.GetHashCode(System.Object)"/>.
+            It is not necessarily equivalent to calling <see cref="M:System.Object.GetHashCode"/>.
+            </remarks>
+        </member>
+        <member name="T:System.Runtime.CompilerServices.DisableRuntimeMarshallingAttribute">
+             <summary>
+             Disables the built-in runtime managed/unmanaged marshalling subsystem for
+             P/Invokes, Delegate types, and unmanaged function pointer invocations.
+             </summary>
+             <remarks>
+             The built-in marshalling subsystem has some behaviors that cannot be changed due to
+             backward-compatibility requirements. This attribute allows disabling the built-in
+             subsystem and instead uses the following rules for P/Invokes, Delegates,
+             and unmanaged function pointer invocations:
+            
+             - All value types that do not contain reference type fields recursively (<c>unmanaged</c> in C#) are blittable
+             - Value types that recursively have any fields that have <c>[StructLayout(LayoutKind.Auto)]</c> are disallowed from interop.
+             - All reference types are disallowed from usage in interop scenarios.
+             - SetLastError support in P/Invokes is disabled.
+             - varargs support is disabled.
+             - LCIDConversionAttribute support is disabled.
+             </remarks>
+        </member>
+        <member name="T:System.Runtime.InteropServices.SuppressGCTransitionAttribute">
+             <summary>
+             An attribute used to indicate a GC transition should be skipped when making an unmanaged function call.
+             </summary>
+             <example>
+             Example of a valid use case. The Win32 `GetTickCount()` function is a small performance related function
+             that reads some global memory and returns the value. In this case, the GC transition overhead is significantly
+             more than the memory read.
+             <code>
+             using System;
+             using System.Runtime.InteropServices;
+             class Program
+             {
+                 [DllImport("Kernel32")]
+                 [SuppressGCTransition]
+                 static extern int GetTickCount();
+                 static void Main()
+                 {
+                     Console.WriteLine($"{GetTickCount()}");
+                 }
+             }
+             </code>
+             </example>
+             <remarks>
+             This attribute is ignored if applied to a method without the <see cref="T:System.Runtime.InteropServices.DllImportAttribute"/>.
+            
+             Forgoing this transition can yield benefits when the cost of the transition is more than the execution time
+             of the unmanaged function. However, avoiding this transition removes some of the guarantees the runtime
+             provides through a normal P/Invoke. When exiting the managed runtime to enter an unmanaged function the
+             GC must transition from Cooperative mode into Preemptive mode. Full details on these modes can be found at
+             https://github.com/dotnet/runtime/blob/main/docs/coding-guidelines/clr-code-guide.md#2.1.8.
+             Suppressing the GC transition is an advanced scenario and should not be done without fully understanding
+             potential consequences.
+            
+             One of these consequences is an impact to Mixed-mode debugging (https://docs.microsoft.com/visualstudio/debugger/how-to-debug-in-mixed-mode).
+             During Mixed-mode debugging, it is not possible to step into or set breakpoints in a P/Invoke that
+             has been marked with this attribute. A workaround is to switch to native debugging and set a breakpoint in the native function.
+             In general, usage of this attribute is not recommended if debugging the P/Invoke is important, for example
+             stepping through the native code or diagnosing an exception thrown from the native code.
+            
+             The runtime may load the native library for method marked with this attribute in advance before the method is called for the first time.
+             Usage of this attribute is not recommended for platform neutral libraries with conditional platform specific code.
+            
+             The P/Invoke method that this attribute is applied to must have all of the following properties:
+               * Native function always executes for a trivial amount of time (less than 1 microsecond).
+               * Native function does not perform a blocking syscall (e.g. any type of I/O).
+               * Native function does not call back into the runtime (e.g. Reverse P/Invoke).
+               * Native function does not throw exceptions.
+               * Native function does not manipulate locks or other concurrency primitives.
+            
+             Consequences of invalid uses of this attribute:
+               * GC starvation.
+               * Immediate runtime termination.
+               * Data corruption.
+             </remarks>
+        </member>
+        <member name="T:System.Runtime.InteropServices.UnmanagedCallersOnlyAttribute">
+            <summary>
+            Any method marked with <see cref="T:System.Runtime.InteropServices.UnmanagedCallersOnlyAttribute" /> can be directly called from
+            native code. The function token can be loaded to a local variable using the <see href="https://docs.microsoft.com/dotnet/csharp/language-reference/operators/pointer-related-operators#address-of-operator-">address-of</see> operator
+            in C# and passed as a callback to a native method.
+            </summary>
+            <remarks>
+            Methods marked with this attribute have the following restrictions:
+              * Method must be marked "static".
+              * Must not be called from managed code.
+              * Must only have <see href="https://docs.microsoft.com/dotnet/framework/interop/blittable-and-non-blittable-types">blittable</see> arguments.
+            </remarks>
+        </member>
+        <member name="F:System.Runtime.InteropServices.UnmanagedCallersOnlyAttribute.CallConvs">
+            <summary>
+            Optional. If omitted, the runtime will use the default platform calling convention.
+            </summary>
+            <remarks>
+            Supplied types must be from the official "System.Runtime.CompilerServices" namespace and
+            be of the form "CallConvXXX".
+            </remarks>
+        </member>
+        <member name="F:System.Runtime.InteropServices.UnmanagedCallersOnlyAttribute.EntryPoint">
+            <summary>
+            Optional. If omitted, no named export is emitted during compilation.
+            </summary>
+        </member>
+        <member name="T:System.Runtime.Versioning.ObsoletedOSPlatformAttribute">
+            <summary>
+            Marks APIs that were obsoleted in a given operating system version.
+            </summary>
+            <remarks>
+            Primarily used by OS bindings to indicate APIs that should not be used anymore.
+            </remarks>
+        </member>
+        <member name="T:System.Runtime.Versioning.SupportedOSPlatformAttribute">
+             <summary>
+             Records the operating system (and minimum version) that supports an API. Multiple attributes can be
+             applied to indicate support on multiple operating systems.
+             </summary>
+             <remarks>
+             Callers can apply a <see cref="T:System.Runtime.Versioning.SupportedOSPlatformAttribute" />
+             or use guards to prevent calls to APIs on unsupported operating systems.
+            
+             A given platform should only be specified once.
+             </remarks>
+        </member>
+        <member name="T:System.Runtime.Versioning.SupportedOSPlatformGuardAttribute">
+             <summary>
+             Annotates a custom guard field, property or method with a supported platform name and optional version.
+             Multiple attributes can be applied to indicate guard for multiple supported platforms.
+             </summary>
+             <remarks>
+             Callers can apply a <see cref="T:System.Runtime.Versioning.SupportedOSPlatformGuardAttribute" /> to a field, property or method
+             and use that field, property or method in a conditional or assert statements in order to safely call platform specific APIs.
+            
+             The type of the field or property should be boolean, the method return type should be boolean in order to be used as platform guard.
+             </remarks>
+        </member>
+        <member name="T:System.Runtime.Versioning.TargetPlatformAttribute">
+            <summary>
+            Records the platform that the project targeted.
+            </summary>
+        </member>
+        <member name="T:System.Runtime.Versioning.UnsupportedOSPlatformAttribute">
+            <summary>
+            Marks APIs that were removed in a given operating system version.
+            </summary>
+            <remarks>
+            Primarily used by OS bindings to indicate APIs that are only available in
+            earlier versions.
+            </remarks>
+        </member>
+        <member name="T:System.Runtime.Versioning.UnsupportedOSPlatformGuardAttribute">
+             <summary>
+             Annotates the custom guard field, property or method with an unsupported platform name and optional version.
+             Multiple attributes can be applied to indicate guard for multiple unsupported platforms.
+             </summary>
+             <remarks>
+             Callers can apply a <see cref="T:System.Runtime.Versioning.UnsupportedOSPlatformGuardAttribute" /> to a field, property or method
+             and use that  field, property or method in a conditional or assert statements as a guard to safely call APIs unsupported on those platforms.
+            
+             The type of the field or property should be boolean, the method return type should be boolean in order to be used as platform guard.
+             </remarks>
+        </member>
+        <member name="T:System.Threading.Tasks.TaskToAsyncResult">
+            <summary>
+            Provides methods for using <see cref="T:System.Threading.Tasks.Task"/> to implement the Asynchronous Programming Model
+            pattern based on "Begin" and "End" methods.
+            </summary>
+        </member>
+        <member name="M:System.Threading.Tasks.TaskToAsyncResult.Begin(System.Threading.Tasks.Task,System.AsyncCallback,System.Object)">
+            <summary>Creates a new <see cref="T:System.IAsyncResult"/> from the specified <see cref="T:System.Threading.Tasks.Task"/>, optionally invoking <paramref name="callback"/> when the task has completed.</summary>
+            <param name="task">The <see cref="T:System.Threading.Tasks.Task"/> to be wrapped in an <see cref="T:System.IAsyncResult"/>.</param>
+            <param name="callback">The callback to be invoked upon <paramref name="task"/>'s completion. If <see langword="null"/>, no callback will be invoked.</param>
+            <param name="state">The state to be stored in the <see cref="T:System.IAsyncResult"/>.</param>
+            <returns>An <see cref="T:System.IAsyncResult"/> to represent the task's asynchronous operation. This instance will also be passed to <paramref name="callback"/> when it's invoked.</returns>
+            <exception cref="T:System.ArgumentNullException"><paramref name="task"/> is null.</exception>
+            <remarks>
+            In conjunction with the <see cref="M:System.Threading.Tasks.TaskToAsyncResult.End(System.IAsyncResult)"/> or <see cref="M:System.Threading.Tasks.TaskToAsyncResult.End``1(System.IAsyncResult)"/> methods, this method may be used
+            to implement the Begin/End pattern (also known as the Asynchronous Programming Model pattern, or APM). It is recommended to not expose this pattern
+            in new code; the methods on <see cref="T:System.Threading.Tasks.TaskToAsyncResult"/> are intended only to help implement such Begin/End methods when they must be exposed, for example
+            because a base class provides virtual methods for the pattern, or when they've already been exposed and must remain for compatibility.  These methods enable
+            implementing all of the core asynchronous logic via <see cref="T:System.Threading.Tasks.Task"/>s and then easily implementing Begin/End methods around that functionality.
+            </remarks>
+        </member>
+        <member name="M:System.Threading.Tasks.TaskToAsyncResult.End(System.IAsyncResult)">
+            <summary>Waits for the <see cref="T:System.Threading.Tasks.Task"/> wrapped by the <see cref="T:System.IAsyncResult"/> returned by <see cref="M:System.Threading.Tasks.TaskToAsyncResult.Begin(System.Threading.Tasks.Task,System.AsyncCallback,System.Object)"/> to complete.</summary>
+            <param name="asyncResult">The <see cref="T:System.IAsyncResult"/> for which to wait.</param>
+            <exception cref="T:System.ArgumentNullException"><paramref name="asyncResult"/> is null.</exception>
+            <exception cref="T:System.ArgumentException"><paramref name="asyncResult"/> was not produced by a call to <see cref="M:System.Threading.Tasks.TaskToAsyncResult.Begin(System.Threading.Tasks.Task,System.AsyncCallback,System.Object)"/>.</exception>
+            <remarks>This will propagate any exception stored in the wrapped <see cref="T:System.Threading.Tasks.Task"/>.</remarks>
+        </member>
+        <member name="M:System.Threading.Tasks.TaskToAsyncResult.End``1(System.IAsyncResult)">
+            <summary>Waits for the <see cref="T:System.Threading.Tasks.Task`1"/> wrapped by the <see cref="T:System.IAsyncResult"/> returned by <see cref="M:System.Threading.Tasks.TaskToAsyncResult.Begin(System.Threading.Tasks.Task,System.AsyncCallback,System.Object)"/> to complete.</summary>
+            <param name="asyncResult">The <see cref="T:System.IAsyncResult"/> for which to wait.</param>
+            <returns>The result of the <see cref="T:System.Threading.Tasks.Task`1"/> wrapped by the <see cref="T:System.IAsyncResult"/>.</returns>
+            <exception cref="T:System.ArgumentNullException"><paramref name="asyncResult"/> is null.</exception>
+            <exception cref="T:System.ArgumentException"><paramref name="asyncResult"/> was not produced by a call to <see cref="M:System.Threading.Tasks.TaskToAsyncResult.Begin(System.Threading.Tasks.Task,System.AsyncCallback,System.Object)"/>.</exception>
+            <remarks>This will propagate any exception stored in the wrapped <see cref="T:System.Threading.Tasks.Task`1"/>.</remarks>
+        </member>
+        <member name="M:System.Threading.Tasks.TaskToAsyncResult.Unwrap(System.IAsyncResult)">
+            <summary>Extracts the underlying <see cref="T:System.Threading.Tasks.Task"/> from an <see cref="T:System.IAsyncResult"/> created by <see cref="M:System.Threading.Tasks.TaskToAsyncResult.Begin(System.Threading.Tasks.Task,System.AsyncCallback,System.Object)"/>.</summary>
+            <param name="asyncResult">The <see cref="T:System.IAsyncResult"/> created by <see cref="M:System.Threading.Tasks.TaskToAsyncResult.Begin(System.Threading.Tasks.Task,System.AsyncCallback,System.Object)"/>.</param>
+            <returns>The <see cref="T:System.Threading.Tasks.Task"/> wrapped by the <see cref="T:System.IAsyncResult"/>.</returns>
+            <exception cref="T:System.ArgumentNullException"><paramref name="asyncResult"/> is null.</exception>
+            <exception cref="T:System.ArgumentException"><paramref name="asyncResult"/> was not produced by a call to <see cref="M:System.Threading.Tasks.TaskToAsyncResult.Begin(System.Threading.Tasks.Task,System.AsyncCallback,System.Object)"/>.</exception>
+        </member>
+        <member name="M:System.Threading.Tasks.TaskToAsyncResult.Unwrap``1(System.IAsyncResult)">
+            <summary>Extracts the underlying <see cref="T:System.Threading.Tasks.Task`1"/> from an <see cref="T:System.IAsyncResult"/> created by <see cref="M:System.Threading.Tasks.TaskToAsyncResult.Begin(System.Threading.Tasks.Task,System.AsyncCallback,System.Object)"/>.</summary>
+            <param name="asyncResult">The <see cref="T:System.IAsyncResult"/> created by <see cref="M:System.Threading.Tasks.TaskToAsyncResult.Begin(System.Threading.Tasks.Task,System.AsyncCallback,System.Object)"/>.</param>
+            <returns>The <see cref="T:System.Threading.Tasks.Task`1"/> wrapped by the <see cref="T:System.IAsyncResult"/>.</returns>
+            <exception cref="T:System.ArgumentNullException"><paramref name="asyncResult"/> is null.</exception>
+            <exception cref="T:System.ArgumentException">
+            <paramref name="asyncResult"/> was not produced by a call to <see cref="M:System.Threading.Tasks.TaskToAsyncResult.Begin(System.Threading.Tasks.Task,System.AsyncCallback,System.Object)"/>,
+            or the <see cref="T:System.Threading.Tasks.Task`1"/> provided to <see cref="M:System.Threading.Tasks.TaskToAsyncResult.Begin(System.Threading.Tasks.Task,System.AsyncCallback,System.Object)"/> was used a generic type parameter
+            that's different from the <typeparamref name="TResult"/> supplied to this call.
+            </exception>
+        </member>
+        <member name="T:System.Threading.Tasks.TaskToAsyncResult.TaskAsyncResult">
+            <summary>Provides a simple <see cref="T:System.IAsyncResult"/> that wraps a <see cref="T:System.Threading.Tasks.Task"/>.</summary>
+            <remarks>
+            We could use the Task as the IAsyncResult if the Task's AsyncState is the same as the object state,
+            but that's very rare, in particular in a situation where someone cares about allocation, and always
+            using TaskAsyncResult simplifies things and enables additional optimizations.
+            </remarks>
+        </member>
+        <member name="F:System.Threading.Tasks.TaskToAsyncResult.TaskAsyncResult._task">
+            <summary>The wrapped Task.</summary>
+        </member>
+        <member name="F:System.Threading.Tasks.TaskToAsyncResult.TaskAsyncResult._callback">
+            <summary>Callback to invoke when the wrapped task completes.</summary>
+        </member>
+        <member name="M:System.Threading.Tasks.TaskToAsyncResult.TaskAsyncResult.#ctor(System.Threading.Tasks.Task,System.Object,System.AsyncCallback)">
+            <summary>Initializes the IAsyncResult with the Task to wrap and the associated object state.</summary>
+            <param name="task">The Task to wrap.</param>
+            <param name="state">The new AsyncState value.</param>
+            <param name="callback">Callback to invoke when the wrapped task completes.</param>
+        </member>
+        <member name="P:System.Threading.Tasks.TaskToAsyncResult.TaskAsyncResult.AsyncState">
+            <inheritdoc/>
+        </member>
+        <member name="P:System.Threading.Tasks.TaskToAsyncResult.TaskAsyncResult.CompletedSynchronously">
+            <inheritdoc/>
+        </member>
+        <member name="P:System.Threading.Tasks.TaskToAsyncResult.TaskAsyncResult.IsCompleted">
+            <inheritdoc/>
+        </member>
+        <member name="P:System.Threading.Tasks.TaskToAsyncResult.TaskAsyncResult.AsyncWaitHandle">
+            <inheritdoc/>
+        </member>
+        <member name="T:BizHawk.Emulation.DiscSystem.MednaDisc">
+            <summary>
+            A resource representing a disc opened and mounted through the MednaDisc component.
+            Does not attempt to virtually present the disc as a BizHawk disc - that will be the
+            responsibility of the user of this code
+            </summary>
+        </member>
+        <member name="M:BizHawk.Emulation.DiscSystem.MednaDisc.#ctor(System.String)">
+            <exception cref="T:System.InvalidOperationException"><see cref="P:BizHawk.Emulation.DiscSystem.MednaDisc.IsLibraryAvailable"/> is <see langword="false"/> (could not load <c>mednadisc.dll</c>), or unmanaged call failed</exception>
+        </member>
+        <member name="M:BizHawk.Emulation.DiscSystem.Disc.LoadAutomagic(System.String)">
+            <summary>
+            Automagically loads a disc, without any fine-tuned control at all
+            </summary>
+        </member>
+        <member name="F:BizHawk.Emulation.DiscSystem.Disc.Sessions">
+            <summary>
+            This is a 1-indexed list of sessions (session 1 is at [1])
+            To prevent duplicate Add(null) calls around the code, we'll have it already have [0] with null
+            So the first Add() call will put a session at [1], the second will put a session at [2], and so on
+            </summary>
+        </member>
+        <member name="P:BizHawk.Emulation.DiscSystem.Disc.Session1">
+            <summary>
+            Session 1 of the disc, since that's all that's needed most of the time.
+            </summary>
+        </member>
+        <member name="P:BizHawk.Emulation.DiscSystem.Disc.TOC">
+            <summary>
+            The DiscTOC corresponding to Session1.
+            </summary>
+        </member>
+        <member name="F:BizHawk.Emulation.DiscSystem.Disc.Name">
+            <summary>
+            The name of a disc. Loosely based on the filename. Just for informational purposes.
+            </summary>
+        </member>
+        <member name="F:BizHawk.Emulation.DiscSystem.Disc.Memos">
+            <summary>
+            Free-form optional memos about the disc
+            </summary>
+        </member>
+        <member name="M:BizHawk.Emulation.DiscSystem.Disc.Easy_Extract_Mode1(System.Int32,System.Int32,System.Int32)">
+            <summary>
+            Easily extracts a mode1 sector range (suitable for extracting ISO FS data files)
+            </summary>
+        </member>
+        <member name="F:BizHawk.Emulation.DiscSystem.Disc.DisposableResources">
+            <summary>
+            Disposable resources (blobs, mostly) referenced by this disc
+            </summary>
+        </member>
+        <member name="F:BizHawk.Emulation.DiscSystem.Disc._Sectors">
+            <summary>
+            The sectors on the disc. Don't use this directly! Use the SectorSynthProvider instead.
+            TODO - eliminate this entirely and do entirely with the delegate (much faster disc loading... but massively annoying architecture inside-out logic)
+            </summary>
+        </member>
+        <member name="F:BizHawk.Emulation.DiscSystem.Disc.SynthProvider">
+            <summary>
+            ISectorSynthProvider instance for the disc. May be daisy-chained
+            </summary>
+        </member>
+        <member name="F:BizHawk.Emulation.DiscSystem.Disc.SynthParams">
+            <summary>
+            Parameters set during disc loading which can be referenced by the sector synthesizers
+            </summary>
+        </member>
+        <member name="M:BizHawk.Emulation.DiscSystem.Disc.#ctor">
+            <summary>
+            Forbid public construction
+            </summary>
+        </member>
+        <member name="M:BizHawk.Emulation.DiscSystem.AudioDecoder.FindAudio(System.String)">
+            <summary>
+            finds audio at a path similar to the provided path (i.e. finds Track01.mp3 for Track01.wav)
+            TODO - isnt this redundant with CueFileResolver?
+            </summary>
+        </member>
+        <member name="M:BizHawk.Emulation.DiscSystem.AudioDecoder.AcquireWaveData(System.String)">
+            <exception cref="T:BizHawk.Emulation.DiscSystem.AudioDecoder.AudioDecoder_Exception">could not find source audio for <paramref name="audioPath"/></exception>
+        </member>
+        <member name="F:BizHawk.Emulation.DiscSystem.Blob_ECM.Index">
+            <summary>
+            an index of blocks within the ECM file, for random-access.
+            itll be sorted by logical ordering, so you can binary search for the address you want
+            </summary>
+        </member>
+        <member name="F:BizHawk.Emulation.DiscSystem.Blob_ECM.EDC">
+            <summary>
+            the ECMfile-provided EDC integrity checksum. not being used right now
+            </summary>
+        </member>
+        <member name="M:BizHawk.Emulation.DiscSystem.Blob_ECM.FindInIndex(System.Int64,System.Int32)">
+            <summary>
+            finds the IndexEntry for the specified logical offset
+            </summary>
+        </member>
+        <member name="T:BizHawk.Emulation.DiscSystem.Blob_WaveFile">
+            <summary>
+            TODO - double-check that riffmaster is not filling memory at load-time but reading through to the disk
+            TODO - clarify stream disposing semantics
+            </summary>
+        </member>
+        <member name="M:BizHawk.Emulation.DiscSystem.Blob_WaveFile.Load(System.IO.Stream)">
+            <exception cref="T:BizHawk.Emulation.DiscSystem.Blob_WaveFile.Blob_WaveFile_Exception">not a valid RIFF WAVE file with exactly one data chunk containing two 16-bit PCM channels at 44.1 kHz</exception>
+        </member>
+        <member name="T:BizHawk.Emulation.DiscSystem.IBlob">
+            <summary>
+            Presently, an IBlob doesn't need to work multithreadedly. It's quite an onerous demand.
+            This should probably be managed by the Disc class somehow, or by the user making another Disc.
+            </summary>
+        </member>
+        <member name="M:BizHawk.Emulation.DiscSystem.IBlob.Read(System.Int64,System.Byte[],System.Int32,System.Int32)">
+            <summary>
+            what a weird parameter order. normally the dest buffer would be first. weird.
+            </summary>
+            <param name="byte_pos">location in the blob to read from</param>
+            <param name="buffer">destination buffer for read data</param>
+            <param name="offset">offset into destination buffer</param>
+            <param name="count">amount to read</param>
+        </member>
+        <member name="T:BizHawk.Emulation.DiscSystem.RiffMaster">
+            <summary>
+            Parses a RIFF file into a live data structure.
+            References to large blobs remain mostly on disk in the file which RiffMaster keeps a reference too. Dispose it to close the file.
+            You can modify blobs however you want and write the file back out to a new path, if you're careful (that was the original point of this)
+            Please be sure to test round-tripping when you make any changes. This architecture is a bit tricky to use, but it works if you're careful.
+            TODO - clarify stream disposing semantics
+            </summary>
+        </member>
+        <member name="M:BizHawk.Emulation.DiscSystem.RiffMaster.RiffChunk.WriteStream(System.IO.Stream)">
+            <summary>
+            writes this chunk to the stream, including padding
+            </summary>
+        </member>
+        <member name="M:BizHawk.Emulation.DiscSystem.RiffMaster.RiffChunk.GetVolume">
+             <summary>
+             distinct from a size or a length, the `volume` is the volume of bytes occupied by the chunk on disk (accounting for padding).
+            
+             </summary>
+        </member>
+        <member name="M:BizHawk.Emulation.DiscSystem.RiffMaster.RiffChunk.Morph">
+            <summary>
+            transforms into a derived class depending on tag
+            </summary>
+        </member>
+        <member name="M:BizHawk.Emulation.DiscSystem.RiffMaster.RiffContainer_INFO.#ctor(BizHawk.Emulation.DiscSystem.RiffMaster.RiffContainer)">
+            <exception cref="T:System.FormatException"><paramref name="rc"/>.<see cref="F:BizHawk.Emulation.DiscSystem.RiffMaster.RiffContainer.subchunks"/> contains a chunk that does not inherit <see cref="T:BizHawk.Emulation.DiscSystem.RiffMaster.RiffSubchunk"/></exception>
+        </member>
+        <member name="M:BizHawk.Emulation.DiscSystem.RiffMaster.LoadStream(System.IO.Stream)">
+            <summary>takes posession of the supplied stream</summary>
+            <exception cref="T:System.FormatException"><paramref name="s"/> does not contain a riff chunk</exception>
+        </member>
+        <member name="T:BizHawk.Emulation.DiscSystem.CCD_Format.CCDFile">
+            <summary>
+            Represents a CCD file, faithfully. Minimal interpretation of the data happens.
+            Currently the [TRACK] sections aren't parsed, though.
+            </summary>
+        </member>
+        <member name="F:BizHawk.Emulation.DiscSystem.CCD_Format.CCDFile.Version">
+            <summary>
+            which version CCD file this came from. We hope it shouldn't affect the semantics of anything else in here, but just in case..
+            </summary>
+        </member>
+        <member name="F:BizHawk.Emulation.DiscSystem.CCD_Format.CCDFile.DataTracksScrambled">
+            <summary>
+            this is probably a 0 or 1 bool
+            </summary>
+        </member>
+        <member name="F:BizHawk.Emulation.DiscSystem.CCD_Format.CCDFile.CDTextLength">
+            <summary>
+            ???
+            </summary>
+        </member>
+        <member name="F:BizHawk.Emulation.DiscSystem.CCD_Format.CCDFile.Sessions">
+            <summary>
+            The [Session] sections
+            </summary>
+        </member>
+        <member name="F:BizHawk.Emulation.DiscSystem.CCD_Format.CCDFile.TOCEntries">
+            <summary>
+            The [Entry] sctions
+            </summary>
+        </member>
+        <member name="F:BizHawk.Emulation.DiscSystem.CCD_Format.CCDFile.Tracks">
+            <summary>
+            The [TRACK] sections
+            </summary>
+        </member>
+        <member name="F:BizHawk.Emulation.DiscSystem.CCD_Format.CCDFile.TracksByNumber">
+            <summary>
+            The [TRACK] sections, indexed by number
+            </summary>
+        </member>
+        <member name="T:BizHawk.Emulation.DiscSystem.CCD_Format.CCDTocEntry">
+            <summary>
+            Represents an [Entry] section from a CCD file
+            </summary>
+        </member>
+        <member name="F:BizHawk.Emulation.DiscSystem.CCD_Format.CCDTocEntry.EntryNum">
+            <summary>
+            these should be 0-indexed
+            </summary>
+        </member>
+        <member name="F:BizHawk.Emulation.DiscSystem.CCD_Format.CCDTocEntry.Session">
+            <summary>
+            the CCD specifies this, but it isnt in the actual disc data as such, it is encoded some other (likely difficult to extract) way and that's why CCD puts it here
+            </summary>
+        </member>
+        <member name="F:BizHawk.Emulation.DiscSystem.CCD_Format.CCDTocEntry.ALBA">
+            <summary>
+            this seems just to be the LBA corresponding to AMIN:ASEC:AFRAME (give or take 150). It's not stored on the disc, and it's redundant.
+            </summary>
+        </member>
+        <member name="F:BizHawk.Emulation.DiscSystem.CCD_Format.CCDTocEntry.PLBA">
+            <summary>
+            this seems just to be the LBA corresponding to PMIN:PSEC:PFRAME (give or take 150). It's not stored on the disc, and it's redundant.
+            </summary>
+        </member>
+        <member name="T:BizHawk.Emulation.DiscSystem.CCD_Format.CCDTrack">
+            <summary>
+            Represents a [Track] section from a CCD file
+            </summary>
+        </member>
+        <member name="F:BizHawk.Emulation.DiscSystem.CCD_Format.CCDTrack.Number">
+            <summary>
+            note: this is 1-indexed
+            </summary>
+        </member>
+        <member name="F:BizHawk.Emulation.DiscSystem.CCD_Format.CCDTrack.Mode">
+            <summary>
+            The specified data mode.
+            </summary>
+        </member>
+        <member name="F:BizHawk.Emulation.DiscSystem.CCD_Format.CCDTrack.Indexes">
+            <summary>
+            The indexes specified for the track (these are 0-indexed)
+            </summary>
+        </member>
+        <member name="T:BizHawk.Emulation.DiscSystem.CCD_Format.CCDSession">
+            <summary>
+            Represents a [Session] section from a CCD file
+            </summary>
+        </member>
+        <member name="F:BizHawk.Emulation.DiscSystem.CCD_Format.CCDSession.Number">
+            <summary>
+            note: this is 1-indexed.
+            </summary>
+        </member>
+        <member name="F:BizHawk.Emulation.DiscSystem.CCD_Format.CCDSession.PregapSubcode">
+            <summary>
+            this is probably a 0 or 1 bool
+            </summary>
+        </member>
+        <member name="M:BizHawk.Emulation.DiscSystem.CCD_Format.CCDSection.FetchOrFail(System.String)">
+            <exception cref="T:BizHawk.Emulation.DiscSystem.CCD_Format.CCDParseException"><paramref name="key"/> not found in <see langword="this"/></exception>
+        </member>
+        <member name="M:BizHawk.Emulation.DiscSystem.CCD_Format.ParseFrom(System.IO.Stream)">
+            <exception cref="T:BizHawk.Emulation.DiscSystem.CCD_Format.CCDParseException">parsed <see cref="F:BizHawk.Emulation.DiscSystem.CCD_Format.CCDFile.DataTracksScrambled"/> is <c>1</c>, parsed session number is not <c>1</c>, or malformed entry</exception>
+        </member>
+        <member name="M:BizHawk.Emulation.DiscSystem.CCD_Format.LoadCCDToDisc(System.String,BizHawk.Emulation.DiscSystem.DiscMountPolicy)">
+            <exception cref="T:BizHawk.Emulation.DiscSystem.CCD_Format.CCDParseException">file <paramref name="ccdPath"/> not found, nonexistent IMG file, nonexistent SUB file, IMG or SUB file not multiple of <c>2352 B</c>, or IMG and SUB files differ in length</exception>
+        </member>
+        <member name="T:BizHawk.Emulation.DiscSystem.CDI_Format.CDIFile">
+            <summary>
+            Represents a CDI file, faithfully. Minimal interpretation of the data happens.
+            </summary>
+        </member>
+        <member name="F:BizHawk.Emulation.DiscSystem.CDI_Format.CDIFile.NumSessions">
+            <summary>
+            Number of sessions
+            </summary>
+        </member>
+        <member name="F:BizHawk.Emulation.DiscSystem.CDI_Format.CDIFile.Sessions">
+            <summary>
+            The session blocks
+            </summary>
+        </member>
+        <member name="F:BizHawk.Emulation.DiscSystem.CDI_Format.CDIFile.Tracks">
+            <summary>
+            The track blocks
+            </summary>
+        </member>
+        <member name="F:BizHawk.Emulation.DiscSystem.CDI_Format.CDIFile.DiscInfo">
+            <summary>
+            The disc info block
+            </summary>
+        </member>
+        <member name="F:BizHawk.Emulation.DiscSystem.CDI_Format.CDIFile.Entrypoint">
+            <summary>
+            Footer size in bytes
+            </summary>
+        </member>
+        <member name="T:BizHawk.Emulation.DiscSystem.CDI_Format.CDISession">
+            <summary>
+            Represents a session block from a CDI file
+            </summary>
+        </member>
+        <member name="F:BizHawk.Emulation.DiscSystem.CDI_Format.CDISession.NumTracks">
+            <summary>
+            Number of tracks in session (1..99) (or 0 = no more sessions)
+            </summary>
+        </member>
+        <member name="T:BizHawk.Emulation.DiscSystem.CDI_Format.CDITrackHeader">
+            <summary>
+            Represents a track/disc info block header from a CDI track
+            </summary>
+        </member>
+        <member name="F:BizHawk.Emulation.DiscSystem.CDI_Format.CDITrackHeader.NumTracks">
+            <summary>
+            Number of tracks on disc (1..99)
+            </summary>
+        </member>
+        <member name="F:BizHawk.Emulation.DiscSystem.CDI_Format.CDITrackHeader.Path">
+            <summary>
+            Full Path/Filename (may be empty)
+            </summary>
+        </member>
+        <member name="F:BizHawk.Emulation.DiscSystem.CDI_Format.CDITrackHeader.MediumType">
+            <summary>
+            0x0098 = CD-ROM, 0x0038 = DVD-ROM
+            </summary>
+        </member>
+        <member name="T:BizHawk.Emulation.DiscSystem.CDI_Format.CDICDText">
+            <summary>
+            Represents a CD text block from a CDI track
+            </summary>
+        </member>
+        <member name="F:BizHawk.Emulation.DiscSystem.CDI_Format.CDICDText.CdTexts">
+            <summary>
+            A CD text block has 0-18 strings, each of variable length
+            </summary>
+        </member>
+        <member name="T:BizHawk.Emulation.DiscSystem.CDI_Format.CDITrack">
+            <summary>
+            Represents a track block from a CDI file
+            </summary>
+        </member>
+        <member name="F:BizHawk.Emulation.DiscSystem.CDI_Format.CDITrack.IndexSectorCounts">
+            <summary>
+            The sector count of each index specified for the track
+            </summary>
+        </member>
+        <member name="F:BizHawk.Emulation.DiscSystem.CDI_Format.CDITrack.CdTextBlocks">
+            <summary>
+            CD text blocks
+            </summary>
+        </member>
+        <member name="F:BizHawk.Emulation.DiscSystem.CDI_Format.CDITrack.TrackMode">
+            <summary>
+            The specified track mode (0 = Audio, 1 = Mode1, 2 = Mode2/Mixed)
+            </summary>
+        </member>
+        <member name="F:BizHawk.Emulation.DiscSystem.CDI_Format.CDITrack.SessionNumber">
+            <summary>
+            Session number (0-indexed)
+            </summary>
+        </member>
+        <member name="F:BizHawk.Emulation.DiscSystem.CDI_Format.CDITrack.TrackNumber">
+            <summary>
+            Track number (0-indexed, releative to session)
+            </summary>
+        </member>
+        <member name="F:BizHawk.Emulation.DiscSystem.CDI_Format.CDITrack.TrackStartAddress">
+            <summary>
+            Track start address
+            </summary>
+        </member>
+        <member name="F:BizHawk.Emulation.DiscSystem.CDI_Format.CDITrack.TrackLength">
+            <summary>
+            Track length, in sectors
+            </summary>
+        </member>
+        <member name="F:BizHawk.Emulation.DiscSystem.CDI_Format.CDITrack.ReadMode">
+            <summary>
+            The specified read mode (0 = Mode1, 1 = Mode2, 2 = Audio, 3 = Raw+Q, 4 = Raw+PQRSTUVW)
+            </summary>
+        </member>
+        <member name="F:BizHawk.Emulation.DiscSystem.CDI_Format.CDITrack.Control">
+            <summary>
+            Upper 4 bits of ADR/Control
+            </summary>
+        </member>
+        <member name="F:BizHawk.Emulation.DiscSystem.CDI_Format.CDITrack.IsrcCode">
+            <summary>
+            12-letter/digit string (may be empty)
+            </summary>
+        </member>
+        <member name="F:BizHawk.Emulation.DiscSystem.CDI_Format.CDITrack.IsrcValidFlag">
+            <summary>
+            Any non-zero is valid?
+            </summary>
+        </member>
+        <member name="F:BizHawk.Emulation.DiscSystem.CDI_Format.CDITrack.SessionType">
+            <summary>
+            Only present on last track of a session (0 = Audio/CD-DA, 1 = Mode1/CD-ROM, 2 = Mode2/CD-XA)
+            </summary>
+        </member>
+        <member name="T:BizHawk.Emulation.DiscSystem.CDI_Format.CDIDiscInfo">
+            <summary>
+            Represents a disc info block from a CDI file
+            </summary>
+        </member>
+        <member name="F:BizHawk.Emulation.DiscSystem.CDI_Format.CDIDiscInfo.DiscSize">
+            <summary>
+            Total number of sectors
+            </summary>
+        </member>
+        <member name="F:BizHawk.Emulation.DiscSystem.CDI_Format.CDIDiscInfo.VolumeId">
+            <summary>
+            probably junk for non-ISO data discs
+            </summary>
+        </member>
+        <member name="F:BizHawk.Emulation.DiscSystem.CDI_Format.CDIDiscInfo.Ean13Code">
+            <summary>
+            13-digit string (may be empty)
+            </summary>
+        </member>
+        <member name="F:BizHawk.Emulation.DiscSystem.CDI_Format.CDIDiscInfo.Ean13CodeValid">
+            <summary>
+            Any non-zero is valid?
+            </summary>
+        </member>
+        <member name="F:BizHawk.Emulation.DiscSystem.CDI_Format.CDIDiscInfo.CdText">
+            <summary>
+            CD text (for lead-in?)
+            </summary>
+        </member>
+        <member name="M:BizHawk.Emulation.DiscSystem.CDI_Format.ParseFrom(System.IO.Stream)">
+            <exception cref="T:BizHawk.Emulation.DiscSystem.CDI_Format.CDIParseException">malformed cdi format</exception>
+        </member>
+        <member name="M:BizHawk.Emulation.DiscSystem.CDI_Format.LoadCDIToDisc(System.String,BizHawk.Emulation.DiscSystem.DiscMountPolicy)">
+            <exception cref="T:BizHawk.Emulation.DiscSystem.CDI_Format.CDIParseException">file <paramref name="cdiPath"/> not found</exception>
+        </member>
+        <member name="T:BizHawk.Emulation.DiscSystem.CHD_Format.CHDFile">
+            <summary>
+            Represents a CHD file.
+            This isn't particularly faithful to the format, but rather it just wraps a chd_file
+            </summary>
+        </member>
+        <member name="F:BizHawk.Emulation.DiscSystem.CHD_Format.CHDFile.ChdFile">
+            <summary>
+            chd_file* to be used for chd_ functions
+            </summary>
+        </member>
+        <member name="F:BizHawk.Emulation.DiscSystem.CHD_Format.CHDFile.Header">
+            <summary>
+            CHD header, interpreted by chd-rs
+            </summary>
+        </member>
+        <member name="F:BizHawk.Emulation.DiscSystem.CHD_Format.CHDFile.CdMetadatas">
+            <summary>
+            CHD CD metadata for each track
+            </summary>
+        </member>
+        <member name="T:BizHawk.Emulation.DiscSystem.CHD_Format.CHDCdMetadata">
+            <summary>
+            Results of chd_get_metadata with cdrom track metadata tags
+            </summary>
+        </member>
+        <member name="F:BizHawk.Emulation.DiscSystem.CHD_Format.CHDCdMetadata.Track">
+            <summary>
+            Track number (1..99)
+            </summary>
+        </member>
+        <member name="F:BizHawk.Emulation.DiscSystem.CHD_Format.CHDCdMetadata.IsCDI">
+            <summary>
+            Indicates this is a CDI format
+            chd_track_type doesn't have an explicit enum for this
+            However, this is still important info for discerning the session format
+            </summary>
+        </member>
+        <member name="F:BizHawk.Emulation.DiscSystem.CHD_Format.CHDCdMetadata.ByteSwapAudio">
+            <summary>
+            Indicates audio is byteswapped
+            CHDs normally byteswap audio (for whatever reason)
+            Except for CHDs made with "old" GDROM metadata
+            </summary>
+        </member>
+        <member name="F:BizHawk.Emulation.DiscSystem.CHD_Format.CHDCdMetadata.TrackType">
+            <summary>
+            Track type
+            </summary>
+        </member>
+        <member name="F:BizHawk.Emulation.DiscSystem.CHD_Format.CHDCdMetadata.SubType">
+            <summary>
+            Subcode type
+            </summary>
+        </member>
+        <member name="F:BizHawk.Emulation.DiscSystem.CHD_Format.CHDCdMetadata.SectorSize">
+            <summary>
+            Size of each sector
+            </summary>
+        </member>
+        <member name="F:BizHawk.Emulation.DiscSystem.CHD_Format.CHDCdMetadata.SubSize">
+            <summary>
+            Subchannel size
+            </summary>
+        </member>
+        <member name="F:BizHawk.Emulation.DiscSystem.CHD_Format.CHDCdMetadata.Frames">
+            <summary>
+            Number of frames in this track
+            This might include pregap, if that is stored in the chd
+            </summary>
+        </member>
+        <member name="F:BizHawk.Emulation.DiscSystem.CHD_Format.CHDCdMetadata.ExtraFrames">
+            <summary>
+            Number of "extra" frames in this track
+            This is done in order to maintain a multiple of 4 frames for each track
+            These extra frames aren't representative of the actual disc anyways
+            They're only useful to know the offset of the next track within the chd
+            </summary>
+        </member>
+        <member name="F:BizHawk.Emulation.DiscSystem.CHD_Format.CHDCdMetadata.Padding">
+            <summary>
+            Number of "padding" frames in this track
+            This is actually just extra pregap frames for the next track
+            These pregap frames aren't within the CHD and must be generated
+            </summary>
+        </member>
+        <member name="F:BizHawk.Emulation.DiscSystem.CHD_Format.CHDCdMetadata.Pregap">
+            <summary>
+            Number of pregap sectors
+            </summary>
+        </member>
+        <member name="F:BizHawk.Emulation.DiscSystem.CHD_Format.CHDCdMetadata.PregapTrackType">
+            <summary>
+            Pregap track type
+            </summary>
+        </member>
+        <member name="F:BizHawk.Emulation.DiscSystem.CHD_Format.CHDCdMetadata.PregapSubType">
+            <summary>
+            Pregap subcode type
+            </summary>
+        </member>
+        <member name="F:BizHawk.Emulation.DiscSystem.CHD_Format.CHDCdMetadata.PregapInChd">
+            <summary>
+            Indicates whether pregap is in the CHD
+            If pregap isn't in the CHD, it needs to be generated where appropriate
+            </summary>
+        </member>
+        <member name="F:BizHawk.Emulation.DiscSystem.CHD_Format.CHDCdMetadata.PostGap">
+            <summary>
+            Number of postgap sectors
+            </summary>
+        </member>
+        <member name="M:BizHawk.Emulation.DiscSystem.CHD_Format.ParseFrom(System.String)">
+            <exception cref="T:BizHawk.Emulation.DiscSystem.CHD_Format.CHDParseException">malformed chd format</exception>
+        </member>
+        <member name="T:BizHawk.Emulation.DiscSystem.CHD_Format.SS_CHD_Audio">
+            <summary>
+            CHD is dumb and byteswaps audio samples for some reason
+            </summary>
+        </member>
+        <member name="M:BizHawk.Emulation.DiscSystem.CHD_Format.LoadCHDToDisc(System.String,BizHawk.Emulation.DiscSystem.DiscMountPolicy)">
+            <exception cref="T:BizHawk.Emulation.DiscSystem.CHD_Format.CHDParseException">file <paramref name="chdPath"/> not found</exception>
+        </member>
+        <member name="T:BizHawk.Emulation.DiscSystem.CUE.CueFileResolver">
+            <summary>
+            The CUE module user's hook for controlling how cue member file paths get resolved
+            </summary>
+        </member>
+        <member name="M:BizHawk.Emulation.DiscSystem.CUE.CueFileResolver.SetBaseDirectory(System.String)">
+            <summary>
+            sets the base directory and caches the list of files in the directory
+            </summary>
+        </member>
+        <member name="M:BizHawk.Emulation.DiscSystem.CUE.CueFileResolver.Resolve(System.String)">
+            <summary>
+            Performs cue-intelligent logic to acquire a file requested by the cue.
+            Returns the resulting full path(s).
+            If there are multiple options, it returns them all.
+            Returns the requested path first in the list (if it was found) for more simple use.
+            Kind of an unusual design, I know. Consider them sorted by confidence.
+            </summary>
+        </member>
+        <member name="F:BizHawk.Emulation.DiscSystem.CUE.CompiledCueIndex.FileMSF">
+            <remarks>this is annoying, it should just be an integer</remarks>
+        </member>
+        <member name="T:BizHawk.Emulation.DiscSystem.CUE.CompiledCueFileType">
+            <summary>
+            What type of file we're looking at.. each one would require a different ingestion handler
+            </summary>
+        </member>
+        <member name="F:BizHawk.Emulation.DiscSystem.CUE.CompiledCueFileType.BIN">
+            <summary>
+            a raw BIN that can be mounted directly
+            </summary>
+        </member>
+        <member name="F:BizHawk.Emulation.DiscSystem.CUE.CompiledCueFileType.WAVE">
+            <summary>
+            a raw WAV that can be mounted directly
+            </summary>
+        </member>
+        <member name="F:BizHawk.Emulation.DiscSystem.CUE.CompiledCueFileType.ECM">
+            <summary>
+            an ECM file that can be mounted directly (once the index is generated)
+            </summary>
+        </member>
+        <member name="F:BizHawk.Emulation.DiscSystem.CUE.CompiledCueFileType.SeekAudio">
+            <summary>
+            An encoded audio file which can be seeked on the fly, therefore roughly mounted on the fly
+            THIS ISN'T SUPPORTED YET
+            </summary>
+        </member>
+        <member name="F:BizHawk.Emulation.DiscSystem.CUE.CompiledCueFileType.DecodeAudio">
+            <summary>
+            An encoded audio file which can't be seeked on the fly. It must be decoded to a temp buffer, or pre-discohawked
+            </summary>
+        </member>
+        <member name="F:BizHawk.Emulation.DiscSystem.CUE.CompiledCueTrack.IsFinalInFile">
+            <summary>
+            A track that's final in a file gets its length from the length of the file; other tracks lengths are determined from the succeeding track
+            </summary>
+        </member>
+        <member name="F:BizHawk.Emulation.DiscSystem.CUE.CompiledCueTrack.IsFirstInFile">
+            <summary>
+            A track that's first in a file has an implicit index 0 at 00:00:00
+            Otherwise it has an implicit index 0 at the placement of the index 1
+            </summary>
+        </member>
+        <member name="M:BizHawk.Emulation.DiscSystem.CUE.CompileCueJob.#ctor(BizHawk.Emulation.DiscSystem.CUE.CUE_File,BizHawk.Emulation.DiscSystem.CUE.CUE_Context)">
+            <param name="cueFile">the CueFile to analyze</param>
+            <param name="cueContext">The context used for this compiling job</param>
+        </member>
+        <member name="P:BizHawk.Emulation.DiscSystem.CUE.CompileCueJob.OUT_CompiledSessionInfo">
+            <summary>
+            output: high level session info (most of the time, this only has 1 session)
+            </summary>
+        </member>
+        <member name="P:BizHawk.Emulation.DiscSystem.CUE.CompileCueJob.OUT_GlobalCDText">
+            <summary>
+            output: CD-Text set at the global level (before any track commands)
+            </summary>
+        </member>
+        <member name="P:BizHawk.Emulation.DiscSystem.CUE.CompileCueJob.OUT_CompiledCueFiles">
+            <summary>
+            output: The compiled file info
+            </summary>
+        </member>
+        <member name="P:BizHawk.Emulation.DiscSystem.CUE.CompileCueJob.OUT_CompiledCueTracks">
+            <summary>
+            output: The compiled track info
+            </summary>
+        </member>
+        <member name="P:BizHawk.Emulation.DiscSystem.CUE.CompileCueJob.OUT_LoadTime">
+            <summary>
+            output: An integer between 0 and 10 indicating how costly it will be to load this disc completely.
+            Activites like decoding non-seekable media will increase the load time.
+            0 - Requires no noticeable time
+            1 - Requires minimal processing (indexing ECM)
+            10 - Requires ages, decoding audio data, etc.
+            </summary>
+        </member>
+        <member name="F:BizHawk.Emulation.DiscSystem.CUE.CUE_Context.Resolver">
+            <summary>
+            The CueFileResolver to be used by this instance
+            </summary>
+        </member>
+        <member name="F:BizHawk.Emulation.DiscSystem.CUE.CUE_Context.DiscMountPolicy">
+            <summary>
+            The DiscMountPolicy to be applied to this context
+            </summary>
+        </member>
+        <member name="T:BizHawk.Emulation.DiscSystem.CUE.CUE_File">
+            <summary>
+            Represents the contents of a cue file
+            </summary>
+        </member>
+        <member name="T:BizHawk.Emulation.DiscSystem.CUE.CUE_File.Command">
+            <remarks>
+            (here are all the commands we can encounter)
+            TODO record line number origin of command? Kind of nice but unessential
+            </remarks>
+        </member>
+        <member name="T:BizHawk.Emulation.DiscSystem.CUE.CUE_File.DiscInfo">
+            <summary>
+            Stuff other than the commands, global for the whole disc
+            </summary>
+        </member>
+        <member name="F:BizHawk.Emulation.DiscSystem.CUE.CUE_File.Commands">
+            <summary>
+            The sequential list of commands parsed out of the cue file
+            </summary>
+        </member>
+        <member name="F:BizHawk.Emulation.DiscSystem.CUE.CUE_File.GlobalDiscInfo">
+            <summary>
+            Stuff other than the commands, global for the whole disc
+            </summary>
+        </member>
+        <member name="T:BizHawk.Emulation.DiscSystem.CUE.LoadCueJob">
+            <summary>
+            Loads a cue file into a Disc.
+            For this job, virtually all nonsense input is treated as errors, but the process will try to recover as best it can.
+            The user should still reject any jobs which generated errors
+            </summary>
+        </member>
+        <member name="M:BizHawk.Emulation.DiscSystem.CUE.LoadCueJob.#ctor(BizHawk.Emulation.DiscSystem.CUE.CompileCueJob)">
+            <param name="compileJob">The results of the compile job, a prerequisite for this</param>
+        </member>
+        <member name="P:BizHawk.Emulation.DiscSystem.CUE.LoadCueJob.OUT_Disc">
+            <summary>
+            The resulting disc
+            </summary>
+        </member>
+        <member name="T:BizHawk.Emulation.DiscSystem.CUE.LoadCueJob.TrackInfo">
+            <remarks>not sure if we need this...</remarks>
+        </member>
+        <member name="T:BizHawk.Emulation.DiscSystem.CUE.ParseCueJob">
+            <summary>
+            Performs minimum parse processing on a cue file
+            </summary>
+        </member>
+        <member name="M:BizHawk.Emulation.DiscSystem.CUE.ParseCueJob.#ctor(System.String,System.Boolean)">
+            <param name="cueString">the cue string to parse</param>
+            <param name="strict">Indicates whether parsing will be strict or lenient</param>
+        </member>
+        <member name="P:BizHawk.Emulation.DiscSystem.CUE.ParseCueJob.OUT_CueFile">
+            <summary>
+            output: the resulting minimally-processed cue file
+            </summary>
+        </member>
+        <member name="T:BizHawk.Emulation.DiscSystem.CUE.SS_Mode2_Form1_2048">
+            <summary>
+            Represents a Mode2 Form1 2048-byte sector
+            Only used by NRG, MDS, and CHD
+            </summary>
+        </member>
+        <member name="T:BizHawk.Emulation.DiscSystem.CUE.SS_Mode2_Form2_2324">
+            <summary>
+            Represents a Mode2 Form1 2324-byte sector
+            Only used by MDS and CHD
+            </summary>
+        </member>
+        <member name="T:BizHawk.Emulation.DiscSystem.CUE.SS_Mode2_Form2_2328">
+            <summary>
+            Represents a Mode2 Form1 2328-byte sector
+            Only used by MDS
+            </summary>
+        </member>
+        <member name="T:BizHawk.Emulation.DiscSystem.CUE.SS_2448_Interleaved">
+            <summary>
+            Represents a full 2448-byte sector with interleaved subcode
+            Only used by MDS, NRG, and CDI
+            </summary>
+        </member>
+        <member name="T:BizHawk.Emulation.DiscSystem.CUE.SS_2364_DeinterleavedQ">
+            <summary>
+            Represents a 2364-byte (2352 + 12) sector with deinterleaved Q subcode
+            Only used by CDI
+            </summary>
+        </member>
+        <member name="T:BizHawk.Emulation.DiscSystem.CUE.SS_Mode1_2048">
+            <summary>
+            Represents a Mode1 2048-byte sector
+            </summary>
+        </member>
+        <member name="T:BizHawk.Emulation.DiscSystem.CUE.SS_Mode2_2336">
+            <summary>
+            Represents a Mode2 2336-byte sector
+            </summary>
+        </member>
+        <member name="T:BizHawk.Emulation.DiscSystem.CUE.SS_2352">
+            <summary>
+            Represents a 2352-byte sector of any sort
+            </summary>
+        </member>
+        <member name="T:BizHawk.Emulation.DiscSystem.CUE.SS_Gap">
+            <summary>
+            Encodes a pre-gap sector
+            </summary>
+        </member>
+        <member name="F:BizHawk.Emulation.DiscSystem.M3U_File.Entry.Title">
+            <summary>
+            if the title is null, it isn't set
+            </summary>
+        </member>
+        <member name="F:BizHawk.Emulation.DiscSystem.M3U_File.Entry.Runtime">
+            <summary>
+            if the runtime is -1, it isn't set
+            </summary>
+        </member>
+        <member name="T:BizHawk.Emulation.DiscSystem.MDS_Format">
+            <summary>
+            Parsing Alcohol 120% files
+            Info taken from:
+            * http://forum.redump.org/post/41803/#p41803
+            * Libmirage image-mds parser - https://sourceforge.net/projects/cdemu/files/libmirage/
+            * DiscImageChef -   https://github.com/claunia/DiscImageChef/blob/master/DiscImageChef.DiscImages/Alcohol120.cs
+            </summary>
+        </member>
+        <member name="T:BizHawk.Emulation.DiscSystem.MDS_Format.AFile">
+            <summary>
+            A loose representation of an Alcohol 120 .mds file (with a few extras)
+            </summary>
+        </member>
+        <member name="F:BizHawk.Emulation.DiscSystem.MDS_Format.AFile.MDSPath">
+            <summary>
+            Full path to the MDS file
+            </summary>
+        </member>
+        <member name="F:BizHawk.Emulation.DiscSystem.MDS_Format.AFile.Header">
+            <summary>
+            MDS Header
+            </summary>
+        </member>
+        <member name="F:BizHawk.Emulation.DiscSystem.MDS_Format.AFile.Sessions">
+            <summary>
+            List of MDS session blocks
+            </summary>
+        </member>
+        <member name="F:BizHawk.Emulation.DiscSystem.MDS_Format.AFile.Tracks">
+            <summary>
+            List of track blocks
+            </summary>
+        </member>
+        <member name="F:BizHawk.Emulation.DiscSystem.MDS_Format.AFile.ParsedSession">
+            <summary>
+            Current parsed session objects
+            </summary>
+        </member>
+        <member name="F:BizHawk.Emulation.DiscSystem.MDS_Format.AFile.TOCEntries">
+            <summary>
+            Calculated MDS TOC entries (still to be parsed into BizHawk)
+            </summary>
+        </member>
+        <member name="F:BizHawk.Emulation.DiscSystem.MDS_Format.AHeader.Signature">
+            <summary>
+            Standard alcohol 120% signature - usually "MEDIA DESCRIPTOR"
+            </summary>
+        </member>
+        <member name="F:BizHawk.Emulation.DiscSystem.MDS_Format.AHeader.Version">
+            <summary>
+            Alcohol version?
+            </summary>
+        </member>
+        <member name="F:BizHawk.Emulation.DiscSystem.MDS_Format.AHeader.Medium">
+            <summary>
+            The medium type
+            * 0x00  -   CD
+            * 0x01  -   CD-R
+            * 0x02  -   CD-RW
+            * 0x10  -   DVD
+            * 0x12  -   DVD-R
+            </summary>
+        </member>
+        <member name="F:BizHawk.Emulation.DiscSystem.MDS_Format.AHeader.SessionCount">
+            <summary>
+            Number of sessions
+            </summary>
+        </member>
+        <member name="F:BizHawk.Emulation.DiscSystem.MDS_Format.AHeader.BCALength">
+            <summary>
+            Burst Cutting Area length
+            </summary>
+        </member>
+        <member name="F:BizHawk.Emulation.DiscSystem.MDS_Format.AHeader.BCAOffset">
+            <summary>
+            Burst Cutting Area data offset
+            </summary>
+        </member>
+        <member name="F:BizHawk.Emulation.DiscSystem.MDS_Format.AHeader.StructureOffset">
+            <summary>
+            Offset to disc (DVD?) structures
+            </summary>
+        </member>
+        <member name="F:BizHawk.Emulation.DiscSystem.MDS_Format.AHeader.SessionOffset">
+            <summary>
+            Offset to the first session block
+            </summary>
+        </member>
+        <member name="F:BizHawk.Emulation.DiscSystem.MDS_Format.AHeader.DPMOffset">
+            <summary>
+            Data Position Measurement offset
+            </summary>
+        </member>
+        <member name="M:BizHawk.Emulation.DiscSystem.MDS_Format.AHeader.Parse(System.IO.Stream)">
+            <summary>
+            Parse mds stream for the header
+            </summary>
+        </member>
+        <member name="T:BizHawk.Emulation.DiscSystem.MDS_Format.ASession">
+            <summary>
+            MDS session block representation
+            </summary>
+        </member>
+        <member name="T:BizHawk.Emulation.DiscSystem.MDS_Format.ATrack">
+            <summary>
+            Representation of an MDS track block
+            For convenience (and extra confusion) this also holds the track extrablock, filename(footer) block infos
+            as well as the calculated image filepath as specified in the MDS file
+            </summary>
+        </member>
+        <member name="F:BizHawk.Emulation.DiscSystem.MDS_Format.ATrack.Mode">
+            <summary>
+            The specified data mode (only lower 3 bits are actually meaningful)
+            0x00    -   None (no data)
+            0x02    -   DVD (when header specifies DVD, Mode1 otherwise)
+            0xA9    -   Audio
+            0xAA    -   Mode1
+            0xAB    -   Mode2
+            0xAC    -   Mode2 Form1
+            0xAD    -   Mode2 Form2
+            </summary>
+        </member>
+        <member name="F:BizHawk.Emulation.DiscSystem.MDS_Format.ATrack.SubMode">
+            <summary>
+            Subchannel mode for the track (0x00 = None, 0x08 = Interleaved)
+            </summary>
+        </member>
+        <member name="F:BizHawk.Emulation.DiscSystem.MDS_Format.ATrack.ExtraBlock">
+            <summary>
+            Track extra block
+            </summary>
+        </member>
+        <member name="F:BizHawk.Emulation.DiscSystem.MDS_Format.ATrack.FooterBlocks">
+            <summary>
+            List of footer(filename) blocks for this track
+            </summary>
+        </member>
+        <member name="F:BizHawk.Emulation.DiscSystem.MDS_Format.ATrack.ImageFileNamePaths">
+            <summary>
+            List of the calculated full paths to this track's image file
+            The MDS file itself may contain a filename, or just an *.extension
+            </summary>
+        </member>
+        <member name="T:BizHawk.Emulation.DiscSystem.MDS_Format.ATrackExtra">
+            <summary>
+            Extra track block
+            </summary>
+        </member>
+        <member name="T:BizHawk.Emulation.DiscSystem.MDS_Format.AFooter">
+            <summary>
+            Footer (filename) block - potentially one for every track
+            </summary>
+        </member>
+        <member name="T:BizHawk.Emulation.DiscSystem.MDS_Format.ATOCEntry">
+            <summary>
+            Represents a parsed MDS TOC entry
+            </summary>
+        </member>
+        <member name="M:BizHawk.Emulation.DiscSystem.MDS_Format.ATOCEntry.#ctor(System.Int32)">
+            <summary>
+            Represents a parsed MDS TOC entry
+            </summary>
+        </member>
+        <member name="F:BizHawk.Emulation.DiscSystem.MDS_Format.ATOCEntry.EntryNum">
+            <summary>
+            these should be 0-indexed
+            </summary>
+        </member>
+        <member name="F:BizHawk.Emulation.DiscSystem.MDS_Format.ATOCEntry.SessionNum">
+            <summary>
+            1-indexed - the session that this entry belongs to
+            </summary>
+        </member>
+        <member name="F:BizHawk.Emulation.DiscSystem.MDS_Format.ATOCEntry.PLBA">
+            <summary>
+            this seems just to be the LBA corresponding to PMIN:PSEC:PFRAME (give or take 150).
+            </summary>
+        </member>
+        <member name="F:BizHawk.Emulation.DiscSystem.MDS_Format.ATOCEntry.TrackMode">
+            <summary>
+            Lower 3 bits of ATrack Mode
+            Upper 5 bits are meaningless (see mirage_parser_mds_convert_track_mode)
+            0x0 - None or Mode2 (Depends on sector size)
+            0x1 - Audio
+            0x2 - DVD or Mode1 (Depends on medium)
+            0x3 - Mode2
+            0x4 - Mode2 Form1
+            0x5 - Mode2 Form2
+            0x6 - UNKNOWN
+            0x7 - Mode2
+            </summary>
+        </member>
+        <member name="F:BizHawk.Emulation.DiscSystem.MDS_Format.ATOCEntry.ImageFileNamePaths">
+            <summary>
+            List of the calculated full paths to this track's image file
+            The MDS file itself may contain a filename, or just an *.extension
+            </summary>
+        </member>
+        <member name="F:BizHawk.Emulation.DiscSystem.MDS_Format.ATOCEntry.ExtraBlock">
+            <summary>
+            Track extra block
+            </summary>
+        </member>
+        <member name="M:BizHawk.Emulation.DiscSystem.MDS_Format.Parse(System.IO.FileStream)">
+            <exception cref="T:BizHawk.Emulation.DiscSystem.MDS_Format.MDSParseException">header is malformed or identifies file as MDS 2.x, or any track has a DVD mode</exception>
+        </member>
+        <member name="T:BizHawk.Emulation.DiscSystem.MDS_Format.Session">
+            <summary>
+            Custom session object
+            </summary>
+        </member>
+        <member name="M:BizHawk.Emulation.DiscSystem.MDS_Format.MountBlobs(BizHawk.Emulation.DiscSystem.MDS_Format.AFile,BizHawk.Emulation.DiscSystem.Disc)">
+            <exception cref="T:BizHawk.Emulation.DiscSystem.MDS_Format.MDSParseException">path reference no longer points to file</exception>
+        </member>
+        <member name="M:BizHawk.Emulation.DiscSystem.MDS_Format.LoadMDSToDisc(System.String,BizHawk.Emulation.DiscSystem.DiscMountPolicy)">
+            <exception cref="T:BizHawk.Emulation.DiscSystem.MDS_Format.MDSParseException">no file found at <paramref name="mdsPath"/> or BLOB error</exception>
+        </member>
+        <member name="T:BizHawk.Emulation.DiscSystem.NRG_Format.NRGFile">
+            <summary>
+            Represents a NRG file, faithfully. Minimal interpretation of the data happens.
+            May represent either a v1 or v2 NRG file
+            </summary>
+        </member>
+        <member name="F:BizHawk.Emulation.DiscSystem.NRG_Format.NRGFile.FileID">
+            <summary>
+            File ID
+            "NERO" for V1, "NER5" for V2
+            </summary>
+        </member>
+        <member name="F:BizHawk.Emulation.DiscSystem.NRG_Format.NRGFile.FileOffset">
+            <summary>
+            Offset to first chunk size in bytes
+            </summary>
+        </member>
+        <member name="F:BizHawk.Emulation.DiscSystem.NRG_Format.NRGFile.Cues">
+            <summary>
+            The CUES/CUEX chunks
+            </summary>
+        </member>
+        <member name="F:BizHawk.Emulation.DiscSystem.NRG_Format.NRGFile.DAOTrackInfos">
+            <summary>
+            The DAOI/DAOX chunks
+            </summary>
+        </member>
+        <member name="F:BizHawk.Emulation.DiscSystem.NRG_Format.NRGFile.TAOTrackInfos">
+            <summary>
+            The TINF/ETNF/ETN2 chunks
+            </summary>
+        </member>
+        <member name="F:BizHawk.Emulation.DiscSystem.NRG_Format.NRGFile.RELOs">
+            <summary>
+            The RELO chunks
+            </summary>
+        </member>
+        <member name="F:BizHawk.Emulation.DiscSystem.NRG_Format.NRGFile.TOCTs">
+            <summary>
+            The TOCT chunks
+            </summary>
+        </member>
+        <member name="F:BizHawk.Emulation.DiscSystem.NRG_Format.NRGFile.SessionInfos">
+            <summary>
+            The SINF chunks
+            </summary>
+        </member>
+        <member name="F:BizHawk.Emulation.DiscSystem.NRG_Format.NRGFile.CdText">
+            <summary>
+            The CDTX chunk
+            </summary>
+        </member>
+        <member name="F:BizHawk.Emulation.DiscSystem.NRG_Format.NRGFile.MediaType">
+            <summary>
+            The MTYP chunk
+            </summary>
+        </member>
+        <member name="F:BizHawk.Emulation.DiscSystem.NRG_Format.NRGFile.Filenames">
+            <summary>
+            The AFNM chunk
+            </summary>
+        </member>
+        <member name="F:BizHawk.Emulation.DiscSystem.NRG_Format.NRGFile.VolumeName">
+            <summary>
+            The VOLM chunk
+            </summary>
+        </member>
+        <member name="F:BizHawk.Emulation.DiscSystem.NRG_Format.NRGFile.End">
+            <summary>
+            The END! chunk
+            </summary>
+        </member>
+        <member name="T:BizHawk.Emulation.DiscSystem.NRG_Format.NRGChunk">
+            <summary>
+            Represents a generic chunk from a NRG file
+            </summary>
+        </member>
+        <member name="F:BizHawk.Emulation.DiscSystem.NRG_Format.NRGChunk.ChunkID">
+            <summary>
+            The chunk ID
+            </summary>
+        </member>
+        <member name="F:BizHawk.Emulation.DiscSystem.NRG_Format.NRGChunk.ChunkSize">
+            <summary>
+            The chunk size in bytes
+            </summary>
+        </member>
+        <member name="T:BizHawk.Emulation.DiscSystem.NRG_Format.NRGTrackIndex">
+            <summary>
+            Represents a track index in CUES/CUEX chunk
+            </summary>
+        </member>
+        <member name="F:BizHawk.Emulation.DiscSystem.NRG_Format.NRGTrackIndex.ADRControl">
+            <summary>
+            ADR/Control byte (LSBs = ADR, MSBs = Control)
+            </summary>
+        </member>
+        <member name="F:BizHawk.Emulation.DiscSystem.NRG_Format.NRGTrackIndex.Track">
+            <summary>
+            Track number (00 = leadin, 01-99 = track n, AA = leadout)
+            </summary>
+        </member>
+        <member name="F:BizHawk.Emulation.DiscSystem.NRG_Format.NRGTrackIndex.Index">
+            <summary>
+            Index (00 = pregap, 01+ = actual track)
+            </summary>
+        </member>
+        <member name="F:BizHawk.Emulation.DiscSystem.NRG_Format.NRGTrackIndex.LBA">
+            <summary>
+            LBA for the location of this track index, starts at -150
+            </summary>
+        </member>
+        <member name="T:BizHawk.Emulation.DiscSystem.NRG_Format.NRGCue">
+            <summary>
+            Represents a CUES/CUEX chunk from a NRG file
+            </summary>
+        </member>
+        <member name="F:BizHawk.Emulation.DiscSystem.NRG_Format.NRGCue.TrackIndices">
+            <summary>
+            All of the track indices for this session
+            Don't trust index0's LBA, it's probably wrong
+            </summary>
+        </member>
+        <member name="T:BizHawk.Emulation.DiscSystem.NRG_Format.NRGDAOTrack">
+            <summary>
+            Represents a track in a DAOI/DAOX chunk
+            </summary>
+        </member>
+        <member name="F:BizHawk.Emulation.DiscSystem.NRG_Format.NRGDAOTrack.Isrc">
+            <summary>
+            12-letter/digit string (may be empty)
+            </summary>
+        </member>
+        <member name="F:BizHawk.Emulation.DiscSystem.NRG_Format.NRGDAOTrack.SectorSize">
+            <summary>
+            Sector size (depends on Mode)
+            Note: some files will have all tracks use the same sector size
+            So if you have different modes on tracks, this will be the largest mode size
+            Of course, this means sectors on the file may just have padding
+            </summary>
+        </member>
+        <member name="F:BizHawk.Emulation.DiscSystem.NRG_Format.NRGDAOTrack.Mode">
+            <summary>
+            00 = Mode1 / 2048 byte sectors
+            02 = Mode2 Form1 / 2048 byte sectors
+            03 = Mode2 / 2336 byte sectors
+            (nb: no$ reports this is Form1, libmirage reports this is Form2, doesn't matter with 2336 bytes anyways)
+            05 = Mode1 / 2352 byte sectors
+            06 = Mode2 / 2352 byte sectors
+            07 = Audio / 2352 byte sectors
+            0F = Mode1 / 2448 byte sectors
+            10 = Audio / 2448 byte sectors
+            11 = Mode2 / 2448 byte sectors
+            </summary>
+        </member>
+        <member name="F:BizHawk.Emulation.DiscSystem.NRG_Format.NRGDAOTrack.PregapFileOffset">
+            <summary>
+            File offset to this track's pregap (index 0)
+            </summary>
+        </member>
+        <member name="F:BizHawk.Emulation.DiscSystem.NRG_Format.NRGDAOTrack.TrackStartFileOffset">
+            <summary>
+            File offset to this track's actual data (index 1)
+            </summary>
+        </member>
+        <member name="F:BizHawk.Emulation.DiscSystem.NRG_Format.NRGDAOTrack.TrackEndFileOffset">
+            <summary>
+            File offset to the end of this track (equal to next track pregap)
+            </summary>
+        </member>
+        <member name="T:BizHawk.Emulation.DiscSystem.NRG_Format.NRGDAOTrackInfo">
+            <summary>
+            Represents a DAOI/DAOX chunk from a NRG file
+            </summary>
+        </member>
+        <member name="F:BizHawk.Emulation.DiscSystem.NRG_Format.NRGDAOTrackInfo.Ean13CatalogNumber">
+            <summary>
+            13-digit ASCII string (may be empty)
+            </summary>
+        </member>
+        <member name="F:BizHawk.Emulation.DiscSystem.NRG_Format.NRGDAOTrackInfo.DiskType">
+            <summary>
+            Disk type (0x00 = Mode1 or Audio, 0x10 = CD-I (?), 0x20 = XA/Mode2)
+            </summary>
+        </member>
+        <member name="F:BizHawk.Emulation.DiscSystem.NRG_Format.NRGDAOTrackInfo.FirstTrack">
+            <summary>
+            First track, non-BCD (1-99)
+            </summary>
+        </member>
+        <member name="F:BizHawk.Emulation.DiscSystem.NRG_Format.NRGDAOTrackInfo.LastTrack">
+            <summary>
+            Last track, non-BCD (1-99)
+            </summary>
+        </member>
+        <member name="F:BizHawk.Emulation.DiscSystem.NRG_Format.NRGDAOTrackInfo.Tracks">
+            <summary>
+            All of the tracks for this chunk
+            </summary>
+        </member>
+        <member name="T:BizHawk.Emulation.DiscSystem.NRG_Format.NRGTAOTrack">
+            <summary>
+            Represents a track in a TINF/ETNF/ETN2 chunk
+            </summary>
+        </member>
+        <member name="F:BizHawk.Emulation.DiscSystem.NRG_Format.NRGTAOTrack.TrackFileOffset">
+            <summary>
+            File offset to this track's data (presumably the start of the pregap)
+            </summary>
+        </member>
+        <member name="F:BizHawk.Emulation.DiscSystem.NRG_Format.NRGTAOTrack.TrackLength">
+            <summary>
+            Track length in bytes
+            </summary>
+        </member>
+        <member name="F:BizHawk.Emulation.DiscSystem.NRG_Format.NRGTAOTrack.Mode">
+            <summary>
+            Same meaning as NRGDAOTrack's Mode
+            </summary>
+        </member>
+        <member name="F:BizHawk.Emulation.DiscSystem.NRG_Format.NRGTAOTrack.StartLBA">
+            <summary>
+            Starting LBA for this track on the disc
+            Not present for TINF chunks
+            </summary>
+        </member>
+        <member name="T:BizHawk.Emulation.DiscSystem.NRG_Format.NRGTAOTrackInfo">
+            <summary>
+            Represents a TINF/ETNF/ETN2 chunk
+            </summary>
+        </member>
+        <member name="F:BizHawk.Emulation.DiscSystem.NRG_Format.NRGTAOTrackInfo.Tracks">
+            <summary>
+            All of the tracks for this chunk
+            </summary>
+        </member>
+        <member name="T:BizHawk.Emulation.DiscSystem.NRG_Format.NRGRELO">
+            <summary>
+            Represents a RELO chunk
+            </summary>
+        </member>
+        <member name="T:BizHawk.Emulation.DiscSystem.NRG_Format.NRGTOCT">
+            <summary>
+            Represents a TOCT chunk
+            </summary>
+        </member>
+        <member name="F:BizHawk.Emulation.DiscSystem.NRG_Format.NRGTOCT.DiskType">
+            <summary>
+            Disk type (0x00 = Mode1 or Audio, 0x10 = CD-I (?), 0x20 = XA/Mode2)
+            </summary>
+        </member>
+        <member name="T:BizHawk.Emulation.DiscSystem.NRG_Format.NRGSessionInfo">
+            <summary>
+            Represents a SINF chunk
+            </summary>
+        </member>
+        <member name="F:BizHawk.Emulation.DiscSystem.NRG_Format.NRGSessionInfo.TrackCount">
+            <summary>
+            Number of tracks in session
+            </summary>
+        </member>
+        <member name="T:BizHawk.Emulation.DiscSystem.NRG_Format.NRGCdText">
+            <summary>
+            Represents a CDTX chunk
+            </summary>
+        </member>
+        <member name="F:BizHawk.Emulation.DiscSystem.NRG_Format.NRGCdText.CdTextPacks">
+            <summary>
+            Raw 18-byte CD text packs
+            </summary>
+        </member>
+        <member name="T:BizHawk.Emulation.DiscSystem.NRG_Format.NRGMediaType">
+            <summary>
+            Represents a MTYP chunk
+            </summary>
+        </member>
+        <member name="F:BizHawk.Emulation.DiscSystem.NRG_Format.NRGMediaType.MediaType">
+            <summary>
+            Media Type
+            </summary>
+        </member>
+        <member name="T:BizHawk.Emulation.DiscSystem.NRG_Format.NRGFilenames">
+            <summary>
+            Represents a AFNM chunk
+            </summary>
+        </member>
+        <member name="F:BizHawk.Emulation.DiscSystem.NRG_Format.NRGFilenames.Filenames">
+            <summary>
+            Filenames where the image originally came from
+            </summary>
+        </member>
+        <member name="T:BizHawk.Emulation.DiscSystem.NRG_Format.NRGVolumeName">
+            <summary>
+            Represents a VOLM chunk
+            </summary>
+        </member>
+        <member name="F:BizHawk.Emulation.DiscSystem.NRG_Format.NRGVolumeName.VolumeName">
+            <summary>
+            Volume Name
+            </summary>
+        </member>
+        <member name="T:BizHawk.Emulation.DiscSystem.NRG_Format.NRGEND">
+            <summary>
+            Represents a END! chunk
+            </summary>
+        </member>
+        <member name="M:BizHawk.Emulation.DiscSystem.NRG_Format.ParseFrom(System.IO.Stream)">
+            <exception cref="T:BizHawk.Emulation.DiscSystem.NRG_Format.NRGParseException">malformed nrg format</exception>
+        </member>
+        <member name="M:BizHawk.Emulation.DiscSystem.NRG_Format.LoadNRGToDisc(System.String,BizHawk.Emulation.DiscSystem.DiscMountPolicy)">
+            <exception cref="T:BizHawk.Emulation.DiscSystem.NRG_Format.NRGParseException">file <paramref name="nrgPath"/> not found, or other parsing error</exception>
+        </member>
+        <member name="T:BizHawk.Emulation.DiscSystem.SBI.SubQPatchData">
+            <summary>
+            The interpreted contents of an SBI file
+            </summary>
+        </member>
+        <member name="F:BizHawk.Emulation.DiscSystem.SBI.SubQPatchData.ABAs">
+            <summary>
+            a list of patched ABAs
+            </summary>
+        </member>
+        <member name="F:BizHawk.Emulation.DiscSystem.SBI.SubQPatchData.subq">
+            <summary>
+            12 values (Q subchannel data) for every patched ABA; -1 means unpatched
+            </summary>
+        </member>
+        <member name="M:BizHawk.Emulation.DiscSystem.SBI.SBIFormat.QuickCheckISSBI(System.String)">
+            <summary>
+            Does a cursory check to see if the file looks like an SBI
+            </summary>
+        </member>
+        <member name="T:BizHawk.Emulation.DiscSystem.SBI.LoadSBIJob">
+            <summary>
+            Loads SBI files into an internal representation.
+            </summary>
+        </member>
+        <member name="M:BizHawk.Emulation.DiscSystem.SBI.LoadSBIJob.#ctor(System.String)">
+            <param name="path">The file to be loaded</param>
+        </member>
+        <member name="P:BizHawk.Emulation.DiscSystem.SBI.LoadSBIJob.OUT_Data">
+            <summary>
+            The resulting interpreted data
+            </summary>
+        </member>
+        <member name="M:BizHawk.Emulation.DiscSystem.SBI.LoadSBIJob.Run">
+            <exception cref="T:BizHawk.Emulation.DiscSystem.SBI.SBIParseException">file at <see cref="F:BizHawk.Emulation.DiscSystem.SBI.LoadSBIJob.IN_Path"/> does not contain valid header or contains misformatted record</exception>
+        </member>
+        <member name="M:BizHawk.Emulation.DiscSystem.DiscHasher.Calculate_PSX_BizIDHash">
+            <summary>
+            calculates the hash for quick PSX Disc identification
+            </summary>
+        </member>
+        <member name="M:BizHawk.Emulation.DiscSystem.DiscHasher.Calculate_PSX_RedumpHash">
+            <summary>
+            calculates the complete disc hash for matching to a redump
+            </summary>
+        </member>
+        <member name="M:BizHawk.Emulation.DiscSystem.DiscHasher.CalculateRAJaguarHash">
+            <summary>
+            Calculate Jaguar CD hash according to RetroAchievements logic
+            </summary>
+        </member>
+        <member name="F:BizHawk.Emulation.DiscSystem.DiscType.AudioDisc">
+            <summary>
+            Disc contains audio in track 1. This may be a PCFX or PCECD game, but if not it is assumed AudioDisc
+            </summary>
+        </member>
+        <member name="F:BizHawk.Emulation.DiscSystem.DiscType.UnknownFormat">
+            <summary>
+            Nothing is known about this data disc type
+            </summary>
+        </member>
+        <member name="F:BizHawk.Emulation.DiscSystem.DiscType.UnknownCDFS">
+            <summary>
+            This is definitely a CDFS disc, but we can't identify anything more about it
+            </summary>
+        </member>
+        <member name="F:BizHawk.Emulation.DiscSystem.DiscType.SonyPSX">
+            <summary>
+            Sony PSX
+            </summary>
+        </member>
+        <member name="F:BizHawk.Emulation.DiscSystem.DiscType.SonyPSP">
+            <summary>
+            Sony PSP
+            </summary>
+        </member>
+        <member name="F:BizHawk.Emulation.DiscSystem.DiscType.SegaSaturn">
+            <summary>
+            Sega Saturn
+            </summary>
+        </member>
+        <member name="F:BizHawk.Emulation.DiscSystem.DiscType.TurboCD">
+            <summary>
+            PC Engine CD
+            </summary>
+        </member>
+        <member name="F:BizHawk.Emulation.DiscSystem.DiscType.TurboGECD">
+            <summary>
+            PC Engine "GECD" for unlicensed games
+            </summary>
+        </member>
+        <member name="F:BizHawk.Emulation.DiscSystem.DiscType.MegaCD">
+            <summary>
+            MegaDrive add-on
+            </summary>
+        </member>
+        <member name="F:BizHawk.Emulation.DiscSystem.DiscType.PCFX">
+            <summary>
+            By NEC.
+            </summary>
+        </member>
+        <member name="F:BizHawk.Emulation.DiscSystem.DiscType.Panasonic3DO">
+            <summary>
+            By Panasonic
+            </summary>
+        </member>
+        <member name="F:BizHawk.Emulation.DiscSystem.DiscType.CDi">
+            <summary>
+            Philips
+            </summary>
+        </member>
+        <member name="F:BizHawk.Emulation.DiscSystem.DiscType.GameCube">
+            <summary>
+            Nintendo GameCube
+            </summary>
+        </member>
+        <member name="F:BizHawk.Emulation.DiscSystem.DiscType.Wii">
+            <summary>
+            Nintendo Wii
+            </summary>
+        </member>
+        <member name="F:BizHawk.Emulation.DiscSystem.DiscType.NeoGeoCD">
+            <summary>
+            SNK NeoGeo
+            </summary>
+        </member>
+        <member name="F:BizHawk.Emulation.DiscSystem.DiscType.Playdia">
+            <summary>
+            Bandai Playdia
+            </summary>
+        </member>
+        <member name="F:BizHawk.Emulation.DiscSystem.DiscType.Amiga">
+            <summary>
+            Either CDTV or CD32 (I havent found a reliable way of distinguishing between them yet -asni)
+            </summary>
+        </member>
+        <member name="F:BizHawk.Emulation.DiscSystem.DiscType.Dreamcast">
+            <summary>
+            Sega Dreamcast
+            </summary>
+        </member>
+        <member name="F:BizHawk.Emulation.DiscSystem.DiscType.SonyPS2">
+            <summary>
+            Yes, that one
+            </summary>
+        </member>
+        <member name="F:BizHawk.Emulation.DiscSystem.DiscType.JaguarCD">
+            <summary>
+            Atari Jaguar CD
+            </summary>
+        </member>
+        <member name="F:BizHawk.Emulation.DiscSystem.DiscType.DOS">
+            <summary>
+            DOS / Windows
+            </summary>
+        </member>
+        <member name="M:BizHawk.Emulation.DiscSystem.DiscIdentifier.DetectDiscType">
+            <summary>
+            Attempts to determine the type of the disc.
+            In the future, we might return a struct or a class with more detailed information
+            </summary>
+        </member>
+        <member name="M:BizHawk.Emulation.DiscSystem.DiscIdentifier.DetectSegaSaturn">
+            <summary>
+            This is reasonable approach to ID saturn.
+            </summary>
+        </member>
+        <member name="M:BizHawk.Emulation.DiscSystem.DiscIdentifier.DetectMegaCD">
+            <summary>
+            probably wrong
+            </summary>
+        </member>
+        <member name="M:BizHawk.Emulation.DiscSystem.DiscIdentifier.DetectISO9660">
+            <summary>Detects ISO9660 / Joliet CD formats (target for DOS / Windows)</summary>
+            <remarks><see href="https://en.wikipedia.org/wiki/ISO_9660"/></remarks>
+        </member>
+        <member name="M:BizHawk.Emulation.DiscSystem.DiscIdentifier.DetectUDF">
+            <remarks><see href="https://www.cnwrecovery.com/manual/HowToRecogniseTypeOfCDDVD.html"/></remarks>
+        </member>
+        <member name="T:BizHawk.Emulation.DiscSystem.DiscJob">
+            <summary>
+            Returns ERRORS for things which will can't be processed any further. Processing of this job will continue though to try to collect the maximum amount of feedback.
+            Returns WARNINGS for things which will are irregular or erroneous but later jobs might be able to handle, or which can be worked around by configuration assumptions.
+            TODO - make IDisposable so I don't have to remember to Finish() it?
+            </summary>
+        </member>
+        <member name="P:BizHawk.Emulation.DiscSystem.DiscJob.OUT_ErrorLevel">
+            <summary>
+            Whether there were any errors
+            </summary>
+        </member>
+        <member name="P:BizHawk.Emulation.DiscSystem.DiscJob.OUT_Log">
+            <summary>
+            output: log transcript of the job
+            </summary>
+        </member>
+        <member name="M:BizHawk.Emulation.DiscSystem.DiscJob.FinishLog">
+            <summary>
+            Finishes logging. Flushes the output and closes the logging mechanism
+            </summary>
+        </member>
+        <member name="M:BizHawk.Emulation.DiscSystem.DiscJob.ConcatenateJobLog(BizHawk.Emulation.DiscSystem.DiscJob)">
+            <summary>
+            Concatenates the log results from the provided job into this log
+            </summary>
+        </member>
+        <member name="T:BizHawk.Emulation.DiscSystem.DiscMountJob">
+            <summary>
+            A Job interface for mounting discs.
+            This is publicly exposed because it's the main point of control for fine-tuning disc loading options.
+            This would typically be used to load discs.
+            </summary>
+        </member>
+        <member name="M:BizHawk.Emulation.DiscSystem.DiscMountJob.#ctor(System.String,BizHawk.Emulation.DiscSystem.DiscMountPolicy,BizHawk.Emulation.DiscSystem.DiscInterface,System.Int32)">
+            <param name="fromPath">The filename to be loaded</param>
+            <param name="discMountPolicy">Cryptic policies to be used when mounting the disc.</param>
+            <param name="discInterface">
+            The interface to be used for loading the disc.
+            Usually you'll want DiscInterface.BizHawk, but others can be used for A/B testing
+            </param>
+            <param name="slowLoadAbortThreshold">
+            Slow-loading cues won't finish loading if this threshold is exceeded.
+            Set to 10 to always load a cue
+            </param>
+        </member>
+        <member name="M:BizHawk.Emulation.DiscSystem.DiscMountJob.#ctor(System.String,BizHawk.Emulation.DiscSystem.DiscInterface,System.Int32)">
+            <param name="fromPath">The filename to be loaded</param>
+            <param name="discInterface">
+            The interface to be used for loading the disc.
+            Usually you'll want DiscInterface.BizHawk, but others can be used for A/B testing
+            </param>
+            <param name="slowLoadAbortThreshold">
+            Slow-loading cues won't finish loading if this threshold is exceeded.
+            Set to 10 to always load a cue
+            </param>
+        </member>
+        <member name="P:BizHawk.Emulation.DiscSystem.DiscMountJob.OUT_Disc">
+            <summary>
+            The resulting disc
+            </summary>
+        </member>
+        <member name="P:BizHawk.Emulation.DiscSystem.DiscMountJob.OUT_SlowLoadAborted">
+            <summary>
+            Whether a mount operation was aborted due to being too slow
+            </summary>
+        </member>
+        <member name="M:BizHawk.Emulation.DiscSystem.DiscMountJob.Run">
+            <exception cref="T:System.NotSupportedException"><see cref="F:BizHawk.Emulation.DiscSystem.DiscMountJob.IN_DiscInterface"/> is <see cref="F:BizHawk.Emulation.DiscSystem.DiscInterface.LibMirage"/></exception>
+        </member>
+        <member name="T:BizHawk.Emulation.DiscSystem.DiscMountPolicy">
+            <summary>
+            General disc policies to be logically applied at mounting time. The choices are irreversible once a disc is loaded.
+            Maybe these are only for CUEs, but maybe not. Not sure yet.
+            Could put caching policies here too (cached ecm calculations, etc.)
+            </summary>
+        </member>
+        <member name="F:BizHawk.Emulation.DiscSystem.DiscMountPolicy.CUE_PregapContradictionModeA">
+            <summary>
+            "At the beginning of a Pause (i.e. Index = 00) the relative time is
+            --A-- set to the duration of the Pause.
+            During the Pause this relative time decreases and
+            --B-- equals zero in the last Section"
+            This is a contradiction.
+            By choosing true, mode A is selected, and the final sector of the pause is -1.
+             (I like this better. Defaulting until proven otherwise [write test case here])
+            By choosing false, mode B is selected, and the final sector of the pause is 0.
+             (Mednafen does it this way)
+            Discs (including PSX) exist using A, or B, or possibly (reference please) neither.
+            </summary>
+        </member>
+        <member name="F:BizHawk.Emulation.DiscSystem.DiscMountPolicy.CUE_PregapMode2_As_XA_Form2">
+            <summary>
+            Mednafen sets mode2 pregap sectors as XA Form2 sectors.
+            This is almost surely not right in every case.
+            </summary>
+        </member>
+        <member name="F:BizHawk.Emulation.DiscSystem.DiscMountPolicy.SBI_As_Mednafen">
+            <summary>
+            Mednafen loads SBI files oddly
+            </summary>
+        </member>
+        <member name="T:BizHawk.Emulation.DiscSystem.DiscoHawkLogic">
+             <remarks>
+             cue format preferences notes
+            
+             PCEjin -
+             does not like session commands
+             it can handle binpercue
+             it seems not to be able to handle binpertrack, or maybe i am doing something wrong (still haven't ruled it out)
+             </remarks>
+        </member>
+        <member name="T:BizHawk.Emulation.DiscSystem.DiscoHawkLogic.HawkedFormats">
+            <summary>
+            Formats supported with HawkAndWriteFile
+            </summary>
+        </member>
+        <member name="T:BizHawk.Emulation.DiscSystem.DiscSectorReaderPolicy.EUserData2048Mode">
+            <summary>
+            Different methods that can be used to get 2048 byte sectors
+            </summary>
+        </member>
+        <member name="F:BizHawk.Emulation.DiscSystem.DiscSectorReaderPolicy.EUserData2048Mode.InspectSector">
+            <summary>
+            The contents of the sector should be inspected (mode and form) and 2048 bytes returned accordingly
+            </summary>
+        </member>
+        <member name="F:BizHawk.Emulation.DiscSystem.DiscSectorReaderPolicy.EUserData2048Mode.AssumeMode1">
+            <summary>
+            Read it as mode 1
+            </summary>
+        </member>
+        <member name="F:BizHawk.Emulation.DiscSystem.DiscSectorReaderPolicy.EUserData2048Mode.AssumeMode2_Form1">
+            <summary>
+            Read it as mode 2 (form 1)
+            </summary>
+        </member>
+        <member name="F:BizHawk.Emulation.DiscSystem.DiscSectorReaderPolicy.EUserData2048Mode.InspectSector_AssumeForm1">
+            <summary>
+            The contents of the sector should be inspected (mode) and 2048 bytes returned accordingly
+            Mode 2 form is assumed to be 1
+            </summary>
+        </member>
+        <member name="F:BizHawk.Emulation.DiscSystem.DiscSectorReaderPolicy.UserData2048Mode">
+            <summary>
+            The method used to get 2048 byte sectors
+            </summary>
+        </member>
+        <member name="F:BizHawk.Emulation.DiscSystem.DiscSectorReaderPolicy.ThrowExceptions2048">
+            <summary>
+            Throw exceptions if 2048 byte data can't be read
+            </summary>
+        </member>
+        <member name="F:BizHawk.Emulation.DiscSystem.DiscSectorReaderPolicy.DeinterleavedSubcode">
+            <summary>
+            Indicates whether subcode should be delivered deinterleaved. It isn't stored that way on actual discs. But it is in .sub files.
+            This defaults to true because it's most likely higher-performing, and it's rarely ever wanted interleaved.
+            </summary>
+        </member>
+        <member name="F:BizHawk.Emulation.DiscSystem.DiscSectorReaderPolicy.DeterministicClearBuffer">
+            <summary>
+            Indicates whether the output buffer should be cleared before returning any data.
+            This will unfortunately involve clearing sections you didn't ask for, and clearing sections about to be filled with data from the disc.
+            It is a waste of performance, but it will ensure reliability.
+            </summary>
+        </member>
+        <member name="T:BizHawk.Emulation.DiscSystem.DiscSectorReader">
+            <summary>
+            Main entry point for reading sectors from a disc.
+            This is not a multi-thread capable interface.
+            </summary>
+        </member>
+        <member name="M:BizHawk.Emulation.DiscSystem.DiscSectorReader.ReadLBA_2352(System.Int32,System.Byte[],System.Int32)">
+            <summary>
+            Reads a full 2352 bytes of user data from a sector
+            </summary>
+        </member>
+        <member name="M:BizHawk.Emulation.DiscSystem.DiscSectorReader.ReadLBA_2448(System.Int32,System.Byte[],System.Int32)">
+            <summary>
+            Reads the absolutely complete 2448 byte sector including all the user data and subcode
+            </summary>
+        </member>
+        <member name="M:BizHawk.Emulation.DiscSystem.DiscSectorReader.ReadLBA_SubQ(System.Int32,System.Byte[],System.Int32)">
+            <summary>
+            Reads 12 bytes of subQ data from a sector.
+            This is necessarily deinterleaved.
+            </summary>
+        </member>
+        <member name="M:BizHawk.Emulation.DiscSystem.DiscSectorReader.ReadLBA_2048(System.Int32,System.Byte[],System.Int32)">
+            <summary>
+            reads 2048 bytes of user data from a sector.
+            This is only valid for Mode 1 and XA Mode 2 (Form 1) sectors.
+            Attempting it on any other sectors is ill-defined.
+            If any console is trying to do that, we'll have to add a policy for it, or handle it in the console.
+            (We can add a method to this API that checks the type of a sector to make that easier)
+            </summary>
+            <exception cref="T:System.InvalidOperationException"></exception>
+        </member>
+        <member name="M:BizHawk.Emulation.DiscSystem.DiscSectorReader.ReadLBA_SubQ(System.Int32,BizHawk.Emulation.DiscSystem.SubchannelQ@)">
+            <summary>
+            Reads 12 bytes of subQ data from a sector and stores it unpacked into the provided struct
+            TODO - make use of deserialize code elsewhere
+            </summary>
+        </member>
+        <member name="M:BizHawk.Emulation.DiscSystem.DiscSectorReader.ReadLBA_Mode(System.Int32)">
+            <summary>
+            Reads the mode field from a sector
+            If this is an audio sector, the results will be nonsense.
+            </summary>
+        </member>
+        <member name="F:BizHawk.Emulation.DiscSystem.DiscSession.TOC">
+            <summary>
+            The DiscTOC corresponding to the RawTOCEntries.
+            </summary>
+        </member>
+        <member name="F:BizHawk.Emulation.DiscSystem.DiscSession.RawTOCEntries">
+            <summary>
+            The raw TOC entries found in the lead-in track.
+            These aren't very useful, but they're one of the most lowest-level data structures from which other TOC-related stuff is derived
+            </summary>
+        </member>
+        <member name="P:BizHawk.Emulation.DiscSystem.DiscSession.LeadoutLBA">
+            <summary>
+            The LBA of the session's leadout. In other words, for all intents and purposes, the end of the session
+            </summary>
+        </member>
+        <member name="F:BizHawk.Emulation.DiscSystem.DiscSession.Number">
+            <summary>
+            The session number
+            </summary>
+        </member>
+        <member name="P:BizHawk.Emulation.DiscSystem.DiscSession.InformationTrackCount">
+            <summary>
+            The number of user information tracks in the session.
+            This excludes the lead-in and lead-out tracks
+            Use this instead of Tracks.Count
+            </summary>
+        </member>
+        <member name="F:BizHawk.Emulation.DiscSystem.DiscSession.Tracks">
+            <summary>
+            All the tracks in the session.. but... Tracks[0] is the lead-in track. Tracks[1] should be "Track 1". So beware of this.
+            For a disc with "3 tracks", Tracks.Count will be 5: it includes that lead-in track as well as the leadout track.
+            Perhaps we should turn this into a special collection type with no Count or Length, or a method to GetTrack()
+            </summary>
+        </member>
+        <member name="P:BizHawk.Emulation.DiscSystem.DiscSession.FirstInformationTrack">
+            <summary>
+            A reference to the first information track (Track 1)
+            The raw TOC may have specified something different; it's not clear how this discrepancy is handled.
+            </summary>
+        </member>
+        <member name="P:BizHawk.Emulation.DiscSystem.DiscSession.LastInformationTrack">
+            <summary>
+            A reference to the last information track on the disc.
+            The raw TOC may have specified something different; it's not clear how this discrepancy is handled.
+            </summary>
+        </member>
+        <member name="P:BizHawk.Emulation.DiscSystem.DiscSession.LeadoutTrack">
+            <summary>
+            A reference to the lead-out track.
+            Effectively, the end of the user area of the disc.
+            </summary>
+        </member>
+        <member name="P:BizHawk.Emulation.DiscSystem.DiscSession.LeadinTrack">
+            <summary>
+            A reference to the lead-in track
+            </summary>
+        </member>
+        <member name="M:BizHawk.Emulation.DiscSystem.DiscSession.SeekTrack(System.Int32)">
+            <summary>
+            Determines which track of the session is at the specified LBA.
+            </summary>
+        </member>
+        <member name="F:BizHawk.Emulation.DiscSystem.EDiscStreamView.DiscStreamView_Mode0_2352">
+            <summary>
+            views the disc as Mode 0 (aka Audio)
+            </summary>
+        </member>
+        <member name="F:BizHawk.Emulation.DiscSystem.EDiscStreamView.DiscStreamView_Audio_2352">
+            <summary>
+            views the disc as audio (aka Mode 0)
+            </summary>
+        </member>
+        <member name="F:BizHawk.Emulation.DiscSystem.EDiscStreamView.DiscStreamView_Mode1_2048">
+            <summary>
+            views the disc as Mode 1
+            </summary>
+        </member>
+        <member name="F:BizHawk.Emulation.DiscSystem.EDiscStreamView.DiscStreamView_Mode2_2336">
+            <summary>
+            views the disc as Mode 2
+            </summary>
+        </member>
+        <member name="F:BizHawk.Emulation.DiscSystem.EDiscStreamView.DiscStreamView_Mode2_Form1_2048">
+            <summary>
+            views the disc as Mode 2 Form 1
+            </summary>
+        </member>
+        <member name="F:BizHawk.Emulation.DiscSystem.EDiscStreamView.DiscStreamView_Mode2_Form2_2324">
+            <summary>
+            views the disc as Mode 2 Form 2
+            </summary>
+        </member>
+        <member name="T:BizHawk.Emulation.DiscSystem.DiscStream">
+             <summary>
+             Allows you to stream data off a disc.
+             For future work: depending on the View you select, it may not be seekable (in other words, it would need to read sequentially)
+            
+             OLD COMMENTS:
+             Allows you to stream data off a disc
+             NOTE - it's probably been commented elsewhere, but this is possibly a bad idea! Turn it into views instead,
+             and the exact behaviour depends on the requested access level (raw or logical) and then what type of sectors are getting used
+             NOTE - actually even THAT is probably a bad idea. sector types can change on the fly.
+             this class promises something it can't deliver. (it's only being used to scan an ISO disc)
+             Well, we could make code that is full of red flags and warnings like "if this ISNT a 2048 byte sector ISO disc, then this wont work"
+            
+             TODO - Receive some information about the track that this stream is modeling, and have the stream return EOF at the end of the track?
+             </summary>
+        </member>
+        <member name="M:BizHawk.Emulation.DiscSystem.DiscStream.#ctor(BizHawk.Emulation.DiscSystem.Disc,BizHawk.Emulation.DiscSystem.EDiscStreamView,System.Int32)">
+            <exception cref="T:System.NotSupportedException"><paramref name="view"/> is not <see cref="F:BizHawk.Emulation.DiscSystem.DiscSectorReaderPolicy.EUserData2048Mode.AssumeMode1"/> or <see cref="F:BizHawk.Emulation.DiscSystem.DiscSectorReaderPolicy.EUserData2048Mode.AssumeMode2_Form1"/></exception>
+        </member>
+        <member name="T:BizHawk.Emulation.DiscSystem.EControlQ">
+            <summary>
+            Control bit flags for the Q Subchannel.
+            </summary>
+        </member>
+        <member name="T:BizHawk.Emulation.DiscSystem.SubchannelQ">
+            <summary>
+            Why did I make this a struct? I thought there might be a shitton of these and I was trying to cut down on object creation churn during disc-loading.
+            But I ended up mostly just having a shitton of byte[] for each buffer (I could improve that later to possibly reference a blob on top of a MemoryStream)
+            So, I should probably change that.
+            </summary>
+        </member>
+        <member name="F:BizHawk.Emulation.DiscSystem.SubchannelQ.q_status">
+            <summary>
+            ADR and CONTROL
+            TODO - make BCD2? PROBABLY NOT. I DONT KNOW.
+            </summary>
+        </member>
+        <member name="F:BizHawk.Emulation.DiscSystem.SubchannelQ.q_tno">
+            <summary>
+            normal track: BCD indication of the current track number
+            leadin track: should be 0
+            </summary>
+        </member>
+        <member name="F:BizHawk.Emulation.DiscSystem.SubchannelQ.q_index">
+            <summary>
+            normal track: BCD indication of the current index
+            leadin track: 'POINT' field used to ID the TOC entry #
+            </summary>
+        </member>
+        <member name="F:BizHawk.Emulation.DiscSystem.SubchannelQ.min">
+            <summary>
+            These are the initial set of timestamps. Meaning varies:
+            check yellowbook 22.3.3 and 22.3.4
+            leadin track: unknown
+            user information track: relative timestamp
+            leadout: relative timestamp
+            TODO - why are these BCD2? having things in BCD2 is freaking annoying, I should only make them BCD2 when serializing into a subchannel Q buffer
+            EDIT - elsewhere I rambled "why not BCD2?". geh. need to make a final organized approach
+            </summary>
+        </member>
+        <member name="F:BizHawk.Emulation.DiscSystem.SubchannelQ.sec">
+            <summary>
+            These are the initial set of timestamps. Meaning varies:
+            check yellowbook 22.3.3 and 22.3.4
+            leadin track: unknown
+            user information track: relative timestamp
+            leadout: relative timestamp
+            TODO - why are these BCD2? having things in BCD2 is freaking annoying, I should only make them BCD2 when serializing into a subchannel Q buffer
+            EDIT - elsewhere I rambled "why not BCD2?". geh. need to make a final organized approach
+            </summary>
+        </member>
+        <member name="F:BizHawk.Emulation.DiscSystem.SubchannelQ.frame">
+            <summary>
+            These are the initial set of timestamps. Meaning varies:
+            check yellowbook 22.3.3 and 22.3.4
+            leadin track: unknown
+            user information track: relative timestamp
+            leadout: relative timestamp
+            TODO - why are these BCD2? having things in BCD2 is freaking annoying, I should only make them BCD2 when serializing into a subchannel Q buffer
+            EDIT - elsewhere I rambled "why not BCD2?". geh. need to make a final organized approach
+            </summary>
+        </member>
+        <member name="F:BizHawk.Emulation.DiscSystem.SubchannelQ.zero">
+            <summary>
+            This is supposed to be zero.. but CCD format stores it, so maybe it's useful for copy protection or something
+            </summary>
+        </member>
+        <member name="F:BizHawk.Emulation.DiscSystem.SubchannelQ.ap_min">
+            <summary>
+            These are the second set of timestamps.  Meaning varies:
+            check yellowbook 22.3.3 and 22.3.4
+            leadin track q-mode 1: TOC entry, absolute MSF of track
+            user information track: absolute timestamp
+            leadout: absolute timestamp
+            </summary>
+        </member>
+        <member name="F:BizHawk.Emulation.DiscSystem.SubchannelQ.ap_sec">
+            <summary>
+            These are the second set of timestamps.  Meaning varies:
+            check yellowbook 22.3.3 and 22.3.4
+            leadin track q-mode 1: TOC entry, absolute MSF of track
+            user information track: absolute timestamp
+            leadout: absolute timestamp
+            </summary>
+        </member>
+        <member name="F:BizHawk.Emulation.DiscSystem.SubchannelQ.ap_frame">
+            <summary>
+            These are the second set of timestamps.  Meaning varies:
+            check yellowbook 22.3.3 and 22.3.4
+            leadin track q-mode 1: TOC entry, absolute MSF of track
+            user information track: absolute timestamp
+            leadout: absolute timestamp
+            </summary>
+        </member>
+        <member name="F:BizHawk.Emulation.DiscSystem.SubchannelQ.q_crc">
+            <summary>
+            Don't assume this CRC is correct, in the case of some copy protections it is intended to be wrong.
+            Furthermore, it is meaningless (and in BizHawk, unpopulated) for a TOC Entry
+            (since an invalid CRC on a [theyre redundantly/duplicately stored] toc entry would cause it to get discarded in favor of another one with a correct CRC)
+            </summary>
+        </member>
+        <member name="P:BizHawk.Emulation.DiscSystem.SubchannelQ.Timestamp">
+            <summary>
+            Retrieves the initial set of timestamps (min,sec,frac) as a convenient Timestamp
+            </summary>
+        </member>
+        <member name="P:BizHawk.Emulation.DiscSystem.SubchannelQ.AP_Timestamp">
+            <summary>
+            Retrieves the second set of timestamps (ap_min, ap_sec, ap_frac) as a convenient Timestamp.
+            TODO - rename everything AP here, it's nonsense. (the P is)
+            </summary>
+        </member>
+        <member name="M:BizHawk.Emulation.DiscSystem.SubchannelQ.SetStatus(System.Byte,BizHawk.Emulation.DiscSystem.EControlQ)">
+            <summary>
+            sets the status byte from the provided adr/qmode and control values
+            </summary>
+        </member>
+        <member name="M:BizHawk.Emulation.DiscSystem.SubchannelQ.ComputeStatus(System.Int32,BizHawk.Emulation.DiscSystem.EControlQ)">
+            <summary>
+            computes a status byte from the provided adr/qmode and control values
+            </summary>
+        </member>
+        <member name="P:BizHawk.Emulation.DiscSystem.SubchannelQ.ADR">
+            <summary>
+            Retrives the ADR field of the q_status member (low 4 bits)
+            </summary>
+        </member>
+        <member name="P:BizHawk.Emulation.DiscSystem.SubchannelQ.CONTROL">
+            <summary>
+            Retrieves the CONTROL field of the q_status member (high 4 bits)
+            </summary>
+        </member>
+        <member name="T:BizHawk.Emulation.DiscSystem.DiscTOC">
+            <summary>
+            Represents our best guess at what a disc drive firmware will receive by reading the TOC from the lead-in track, modeled after CCD contents and mednafen/PSX needs.
+            </summary>
+        </member>
+        <member name="F:BizHawk.Emulation.DiscSystem.DiscTOC.FirstRecordedTrackNumber">
+            <summary>
+            The TOC specifies the first recorded track number, independently of whatever may actually be recorded
+            </summary>
+        </member>
+        <member name="F:BizHawk.Emulation.DiscSystem.DiscTOC.LastRecordedTrackNumber">
+            <summary>
+            The TOC specifies the last recorded track number, independently of whatever may actually be recorded
+            </summary>
+        </member>
+        <member name="F:BizHawk.Emulation.DiscSystem.DiscTOC.SessionFormat">
+            <summary>
+            The TOC specifies the format of the session, so here it is.
+            </summary>
+        </member>
+        <member name="T:BizHawk.Emulation.DiscSystem.DiscTOC.TOCItem">
+            <summary>
+            Information about a single track in the TOC
+            </summary>
+        </member>
+        <member name="F:BizHawk.Emulation.DiscSystem.DiscTOC.TOCItem.Control">
+            <summary>
+            [IEC10149] "the control field used in the information track"
+            the raw TOC entries do have a control field which is supposed to match what's found in the track.
+            Determining whether a track contains audio or data is very important.
+            A track mode can't be safely determined from reading sectors from the actual track if it's an audio track (there's no sector header with a mode byte)
+            </summary>
+        </member>
+        <member name="P:BizHawk.Emulation.DiscSystem.DiscTOC.TOCItem.IsData">
+            <summary>
+            Whether the Control indicates that this is data
+            </summary>
+        </member>
+        <member name="F:BizHawk.Emulation.DiscSystem.DiscTOC.TOCItem.LBA">
+            <summary>
+            The location of the track (Index 1)
+            </summary>
+        </member>
+        <member name="F:BizHawk.Emulation.DiscSystem.DiscTOC.TOCItem.Exists">
+            <summary>
+            Whether this entry exists (since the table is 101 entries long always)
+            </summary>
+        </member>
+        <member name="F:BizHawk.Emulation.DiscSystem.DiscTOC.TOCItems">
+            <summary>
+            This is a convenient format for storing the TOC (taken from mednafen)
+            Element 0 is the Lead-in track
+            Element 100 is the Lead-out track
+            </summary>
+        </member>
+        <member name="P:BizHawk.Emulation.DiscSystem.DiscTOC.LeadoutLBA">
+            <summary>
+            The timestamp of the leadout track. In other words, the end of the user area.
+            </summary>
+        </member>
+        <member name="T:BizHawk.Emulation.DiscSystem.DiscTrack">
+            <summary>
+            Information about a Track.
+            </summary>
+        </member>
+        <member name="F:BizHawk.Emulation.DiscSystem.DiscTrack.Number">
+            <summary>
+            The number of the track (1-indexed)
+            </summary>
+        </member>
+        <member name="F:BizHawk.Emulation.DiscSystem.DiscTrack.Mode">
+            <summary>
+            The Mode of the track (0 is Audio, 1 and 2 are data)
+            This is heuristically determined.
+            Actual sector contents may vary
+            </summary>
+        </member>
+        <member name="P:BizHawk.Emulation.DiscSystem.DiscTrack.IsData">
+            <summary>
+            Is this track a Data track?
+            </summary>
+        </member>
+        <member name="P:BizHawk.Emulation.DiscSystem.DiscTrack.IsAudio">
+            <summary>
+            Is this track an Audio track?
+            </summary>
+        </member>
+        <member name="F:BizHawk.Emulation.DiscSystem.DiscTrack.Control">
+            <summary>
+            The 'control' properties of the track expected to be found in the track's subQ.
+            However, this is what's indicated by the disc TOC.
+            Actual sector contents may vary.
+            </summary>
+        </member>
+        <member name="F:BizHawk.Emulation.DiscSystem.DiscTrack.LBA">
+            <summary>
+            The starting LBA of the track (index 1).
+            </summary>
+        </member>
+        <member name="F:BizHawk.Emulation.DiscSystem.DiscTrack.NextTrack">
+            <summary>
+            The next track in the session. null for the leadout track of a session.
+            </summary>
+        </member>
+        <member name="T:BizHawk.Emulation.DiscSystem.DiscTrack.ETrackType">
+            <summary>
+            The Type of a track as specified in the TOC Q-Subchannel data from the control flags.
+            Could also be 4-Channel Audio, but we'll handle that later if needed
+            </summary>
+        </member>
+        <member name="F:BizHawk.Emulation.DiscSystem.DiscTrack.ETrackType.Unknown">
+            <summary>
+            The track type isn't always known.. it can take this value til its populated
+            </summary>
+        </member>
+        <member name="F:BizHawk.Emulation.DiscSystem.DiscTrack.ETrackType.Data">
+            <summary>
+            Data track( TOC Q control 0x04 flag set )
+            </summary>
+        </member>
+        <member name="F:BizHawk.Emulation.DiscSystem.DiscTrack.ETrackType.Audio">
+            <summary>
+            Audio track( TOC Q control 0x04 flag clear )
+            </summary>
+        </member>
+        <member name="T:BizHawk.Emulation.DiscSystem.RawTOCEntry">
+            <summary>
+            Represents a TOC entry discovered in the Q subchannel data of the lead-in track by the reader. These are stored redundantly.
+            For CDs, all that is needed is SubchannelQ data.
+            However, for DVDs (and similar formats, e.g. UMDs), this isn't sufficient.
+            DVDs don't have CD subchannels (so this data is mostly junk for such).
+            Even worse, DVDs are large enough where they might not be able to fit within absolute timestamps (due to BCD constraints).
+            They do have physical sectors numbers within the lead-in for the start and end of the data zone.
+            As such, we'll include the absolute timestamp separately here, which can be used to create an LBA later on (without being constrained by BCD).
+            Note, this is a bit nonsense for DVDs, the physical sector number on a DVD for LBA 0 is 196608, and that is what's stored in the DVD lead-in.
+            </summary>
+        </member>
+        <member name="T:BizHawk.Emulation.DiscSystem.BCD2">
+            <summary>
+            encapsulates a 2 digit BCD number as used various places in the CD specs
+            </summary>
+        </member>
+        <member name="F:BizHawk.Emulation.DiscSystem.BCD2.BCDValue">
+            <summary>
+            The raw BCD value. you can't do math on this number! but you may be asked to supply it to a game program.
+            The largest number it can logically contain is 99
+            </summary>
+        </member>
+        <member name="P:BizHawk.Emulation.DiscSystem.BCD2.DecimalValue">
+            <summary>
+            The derived decimal value. you can do math on this! the largest number it can logically contain is 99.
+            </summary>
+        </member>
+        <member name="M:BizHawk.Emulation.DiscSystem.BCD2.FromDecimal(System.Int32)">
+            <summary>
+            makes a BCD2 from a decimal number. don't supply a number > 99 or you might not like the results
+            </summary>
+        </member>
+        <member name="T:BizHawk.Emulation.DiscSystem.Timestamp">
+            <summary>
+            todo - rename to MSF? It can specify durations, so maybe it should be not suggestive of timestamp
+            TODO - can we maybe use BCD2 in here
+            </summary>
+        </member>
+        <member name="M:BizHawk.Emulation.DiscSystem.Timestamp.IsMatch(System.String)">
+            <summary>
+            Checks if the string is a legit MSF. It's strict.
+            </summary>
+        </member>
+        <member name="M:BizHawk.Emulation.DiscSystem.Timestamp.#ctor(System.String)">
+            <summary>
+            creates a timestamp from a string in the form mm:ss:ff
+            </summary>
+        </member>
+        <member name="P:BizHawk.Emulation.DiscSystem.Timestamp.Value">
+            <summary>
+            The string representation of the MSF
+            </summary>
+        </member>
+        <member name="P:BizHawk.Emulation.DiscSystem.Timestamp.Sector">
+            <summary>
+            The fully multiplied out flat-address Sector number
+            </summary>
+        </member>
+        <member name="M:BizHawk.Emulation.DiscSystem.Timestamp.#ctor(System.Int32,System.Int32,System.Int32)">
+            <summary>
+            creates timestamp from the supplied MSF
+            </summary>
+        </member>
+        <member name="M:BizHawk.Emulation.DiscSystem.Timestamp.#ctor(System.Int32)">
+            <summary>
+            creates timestamp from supplied SectorNumber
+            </summary>
+        </member>
+        <member name="M:BizHawk.Emulation.DiscSystem.DiscUtils.BCD_Byte(System.Int32)">
+            <summary>
+            converts the given int to a BCD value
+            </summary>
+        </member>
+        <member name="M:BizHawk.Emulation.DiscSystem.DiscUtils.Convert_LBA_To_AMSF(System.Int32,System.Byte@,System.Byte@,System.Byte@)">
+            <summary>
+            converts an LBA to AMSF absolute minute:second:frame format.
+            </summary>
+        </member>
+        <member name="M:BizHawk.Emulation.DiscSystem.ECM.Prep_EDC">
+            <summary>
+            calculate EDC crc tables
+            </summary>
+        </member>
+        <member name="M:BizHawk.Emulation.DiscSystem.ECM.Prep_ECC">
+            <summary>
+            calculate math lookup tables for ECC calculations.
+            </summary>
+        </member>
+        <member name="M:BizHawk.Emulation.DiscSystem.ECM.CalcECC(System.Byte[],System.Int32,System.Int32,System.Int32,System.Int32,System.Byte@,System.Byte@)">
+            <summary>
+            Calculates ECC parity values for the specified data
+            see annex A of yellowbook
+            </summary>
+        </member>
+        <member name="M:BizHawk.Emulation.DiscSystem.ECM.PokeUint(System.Byte[],System.Int32,System.UInt32)">
+            <summary>
+            handy for stashing the EDC somewhere with little endian
+            </summary>
+        </member>
+        <member name="M:BizHawk.Emulation.DiscSystem.ECM.EDC_Calc(System.Byte[],System.Int32,System.Int32)">
+            <summary>
+            calculates EDC checksum for the range of data provided
+            see section 14.3 of yellowbook
+            </summary>
+        </member>
+        <member name="M:BizHawk.Emulation.DiscSystem.ECM.GetSectorAddress(System.Byte[],System.Int32)">
+            <summary>
+            returns the address from a sector. useful for saving it before zeroing it for ECC calculations
+            </summary>
+        </member>
+        <member name="M:BizHawk.Emulation.DiscSystem.ECM.SetSectorAddress(System.Byte[],System.Int32,System.UInt32)">
+            <summary>
+            sets the address for a sector. useful for restoring it after zeroing it for ECC calculations
+            </summary>
+        </member>
+        <member name="M:BizHawk.Emulation.DiscSystem.ECM.ECC_Populate(System.Byte[],System.Int32,System.Byte[],System.Int32,System.Boolean)">
+            <summary>
+            populates a sector with valid ECC information.
+            it is safe to supply the same array for sector and dest.
+            </summary>
+        </member>
+        <member name="M:BizHawk.Emulation.DiscSystem.ApplySBIJob.Run(BizHawk.Emulation.DiscSystem.Disc,BizHawk.Emulation.DiscSystem.SBI.SubQPatchData,System.Boolean)">
+            <summary>
+            applies an SBI file to the disc
+            </summary>
+        </member>
+        <member name="T:BizHawk.Emulation.DiscSystem.Synthesize_A0A1A2_Job">
+            <summary>
+            Synthesizes RawTCOEntry A0 A1 A2 from the provided information.
+            This might be reused by formats other than CUE later, so it isn't directly associated with that
+            </summary>
+        </member>
+        <member name="M:BizHawk.Emulation.DiscSystem.Synthesize_A0A1A2_Job.#ctor(System.Int32,System.Int32,BizHawk.Emulation.DiscSystem.SessionFormat,System.Int32)">
+            <param name="firstRecordedTrackNumber">"First Recorded Track Number" value for TOC (usually 1)</param>
+            <param name="lastRecordedTrackNumber">"Last Recorded Track Number" value for TOC</param>
+            <param name="sessionFormat">The session format for this TOC</param>
+            <param name="leadoutTimestamp">The absolute timestamp of the lead-out track</param>
+        </member>
+        <member name="M:BizHawk.Emulation.DiscSystem.Synthesize_A0A1A2_Job.Run(System.Collections.Generic.List{BizHawk.Emulation.DiscSystem.RawTOCEntry})">
+            <summary>appends the new entries to the provided list</summary>
+            <exception cref="T:System.InvalidOperationException"><see cref="F:BizHawk.Emulation.DiscSystem.Synthesize_A0A1A2_Job.IN_SessionFormat"/> is <see cref="F:BizHawk.Emulation.DiscSystem.SessionFormat.None"/> or a non-member</exception>
+        </member>
+        <member name="T:BizHawk.Emulation.DiscSystem.Synthesize_DiscTOC_From_RawTOCEntries_Job">
+            <summary>
+            Synthesizes the TOC from a set of raw entries.
+            When a disc drive firmware reads the lead-in area, it builds this TOC from finding q-mode 1 sectors in the Q subchannel of the lead-in area.
+            Question: I guess it must ignore q-mode != 1? what else would it do with it?
+            </summary>
+        </member>
+        <member name="M:BizHawk.Emulation.DiscSystem.Synthesize_DiscTracks_From_DiscTOC_Job.Run">
+            <exception cref="T:System.InvalidOperationException">first track of <see cref="P:BizHawk.Emulation.DiscSystem.Synthesize_DiscTracks_From_DiscTOC_Job.TOCRaw"/> is not <c>1</c></exception>
+        </member>
+        <member name="T:BizHawk.Emulation.DiscSystem.Synthesize_LeadoutJob">
+            <summary>
+            generates lead-out sectors according to very crude approximations
+            TODO - this isn't being used right now
+            </summary>
+        </member>
+        <member name="T:BizHawk.Emulation.DiscSystem.ESectorSynthPart">
+            <summary>
+            Indicates which part of a sector are needing to be synthesized.
+            Sector synthesis may create too much data, but this is a hint as to what's needed
+            TODO - add a flag indicating whether clearing has happened
+            TODO - add output to the job indicating whether interleaving has happened. let the sector reader be responsible
+            </summary>
+        </member>
+        <member name="F:BizHawk.Emulation.DiscSystem.ESectorSynthPart.Header16">
+            <summary>
+            The data sector header is required. There's no header for audio tracks/sectors.
+            </summary>
+        </member>
+        <member name="F:BizHawk.Emulation.DiscSystem.ESectorSynthPart.User2048">
+            <summary>
+            The main 2048 user data bytes are required
+            </summary>
+        </member>
+        <member name="F:BizHawk.Emulation.DiscSystem.ESectorSynthPart.ECC276">
+            <summary>
+            The 276 bytes of error correction are required
+            </summary>
+        </member>
+        <member name="F:BizHawk.Emulation.DiscSystem.ESectorSynthPart.EDC12">
+            <summary>
+            The 12 bytes preceding the ECC section are required (usually EDC and zero but also userdata sometimes)
+            </summary>
+        </member>
+        <member name="F:BizHawk.Emulation.DiscSystem.ESectorSynthPart.ECM288Complete">
+            <summary>
+            The entire possible 276+12=288 bytes of ECM data is required (ECC276|EDC12)
+            </summary>
+        </member>
+        <member name="F:BizHawk.Emulation.DiscSystem.ESectorSynthPart.ECMAny">
+            <summary>
+            An alias for ECM288Complete
+            </summary>
+        </member>
+        <member name="F:BizHawk.Emulation.DiscSystem.ESectorSynthPart.User2336">
+            <summary>
+            A mode2 userdata section is required: the main 2048 user bytes AND the ECC and EDC areas
+            </summary>
+        </member>
+        <member name="F:BizHawk.Emulation.DiscSystem.ESectorSynthPart.UserComplete">
+            <summary>
+            The complete sector userdata (2352 bytes) is required
+            </summary>
+        </member>
+        <member name="F:BizHawk.Emulation.DiscSystem.ESectorSynthPart.UserAny">
+            <summary>
+            An alias for UserComplete
+            </summary>
+        </member>
+        <member name="F:BizHawk.Emulation.DiscSystem.ESectorSynthPart.User2352">
+            <summary>
+            An alias for UserComplete
+            </summary>
+        </member>
+        <member name="F:BizHawk.Emulation.DiscSystem.ESectorSynthPart.SubchannelP">
+            <summary>
+            SubP is required
+            </summary>
+        </member>
+        <member name="F:BizHawk.Emulation.DiscSystem.ESectorSynthPart.SubchannelQ">
+            <summary>
+            SubQ is required
+            </summary>
+        </member>
+        <member name="F:BizHawk.Emulation.DiscSystem.ESectorSynthPart.Subchannel_RSTUVW">
+            <summary>
+            Subchannels R-W (all except for P and Q)
+            </summary>
+        </member>
+        <member name="F:BizHawk.Emulation.DiscSystem.ESectorSynthPart.SubcodeComplete">
+            <summary>
+            Complete subcode is required
+            </summary>
+        </member>
+        <member name="F:BizHawk.Emulation.DiscSystem.ESectorSynthPart.SubcodeAny">
+            <summary>
+            Any of the subcode might be required (just another way of writing SubcodeComplete)
+            </summary>
+        </member>
+        <member name="F:BizHawk.Emulation.DiscSystem.ESectorSynthPart.SubcodeDeinterleave">
+            <summary>
+            The subcode should be deinterleaved
+            </summary>
+        </member>
+        <member name="F:BizHawk.Emulation.DiscSystem.ESectorSynthPart.Complete2448">
+            <summary>
+            The 100% complete sector is required including 2352 bytes of userdata and 96 bytes of subcode
+            </summary>
+        </member>
+        <member name="T:BizHawk.Emulation.DiscSystem.ISectorSynthJob2448">
+            <summary>
+            Basic unit of sector synthesis
+            </summary>
+        </member>
+        <member name="M:BizHawk.Emulation.DiscSystem.ISectorSynthJob2448.Synth(BizHawk.Emulation.DiscSystem.SectorSynthJob)">
+            <summary>
+            Synthesizes a sctor with the given job parameters
+            </summary>
+        </member>
+        <member name="T:BizHawk.Emulation.DiscSystem.SectorSynthJob">
+            <summary>
+            Not a proper job? maybe with additional flags, it could be
+            </summary>
+        </member>
+        <member name="T:BizHawk.Emulation.DiscSystem.ArraySectorSynthProvider">
+            <summary>
+            an ISectorSynthProvider that just returns a value from an array of pre-made sectors
+            </summary>
+        </member>
+        <member name="T:BizHawk.Emulation.DiscSystem.SimpleSectorSynthProvider">
+            <summary>
+            an ISectorSynthProvider that just returns a fixed synthesizer
+            </summary>
+        </member>
+        <member name="T:BizHawk.Emulation.DiscSystem.ConditionalSectorSynthProvider">
+            <summary>
+            Returns 'Patch' synth if the provided condition is met
+            </summary>
+        </member>
+        <member name="T:BizHawk.Emulation.DiscSystem.ISectorSynthProvider">
+            <summary>
+            When creating a disc, this is set with a callback that can deliver an ISectorSynthJob2448 for the given LBA
+            </summary>
+        </member>
+        <member name="M:BizHawk.Emulation.DiscSystem.ISectorSynthProvider.Get(System.Int32)">
+            <summary>
+            Retrieves an ISectorSynthJob2448 for the given LBA
+            </summary>
+        </member>
+        <member name="T:BizHawk.Emulation.DiscSystem.SectorSynthParams">
+            <summary>
+            Generic parameters for sector synthesis.
+            To cut down on resource utilization, these can be stored in a disc and are tightly coupled to
+            the SectorSynths that have been setup for it
+            </summary>
+        </member>
+        <member name="M:BizHawk.Emulation.DiscSystem.SynthUtils.SubQ_SynthChecksum(System.Byte[],System.Int32)">
+            <summary>
+            Calculates the checksum of the provided Q subchannel buffer and emplaces it
+            </summary>
+            <param name="buf12">12 byte Q subchannel buffer: input and output buffer for operation</param>
+            <param name="offset">location within buffer of Q subchannel</param>
+        </member>
+        <member name="M:BizHawk.Emulation.DiscSystem.SynthUtils.SubQ_CalcChecksum(System.Byte[],System.Int32)">
+            <summary>
+            Calculates the checksum of the provided Q subchannel buffer
+            </summary>
+        </member>
+        <member name="M:BizHawk.Emulation.DiscSystem.SynthUtils.SubQ_Serialize(System.Byte[],System.Int32,BizHawk.Emulation.DiscSystem.SubchannelQ@)">
+            <summary>
+            Serializes the provided SubchannelQ structure into a buffer
+            Returns the crc, calculated or otherwise.
+            </summary>
+        </member>
+        <member name="M:BizHawk.Emulation.DiscSystem.SynthUtils.SubP(System.Byte[],System.Int32,System.Boolean)">
+            <summary>
+            Synthesizes the typical subP data into the provided buffer depending on the indicated pause flag
+            </summary>
+        </member>
+        <member name="M:BizHawk.Emulation.DiscSystem.SynthUtils.SectorHeader(System.Byte[],System.Int32,System.Int32,System.Byte)">
+            <summary>
+            Synthesizes a data sector header
+            </summary>
+        </member>
+        <member name="M:BizHawk.Emulation.DiscSystem.SynthUtils.SectorSubHeader(System.Byte[],System.Int32,System.Byte)">
+            <summary>
+            Synthesizes a Mode2 sector subheader
+            </summary>
+        </member>
+        <member name="M:BizHawk.Emulation.DiscSystem.SynthUtils.EDC_Mode1(System.Byte[],System.Int32)">
+            <summary>
+            Synthesizes the EDC checksum for a Mode 1 data sector (and puts it in place)
+            </summary>
+        </member>
+        <member name="M:BizHawk.Emulation.DiscSystem.SynthUtils.EDC_Mode2_Form1(System.Byte[],System.Int32)">
+            <summary>
+            Synthesizes the EDC checksum for a Mode 2 Form 1 data sector (and puts it in place)
+            </summary>
+        </member>
+        <member name="M:BizHawk.Emulation.DiscSystem.SynthUtils.EDC_Mode2_Form2(System.Byte[],System.Int32)">
+            <summary>
+            Synthesizes the EDC checksum for a Mode 2 Form 2 data sector (and puts it in place)
+            </summary>
+        </member>
+        <member name="M:BizHawk.Emulation.DiscSystem.SynthUtils.ECM_Mode1(System.Byte[],System.Int32)">
+            <summary>
+            Synthesizes the complete ECM data (EDC + ECC) for a Mode 1 data sector (and puts it in place)
+            Make sure everything else in the sector header and userdata is done before calling this
+            </summary>
+        </member>
+        <member name="M:BizHawk.Emulation.DiscSystem.SynthUtils.ECM_Mode2_Form1(System.Byte[],System.Int32)">
+            <summary>
+            Synthesizes the complete ECM data (Subheader + EDC + ECC) for a Mode 2 Form 1 data sector (and puts it in place)
+            Make sure everything else in the sector header and userdata is done before calling this
+            </summary>
+        </member>
+        <member name="M:BizHawk.Emulation.DiscSystem.SynthUtils.ECM_Mode2_Form2(System.Byte[],System.Int32)">
+            <summary>
+            Synthesizes the complete ECM data (Subheader + EDC) for a Mode 2 Form 2 data sector (and puts it in place)
+            Make sure everything else in the userdata is done before calling this
+            </summary>
+        </member>
+        <member name="M:BizHawk.Emulation.DiscSystem.SynthUtils.InterleaveSubcode(System.Byte[],System.Int32,System.Byte[],System.Int32)">
+            <summary>
+            Converts the useful (but unrealistic) deinterleaved subchannel data into the useless (but realistic) interleaved format.
+            in_buf and out_buf should not overlap
+            </summary>
+        </member>
+        <member name="M:BizHawk.Emulation.DiscSystem.SynthUtils.DeinterleaveSubcode(System.Byte[],System.Int32,System.Byte[],System.Int32)">
+            <summary>
+            Converts the useless (but realistic) interleaved subchannel data into a useful (but unrealistic) deinterleaved format.
+            in_buf and out_buf should not overlap
+            </summary>
+        </member>
+        <member name="M:BizHawk.Emulation.DiscSystem.SynthUtils.InterleaveSubcodeInplace(System.Byte[],System.Int32)">
+            <summary>
+            Converts the useful (but unrealistic) deinterleaved data into the useless (but realistic) interleaved subchannel format.
+            </summary>
+        </member>
+        <member name="M:BizHawk.Emulation.DiscSystem.SynthUtils.DeinterleaveSubcodeInplace(System.Byte[],System.Int32)">
+            <summary>
+            Converts the useless (but realistic) interleaved subchannel data into a useful (but unrealistic) deinterleaved format.
+            </summary>
+        </member>
+        <member name="T:BizHawk.Emulation.DiscSystem.LibChd">
+            <summary>
+            Bindings matching libchdr's chd.h
+            In practice, we use chd-rs, whose c api matches libchdr's
+            TODO: should this be common-ized? chd isn't limited to discs, it could be used for hard disk images (e.g. for MAME)
+            </summary>
+        </member>
+        <member name="T:BizHawk.Emulation.DiscSystem.LibChd.chd_sub_type">
+            <summary>
+            These sub types seem to be intended to match up with how cdrdao defines .toc sub types
+            </summary>
+        </member>
+        <member name="M:BizHawk.Emulation.DiscSystem.ReflectionCache.EmbeddedResourceStream(System.String)">
+            <exception cref="T:System.ArgumentException">not found</exception>
+        </member>
+        <member name="M:PolyfillExtensions.WaitAsync``1(System.Threading.Tasks.Task{``0},System.Threading.CancellationToken)">
+            <summary>
+            Gets a <see cref="T:System.Threading.Tasks.Task`1"/> that will complete when the <paramref name="task"/> completes or when the specified <paramref name="cancellationToken"/> has cancellation requested.
+            </summary>
+            <typeparam name="TResult">The type of the task result.</typeparam>
+            <param name="task">The task to wait on for completion.</param>
+            <param name="cancellationToken">The <see cref="T:System.Threading.CancellationToken"/> to monitor for a cancellation request.</param>
+            <returns>The <see cref="T:System.Threading.Tasks.Task`1"/> representing the asynchronous wait.</returns>
+        </member>
+    </members>
+</doc>

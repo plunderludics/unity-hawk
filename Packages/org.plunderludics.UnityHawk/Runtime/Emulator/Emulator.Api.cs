@@ -2,10 +2,10 @@
 // Including methods for interfacing with the BizHawk API (loading/saving states, etc)
 
 using System;
+using System.Linq;
 using UnityEngine;
 
-using NaughtyAttributes;
-using System.Linq;
+using Plunderludics.UnityHawk.Shared;
 
 namespace UnityHawk {
 public partial class Emulator {

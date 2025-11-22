@@ -19,7 +19,7 @@ using EditorBrowsableState = System.ComponentModel.EditorBrowsableState;
 using UnityEditor;
 #endif
 
-using UnityEngine.Serialization;
+using Plunderludics.UnityHawk.Shared;
 
 namespace UnityHawk {
 
