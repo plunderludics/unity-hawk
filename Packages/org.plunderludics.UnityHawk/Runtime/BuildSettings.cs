@@ -3,10 +3,11 @@
 // [Probably some way to strip it out of build I guess?]
 using UnityEngine;
 using System.Collections.Generic;
-using NaughtyAttributes;
 
 using UnityEngine.SceneManagement;
 using System.Linq;
+
+using TriInspector;
 
 namespace UnityHawk {
 
@@ -24,7 +25,7 @@ public class BuildSettings : MonoBehaviour {
     [Tooltip("Extra bizhawk assets to include in the build")]
     public List<BizhawkAsset> extraAssets;
     
-    [ReadOnly, SerializeField]
+    [ReadOnly, ShowInInspector]
     [Tooltip("These are all the bizhawk assets that will be included in the build")]
     List<BizhawkAsset> includedAssets;
 

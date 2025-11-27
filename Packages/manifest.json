@@ -6,15 +6,16 @@
     "com.unity.postprocessing": "3.4.0",
     "com.unity.modules.animation": "1.0.0",
     "com.unity.modules.audio": "1.0.0",
-    "com.unity.modules.imgui": "1.0.0"
+    "com.unity.modules.imgui": "1.0.0",
+    "com.codewriter.triinspector": "1.15.1"
   },
   "scopedRegistries": [
     {
       "name": "package.openupm.com",
       "url": "https://package.openupm.com",
       "scopes": [
-        "com.openupm",
-        "com.dbrizov.naughtyattributes"
+        "com.codewriter.triinspector",
+        "com.openupm"
       ]
     }
   ]
