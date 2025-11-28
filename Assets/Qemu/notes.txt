@@ -1,0 +1,43 @@
+# Main guide I followed for win95: https://wiki.qemu.org/Documentation/GuestOperatingSystems/Windows95
+# Also useful: https://catzy007.github.io/loader.html?post=2021-04-05-Windows-95-on-Linux-QEMU
+
+# Windows XP:
+# https://computernewb.com/wiki/QEMU/Guests/Windows_XP
+
+# Basic startup
+# $QEMU/qemu-system-i386.exe -hda win95.qcow2 -m 64 -cpu 486 -vga cirrus -device sb16,audiodev=snd0 -audiodev dsound,id=snd0
+
+# Create iso:
+# mkisofs -o minesweeper.iso -J -R "Minesweeper-Windows-95"
+
+# To run AOE:
+# $QEMU/qemu-system-i386.exe -netdev user,id=mynet0 -device ne2k_isa,netdev=mynet0 -hda win95.qcow2 -m 64 -cpu 486 -vga cirrus -cdrom ./MS_Age_of_Empires_Win95-NT4_Eng_1997/MS-AgeOfEmpires-Eng.cue
+
+# To create a snapshot / overlay hard drive image (https://wiki.qemu.org/Documentation/CreateSnapshot)
+# $QEMU/qemu-img.exe create -f qcow2 -b win95.qcow2 -F qcow2 ./Assets/Qemu/qemu~/snap1.qcow2
+# Then run qemu with -hda snap1.qcow2
+
+# There are two state-saving mechanisms in qemu which have different pros/cons
+# One called savevm/loadvm
+# - Saves *within* the current disk image file (very inconvenient, doesn't seem easy to extract/manipulate)
+# - Also seems to be incompatible with disk image overlays / '-snapshot' mode, really annoying
+# - Saves disk state (as a diff I think) and internal vm state (cpu + ram)
+# - Save and load at runtime is instantaneous
+
+# Another called 'migrate'
+# - Saves to a standalone file, not attached to disk image like savevm
+# - Only saves vm state, not disk contents
+# - Seems a state file can only be loaded when the qemu process starts, can't quick-load at runtime
+#  - (Except maybe with 'cpr', but haven't got that to work so far: https://www.qemu.org/docs/master/devel/migration/CPR.html)
+
+# Save via migration (from qemu console):
+# migrate "exec: cat > save.state"
+
+# Load (add to launch command args):
+# -incoming "exec: cat save.state"
+
+# To save and load via savevm/loadvm (from qemu console):
+# savevm mysavestate
+# loadvm mysavestate
+
+# Leaning towards migrate for convenient general use but savevm/loadvm seems like the only way to get fast loadstate at runtmie 
