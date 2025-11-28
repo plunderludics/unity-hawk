@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using Plunderludics.UnityHawk.Shared;
 
-using NaughtyAttributes;
+using TriInspector;
 
 namespace UnityHawk {
 [ExecuteInEditMode]
@@ -12,7 +12,7 @@ public class MemoryApiTool : MonoBehaviour
     public Emulator emulator;
 
     public string hexAddress = "";
-    [SerializeField, ReadOnly] string _value;
+    [ShowInInspector, ReadOnly] string _value;
     public WatchType type = WatchType.Unsigned;
     public int size = 4;
     public bool isBigEndian = false;

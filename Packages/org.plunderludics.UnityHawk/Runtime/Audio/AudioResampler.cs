@@ -1,29 +1,28 @@
 using UnityEngine;
-using NaughtyAttributes;
 using System.Collections.Generic;
 using System;
 using System.Collections.Concurrent;
+
+using TriInspector;
 
 namespace UnityHawk {
 
 [Serializable]
 internal class AudioResampler {
-    [AllowNesting]
+    // [AllowNesting]
     [Tooltip("Higher value means more audio latency. Lower value may cause crackles and pops")]
     public int idealBufferSize = 512; // [TODO: this should be much less (maybe half or less) than SharedAudioBuffer.MaxBufferSize - should probably enforce somehow]
 
-    [AllowNesting]
+    // [AllowNesting]
     // [ReadOnly, SerializeField]
     private double _avgSamplesProvided;
 
     private RingBuffer<short> _sourceBuffer;
     public bool HasSourceBuffer => _sourceBuffer != null;
 
-    [AllowNesting]
     public int movingAverageN = 1024; // Has to be biiig because the input is so unstable
     private List<int> _samplesProvidedHistory;
 
-    [AllowNesting]
     [Tooltip("How much pressure to apply to keep the buffer short. Higher value will reduce latency but can cause pitch distortion")]
     public float excessPressureFactor = 0.01f;
 
@@ -33,13 +32,13 @@ internal class AudioResampler {
 
     private const int ChannelCount = 2;
     
-    [AllowNesting]
-    [ReadOnly, SerializeField]
+    [ShowInInspector, ReadOnly]
     private int sourceBufferCount;
 
-    [AllowNesting]
-    [ReadOnly, SerializeField]
     private double resampleRatio = 1f;
+    
+    [ShowInInspector] // TriInspector doesn't support doubles
+    float ResampleRatio => (float)resampleRatio;
 
     private const int ConsecutiveEmptyFramesToStopAudio = 5; // If we get more empty frames than this, stop processing audio
     private int _consecutiveEmptyFrames = 0;

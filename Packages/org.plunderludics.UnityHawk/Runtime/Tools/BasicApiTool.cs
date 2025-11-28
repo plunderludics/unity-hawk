@@ -2,7 +2,8 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-using NaughtyAttributes;
+
+using TriInspector;
 
 namespace UnityHawk {
 public class BasicApiTool : MonoBehaviour
