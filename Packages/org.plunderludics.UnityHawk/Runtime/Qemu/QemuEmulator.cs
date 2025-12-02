@@ -9,15 +9,22 @@ using UnityEngine;
 
 using TriInspector;
 
+namespace UnityHawk.QEMU {
 public class QemuEmulator : MonoBehaviour
 {
     Process _qemuProcess;
     QemuVncClient _vncClient;
     QemuQmpClient _qmpClient;
     
+    [ShowInInspector] bool VncConnected => _vncClient != null && _vncClient.IsConnected;
+    [ShowInInspector] bool VncInternalClientConnected => _vncClient != null && _vncClient.IsInternalClientConnected;
+
     public bool enableQmp = true;
     public bool showGui = false;
     public bool passInputFromUnity = true;
+
+    // TODO I guess this should be an asset that gets imported, idk
+    public string diskImagePath = "win95.qcow2"; // Relative to /Assets/
 
     public string saveStateName = "";
 
@@ -27,7 +34,6 @@ public class QemuEmulator : MonoBehaviour
 
     [TextArea(3, 10)]
     public string qemuArgs = @"
-    -hda win95.qcow2
     -m 64
     -cpu pentium
     -vga cirrus
@@ -42,14 +48,17 @@ public class QemuEmulator : MonoBehaviour
     public Texture2D Texture => _vncClient?.Texture;
 
     [Button]
-    public void Restart() {
+    public async void Restart() {
         StopQemu();
-        StartQemuAsync();
+        await StartQemuAsync();
     }
 
     async Task StartQemuAsync()
-    {        
-        var qemuExe = "Packages/org.plunderludics.UnityHawk/qemu~/qemu-system-i386.exe";
+    {
+        // Use Path.Combine to take advantage of unity's dark magic (somehow redirects to the actual package location in packagecache if needed)
+        var qemuExe = Path.Combine("Packages", "org.plunderludics.UnityHawk", "qemu~", "qemu-system-i386.exe");
+        qemuExe = Path.GetFullPath(qemuExe);
+        UnityEngine.Debug.Log($"QEMU executable: {qemuExe}");
 
         var process = new Process();
         process.StartInfo.FileName = qemuExe;
@@ -63,6 +72,12 @@ public class QemuEmulator : MonoBehaviour
         {
             process.StartInfo.ArgumentList.Add("-display");
             process.StartInfo.ArgumentList.Add("sdl");
+        }
+
+        if (!string.IsNullOrEmpty(diskImagePath))
+        {
+            process.StartInfo.ArgumentList.Add("-hda");
+            process.StartInfo.ArgumentList.Add(diskImagePath);
         }
 
         // Add VNC display - :0 means display 0, which is port 5900
@@ -126,7 +141,7 @@ public class QemuEmulator : MonoBehaviour
 
     void Update() {
         // Update VNC client (though it runs async, this ensures it's processing)
-        if (_vncClient != null && _vncClient.IsConnected)
+        if (_vncClient != null)
         {
             _vncClient.Update();
             
@@ -141,6 +156,7 @@ public class QemuEmulator : MonoBehaviour
         }
     }
 
+    // TODO move into some kind of BasicInputProvider type of class
     void HandleInput()
     {
         if (!passInputFromUnity)
@@ -170,29 +186,43 @@ public class QemuEmulator : MonoBehaviour
         bool middleButton = Input.GetMouseButton(2);
         bool rightButton = Input.GetMouseButton(1);
 
-        _vncClient.SendMouseEvent(vncX, vncY, leftButton, middleButton, rightButton);
+        SendMouseEvent(vncX, vncY, leftButton, middleButton, rightButton);
 
-        // Keyboard input - send key down/up events
-        // Basic key mapping (you may need to expand this)
+        // Keyboard input
         foreach (KeyCode key in System.Enum.GetValues(typeof(KeyCode)))
         {
             if (Input.GetKeyDown(key))
             {
-                int keysym = UnityKeyCodeToVncKeysym(key);
-                if (keysym != 0)
-                {
-                    _vncClient.SendKeyEvent(keysym, true);
-                }
+                SendKeyEvent(key, true);
             }
             if (Input.GetKeyUp(key))
             {
-                int keysym = UnityKeyCodeToVncKeysym(key);
-                if (keysym != 0)
-                {
-                    _vncClient.SendKeyEvent(keysym, false);
-                }
+                SendKeyEvent(key, false);
             }
         }
+    }
+
+    // x and y are pixel coordinates from top-left, in actual display resolution (or does the VNC framebuffer have different resolution?)
+    public void SendMouseEvent(int x, int y, bool leftButton, bool middleButton, bool rightButton) {
+        if (_vncClient == null || _vncClient.Texture == null) {
+            UnityEngine.Debug.LogWarning("VNC client not connected");
+            return;
+        }
+        _vncClient.SendMouseEvent(x, y, leftButton, middleButton, rightButton);
+    }
+
+    public void SendKeyEvent(KeyCode key, bool down) {
+        int keysym = UnityKeyCodeToVncKeysym(key);
+        if (keysym == 0) {
+            UnityEngine.Debug.LogWarning($"Unknown key: {key}");
+            return;
+        }
+        if (_vncClient == null || _vncClient.Texture == null) {
+            UnityEngine.Debug.LogWarning("VNC client not connected");
+            return;
+        }
+
+        _vncClient.SendKeyEvent(keysym, down);
     }
 
 
@@ -324,4 +354,4 @@ public class QemuEmulator : MonoBehaviour
         }
     }
 }
-
+}

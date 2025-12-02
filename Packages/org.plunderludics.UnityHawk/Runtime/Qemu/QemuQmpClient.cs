@@ -10,6 +10,7 @@ using UnityEngine;
 /// QEMU Machine Protocol (QMP) client for sending commands to QEMU.
 /// Handles connection, handshake, and command execution.
 /// </summary>
+namespace UnityHawk.QEMU {
 public class QemuQmpClient : IDisposable
 {
     private TcpClient _tcpClient;
@@ -68,24 +69,9 @@ public class QemuQmpClient : IDisposable
         catch (Exception e)
         {
             Debug.LogError($"Failed to connect to QMP socket: {e.Message}");
-            // Don't dispose here - let the caller handle cleanup
-            // Disposing in catch+rethrow can cause IL2CPP issues
             _isConnected = false;
             throw;
         }
-    }
-
-    /// <summary>
-    /// Connect to QEMU's QMP socket via Unix socket (Linux/Mac).
-    /// Note: This requires additional setup on Windows.
-    /// </summary>
-    /// <param name="socketPath">Path to Unix socket file</param>
-    public async Task ConnectUnixSocketAsync(string socketPath)
-    {
-        // On Windows, Unix sockets are not natively supported in .NET
-        // This would require a third-party library or named pipes
-        // For now, we'll throw an exception and recommend TCP
-        throw new NotImplementedException("Unix socket connection not implemented. Use TCP connection on Windows.");
     }
 
     /// <summary>
@@ -199,4 +185,4 @@ public class QemuQmpClient : IDisposable
         _tcpClient = null;
     }
 }
-
+}

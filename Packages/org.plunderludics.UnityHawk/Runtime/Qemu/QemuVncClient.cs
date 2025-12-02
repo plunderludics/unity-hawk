@@ -2,23 +2,31 @@ using System;
 using System.Threading.Tasks;
 using UnityEngine;
 using RemoteViewing.Vnc;
+using TriInspector;
+using System.Diagnostics;
 
 /// <summary>
 /// VNC client wrapper using RemoteViewing library for QEMU
 /// </summary>
+namespace UnityHawk.QEMU {
 public class QemuVncClient : IDisposable
 {
+    private string _host;
+    private int _display;
     private VncClient _vncClient;
     private Texture2D _texture;
     private bool _connected = false;
     private bool _needsUpdate = false;
     private object _updateLock = new object();
-    
+
     public bool IsConnected => _connected && _vncClient != null && _vncClient.IsConnected;
+    public bool IsInternalClientConnected => _vncClient != null && _vncClient.IsConnected;
     public Texture2D Texture => _texture;
 
     public async Task ConnectAsync(string host, int display)
     {
+        _host = host;
+        _display = display;
         try
         {
             int port = 5900 + display;
@@ -52,11 +60,11 @@ public class QemuVncClient : IDisposable
             _connected = true;
             
             // Texture will be created on main thread when first framebuffer update arrives
-            Debug.Log($"VNC connected! Resolution: {_vncClient.Framebuffer?.Width ?? 0}x{_vncClient.Framebuffer?.Height ?? 0}");
+            UnityEngine.Debug.Log($"VNC connected! Resolution: {_vncClient.Framebuffer?.Width ?? 0}x{_vncClient.Framebuffer?.Height ?? 0}");
         }
         catch (Exception e)
         {
-            Debug.LogError($"VNC connection error: {e.GetType().Name}: {e.Message}");
+            UnityEngine.Debug.LogError($"VNC connection error: {e.GetType().Name}: {e.Message}");
             _connected = false;
             throw;
         }
@@ -137,6 +145,13 @@ public class QemuVncClient : IDisposable
     {
         // Update texture on main thread when framebuffer changes
         UpdateTexture();
+
+        if (_vncClient != null && !_vncClient.IsConnected)
+        {
+            // Attempt to reconnect
+            UnityEngine.Debug.LogWarning("VNC client disconnected, attempting to reconnect");
+            // ConnectAsync(_host, _display);
+        }
     }
 
     /// <summary>
@@ -164,7 +179,7 @@ public class QemuVncClient : IDisposable
         }
         catch (Exception e)
         {
-            Debug.LogError($"Failed to send mouse event: {e.Message}");
+            UnityEngine.Debug.LogError($"Failed to send mouse event: {e.Message}");
         }
     }
 
@@ -184,12 +199,13 @@ public class QemuVncClient : IDisposable
         }
         catch (Exception e)
         {
-            Debug.LogError($"Failed to send key event: {e.Message}");
+            UnityEngine.Debug.LogError($"Failed to send key event: {e.Message}");
         }
     }
 
     public void Dispose()
     {
+        UnityEngine.Debug.LogWarning("Disposing VNC client");
         _connected = false;
         
         if (_vncClient != null)
@@ -239,4 +255,5 @@ public class UnityMainThreadDispatcher : MonoBehaviour
             _queue.Enqueue(action);
         }
     }
+}
 }
