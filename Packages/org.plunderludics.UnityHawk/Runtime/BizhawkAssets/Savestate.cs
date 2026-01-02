@@ -1,7 +1,8 @@
 ﻿using BizHawk.Emulation.Common;
-using NaughtyAttributes;
 using UnityEngine;
 using UnityEngine.Serialization;
+
+using TriInspector;
 
 namespace UnityHawk {
 

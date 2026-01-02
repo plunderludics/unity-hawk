@@ -6,11 +6,10 @@ using System.IO;
 using System.Diagnostics;
 using System.Linq;
 using System.Runtime.InteropServices;
-using NaughtyAttributes;
 using UnityEngine;
-using Debug = UnityEngine.Debug;
 using Unity.Profiling;
 using UnityEngine.Assertions;
+using Plunderludics.UnityHawk.Shared;
 using System.Threading;
 using EditorBrowsable = System.ComponentModel.EditorBrowsableAttribute;
 using EditorBrowsableState = System.ComponentModel.EditorBrowsableState;
@@ -18,8 +17,6 @@ using EditorBrowsableState = System.ComponentModel.EditorBrowsableState;
 #if UNITY_EDITOR
 using UnityEditor;
 #endif
-
-using Plunderludics.UnityHawk.Shared;
 
 namespace UnityHawk {
 
@@ -55,28 +52,6 @@ public partial class Emulator : MonoBehaviour {
         false;
 #endif
 
-    [Tooltip("if the emulator launches on start")]
-    public bool runOnEnable = true;
-
-    [Header("Game")]
-    [Tooltip("Savestate file to load")]
-    public Savestate saveStateFile;
-
-    /// .
-    bool SaveStateFileIsNull => saveStateFile is null;
-
-    [HideIf(nameof(SaveStateFileIsNull))]
-    [Tooltip("select rom file automatically based on savestate")]
-    public bool autoSelectRomFile = true;
-
-    /// .
-    //TODO: even if the rom is not in the db, in theory we can still match to a savestate using hash or filename? Not very concerned about this edge case though
-    bool EnableRomFileSelection => !autoSelectRomFile || SaveStateFileIsNull || saveStateFile.RomInfo.NotInDatabase;
-
-    [EnableIf(nameof(EnableRomFileSelection))]
-    [Tooltip("Rom file to run")]
-    public Rom romFile;
-
     ///// Rendering
     public enum RenderMode {
         AttachedRenderer,
@@ -84,118 +59,19 @@ public partial class Emulator : MonoBehaviour {
         RenderTexture,
     }
 
-    [Header("Rendering")]
-    public RenderMode renderMode;
-
-    [ShowIf(nameof(renderMode), RenderMode.ExternalRenderer)]
-    public Renderer targetRenderer;
-
-    [ShowIf(nameof(renderMode), RenderMode.RenderTexture)]
-    [Tooltip("render to a specific render texture instead of creating a default one")]
-    public bool customRenderTexture = false;
-
-    [EnableIf(nameof(customRenderTexture))]
-    [Tooltip("the render texture to write to")]
-    public RenderTexture renderTexture;
-
-    ///// Input
-    [Header("Input")]
-    [Tooltip("If true, Unity will pass keyboard input to the emulator (only in play mode!). If false, BizHawk will accept input directly from the OS")]
-    public bool passInputFromUnity = true;
-
-    [Tooltip("If null and no InputProvider component attached, defaults to BasicInputProvider. Subclass InputProvider for custom behavior.")]
-    [ShowIf(nameof(passInputFromUnity))]
-    public InputProvider inputProvider = null;
-
-    ///// Audio
-    [Header("Audio")]
-    [Tooltip("If true, audio will be played via an attached AudioSource (may induce some latency). If false, BizHawk will play audio directly to the OS")]
-    public bool captureEmulatorAudio = false;
-
-    [ShowIf(nameof(captureEmulatorAudio))]
-    [SerializeField]
-    AudioResampler audioResampler;
-
-    ///// Additional Files
-    [Header("Additional Files")]
-    [Tooltip("a lua script file that will be loaded by the emulator (.lua)")]
-    public LuaScript luaScriptFile;
-
-    [Tooltip("a bizhawk ram watch file to open alongside the emulator (.wch)")]
-    public RamWatch ramWatchFile;
-
-    ///// Bizhawk Config
-    [FormerlySerializedAs("configFile")]
-    [Foldout("BizHawk Config")]
-    [Tooltip("a BizHawk config file (.ini) that will be copied for this instance")]
-    public Config baseConfigFile;
-
-    ///// Development
-    [Foldout("Development")]
-    [Tooltip("if the bizhawk gui should be visible while running in unity editor")]
-    public bool showBizhawkGuiInEditor = false;
-
-    [Foldout("Development")]
-    [ReadOnlyWhenPlaying]
-    [Tooltip("whether bizhawk should run when in edit mode")]
-#pragma warning disable CS0109
-    // Hides inherited member; new keyword is not required
-    // (I don't get why but unity seems to flip-flop between complaining the new keyword is missing or that it's redundant - just ignore)
-    public new bool runInEditMode = false;
-#pragma warning restore CS0109
-
-    [Foldout("Development")]
-    [ShowIf(nameof(runInEditMode))]
-    [ReadOnlyWhenPlaying]
-    [Tooltip("Whether BizHawk will accept input when window is unfocused (in edit mode)")]
-    public bool acceptBackgroundInput = true;
-
-    [Foldout("Development")]
-    [SerializeField] bool muteBizhawkInEditMode = true;
-
-    ///// Debug
-    [Foldout("Debug")]
-    [OnValueChanged(nameof(OnSetLogLevel))]
-    [SerializeField] Logger.LogLevel logLevel = Logger.LogLevel.Warning;
-
-    [Foldout("Debug")]
-    [SerializeField] UnityHawkConfig config;
-
-    [Foldout("Debug")]
-    [Tooltip("if the bizhawk gui should be visible in the build")]
-#pragma warning disable CS0414 // Suppress 'assigned but never used' - only unused in editor
-    [SerializeField] bool showBizhawkGuiInBuild = false;
-#pragma warning restore CS0414
-
-    [Foldout("Debug")]
-    [Tooltip("Prevent BizHawk from popping up windows for warnings and errors; these will still appear in logs")]
-    [SerializeField] bool suppressBizhawkPopups = true;
-
-    [Foldout("Debug")]
-    [SerializeField] bool writeBizhawkLogs = true;
-
-    [ShowIf(nameof(writeBizhawkLogs))]
-    [Foldout("Debug")]
-    [ReadOnly, SerializeField] string bizhawkLogLocation;
-
-    ///// State
-    [Foldout("State")]
-    [ReadOnly, SerializeField] Status status; // Just for displaying in inspector - the actual internal state is _status but we don't want to serialize that
-
-    /// the actual internal state of the emulator
-    Status _status;
-
-
-    [Foldout("State")]
-    [ReadOnly, SerializeField] int _currentFrame; // The frame index of the most-recently grabbed texture
-
-    [Foldout("State")]
-    [ReadOnly, SerializeField] string _systemId; // The system ID of the current core (e.g. "N64", "PSX", etc.)
-
     ///// props
     /// the bizhawk emulator process
     Process _emuhawk;
     
+    /// the current emulator status
+    Status _status;
+
+    /// the current frame index (of most-recently grabbed texture)
+    int _currentFrame;
+
+    /// the system ID of the current core (e.g. "N64", "PSX", etc.)
+    string _systemId;
+
     /// Helper method to check if the emulator process is alive
     bool IsEmuHawkProcessAlive {
         get {
@@ -874,13 +750,6 @@ public partial class Emulator : MonoBehaviour {
             }
         }
     }
-
-    #if UNITY_EDITOR
-        [Button]
-        private void ShowBizhawkLogInOS() {
-            EditorUtility.RevealInFinder(bizhawkLogLocation);
-        }
-    #endif
 
     void WriteInputToBuffer(List<InputEvent> inputEvents) {
         // Get input from inputProvider, serialize and write to the shared memory
