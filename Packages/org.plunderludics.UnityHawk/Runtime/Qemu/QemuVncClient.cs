@@ -149,7 +149,7 @@ public class QemuVncClient : IDisposable
         if (_vncClient != null && !_vncClient.IsConnected)
         {
             // Attempt to reconnect
-            UnityEngine.Debug.LogWarning("VNC client disconnected, attempting to reconnect");
+            // UnityEngine.Debug.LogWarning("VNC client disconnected, attempting to reconnect");
             // ConnectAsync(_host, _display);
         }
     }

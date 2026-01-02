@@ -21,7 +21,8 @@ public class QemuEmulator : MonoBehaviour
 
     public bool enableQmp = true;
     public bool showGui = false;
-    public bool passInputFromUnity = true;
+    public bool passKeyboardInputFromUnity = true;
+    public bool passMouseInputFromUnity = true;
 
     // TODO I guess this should be an asset that gets imported, idk
     public string diskImagePath = "win95.qcow2"; // Relative to /Assets/
@@ -30,7 +31,7 @@ public class QemuEmulator : MonoBehaviour
 
     [SerializeField] private int vncPort = 5900;
     [SerializeField] private int qmpPort = 4444;
-    [SerializeField] private RenderTexture outputTexture;
+    [SerializeField] private RenderTexture outputTexture; // This is kind of unnecessary should just use _vncClient.Texture directly, ideally..
 
     [TextArea(3, 10)]
     public string qemuArgs = @"
@@ -46,6 +47,9 @@ public class QemuEmulator : MonoBehaviour
 
 
     public Texture2D Texture => _vncClient?.Texture;
+
+    public int Width => _vncClient?.Texture?.width ?? -1;
+    public int Height => _vncClient?.Texture?.height ?? -1;
 
     [Button]
     public async void Restart() {
@@ -159,45 +163,51 @@ public class QemuEmulator : MonoBehaviour
     // TODO move into some kind of BasicInputProvider type of class
     void HandleInput()
     {
-        if (!passInputFromUnity)
+        if (!passKeyboardInputFromUnity && !passMouseInputFromUnity)
             return;
 
         if (_vncClient == null || _vncClient.Texture == null)
             return;
 
-        var texture = _vncClient.Texture;
-        int vncWidth = texture.width;
-        int vncHeight = texture.height;
+        if (passMouseInputFromUnity) {
+            var texture = _vncClient.Texture;
+            int vncWidth = texture.width;
+            int vncHeight = texture.height;
 
-        // Mouse input
-        Vector3 mousePos = Input.mousePosition;
-        
-        // Convert Unity screen coordinates to VNC coordinates
-        // Assuming the texture is displayed in a UI element or render texture
-        // For now, map directly from screen space to VNC space
-        // You may need to adjust this based on how you're displaying the texture
-        int vncX = Mathf.Clamp((int)(mousePos.x * vncWidth / Screen.width), 0, vncWidth - 1);
-        int vncY = Mathf.Clamp((int)(mousePos.y * vncHeight / Screen.height), 0, vncHeight - 1);
-        
-        // Flip Y coordinate (Unity has origin at bottom-left, VNC at top-left)
-        vncY = vncHeight - 1 - vncY;
+            // Mouse input
+            Vector3 mousePos = Input.mousePosition;
+            
+            // Convert Unity screen coordinates to VNC coordinates
+            // Assuming the texture is displayed in a UI element or render texture
+            // For now, map directly from screen space to VNC space
+            // You may need to adjust this based on how you're displaying the texture
 
-        bool leftButton = Input.GetMouseButton(0);
-        bool middleButton = Input.GetMouseButton(2);
-        bool rightButton = Input.GetMouseButton(1);
 
-        SendMouseEvent(vncX, vncY, leftButton, middleButton, rightButton);
+            int vncX = Mathf.Clamp((int)(mousePos.x * vncWidth / Screen.width), 0, vncWidth - 1);
+            int vncY = Mathf.Clamp((int)(mousePos.y * vncHeight / Screen.height), 0, vncHeight - 1);
+            
+            // Flip Y coordinate (Unity has origin at bottom-left, VNC at top-left)
+            vncY = vncHeight - 1 - vncY;
 
-        // Keyboard input
-        foreach (KeyCode key in System.Enum.GetValues(typeof(KeyCode)))
-        {
-            if (Input.GetKeyDown(key))
+            bool leftButton = Input.GetMouseButton(0);
+            bool middleButton = Input.GetMouseButton(2);
+            bool rightButton = Input.GetMouseButton(1);
+            
+            SendMouseEvent(vncX, vncY, leftButton, middleButton, rightButton);
+        }
+
+        if (passKeyboardInputFromUnity) {
+            // Keyboard input
+            foreach (KeyCode key in System.Enum.GetValues(typeof(KeyCode)))
             {
-                SendKeyEvent(key, true);
-            }
-            if (Input.GetKeyUp(key))
-            {
-                SendKeyEvent(key, false);
+                if (Input.GetKeyDown(key))
+                {
+                    SendKeyEvent(key, true);
+                }
+                if (Input.GetKeyUp(key))
+                {
+                    SendKeyEvent(key, false);
+                }
             }
         }
     }
