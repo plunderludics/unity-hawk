@@ -27,6 +27,7 @@ namespace UnityHawk.Editor {
     /* Nintendo Gameboy Advance: */ "gba",
     /* NES: */ "nes", "fds", "unf", "nsf",
     /* Super NES: */ "smc", "sfc", "bs",
+    /* MS-DOS: */ "iso",
     /* Nintendo Virtual Boy: */ "vb",
     /* Nintendo 64: */ "z64", "v64", "n64",
     /* Nintendo 64 Disk Drive: */ "ndd",
