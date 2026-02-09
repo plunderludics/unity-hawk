@@ -863,7 +863,7 @@ public partial class Emulator : MonoBehaviour {
         // TODO: cache textures
         _localTexture = new Texture2D(width, height, TextureFormat, false);
 
-        if (!customRenderTexture || renderTexture == null) {
+        if (!customRenderTexture) {
             renderTexture = new RenderTexture(width, height, depth:0, format:RenderTextureFormat);
             renderTexture.name = name;
         }
