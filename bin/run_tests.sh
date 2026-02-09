@@ -13,27 +13,28 @@ cmd="\"${UNITY_EXE}\"
 echo "Running EditMode tests"
 
 # (Seems like we can't redirect logs to stdout so just write to file and tail -f)
-> test_log_editmode.txt
-tail -f test_log_editmode.txt | grep "\[unity-hawk\] \[test\]" &
+mkdir -p artifacts
+> artifacts/test_log_editmode.txt
+tail -f artifacts/test_log_editmode.txt | grep "\[unity-hawk\] \[test\]" &
 TAIL_PID=$!
 
-cmd2="${cmd} -testPlatform EditMode -testResults test_results_editmode.xml -logFile test_log_editmode.txt"
+cmd2="${cmd} -testPlatform EditMode -testResults artifacts/test_results_editmode.xml -logFile artifacts/test_log_editmode.txt"
 eval $cmd2
 kill $TAIL_PID
 
 echo "Running PlayMode tests"
 
-> test_log_playmode.txt
-tail -f test_log_playmode.txt | grep "\[unity-hawk\] \[test\]" &
+> artifacts/test_log_playmode.txt
+tail -f artifacts/test_log_playmode.txt | grep "\[unity-hawk\] \[test\]" &
 TAIL_PID=$!
 
-cmd2="${cmd} -testPlatform PlayMode -testResults test_results_playmode.xml -logFile test_log_playmode.txt"
+cmd2="${cmd} -testPlatform PlayMode -testResults artifacts/test_results_playmode.xml -logFile artifacts/test_log_playmode.txt"
 eval $cmd2
 kill $TAIL_PID
 
 # For some reason nothing gets logged from standalone player when running from cli - fine, can just check the xml or run from editor
 echo "Running standalone (win64) tests (no console output for these)"
-cmd3="${cmd} -testPlatform StandaloneWindows64 -testResults test_results_standalonewindows64.xml -logFile test_log_standalonewindows64.txt"
+cmd3="${cmd} -testPlatform StandaloneWindows64 -testResults artifacts/test_results_standalonewindows64.xml -logFile artifacts/test_log_standalonewindows64.txt"
 eval $cmd3
 
 echo "Tests complete"

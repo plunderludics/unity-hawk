@@ -10,7 +10,8 @@ xmlTarget=Library/ScriptAssemblies/UnityHawk.xml
 # Clean
 rm -f ${xmlTarget};
 
-cmd="\"${UNITY_EXE}\" -projectPath . -batchmode -logFile build_docs.log -executeMethod RecompileForcer.ForceRecompile -quit";
+mkdir -p artifacts
+cmd="\"${UNITY_EXE}\" -projectPath . -batchmode -logFile artifacts/build_docs.log -executeMethod RecompileForcer.ForceRecompile -quit";
 echo $cmd;
 eval $cmd;
 
