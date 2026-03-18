@@ -72,6 +72,9 @@ public partial class Emulator : MonoBehaviour {
     /// the system ID of the current core (e.g. "N64", "PSX", etc.)
     string _systemId;
 
+    /// whether the OnRomLoaded message has been received from bizhawk
+    bool _romLoaded;
+
     /// Helper method to check if the emulator process is alive
     bool IsEmuHawkProcessAlive {
         get {
@@ -461,6 +464,7 @@ public partial class Emulator : MonoBehaviour {
         _currentBizhawkArgs = MakeBizhawkArgs();
 
         _systemId = null;
+        _romLoaded = false;
 
         // If using referenced assets then first map those assets to filenames
         // (Bizhawk requires a path to a real file on disk)
@@ -736,8 +740,8 @@ public partial class Emulator : MonoBehaviour {
         }
 
         // Consider the emulator to be running if all buffers have been opened successfully
-        // (Which means api calls, input, & texture+audio sharing should all be working)
-        if (CurrentStatus == Status.Started && allBuffersOpen) {
+        // AND the OnRomLoaded message has been received (so _systemId is guaranteed to be set before OnRunning fires)
+        if (CurrentStatus == Status.Started && allBuffersOpen && _romLoaded) {
             CurrentStatus = Status.Running;
         }
 
@@ -951,6 +955,7 @@ public partial class Emulator : MonoBehaviour {
                 case SpecialCommands.OnRomLoaded:
                     // args: $"{systemID}"
                     _systemId = argString;
+                    _romLoaded = true;
                     break;
                 default:
                     _logger.LogWarning($"Bizhawk tried to call unknown special method {callbackName}");

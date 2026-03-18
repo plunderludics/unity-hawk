@@ -324,7 +324,8 @@ public partial class Emulator {
         // Need to update texture buffer size in case platform has changed:
         _sharedTextureBuffer.UpdateSize();
 
-        CurrentStatus = Status.Started; // Not running until new texture buffer is set up
+        _romLoaded = false;
+        CurrentStatus = Status.Started; // Not running until new texture buffer is set up + OnRomLoaded received
     }
 
     /// <summary>
