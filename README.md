@@ -1,6 +1,6 @@
 # UnityHawk
 
-![demo](https://github.com/user-attachments/assets/f4c55af2-8224-40db-8166-4678cb937422)
+<img width="2445" height="1578" alt="image" src="https://github.com/user-attachments/assets/384f0817-1255-47de-b542-994584656a1e" />
 
 UnityHawk lets you run emulated games within a Unity project, using [BizHawk](https://tasvideos.org/BizHawk).
 
