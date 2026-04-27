@@ -7,6 +7,7 @@
 cmd="\"${UNITY_EXE}\"
   -runTests \
   -batchmode \
+  $@ \
   -projectPath ."
 
 echo "Running PlayMode tests..."

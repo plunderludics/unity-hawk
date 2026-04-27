@@ -7,6 +7,7 @@
 cmd="\"${UNITY_EXE}\"
   -runTests \
   -batchmode \
+  $@ \
   -projectPath ."
 
 echo "Running EditMode tests..."
@@ -22,7 +23,7 @@ EXIT_CODE=$?
 kill $TAIL_PID
 
 if [ $EXIT_CODE -ne 0 ]; then
-    echo "❌ EditMode tests Failed. (Or failed to build)."
+    echo "❌ EditMode tests failed."
     exit $EXIT_CODE
 else
     # Double check XML just in case exit code isn't reliable
