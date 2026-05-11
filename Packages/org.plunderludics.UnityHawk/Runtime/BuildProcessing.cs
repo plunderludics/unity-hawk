@@ -118,7 +118,6 @@ public class BuildProcessing : IPreprocessBuildWithReport, IProcessSceneWithRepo
     /// returns the number of files copied
     int CopyFilesToBuild(string exePath) {
         var bizhawkAssetsPath = GetBizhawkAssetsDir(exePath);
-        Directory.CreateDirectory(bizhawkAssetsPath);
 
         int nFilesCopied = 0;
 
