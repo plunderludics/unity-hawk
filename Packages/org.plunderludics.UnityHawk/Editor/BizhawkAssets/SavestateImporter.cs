@@ -15,46 +15,76 @@ internal class SavestateImporter : BizHawkAssetImporter<Savestate> {
 
     public override void OnImportAsset(AssetImportContext ctx) {
         base.OnImportAsset(ctx);
-        var savestate = (Savestate)ctx.mainObject;
+        try {
+            var savestate = (Savestate)ctx.mainObject;
+            using var stateFile = ZipFile.OpenRead(ctx.assetPath);
 
-        using var stateFile = ZipFile.OpenRead(ctx.assetPath);
-        var gameInfo = GameInfo.NullInstance;
-        Texture2D screenshot = null;
-        // find the game info file and deserialize it
-        foreach (var entry in stateFile.Entries) {
-            if (entry.Name == k_GameInfoFile) {
-                using var s = entry.Open();
-                gameInfo = GameInfo.Deserialize(s) ?? GameInfo.NullInstance;
-            } else if (entry.Name == k_FramebufferFile) {
-                using var s = entry.Open();
-                using var bmpStream = new DecompressionStream(s);
+            var gameInfo = GameInfo.NullInstance;
+            Texture2D screenshot = null;
 
-                // First read all bytes from stream
-                byte[] bmpBytes;
-                using (var ms = new MemoryStream())
-                {
-                    bmpStream.CopyTo(ms);
-                    bmpBytes = ms.ToArray();
+            foreach (var entry in stateFile.Entries) {
+                if (entry.Name == k_GameInfoFile) {
+                    gameInfo = TryImportGameInfo(entry, ctx.assetPath);
+                } else if (entry.Name == k_FramebufferFile) {
+                    screenshot = TryImportScreenshot(entry, ctx.assetPath);
                 }
-
-                BMPLoader bmpLoader = new BMPLoader();
-                BMPImage bmpImg = bmpLoader.LoadBMP(bmpBytes);
-
-                // Convert the Color32 array into a Texture2D
-                screenshot = bmpImg.ToTexture2D(TextureFormat.RGB24); // Ensure no alpha channel
             }
+
+            savestate.RomInfo.Name = gameInfo.Name;
+            savestate.RomInfo.Hash = gameInfo.Hash;
+            savestate.RomInfo.Region = gameInfo.Region;
+            savestate.RomInfo.System = gameInfo.System;
+            savestate.RomInfo.NotInDatabase = gameInfo.NotInDatabase;
+            savestate.RomInfo.Core = gameInfo.ForcedCore;
+
+            if (screenshot != null) {
+                screenshot.name = Path.GetFileNameWithoutExtension(ctx.assetPath);
+                ctx.AddObjectToAsset("screenshot", screenshot);
+                savestate.Screenshot = screenshot;
+            }
+        } catch (System.Exception e) {
+            Debug.LogWarning($"Failed to import savestate content from '{ctx.assetPath}': {e.Message}");
         }
+    }
 
-        savestate.RomInfo.Name = gameInfo.Name;
-        savestate.RomInfo.Hash = gameInfo.Hash;
-        savestate.RomInfo.Region = gameInfo.Region;
-        savestate.RomInfo.System = gameInfo.System;
-        savestate.RomInfo.NotInDatabase = gameInfo.NotInDatabase;
-        savestate.RomInfo.Core = gameInfo.ForcedCore;
+    static GameInfo TryImportGameInfo(ZipArchiveEntry entry, string assetPath) {
+        try {
+            using var s = entry.Open();
+            return GameInfo.Deserialize(s) ?? GameInfo.NullInstance;
+        } catch (System.Exception e) {
+            Debug.LogWarning($"Failed to import GameInfo from '{assetPath}': {e.Message}");
+            return GameInfo.NullInstance;
+        }
+    }
 
-        screenshot.name = Path.GetFileNameWithoutExtension(ctx.assetPath);
-        ctx.AddObjectToAsset("screenshot", screenshot);
-        savestate.Screenshot = screenshot;
+    static Texture2D TryImportScreenshot(ZipArchiveEntry entry, string assetPath) {
+        try {
+            using var s = entry.Open();
+
+            byte[] rawBytes;
+            using (var ms = new MemoryStream()) {
+                s.CopyTo(ms);
+                rawBytes = ms.ToArray();
+            }
+
+            // Seems like sometimes (maybe in bizhawk 2.11 only?) the framebuffer file is *not* compressed - handle both cases
+            byte[] bmpBytes;
+            try {
+                using var compressed = new MemoryStream(rawBytes);
+                using var zstd = new DecompressionStream(compressed);
+                using var decompressed = new MemoryStream();
+                zstd.CopyTo(decompressed);
+                bmpBytes = decompressed.ToArray();
+            } catch (ZstdException) {
+                bmpBytes = rawBytes;
+            }
+
+            var bmpImg = new BMPLoader().LoadBMP(bmpBytes);
+            return bmpImg.ToTexture2D(TextureFormat.RGB24);
+        } catch (System.Exception e) {
+            Debug.LogWarning($"Failed to import screenshot from '{assetPath}': {e.Message}");
+            return null;
+        }
     }
 }
 
