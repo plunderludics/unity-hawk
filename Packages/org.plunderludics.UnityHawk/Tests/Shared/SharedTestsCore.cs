@@ -55,14 +55,16 @@ public class SharedTestsCore
         // - Emulator with swoop rom and no savestate, on a disabled game object
         // - SharedTestAssets with other needed assets
 
-        SharedTestAssets assets = Object.FindObjectOfType<SharedTestAssets>();
+        SharedTestAssets assets = Object.FindAnyObjectByType<SharedTestAssets>();
+        Assert.IsNotNull(assets, "SharedTestAssets not found in scene");
         swoopRom = assets.swoopRom;
         eliteSavestate2000 = assets.eliteSavestate2000;
         eliteSavestate5000 = assets.eliteSavestate5000;
         testCallbacksLua = assets.testCallbacksLua;
 
         // Set up Emulator object
-        e = Object.FindObjectOfType<Emulator>(includeInactive: true);
+        e = Object.FindAnyObjectByType<Emulator>(FindObjectsInactive.Include);
+        Assert.IsNotNull(e, "Emulator not found in scene");
         SetParamsOnEmulator(e);
     }
 
@@ -100,9 +102,13 @@ public class SharedTestsCore
         if (Application.isPlaying) {
             SceneManager.LoadScene(sceneName);
             yield return null; // Wait for scene to load
-            if (SceneManager.GetActiveScene().name != sceneName) {
+            var scene = SceneManager.GetSceneByName(sceneName);
+            if (!scene.IsValid()) {
                 Debug.LogError($"[unity-hawk] Test scene failed to load - probably needs to be included in build settings");
             }
+
+            Assert.IsTrue(scene.IsValid());
+            Assert.IsTrue(scene.isLoaded);
         } else {
 #if UNITY_EDITOR
             // Have to load by full path
