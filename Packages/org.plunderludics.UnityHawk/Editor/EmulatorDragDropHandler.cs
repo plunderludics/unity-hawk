@@ -1,82 +1,73 @@
 using UnityEngine;
 using UnityEditor;
+#if UNITY_6000_3_OR_NEWER
+using UnityEntityId = UnityEngine.EntityId;
+#else
+using UnityEntityId = System.Int32;
+#endif
 
 namespace UnityHawk.Editor {
 
 [InitializeOnLoad]
 internal static class EmulatorDragDropHandler {
     static EmulatorDragDropHandler() {
-        // Register for drag and drop events in the hierarchy
+#if UNITY_6000_3_OR_NEWER
+        DragAndDrop.AddDropHandlerV2(HierarchyDropHandler);
+#else
         DragAndDrop.AddDropHandler(HierarchyDropHandler);
+#endif
     }
-    
-    static DragAndDropVisualMode HierarchyDropHandler(int dropTargetInstanceID, HierarchyDropFlags dropMode, Transform parentForDraggedObjects, bool perform) {
-        // Debug.Log($"HierarchyDropHandler: {dropTargetInstanceID}, {dropMode}, {parentForDraggedObjects}, {perform}");
-        // Only handle exactly one dragged object
-        if (DragAndDrop.objectReferences.Length != 1) return DragAndDropVisualMode.None;
-        
-        if ((dropMode & HierarchyDropFlags.DropUpon) == 0) {
-            // Only handle dragging directly onto an object
-            return DragAndDropVisualMode.None;
-        }
 
-        // Check if we're dragging Rom or Savestate assets
-        bool hasValidAsset = false;
+    static DragAndDropVisualMode HierarchyDropHandler(
+        UnityEntityId dropTargetEntityId,
+        HierarchyDropFlags dropMode,
+        Transform parentForDraggedObjects,
+        bool perform) {
+        if (DragAndDrop.objectReferences.Length != 1) return DragAndDropVisualMode.None;
+
+        if ((dropMode & HierarchyDropFlags.DropUpon) == 0)
+            return DragAndDropVisualMode.None;
+
         Rom romAsset = null;
         Savestate savestateAsset = null;
-        
+
         foreach (Object draggedObject in DragAndDrop.objectReferences) {
-            // Debug.Log($"draggedObject: {draggedObject}");
             if (draggedObject is Rom rom) {
-                hasValidAsset = true;
                 romAsset = rom;
                 break;
-            } else if (draggedObject is Savestate savestate) {
-                hasValidAsset = true;
+            }
+            if (draggedObject is Savestate savestate) {
                 savestateAsset = savestate;
                 break;
             }
         }
-        
-        if (!hasValidAsset) return DragAndDropVisualMode.None;
-        
-        // Get the GameObject at this hierarchy item
-        GameObject gameObject = EditorUtility.InstanceIDToObject(dropTargetInstanceID) as GameObject;
+
+        if (romAsset == null && savestateAsset == null) return DragAndDropVisualMode.None;
+
+#if UNITY_6000_3_OR_NEWER
+        GameObject gameObject = EditorUtility.EntityIdToObject(dropTargetEntityId) as GameObject;
+#else
+        GameObject gameObject = EditorUtility.InstanceIDToObject(dropTargetEntityId) as GameObject;
+#endif
         if (gameObject == null) return DragAndDropVisualMode.None;
-        
-        // Check if this GameObject has an Emulator component
+
         Emulator emulator = gameObject.GetComponent<Emulator>();
-        // Debug.Log($"emulator: {emulator}");
         if (emulator == null) return DragAndDropVisualMode.None;
-        
-        // Show that this is a valid drop target
-        if (!perform) {
-            return DragAndDropVisualMode.Copy;
-        }
-        
-        // Perform the drop
+
+        if (!perform) return DragAndDropVisualMode.Copy;
+
         if (romAsset != null) {
             emulator.romFile = romAsset;
-
-            if (emulator.autoSelectRomFile && !emulator.saveStateFile.MatchesRom(romAsset)) {
-                // Need to clear savestateFile so romFile doesn't get overwritten
+            if (emulator.autoSelectRomFile && !emulator.saveStateFile.MatchesRom(romAsset))
                 emulator.saveStateFile = null;
-            }
-            
-            // Debug.Log($"Rom asset '{romAsset.name}' assigned to Emulator on '{gameObject.name}'");
-        } else if (savestateAsset != null) {
-            // Assign the Savestate to the Emulator
+        } else {
             emulator.saveStateFile = savestateAsset;
-
-            // Debug.Log($"Savestate asset '{savestateAsset.name}' assigned to Emulator on '{gameObject.name}'");
         }
 
-        // Mark the scene as dirty so Unity saves the change
         EditorUtility.SetDirty(gameObject);
         EditorUtility.SetDirty(emulator);
+        emulator.OnValidate();
 
-        emulator.OnValidate(); // A bit hacky but this doesn't get called automatically
-        
         return DragAndDropVisualMode.Copy;
     }
 }

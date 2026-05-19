@@ -1,40 +1,54 @@
+#!/bin/bash
 # Usage: ./bin/run_tests.sh
 
 # Heads up - the TestRamXXX tests seem to be flaky when run from this script, sometimes fail, but they seem fine when run from editor, not sure why 
 
-: "${UNITY_VERSION:=$(grep '^m_EditorVersion:' ProjectSettings/ProjectVersion.txt | awk '{print $2}')}"
-: "${UNITY_EXE:=/c/Program Files/Unity/Hub/Editor/${UNITY_VERSION}/Editor/Unity.exe}"
+SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 
-cmd="\"${UNITY_EXE}\"
-  -runTests \
-  -batchmode \
-  -projectPath ."
+echo "=== Running All Tests ==="
 
-echo "Running EditMode tests"
+bash "$SCRIPT_DIR/run_editmode_tests.sh"
+EDITMODE_EXIT=$?
 
-# (Seems like we can't redirect logs to stdout so just write to file and tail -f)
-mkdir -p artifacts
-> artifacts/test_log_editmode.txt
-tail -f artifacts/test_log_editmode.txt | grep "\[unity-hawk\] \[test\]" &
-TAIL_PID=$!
+bash "$SCRIPT_DIR/run_playmode_tests.sh"
+PLAYMODE_EXIT=$?
 
-cmd2="${cmd} -testPlatform EditMode -testResults artifacts/test_results_editmode.xml -logFile artifacts/test_log_editmode.txt"
-eval $cmd2
-kill $TAIL_PID
+bash "$SCRIPT_DIR/run_standalone_tests.sh"
+STANDALONE_EXIT=$?
 
-echo "Running PlayMode tests"
+echo ""
+echo "=== Test Summary ==="
 
-> artifacts/test_log_playmode.txt
-tail -f artifacts/test_log_playmode.txt | grep "\[unity-hawk\] \[test\]" &
-TAIL_PID=$!
+FAILED=0
 
-cmd2="${cmd} -testPlatform PlayMode -testResults artifacts/test_results_playmode.xml -logFile artifacts/test_log_playmode.txt"
-eval $cmd2
-kill $TAIL_PID
+if [ $EDITMODE_EXIT -eq 0 ]; then
+    echo "✅ EditMode tests passed."
+else
+    echo "❌ EditMode tests failed."
+    FAILED=1
+fi
 
-# For some reason nothing gets logged from standalone player when running from cli - fine, can just check the xml or run from editor
-echo "Running standalone (win64) tests (no console output for these)"
-cmd3="${cmd} -testPlatform StandaloneWindows64 -testResults artifacts/test_results_standalonewindows64.xml -logFile artifacts/test_log_standalonewindows64.txt"
-eval $cmd3
+if [ $PLAYMODE_EXIT -eq 0 ]; then
+    echo "✅ PlayMode tests passed."
+else
+    echo "❌ PlayMode tests failed."
+    FAILED=1
+fi
 
-echo "Tests complete"
+if [ $STANDALONE_EXIT -eq 0 ]; then
+    echo "✅ Standalone tests passed."
+else
+    echo "❌ Standalone tests failed."
+    FAILED=1
+fi
+
+echo "===================="
+
+if [ $FAILED -ne 0 ]; then
+    # echo "❌ Some sets of tests failed."
+    exit 1
+else
+    echo "✅ All tests passed successfully."
+    exit 0
+fi
+
