@@ -72,6 +72,9 @@ public partial class Emulator : MonoBehaviour {
     /// the system ID of the current core (e.g. "N64", "PSX", etc.)
     string _systemId;
 
+    /// whether the OnRomLoaded message has been received from bizhawk
+    bool _romLoaded;
+
     /// Helper method to check if the emulator process is alive
     bool IsEmuHawkProcessAlive {
         get {
@@ -164,8 +167,8 @@ public partial class Emulator : MonoBehaviour {
     public Logger Logger => _logger ??= new(this, logLevel);
 
     /// the time the emulator started running
-    float _startedTime;
-    float SystemTime => (float)System.DateTime.Now.Ticks / System.TimeSpan.TicksPerSecond;
+    double _startedTime;
+    double SystemTime => System.DateTime.Now.Ticks / (double)System.TimeSpan.TicksPerSecond;
 
     /// for actions deferred to main thread Update call
     /// (used to make sure OnStarted and OnRunning actions get invoked on main thread)
@@ -351,7 +354,7 @@ public partial class Emulator : MonoBehaviour {
                 // _logger.LogWarning("Emulator audio cannot be captured in edit mode");
             }
             if (Application.isPlaying) {
-                audioResampler.Init(BizhawkSampleRate/AudioSettings.outputSampleRate, _logger);
+                audioResampler.Init((speedPercent/100.0)*BizhawkSampleRate/AudioSettings.outputSampleRate, _logger);
                 var audioSource = GetComponent<AudioSource>();
                 // TODO: Would be nice if we could support an audio source on a different game object
                 // But that would require moving OnFilterAudioRead into a separate "EmulatorAudio" component I guess
@@ -461,6 +464,7 @@ public partial class Emulator : MonoBehaviour {
         _currentBizhawkArgs = MakeBizhawkArgs();
 
         _systemId = null;
+        _romLoaded = false;
 
         // If using referenced assets then first map those assets to filenames
         // (Bizhawk requires a path to a real file on disk)
@@ -693,7 +697,7 @@ public partial class Emulator : MonoBehaviour {
             IntPtr bizhawkWindow = _emuhawk.MainWindowHandle;
             IntPtr focusedWindow = GetForegroundWindow();
             if (focusedWindow != unityWindow) {
-                // _logger.LogVerbose("refocusing unity window");
+                // _logger.Log($"refocusing unity window (systemtime: {SystemTime}, startedTime: {_startedTime}, runtime: {SystemTime - _startedTime})");
                 ShowWindow(unityWindow, 5);
                 SetForegroundWindow(unityWindow);
             }
@@ -736,8 +740,8 @@ public partial class Emulator : MonoBehaviour {
         }
 
         // Consider the emulator to be running if all buffers have been opened successfully
-        // (Which means api calls, input, & texture+audio sharing should all be working)
-        if (CurrentStatus == Status.Started && allBuffersOpen) {
+        // AND the OnRomLoaded message has been received (so _systemId is guaranteed to be set before OnRunning fires)
+        if (CurrentStatus == Status.Started && allBuffersOpen && _romLoaded) {
             CurrentStatus = Status.Running;
         }
 
@@ -951,6 +955,7 @@ public partial class Emulator : MonoBehaviour {
                 case SpecialCommands.OnRomLoaded:
                     // args: $"{systemID}"
                     _systemId = argString;
+                    _romLoaded = true;
                     break;
                 default:
                     _logger.LogWarning($"Bizhawk tried to call unknown special method {callbackName}");
