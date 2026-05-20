@@ -38,7 +38,7 @@ You will probably also need to install the BizHawk prerequisites, which can be i
   - You can specify the component used to handle input under 'Input Provider'. If unspecified it will default to a `BasicInputProvider` with default controls according to the platform. If you want to configure controls, add your own `BasicInputProvider` component.
   - Alternatively you can create your own component that inherits from `InputProvider`.
   - `InputProvider` also provides an `AddInputEvent` method which can be used to programmatically add inputs.
-- Enable 'Show Bizhawk Gui' to show the native Bizhawk window; useful for doing plunderludics development (finding save states, tweaking config & scripts, etc) without having to leave Unity
+- Enable 'Show Bizhawk Gui' (under 'Development') to show the native Bizhawk window; useful for doing plunderludics development (finding save states, tweaking config & scripts, etc) without having to leave Unity
 - Enable 'Capture Emulator Audio' to route emulator audio to an AudioSource, allowing you to use Unity's positional audio system or add audio effects
   - (Might produce minor latency or distortion)
 - The live emulator graphics can be grabbed in code via the `Emulator.Texture` property.
