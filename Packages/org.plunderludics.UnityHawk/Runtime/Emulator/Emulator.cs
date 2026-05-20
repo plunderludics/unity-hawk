@@ -167,8 +167,8 @@ public partial class Emulator : MonoBehaviour {
     public Logger Logger => _logger ??= new(this, logLevel);
 
     /// the time the emulator started running
-    float _startedTime;
-    float SystemTime => (float)System.DateTime.Now.Ticks / System.TimeSpan.TicksPerSecond;
+    double _startedTime;
+    double SystemTime => System.DateTime.Now.Ticks / (double)System.TimeSpan.TicksPerSecond;
 
     /// for actions deferred to main thread Update call
     /// (used to make sure OnStarted and OnRunning actions get invoked on main thread)
@@ -697,7 +697,7 @@ public partial class Emulator : MonoBehaviour {
             IntPtr bizhawkWindow = _emuhawk.MainWindowHandle;
             IntPtr focusedWindow = GetForegroundWindow();
             if (focusedWindow != unityWindow) {
-                // _logger.LogVerbose("refocusing unity window");
+                // _logger.Log($"refocusing unity window (systemtime: {SystemTime}, startedTime: {_startedTime}, runtime: {SystemTime - _startedTime})");
                 ShowWindow(unityWindow, 5);
                 SetForegroundWindow(unityWindow);
             }
