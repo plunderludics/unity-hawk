@@ -354,7 +354,7 @@ public partial class Emulator : MonoBehaviour {
                 // _logger.LogWarning("Emulator audio cannot be captured in edit mode");
             }
             if (Application.isPlaying) {
-                audioResampler.Init(BizhawkSampleRate/AudioSettings.outputSampleRate, _logger);
+                audioResampler.Init((speedPercent/100.0)*BizhawkSampleRate/AudioSettings.outputSampleRate, _logger);
                 var audioSource = GetComponent<AudioSource>();
                 // TODO: Would be nice if we could support an audio source on a different game object
                 // But that would require moving OnFilterAudioRead into a separate "EmulatorAudio" component I guess
