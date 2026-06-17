@@ -9,6 +9,7 @@ using System.Runtime.InteropServices;
 using UnityEngine;
 using Unity.Profiling;
 using UnityEngine.Assertions;
+using Plunderludics.UnityHawk.Shared;
 using System.Threading;
 using EditorBrowsable = System.ComponentModel.EditorBrowsableAttribute;
 using EditorBrowsableState = System.ComponentModel.EditorBrowsableState;
@@ -16,7 +17,6 @@ using EditorBrowsableState = System.ComponentModel.EditorBrowsableState;
 #if UNITY_EDITOR
 using UnityEditor;
 #endif
-
 
 namespace UnityHawk {
 

@@ -1,0 +1,1082 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>Plunderludics.UnityHawk.SharedBuffers</name>
+    </assembly>
+    <members>
+        <member name="T:System.Diagnostics.CodeAnalysis.DynamicDependencyAttribute">
+            <summary>
+            States a dependency that one member has on another.
+            </summary>
+            <remarks>
+            This can be used to inform tooling of a dependency that is otherwise not evident purely from
+            metadata and IL, for example a member relied on via reflection.
+            </remarks>
+        </member>
+        <member name="M:System.Diagnostics.CodeAnalysis.DynamicDependencyAttribute.#ctor(System.String)">
+            <summary>
+            Initializes a new instance of the <see cref="T:System.Diagnostics.CodeAnalysis.DynamicDependencyAttribute"/> class
+            with the specified signature of a member on the same type as the consumer.
+            </summary>
+            <param name="memberSignature">The signature of the member depended on.</param>
+        </member>
+        <member name="M:System.Diagnostics.CodeAnalysis.DynamicDependencyAttribute.#ctor(System.String,System.Type)">
+            <summary>
+            Initializes a new instance of the <see cref="T:System.Diagnostics.CodeAnalysis.DynamicDependencyAttribute"/> class
+            with the specified signature of a member on a <see cref="T:System.Type"/>.
+            </summary>
+            <param name="memberSignature">The signature of the member depended on.</param>
+            <param name="type">The <see cref="T:System.Type"/> containing <paramref name="memberSignature"/>.</param>
+        </member>
+        <member name="M:System.Diagnostics.CodeAnalysis.DynamicDependencyAttribute.#ctor(System.String,System.String,System.String)">
+            <summary>
+            Initializes a new instance of the <see cref="T:System.Diagnostics.CodeAnalysis.DynamicDependencyAttribute"/> class
+            with the specified signature of a member on a type in an assembly.
+            </summary>
+            <param name="memberSignature">The signature of the member depended on.</param>
+            <param name="typeName">The full name of the type containing the specified member.</param>
+            <param name="assemblyName">The assembly name of the type containing the specified member.</param>
+        </member>
+        <member name="M:System.Diagnostics.CodeAnalysis.DynamicDependencyAttribute.#ctor(System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes,System.Type)">
+            <summary>
+            Initializes a new instance of the <see cref="T:System.Diagnostics.CodeAnalysis.DynamicDependencyAttribute"/> class
+            with the specified types of members on a <see cref="T:System.Type"/>.
+            </summary>
+            <param name="memberTypes">The types of members depended on.</param>
+            <param name="type">The <see cref="T:System.Type"/> containing the specified members.</param>
+        </member>
+        <member name="M:System.Diagnostics.CodeAnalysis.DynamicDependencyAttribute.#ctor(System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes,System.String,System.String)">
+            <summary>
+            Initializes a new instance of the <see cref="T:System.Diagnostics.CodeAnalysis.DynamicDependencyAttribute"/> class
+            with the specified types of members on a type in an assembly.
+            </summary>
+            <param name="memberTypes">The types of members depended on.</param>
+            <param name="typeName">The full name of the type containing the specified members.</param>
+            <param name="assemblyName">The assembly name of the type containing the specified members.</param>
+        </member>
+        <member name="P:System.Diagnostics.CodeAnalysis.DynamicDependencyAttribute.MemberSignature">
+            <summary>
+            Gets the signature of the member depended on.
+            </summary>
+            <remarks>
+            Either <see cref="P:System.Diagnostics.CodeAnalysis.DynamicDependencyAttribute.MemberSignature"/> must be a valid string or <see cref="P:System.Diagnostics.CodeAnalysis.DynamicDependencyAttribute.MemberTypes"/>
+            must not equal <see cref="F:System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.None"/>, but not both.
+            </remarks>
+        </member>
+        <member name="P:System.Diagnostics.CodeAnalysis.DynamicDependencyAttribute.MemberTypes">
+            <summary>
+            Gets the <see cref="T:System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes"/> which specifies the type
+            of members depended on.
+            </summary>
+            <remarks>
+            Either <see cref="P:System.Diagnostics.CodeAnalysis.DynamicDependencyAttribute.MemberSignature"/> must be a valid string or <see cref="P:System.Diagnostics.CodeAnalysis.DynamicDependencyAttribute.MemberTypes"/>
+            must not equal <see cref="F:System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.None"/>, but not both.
+            </remarks>
+        </member>
+        <member name="P:System.Diagnostics.CodeAnalysis.DynamicDependencyAttribute.Type">
+            <summary>
+            Gets the <see cref="T:System.Type"/> containing the specified member.
+            </summary>
+            <remarks>
+            If neither <see cref="P:System.Diagnostics.CodeAnalysis.DynamicDependencyAttribute.Type"/> nor <see cref="P:System.Diagnostics.CodeAnalysis.DynamicDependencyAttribute.TypeName"/> are specified,
+            the type of the consumer is assumed.
+            </remarks>
+        </member>
+        <member name="P:System.Diagnostics.CodeAnalysis.DynamicDependencyAttribute.TypeName">
+            <summary>
+            Gets the full name of the type containing the specified member.
+            </summary>
+            <remarks>
+            If neither <see cref="P:System.Diagnostics.CodeAnalysis.DynamicDependencyAttribute.Type"/> nor <see cref="P:System.Diagnostics.CodeAnalysis.DynamicDependencyAttribute.TypeName"/> are specified,
+            the type of the consumer is assumed.
+            </remarks>
+        </member>
+        <member name="P:System.Diagnostics.CodeAnalysis.DynamicDependencyAttribute.AssemblyName">
+            <summary>
+            Gets the assembly name of the specified type.
+            </summary>
+            <remarks>
+            <see cref="P:System.Diagnostics.CodeAnalysis.DynamicDependencyAttribute.AssemblyName"/> is only valid when <see cref="P:System.Diagnostics.CodeAnalysis.DynamicDependencyAttribute.TypeName"/> is specified.
+            </remarks>
+        </member>
+        <member name="P:System.Diagnostics.CodeAnalysis.DynamicDependencyAttribute.Condition">
+            <summary>
+            Gets or sets the condition in which the dependency is applicable, e.g. "DEBUG".
+            </summary>
+        </member>
+        <member name="T:System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes">
+             <summary>
+             Specifies the types of members that are dynamically accessed.
+            
+             This enumeration has a <see cref="T:System.FlagsAttribute"/> attribute that allows a
+             bitwise combination of its member values.
+             </summary>
+        </member>
+        <member name="F:System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.None">
+            <summary>
+            Specifies no members.
+            </summary>
+        </member>
+        <member name="F:System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.PublicParameterlessConstructor">
+            <summary>
+            Specifies the default, parameterless public constructor.
+            </summary>
+        </member>
+        <member name="F:System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.PublicConstructors">
+            <summary>
+            Specifies all public constructors.
+            </summary>
+        </member>
+        <member name="F:System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.NonPublicConstructors">
+            <summary>
+            Specifies all non-public constructors.
+            </summary>
+        </member>
+        <member name="F:System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.PublicMethods">
+            <summary>
+            Specifies all public methods.
+            </summary>
+        </member>
+        <member name="F:System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.NonPublicMethods">
+            <summary>
+            Specifies all non-public methods.
+            </summary>
+        </member>
+        <member name="F:System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.PublicFields">
+            <summary>
+            Specifies all public fields.
+            </summary>
+        </member>
+        <member name="F:System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.NonPublicFields">
+            <summary>
+            Specifies all non-public fields.
+            </summary>
+        </member>
+        <member name="F:System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.PublicNestedTypes">
+            <summary>
+            Specifies all public nested types.
+            </summary>
+        </member>
+        <member name="F:System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.NonPublicNestedTypes">
+            <summary>
+            Specifies all non-public nested types.
+            </summary>
+        </member>
+        <member name="F:System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.PublicProperties">
+            <summary>
+            Specifies all public properties.
+            </summary>
+        </member>
+        <member name="F:System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.NonPublicProperties">
+            <summary>
+            Specifies all non-public properties.
+            </summary>
+        </member>
+        <member name="F:System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.PublicEvents">
+            <summary>
+            Specifies all public events.
+            </summary>
+        </member>
+        <member name="F:System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.NonPublicEvents">
+            <summary>
+            Specifies all non-public events.
+            </summary>
+        </member>
+        <member name="F:System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.Interfaces">
+            <summary>
+            Specifies all interfaces implemented by the type.
+            </summary>
+        </member>
+        <member name="F:System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.All">
+            <summary>
+            Specifies all members.
+            </summary>
+        </member>
+        <member name="T:System.Diagnostics.CodeAnalysis.DynamicallyAccessedMembersAttribute">
+             <summary>
+             Indicates that certain members on a specified <see cref="T:System.Type"/> are accessed dynamically,
+             for example through <see cref="N:System.Reflection"/>.
+             </summary>
+             <remarks>
+             This allows tools to understand which members are being accessed during the execution
+             of a program.
+            
+             This attribute is valid on members whose type is <see cref="T:System.Type"/> or <see cref="T:System.String"/>.
+            
+             When this attribute is applied to a location of type <see cref="T:System.String"/>, the assumption is
+             that the string represents a fully qualified type name.
+            
+             When this attribute is applied to a class, interface, or struct, the members specified
+             can be accessed dynamically on <see cref="T:System.Type"/> instances returned from calling
+             <see cref="M:System.Object.GetType"/> on instances of that class, interface, or struct.
+            
+             If the attribute is applied to a method it's treated as a special case and it implies
+             the attribute should be applied to the "this" parameter of the method. As such the attribute
+             should only be used on instance methods of types assignable to System.Type (or string, but no methods
+             will use it there).
+             </remarks>
+        </member>
+        <member name="M:System.Diagnostics.CodeAnalysis.DynamicallyAccessedMembersAttribute.#ctor(System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes)">
+            <summary>
+            Initializes a new instance of the <see cref="T:System.Diagnostics.CodeAnalysis.DynamicallyAccessedMembersAttribute"/> class
+            with the specified member types.
+            </summary>
+            <param name="memberTypes">The types of members dynamically accessed.</param>
+        </member>
+        <member name="P:System.Diagnostics.CodeAnalysis.DynamicallyAccessedMembersAttribute.MemberTypes">
+            <summary>
+            Gets the <see cref="T:System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes"/> which specifies the type
+            of members dynamically accessed.
+            </summary>
+        </member>
+        <member name="T:System.Diagnostics.CodeAnalysis.RequiresAssemblyFilesAttribute">
+            <summary>
+            Indicates that the specified member requires assembly files to be on disk.
+            </summary>
+        </member>
+        <member name="M:System.Diagnostics.CodeAnalysis.RequiresAssemblyFilesAttribute.#ctor">
+            <summary>
+            Initializes a new instance of the <see cref="!:global::System.RequiresAssemblyFilesAttribute"/> class.
+            </summary>
+        </member>
+        <member name="M:System.Diagnostics.CodeAnalysis.RequiresAssemblyFilesAttribute.#ctor(System.String)">
+            <summary>
+            Initializes a new instance of the <see cref="!:global::System.RequiresAssemblyFilesAttribute"/> class.
+            </summary>
+            <param name="message">
+            A message that contains information about the need for assembly files to be on disk.
+            </param>
+        </member>
+        <member name="P:System.Diagnostics.CodeAnalysis.RequiresAssemblyFilesAttribute.Message">
+            <summary>
+            Gets an optional message that contains information about the need for
+            assembly files to be on disk.
+            </summary>
+        </member>
+        <member name="P:System.Diagnostics.CodeAnalysis.RequiresAssemblyFilesAttribute.Url">
+            <summary>
+            Gets or sets an optional URL that contains more information about the member,
+            why it requires assembly files to be on disk, and what options a consumer has
+            to deal with it.
+            </summary>
+        </member>
+        <member name="T:System.Diagnostics.CodeAnalysis.RequiresDynamicCodeAttribute">
+            <summary>
+            Indicates that the specified method requires the ability to generate new code at runtime,
+            for example through <see cref="N:System.Reflection"/>.
+            </summary>
+            <remarks>
+            This allows tools to understand which methods are unsafe to call when compiling ahead of time.
+            </remarks>
+        </member>
+        <member name="M:System.Diagnostics.CodeAnalysis.RequiresDynamicCodeAttribute.#ctor(System.String)">
+            <summary>
+            Initializes a new instance of the <see cref="T:System.Diagnostics.CodeAnalysis.RequiresDynamicCodeAttribute"/> class
+            with the specified message.
+            </summary>
+            <param name="message">
+            A message that contains information about the usage of dynamic code.
+            </param>
+        </member>
+        <member name="P:System.Diagnostics.CodeAnalysis.RequiresDynamicCodeAttribute.Message">
+            <summary>
+            Gets a message that contains information about the usage of dynamic code.
+            </summary>
+        </member>
+        <member name="P:System.Diagnostics.CodeAnalysis.RequiresDynamicCodeAttribute.Url">
+            <summary>
+            Gets or sets an optional URL that contains more information about the method,
+            why it requires dynamic code, and what options a consumer has to deal with it.
+            </summary>
+        </member>
+        <member name="T:System.Diagnostics.CodeAnalysis.RequiresUnreferencedCodeAttribute">
+            <summary>
+            Indicates that the specified method requires dynamic access to code that is not referenced
+            statically, for example through <see cref="N:System.Reflection"/>.
+            </summary>
+            <remarks>
+            This allows tools to understand which methods are unsafe to call when removing unreferenced
+            code from an application.
+            </remarks>
+        </member>
+        <member name="M:System.Diagnostics.CodeAnalysis.RequiresUnreferencedCodeAttribute.#ctor(System.String)">
+            <summary>
+            Initializes a new instance of the <see cref="T:System.Diagnostics.CodeAnalysis.RequiresUnreferencedCodeAttribute"/> class
+            with the specified message.
+            </summary>
+            <param name="message">
+            A message that contains information about the usage of unreferenced code.
+            </param>
+        </member>
+        <member name="P:System.Diagnostics.CodeAnalysis.RequiresUnreferencedCodeAttribute.Message">
+            <summary>
+            Gets a message that contains information about the usage of unreferenced code.
+            </summary>
+        </member>
+        <member name="P:System.Diagnostics.CodeAnalysis.RequiresUnreferencedCodeAttribute.Url">
+            <summary>
+            Gets or sets an optional URL that contains more information about the method,
+            why it requires unreferenced code, and what options a consumer has to deal with it.
+            </summary>
+        </member>
+        <member name="T:System.Diagnostics.CodeAnalysis.UnconditionalSuppressMessageAttribute">
+            <summary>
+            Suppresses reporting of a specific rule violation, allowing multiple suppressions on a
+            single code artifact.
+            </summary>
+            <remarks>
+            <see cref="T:System.Diagnostics.CodeAnalysis.UnconditionalSuppressMessageAttribute"/> is different than
+            <see cref="T:System.Diagnostics.CodeAnalysis.SuppressMessageAttribute"/> in that it doesn't have a
+            <see cref="T:System.Diagnostics.ConditionalAttribute"/>. So it is always preserved in the compiled assembly.
+            </remarks>
+        </member>
+        <member name="M:System.Diagnostics.CodeAnalysis.UnconditionalSuppressMessageAttribute.#ctor(System.String,System.String)">
+            <summary>
+            Initializes a new instance of the <see cref="T:System.Diagnostics.CodeAnalysis.UnconditionalSuppressMessageAttribute"/>
+            class, specifying the category of the tool and the identifier for an analysis rule.
+            </summary>
+            <param name="category">The category for the attribute.</param>
+            <param name="checkId">The identifier of the analysis rule the attribute applies to.</param>
+        </member>
+        <member name="P:System.Diagnostics.CodeAnalysis.UnconditionalSuppressMessageAttribute.Category">
+            <summary>
+            Gets the category identifying the classification of the attribute.
+            </summary>
+            <remarks>
+            The <see cref="P:System.Diagnostics.CodeAnalysis.UnconditionalSuppressMessageAttribute.Category"/> property describes the tool or tool analysis category
+            for which a message suppression attribute applies.
+            </remarks>
+        </member>
+        <member name="P:System.Diagnostics.CodeAnalysis.UnconditionalSuppressMessageAttribute.CheckId">
+            <summary>
+            Gets the identifier of the analysis tool rule to be suppressed.
+            </summary>
+            <remarks>
+            Concatenated together, the <see cref="P:System.Diagnostics.CodeAnalysis.UnconditionalSuppressMessageAttribute.Category"/> and <see cref="P:System.Diagnostics.CodeAnalysis.UnconditionalSuppressMessageAttribute.CheckId"/>
+            properties form a unique check identifier.
+            </remarks>
+        </member>
+        <member name="P:System.Diagnostics.CodeAnalysis.UnconditionalSuppressMessageAttribute.Scope">
+            <summary>
+            Gets or sets the scope of the code that is relevant for the attribute.
+            </summary>
+            <remarks>
+            The Scope property is an optional argument that specifies the metadata scope for which
+            the attribute is relevant.
+            </remarks>
+        </member>
+        <member name="P:System.Diagnostics.CodeAnalysis.UnconditionalSuppressMessageAttribute.Target">
+            <summary>
+            Gets or sets a fully qualified path that represents the target of the attribute.
+            </summary>
+            <remarks>
+            The <see cref="P:System.Diagnostics.CodeAnalysis.UnconditionalSuppressMessageAttribute.Target"/> property is an optional argument identifying the analysis target
+            of the attribute. An example value is "System.IO.Stream.ctor():System.Void".
+            Because it is fully qualified, it can be long, particularly for targets such as parameters.
+            The analysis tool user interface should be capable of automatically formatting the parameter.
+            </remarks>
+        </member>
+        <member name="P:System.Diagnostics.CodeAnalysis.UnconditionalSuppressMessageAttribute.MessageId">
+            <summary>
+            Gets or sets an optional argument expanding on exclusion criteria.
+            </summary>
+            <remarks>
+            The <see cref="P:System.Diagnostics.CodeAnalysis.UnconditionalSuppressMessageAttribute.MessageId"/> property is an optional argument that specifies additional
+            exclusion where the literal metadata target is not sufficiently precise. For example,
+            the <see cref="T:System.Diagnostics.CodeAnalysis.UnconditionalSuppressMessageAttribute"/> cannot be applied within a method,
+            and it may be desirable to suppress a violation against a statement in the method that will
+            give a rule violation, but not against all statements in the method.
+            </remarks>
+        </member>
+        <member name="P:System.Diagnostics.CodeAnalysis.UnconditionalSuppressMessageAttribute.Justification">
+            <summary>
+            Gets or sets the justification for suppressing the code analysis message.
+            </summary>
+        </member>
+        <member name="T:System.Diagnostics.StackTraceHiddenAttribute">
+            <summary>
+            Types and Methods attributed with StackTraceHidden will be omitted from the stack trace text shown in StackTrace.ToString()
+            and Exception.StackTrace
+            </summary>
+        </member>
+        <member name="M:System.Diagnostics.StackTraceHiddenAttribute.#ctor">
+            <summary>
+            Initializes a new instance of the <see cref="T:System.Diagnostics.StackTraceHiddenAttribute"/> class.
+            </summary>
+        </member>
+        <member name="T:System.Collections.Generic.PriorityQueue`2">
+            <summary>
+             Represents a min priority queue.
+            </summary>
+            <typeparam name="TElement">Specifies the type of elements in the queue.</typeparam>
+            <typeparam name="TPriority">Specifies the type of priority associated with enqueued elements.</typeparam>
+            <remarks>
+             Implements an array-backed quaternary min-heap. Each element is enqueued with an associated priority
+             that determines the dequeue order: elements with the lowest priority get dequeued first.
+            </remarks>
+        </member>
+        <member name="F:System.Collections.Generic.PriorityQueue`2._nodes">
+            <summary>
+            Represents an implicit heap-ordered complete d-ary tree, stored as an array.
+            </summary>
+        </member>
+        <member name="F:System.Collections.Generic.PriorityQueue`2._comparer">
+            <summary>
+            Custom comparer used to order the heap.
+            </summary>
+        </member>
+        <member name="F:System.Collections.Generic.PriorityQueue`2._unorderedItems">
+            <summary>
+            Lazily-initialized collection used to expose the contents of the queue.
+            </summary>
+        </member>
+        <member name="F:System.Collections.Generic.PriorityQueue`2._size">
+            <summary>
+            The number of nodes in the heap.
+            </summary>
+        </member>
+        <member name="F:System.Collections.Generic.PriorityQueue`2._version">
+            <summary>
+            Version updated on mutation to help validate enumerators operate on a consistent state.
+            </summary>
+        </member>
+        <member name="F:System.Collections.Generic.PriorityQueue`2.Arity">
+            <summary>
+            Specifies the arity of the d-ary heap, which here is quaternary.
+            It is assumed that this value is a power of 2.
+            </summary>
+        </member>
+        <member name="F:System.Collections.Generic.PriorityQueue`2.Log2Arity">
+            <summary>
+            The binary logarithm of <see cref="F:System.Collections.Generic.PriorityQueue`2.Arity" />.
+            </summary>
+        </member>
+        <member name="M:System.Collections.Generic.PriorityQueue`2.#ctor">
+            <summary>
+             Initializes a new instance of the <see cref="T:System.Collections.Generic.PriorityQueue`2"/> class.
+            </summary>
+        </member>
+        <member name="M:System.Collections.Generic.PriorityQueue`2.#ctor(System.Int32)">
+            <summary>
+             Initializes a new instance of the <see cref="T:System.Collections.Generic.PriorityQueue`2"/> class
+             with the specified initial capacity.
+            </summary>
+            <param name="initialCapacity">Initial capacity to allocate in the underlying heap array.</param>
+            <exception cref="T:System.ArgumentOutOfRangeException">
+             The specified <paramref name="initialCapacity"/> was negative.
+            </exception>
+        </member>
+        <member name="M:System.Collections.Generic.PriorityQueue`2.#ctor(System.Collections.Generic.IComparer{`1})">
+            <summary>
+             Initializes a new instance of the <see cref="T:System.Collections.Generic.PriorityQueue`2"/> class
+             with the specified custom priority comparer.
+            </summary>
+            <param name="comparer">
+             Custom comparer dictating the ordering of elements.
+             Uses <see cref="P:System.Collections.Generic.Comparer`1.Default" /> if the argument is <see langword="null"/>.
+            </param>
+        </member>
+        <member name="M:System.Collections.Generic.PriorityQueue`2.#ctor(System.Int32,System.Collections.Generic.IComparer{`1})">
+            <summary>
+             Initializes a new instance of the <see cref="T:System.Collections.Generic.PriorityQueue`2"/> class
+             with the specified initial capacity and custom priority comparer.
+            </summary>
+            <param name="initialCapacity">Initial capacity to allocate in the underlying heap array.</param>
+            <param name="comparer">
+             Custom comparer dictating the ordering of elements.
+             Uses <see cref="P:System.Collections.Generic.Comparer`1.Default" /> if the argument is <see langword="null"/>.
+            </param>
+            <exception cref="T:System.ArgumentOutOfRangeException">
+             The specified <paramref name="initialCapacity"/> was negative.
+            </exception>
+        </member>
+        <member name="M:System.Collections.Generic.PriorityQueue`2.#ctor(System.Collections.Generic.IEnumerable{System.ValueTuple{`0,`1}})">
+            <summary>
+             Initializes a new instance of the <see cref="T:System.Collections.Generic.PriorityQueue`2"/> class
+             that is populated with the specified elements and priorities.
+            </summary>
+            <param name="items">The pairs of elements and priorities with which to populate the queue.</param>
+            <exception cref="T:System.ArgumentNullException">
+             The specified <paramref name="items"/> argument was <see langword="null"/>.
+            </exception>
+            <remarks>
+             Constructs the heap using a heapify operation,
+             which is generally faster than enqueuing individual elements sequentially.
+            </remarks>
+        </member>
+        <member name="M:System.Collections.Generic.PriorityQueue`2.#ctor(System.Collections.Generic.IEnumerable{System.ValueTuple{`0,`1}},System.Collections.Generic.IComparer{`1})">
+            <summary>
+             Initializes a new instance of the <see cref="T:System.Collections.Generic.PriorityQueue`2"/> class
+             that is populated with the specified elements and priorities,
+             and with the specified custom priority comparer.
+            </summary>
+            <param name="items">The pairs of elements and priorities with which to populate the queue.</param>
+            <param name="comparer">
+             Custom comparer dictating the ordering of elements.
+             Uses <see cref="P:System.Collections.Generic.Comparer`1.Default" /> if the argument is <see langword="null"/>.
+            </param>
+            <exception cref="T:System.ArgumentNullException">
+             The specified <paramref name="items"/> argument was <see langword="null"/>.
+            </exception>
+            <remarks>
+             Constructs the heap using a heapify operation,
+             which is generally faster than enqueuing individual elements sequentially.
+            </remarks>
+        </member>
+        <member name="P:System.Collections.Generic.PriorityQueue`2.Count">
+            <summary>
+             Gets the number of elements contained in the <see cref="T:System.Collections.Generic.PriorityQueue`2"/>.
+            </summary>
+        </member>
+        <member name="P:System.Collections.Generic.PriorityQueue`2.Comparer">
+            <summary>
+             Gets the priority comparer used by the <see cref="T:System.Collections.Generic.PriorityQueue`2"/>.
+            </summary>
+        </member>
+        <member name="P:System.Collections.Generic.PriorityQueue`2.UnorderedItems">
+            <summary>
+             Gets a collection that enumerates the elements of the queue in an unordered manner.
+            </summary>
+            <remarks>
+             The enumeration does not order items by priority, since that would require N * log(N) time and N space.
+             Items are instead enumerated following the internal array heap layout.
+            </remarks>
+        </member>
+        <member name="M:System.Collections.Generic.PriorityQueue`2.Enqueue(`0,`1)">
+            <summary>
+             Adds the specified element with associated priority to the <see cref="T:System.Collections.Generic.PriorityQueue`2"/>.
+            </summary>
+            <param name="element">The element to add to the <see cref="T:System.Collections.Generic.PriorityQueue`2"/>.</param>
+            <param name="priority">The priority with which to associate the new element.</param>
+        </member>
+        <member name="M:System.Collections.Generic.PriorityQueue`2.Peek">
+            <summary>
+             Returns the minimal element from the <see cref="T:System.Collections.Generic.PriorityQueue`2"/> without removing it.
+            </summary>
+            <exception cref="T:System.InvalidOperationException">The <see cref="T:System.Collections.Generic.PriorityQueue`2"/> is empty.</exception>
+            <returns>The minimal element of the <see cref="T:System.Collections.Generic.PriorityQueue`2"/>.</returns>
+        </member>
+        <member name="M:System.Collections.Generic.PriorityQueue`2.Dequeue">
+            <summary>
+             Removes and returns the minimal element from the <see cref="T:System.Collections.Generic.PriorityQueue`2"/>.
+            </summary>
+            <exception cref="T:System.InvalidOperationException">The queue is empty.</exception>
+            <returns>The minimal element of the <see cref="T:System.Collections.Generic.PriorityQueue`2"/>.</returns>
+        </member>
+        <member name="M:System.Collections.Generic.PriorityQueue`2.DequeueEnqueue(`0,`1)">
+            <summary>
+             Removes the minimal element and then immediately adds the specified element with associated priority to the <see cref="T:System.Collections.Generic.PriorityQueue`2"/>,
+            </summary>
+            <param name="element">The element to add to the <see cref="T:System.Collections.Generic.PriorityQueue`2"/>.</param>
+            <param name="priority">The priority with which to associate the new element.</param>
+            <exception cref="T:System.InvalidOperationException">The queue is empty.</exception>
+            <returns>The minimal element removed before performing the enqueue operation.</returns>
+            <remarks>
+             Implements an extract-then-insert heap operation that is generally more efficient
+             than sequencing Dequeue and Enqueue operations: in the worst case scenario only one
+             shift-down operation is required.
+            </remarks>
+        </member>
+        <member name="M:System.Collections.Generic.PriorityQueue`2.TryDequeue(`0@,`1@)">
+            <summary>
+             Removes the minimal element from the <see cref="T:System.Collections.Generic.PriorityQueue`2"/>,
+             and copies it to the <paramref name="element"/> parameter,
+             and its associated priority to the <paramref name="priority"/> parameter.
+            </summary>
+            <param name="element">The removed element.</param>
+            <param name="priority">The priority associated with the removed element.</param>
+            <returns>
+             <see langword="true"/> if the element is successfully removed;
+             <see langword="false"/> if the <see cref="T:System.Collections.Generic.PriorityQueue`2"/> is empty.
+            </returns>
+        </member>
+        <member name="M:System.Collections.Generic.PriorityQueue`2.TryPeek(`0@,`1@)">
+            <summary>
+             Returns a value that indicates whether there is a minimal element in the <see cref="T:System.Collections.Generic.PriorityQueue`2"/>,
+             and if one is present, copies it to the <paramref name="element"/> parameter,
+             and its associated priority to the <paramref name="priority"/> parameter.
+             The element is not removed from the <see cref="T:System.Collections.Generic.PriorityQueue`2"/>.
+            </summary>
+            <param name="element">The minimal element in the queue.</param>
+            <param name="priority">The priority associated with the minimal element.</param>
+            <returns>
+             <see langword="true"/> if there is a minimal element;
+             <see langword="false"/> if the <see cref="T:System.Collections.Generic.PriorityQueue`2"/> is empty.
+            </returns>
+        </member>
+        <member name="M:System.Collections.Generic.PriorityQueue`2.EnqueueDequeue(`0,`1)">
+            <summary>
+             Adds the specified element with associated priority to the <see cref="T:System.Collections.Generic.PriorityQueue`2"/>,
+             and immediately removes the minimal element, returning the result.
+            </summary>
+            <param name="element">The element to add to the <see cref="T:System.Collections.Generic.PriorityQueue`2"/>.</param>
+            <param name="priority">The priority with which to associate the new element.</param>
+            <returns>The minimal element removed after the enqueue operation.</returns>
+            <remarks>
+             Implements an insert-then-extract heap operation that is generally more efficient
+             than sequencing Enqueue and Dequeue operations: in the worst case scenario only one
+             shift-down operation is required.
+            </remarks>
+        </member>
+        <member name="M:System.Collections.Generic.PriorityQueue`2.EnqueueRange(System.Collections.Generic.IEnumerable{System.ValueTuple{`0,`1}})">
+            <summary>
+             Enqueues a sequence of element/priority pairs to the <see cref="T:System.Collections.Generic.PriorityQueue`2"/>.
+            </summary>
+            <param name="items">The pairs of elements and priorities to add to the queue.</param>
+            <exception cref="T:System.ArgumentNullException">
+             The specified <paramref name="items"/> argument was <see langword="null"/>.
+            </exception>
+        </member>
+        <member name="M:System.Collections.Generic.PriorityQueue`2.EnqueueRange(System.Collections.Generic.IEnumerable{`0},`1)">
+            <summary>
+             Enqueues a sequence of elements pairs to the <see cref="T:System.Collections.Generic.PriorityQueue`2"/>,
+             all associated with the specified priority.
+            </summary>
+            <param name="elements">The elements to add to the queue.</param>
+            <param name="priority">The priority to associate with the new elements.</param>
+            <exception cref="T:System.ArgumentNullException">
+             The specified <paramref name="elements"/> argument was <see langword="null"/>.
+            </exception>
+        </member>
+        <member name="M:System.Collections.Generic.PriorityQueue`2.Clear">
+            <summary>
+             Removes all items from the <see cref="T:System.Collections.Generic.PriorityQueue`2"/>.
+            </summary>
+        </member>
+        <member name="M:System.Collections.Generic.PriorityQueue`2.EnsureCapacity(System.Int32)">
+            <summary>
+             Ensures that the <see cref="T:System.Collections.Generic.PriorityQueue`2"/> can hold up to
+             <paramref name="capacity"/> items without further expansion of its backing storage.
+            </summary>
+            <param name="capacity">The minimum capacity to be used.</param>
+            <exception cref="T:System.ArgumentOutOfRangeException">
+             The specified <paramref name="capacity"/> is negative.
+            </exception>
+            <returns>The current capacity of the <see cref="T:System.Collections.Generic.PriorityQueue`2"/>.</returns>
+        </member>
+        <member name="M:System.Collections.Generic.PriorityQueue`2.TrimExcess">
+            <summary>
+             Sets the capacity to the actual number of items in the <see cref="T:System.Collections.Generic.PriorityQueue`2"/>,
+             if that is less than 90 percent of current capacity.
+            </summary>
+            <remarks>
+             This method can be used to minimize a collection's memory overhead
+             if no new elements will be added to the collection.
+            </remarks>
+        </member>
+        <member name="M:System.Collections.Generic.PriorityQueue`2.Grow(System.Int32)">
+            <summary>
+            Grows the priority queue to match the specified min capacity.
+            </summary>
+        </member>
+        <member name="M:System.Collections.Generic.PriorityQueue`2.RemoveRootNode">
+            <summary>
+            Removes the node from the root of the heap
+            </summary>
+        </member>
+        <member name="M:System.Collections.Generic.PriorityQueue`2.GetParentIndex(System.Int32)">
+            <summary>
+            Gets the index of an element's parent.
+            </summary>
+        </member>
+        <member name="M:System.Collections.Generic.PriorityQueue`2.GetFirstChildIndex(System.Int32)">
+            <summary>
+            Gets the index of the first child of an element.
+            </summary>
+        </member>
+        <member name="M:System.Collections.Generic.PriorityQueue`2.Heapify">
+            <summary>
+            Converts an unordered list into a heap.
+            </summary>
+        </member>
+        <member name="M:System.Collections.Generic.PriorityQueue`2.MoveUpDefaultComparer(System.ValueTuple{`0,`1},System.Int32)">
+            <summary>
+            Moves a node up in the tree to restore heap order.
+            </summary>
+        </member>
+        <member name="M:System.Collections.Generic.PriorityQueue`2.MoveUpCustomComparer(System.ValueTuple{`0,`1},System.Int32)">
+            <summary>
+            Moves a node up in the tree to restore heap order.
+            </summary>
+        </member>
+        <member name="M:System.Collections.Generic.PriorityQueue`2.MoveDownDefaultComparer(System.ValueTuple{`0,`1},System.Int32)">
+            <summary>
+            Moves a node down in the tree to restore heap order.
+            </summary>
+        </member>
+        <member name="M:System.Collections.Generic.PriorityQueue`2.MoveDownCustomComparer(System.ValueTuple{`0,`1},System.Int32)">
+            <summary>
+            Moves a node down in the tree to restore heap order.
+            </summary>
+        </member>
+        <member name="M:System.Collections.Generic.PriorityQueue`2.InitializeComparer(System.Collections.Generic.IComparer{`1})">
+            <summary>
+            Initializes the custom comparer to be used internally by the heap.
+            </summary>
+        </member>
+        <member name="T:System.Collections.Generic.PriorityQueue`2.UnorderedItemsCollection">
+            <summary>
+             Enumerates the contents of a <see cref="T:System.Collections.Generic.PriorityQueue`2"/>, without any ordering guarantees.
+            </summary>
+        </member>
+        <member name="T:System.Collections.Generic.PriorityQueue`2.UnorderedItemsCollection.Enumerator">
+            <summary>
+             Enumerates the element and priority pairs of a <see cref="T:System.Collections.Generic.PriorityQueue`2"/>,
+             without any ordering guarantees.
+            </summary>
+        </member>
+        <member name="M:System.Collections.Generic.PriorityQueue`2.UnorderedItemsCollection.Enumerator.Dispose">
+            <summary>
+            Releases all resources used by the <see cref="T:System.Collections.Generic.PriorityQueue`2.UnorderedItemsCollection.Enumerator"/>.
+            </summary>
+        </member>
+        <member name="M:System.Collections.Generic.PriorityQueue`2.UnorderedItemsCollection.Enumerator.MoveNext">
+            <summary>
+            Advances the enumerator to the next element of the <see cref="P:System.Collections.Generic.PriorityQueue`2.UnorderedItems"/>.
+            </summary>
+            <returns><see langword="true"/> if the enumerator was successfully advanced to the next element; <see langword="false"/> if the enumerator has passed the end of the collection.</returns>
+        </member>
+        <member name="P:System.Collections.Generic.PriorityQueue`2.UnorderedItemsCollection.Enumerator.Current">
+            <summary>
+            Gets the element at the current position of the enumerator.
+            </summary>
+        </member>
+        <member name="M:System.Collections.Generic.PriorityQueue`2.UnorderedItemsCollection.GetEnumerator">
+            <summary>
+            Returns an enumerator that iterates through the <see cref="P:System.Collections.Generic.PriorityQueue`2.UnorderedItems"/>.
+            </summary>
+            <returns>An <see cref="T:System.Collections.Generic.PriorityQueue`2.UnorderedItemsCollection.Enumerator"/> for the <see cref="P:System.Collections.Generic.PriorityQueue`2.UnorderedItems"/>.</returns>
+        </member>
+        <member name="T:System.Collections.Generic.ReferenceEqualityComparer">
+            <summary>
+            An <see cref="T:System.Collections.Generic.IEqualityComparer`1"/> that uses reference equality (<see cref="M:System.Object.ReferenceEquals(System.Object,System.Object)"/>)
+            instead of value equality (<see cref="M:System.Object.Equals(System.Object)"/>) when comparing two object instances.
+            </summary>
+            <remarks>
+            The <see cref="T:System.Collections.Generic.ReferenceEqualityComparer"/> type cannot be instantiated. Instead, use the <see cref="P:System.Collections.Generic.ReferenceEqualityComparer.Instance"/> property
+            to access the singleton instance of this type.
+            </remarks>
+        </member>
+        <member name="P:System.Collections.Generic.ReferenceEqualityComparer.Instance">
+            <summary>
+            Gets the singleton <see cref="T:System.Collections.Generic.ReferenceEqualityComparer"/> instance.
+            </summary>
+        </member>
+        <member name="M:System.Collections.Generic.ReferenceEqualityComparer.Equals(System.Object,System.Object)">
+            <summary>
+            Determines whether two object references refer to the same object instance.
+            </summary>
+            <param name="x">The first object to compare.</param>
+            <param name="y">The second object to compare.</param>
+            <returns>
+            <see langword="true"/> if both <paramref name="x"/> and <paramref name="y"/> refer to the same object instance
+            or if both are <see langword="null"/>; otherwise, <see langword="false"/>.
+            </returns>
+            <remarks>
+            This API is a wrapper around <see cref="M:System.Object.ReferenceEquals(System.Object,System.Object)"/>.
+            It is not necessarily equivalent to calling <see cref="M:System.Object.Equals(System.Object,System.Object)"/>.
+            </remarks>
+        </member>
+        <member name="M:System.Collections.Generic.ReferenceEqualityComparer.GetHashCode(System.Object)">
+            <summary>
+            Returns a hash code for the specified object. The returned hash code is based on the object
+            identity, not on the contents of the object.
+            </summary>
+            <param name="obj">The object for which to retrieve the hash code.</param>
+            <returns>A hash code for the identity of <paramref name="obj"/>.</returns>
+            <remarks>
+            This API is a wrapper around <see cref="M:System.Runtime.CompilerServices.RuntimeHelpers.GetHashCode(System.Object)"/>.
+            It is not necessarily equivalent to calling <see cref="M:System.Object.GetHashCode"/>.
+            </remarks>
+        </member>
+        <member name="T:System.Runtime.CompilerServices.AsyncMethodBuilderAttribute">
+            <summary>
+            Indicates the type of the async method builder that should be used by a language compiler to
+            build the attributed async method or to build the attributed type when used as the return type
+            of an async method.
+            </summary>
+        </member>
+        <member name="M:System.Runtime.CompilerServices.AsyncMethodBuilderAttribute.#ctor(System.Type)">
+            <summary>Initializes the <see cref="T:System.Runtime.CompilerServices.AsyncMethodBuilderAttribute"/>.</summary>
+            <param name="builderType">The <see cref="T:System.Type"/> of the associated builder.</param>
+        </member>
+        <member name="P:System.Runtime.CompilerServices.AsyncMethodBuilderAttribute.BuilderType">
+            <summary>Gets the <see cref="T:System.Type"/> of the associated builder.</summary>
+        </member>
+        <member name="T:System.Runtime.CompilerServices.DisableRuntimeMarshallingAttribute">
+             <summary>
+             Disables the built-in runtime managed/unmanaged marshalling subsystem for
+             P/Invokes, Delegate types, and unmanaged function pointer invocations.
+             </summary>
+             <remarks>
+             The built-in marshalling subsystem has some behaviors that cannot be changed due to
+             backward-compatibility requirements. This attribute allows disabling the built-in
+             subsystem and instead uses the following rules for P/Invokes, Delegates,
+             and unmanaged function pointer invocations:
+            
+             - All value types that do not contain reference type fields recursively (<c>unmanaged</c> in C#) are blittable
+             - Value types that recursively have any fields that have <c>[StructLayout(LayoutKind.Auto)]</c> are disallowed from interop.
+             - All reference types are disallowed from usage in interop scenarios.
+             - SetLastError support in P/Invokes is disabled.
+             - varargs support is disabled.
+             - LCIDConversionAttribute support is disabled.
+             </remarks>
+        </member>
+        <member name="T:System.Runtime.InteropServices.SuppressGCTransitionAttribute">
+             <summary>
+             An attribute used to indicate a GC transition should be skipped when making an unmanaged function call.
+             </summary>
+             <example>
+             Example of a valid use case. The Win32 `GetTickCount()` function is a small performance related function
+             that reads some global memory and returns the value. In this case, the GC transition overhead is significantly
+             more than the memory read.
+             <code>
+             using System;
+             using System.Runtime.InteropServices;
+             class Program
+             {
+                 [DllImport("Kernel32")]
+                 [SuppressGCTransition]
+                 static extern int GetTickCount();
+                 static void Main()
+                 {
+                     Console.WriteLine($"{GetTickCount()}");
+                 }
+             }
+             </code>
+             </example>
+             <remarks>
+             This attribute is ignored if applied to a method without the <see cref="T:System.Runtime.InteropServices.DllImportAttribute"/>.
+            
+             Forgoing this transition can yield benefits when the cost of the transition is more than the execution time
+             of the unmanaged function. However, avoiding this transition removes some of the guarantees the runtime
+             provides through a normal P/Invoke. When exiting the managed runtime to enter an unmanaged function the
+             GC must transition from Cooperative mode into Preemptive mode. Full details on these modes can be found at
+             https://github.com/dotnet/runtime/blob/main/docs/coding-guidelines/clr-code-guide.md#2.1.8.
+             Suppressing the GC transition is an advanced scenario and should not be done without fully understanding
+             potential consequences.
+            
+             One of these consequences is an impact to Mixed-mode debugging (https://docs.microsoft.com/visualstudio/debugger/how-to-debug-in-mixed-mode).
+             During Mixed-mode debugging, it is not possible to step into or set breakpoints in a P/Invoke that
+             has been marked with this attribute. A workaround is to switch to native debugging and set a breakpoint in the native function.
+             In general, usage of this attribute is not recommended if debugging the P/Invoke is important, for example
+             stepping through the native code or diagnosing an exception thrown from the native code.
+            
+             The runtime may load the native library for method marked with this attribute in advance before the method is called for the first time.
+             Usage of this attribute is not recommended for platform neutral libraries with conditional platform specific code.
+            
+             The P/Invoke method that this attribute is applied to must have all of the following properties:
+               * Native function always executes for a trivial amount of time (less than 1 microsecond).
+               * Native function does not perform a blocking syscall (e.g. any type of I/O).
+               * Native function does not call back into the runtime (e.g. Reverse P/Invoke).
+               * Native function does not throw exceptions.
+               * Native function does not manipulate locks or other concurrency primitives.
+            
+             Consequences of invalid uses of this attribute:
+               * GC starvation.
+               * Immediate runtime termination.
+               * Data corruption.
+             </remarks>
+        </member>
+        <member name="T:System.Runtime.InteropServices.UnmanagedCallersOnlyAttribute">
+            <summary>
+            Any method marked with <see cref="T:System.Runtime.InteropServices.UnmanagedCallersOnlyAttribute" /> can be directly called from
+            native code. The function token can be loaded to a local variable using the <see href="https://docs.microsoft.com/dotnet/csharp/language-reference/operators/pointer-related-operators#address-of-operator-">address-of</see> operator
+            in C# and passed as a callback to a native method.
+            </summary>
+            <remarks>
+            Methods marked with this attribute have the following restrictions:
+              * Method must be marked "static".
+              * Must not be called from managed code.
+              * Must only have <see href="https://docs.microsoft.com/dotnet/framework/interop/blittable-and-non-blittable-types">blittable</see> arguments.
+            </remarks>
+        </member>
+        <member name="F:System.Runtime.InteropServices.UnmanagedCallersOnlyAttribute.CallConvs">
+            <summary>
+            Optional. If omitted, the runtime will use the default platform calling convention.
+            </summary>
+            <remarks>
+            Supplied types must be from the official "System.Runtime.CompilerServices" namespace and
+            be of the form "CallConvXXX".
+            </remarks>
+        </member>
+        <member name="F:System.Runtime.InteropServices.UnmanagedCallersOnlyAttribute.EntryPoint">
+            <summary>
+            Optional. If omitted, no named export is emitted during compilation.
+            </summary>
+        </member>
+        <member name="T:System.Runtime.Versioning.ObsoletedOSPlatformAttribute">
+            <summary>
+            Marks APIs that were obsoleted in a given operating system version.
+            </summary>
+            <remarks>
+            Primarily used by OS bindings to indicate APIs that should not be used anymore.
+            </remarks>
+        </member>
+        <member name="T:System.Runtime.Versioning.SupportedOSPlatformAttribute">
+             <summary>
+             Records the operating system (and minimum version) that supports an API. Multiple attributes can be
+             applied to indicate support on multiple operating systems.
+             </summary>
+             <remarks>
+             Callers can apply a <see cref="T:System.Runtime.Versioning.SupportedOSPlatformAttribute" />
+             or use guards to prevent calls to APIs on unsupported operating systems.
+            
+             A given platform should only be specified once.
+             </remarks>
+        </member>
+        <member name="T:System.Runtime.Versioning.SupportedOSPlatformGuardAttribute">
+             <summary>
+             Annotates a custom guard field, property or method with a supported platform name and optional version.
+             Multiple attributes can be applied to indicate guard for multiple supported platforms.
+             </summary>
+             <remarks>
+             Callers can apply a <see cref="T:System.Runtime.Versioning.SupportedOSPlatformGuardAttribute" /> to a field, property or method
+             and use that field, property or method in a conditional or assert statements in order to safely call platform specific APIs.
+            
+             The type of the field or property should be boolean, the method return type should be boolean in order to be used as platform guard.
+             </remarks>
+        </member>
+        <member name="T:System.Runtime.Versioning.TargetPlatformAttribute">
+            <summary>
+            Records the platform that the project targeted.
+            </summary>
+        </member>
+        <member name="T:System.Runtime.Versioning.UnsupportedOSPlatformAttribute">
+            <summary>
+            Marks APIs that were removed in a given operating system version.
+            </summary>
+            <remarks>
+            Primarily used by OS bindings to indicate APIs that are only available in
+            earlier versions.
+            </remarks>
+        </member>
+        <member name="T:System.Runtime.Versioning.UnsupportedOSPlatformGuardAttribute">
+             <summary>
+             Annotates the custom guard field, property or method with an unsupported platform name and optional version.
+             Multiple attributes can be applied to indicate guard for multiple unsupported platforms.
+             </summary>
+             <remarks>
+             Callers can apply a <see cref="T:System.Runtime.Versioning.UnsupportedOSPlatformGuardAttribute" /> to a field, property or method
+             and use that  field, property or method in a conditional or assert statements as a guard to safely call APIs unsupported on those platforms.
+            
+             The type of the field or property should be boolean, the method return type should be boolean in order to be used as platform guard.
+             </remarks>
+        </member>
+        <member name="T:System.Threading.Tasks.TaskToAsyncResult">
+            <summary>
+            Provides methods for using <see cref="T:System.Threading.Tasks.Task"/> to implement the Asynchronous Programming Model
+            pattern based on "Begin" and "End" methods.
+            </summary>
+        </member>
+        <member name="M:System.Threading.Tasks.TaskToAsyncResult.Begin(System.Threading.Tasks.Task,System.AsyncCallback,System.Object)">
+            <summary>Creates a new <see cref="T:System.IAsyncResult"/> from the specified <see cref="T:System.Threading.Tasks.Task"/>, optionally invoking <paramref name="callback"/> when the task has completed.</summary>
+            <param name="task">The <see cref="T:System.Threading.Tasks.Task"/> to be wrapped in an <see cref="T:System.IAsyncResult"/>.</param>
+            <param name="callback">The callback to be invoked upon <paramref name="task"/>'s completion. If <see langword="null"/>, no callback will be invoked.</param>
+            <param name="state">The state to be stored in the <see cref="T:System.IAsyncResult"/>.</param>
+            <returns>An <see cref="T:System.IAsyncResult"/> to represent the task's asynchronous operation. This instance will also be passed to <paramref name="callback"/> when it's invoked.</returns>
+            <exception cref="T:System.ArgumentNullException"><paramref name="task"/> is null.</exception>
+            <remarks>
+            In conjunction with the <see cref="M:System.Threading.Tasks.TaskToAsyncResult.End(System.IAsyncResult)"/> or <see cref="M:System.Threading.Tasks.TaskToAsyncResult.End``1(System.IAsyncResult)"/> methods, this method may be used
+            to implement the Begin/End pattern (also known as the Asynchronous Programming Model pattern, or APM). It is recommended to not expose this pattern
+            in new code; the methods on <see cref="T:System.Threading.Tasks.TaskToAsyncResult"/> are intended only to help implement such Begin/End methods when they must be exposed, for example
+            because a base class provides virtual methods for the pattern, or when they've already been exposed and must remain for compatibility.  These methods enable
+            implementing all of the core asynchronous logic via <see cref="T:System.Threading.Tasks.Task"/>s and then easily implementing Begin/End methods around that functionality.
+            </remarks>
+        </member>
+        <member name="M:System.Threading.Tasks.TaskToAsyncResult.End(System.IAsyncResult)">
+            <summary>Waits for the <see cref="T:System.Threading.Tasks.Task"/> wrapped by the <see cref="T:System.IAsyncResult"/> returned by <see cref="M:System.Threading.Tasks.TaskToAsyncResult.Begin(System.Threading.Tasks.Task,System.AsyncCallback,System.Object)"/> to complete.</summary>
+            <param name="asyncResult">The <see cref="T:System.IAsyncResult"/> for which to wait.</param>
+            <exception cref="T:System.ArgumentNullException"><paramref name="asyncResult"/> is null.</exception>
+            <exception cref="T:System.ArgumentException"><paramref name="asyncResult"/> was not produced by a call to <see cref="M:System.Threading.Tasks.TaskToAsyncResult.Begin(System.Threading.Tasks.Task,System.AsyncCallback,System.Object)"/>.</exception>
+            <remarks>This will propagate any exception stored in the wrapped <see cref="T:System.Threading.Tasks.Task"/>.</remarks>
+        </member>
+        <member name="M:System.Threading.Tasks.TaskToAsyncResult.End``1(System.IAsyncResult)">
+            <summary>Waits for the <see cref="T:System.Threading.Tasks.Task`1"/> wrapped by the <see cref="T:System.IAsyncResult"/> returned by <see cref="M:System.Threading.Tasks.TaskToAsyncResult.Begin(System.Threading.Tasks.Task,System.AsyncCallback,System.Object)"/> to complete.</summary>
+            <param name="asyncResult">The <see cref="T:System.IAsyncResult"/> for which to wait.</param>
+            <returns>The result of the <see cref="T:System.Threading.Tasks.Task`1"/> wrapped by the <see cref="T:System.IAsyncResult"/>.</returns>
+            <exception cref="T:System.ArgumentNullException"><paramref name="asyncResult"/> is null.</exception>
+            <exception cref="T:System.ArgumentException"><paramref name="asyncResult"/> was not produced by a call to <see cref="M:System.Threading.Tasks.TaskToAsyncResult.Begin(System.Threading.Tasks.Task,System.AsyncCallback,System.Object)"/>.</exception>
+            <remarks>This will propagate any exception stored in the wrapped <see cref="T:System.Threading.Tasks.Task`1"/>.</remarks>
+        </member>
+        <member name="M:System.Threading.Tasks.TaskToAsyncResult.Unwrap(System.IAsyncResult)">
+            <summary>Extracts the underlying <see cref="T:System.Threading.Tasks.Task"/> from an <see cref="T:System.IAsyncResult"/> created by <see cref="M:System.Threading.Tasks.TaskToAsyncResult.Begin(System.Threading.Tasks.Task,System.AsyncCallback,System.Object)"/>.</summary>
+            <param name="asyncResult">The <see cref="T:System.IAsyncResult"/> created by <see cref="M:System.Threading.Tasks.TaskToAsyncResult.Begin(System.Threading.Tasks.Task,System.AsyncCallback,System.Object)"/>.</param>
+            <returns>The <see cref="T:System.Threading.Tasks.Task"/> wrapped by the <see cref="T:System.IAsyncResult"/>.</returns>
+            <exception cref="T:System.ArgumentNullException"><paramref name="asyncResult"/> is null.</exception>
+            <exception cref="T:System.ArgumentException"><paramref name="asyncResult"/> was not produced by a call to <see cref="M:System.Threading.Tasks.TaskToAsyncResult.Begin(System.Threading.Tasks.Task,System.AsyncCallback,System.Object)"/>.</exception>
+        </member>
+        <member name="M:System.Threading.Tasks.TaskToAsyncResult.Unwrap``1(System.IAsyncResult)">
+            <summary>Extracts the underlying <see cref="T:System.Threading.Tasks.Task`1"/> from an <see cref="T:System.IAsyncResult"/> created by <see cref="M:System.Threading.Tasks.TaskToAsyncResult.Begin(System.Threading.Tasks.Task,System.AsyncCallback,System.Object)"/>.</summary>
+            <param name="asyncResult">The <see cref="T:System.IAsyncResult"/> created by <see cref="M:System.Threading.Tasks.TaskToAsyncResult.Begin(System.Threading.Tasks.Task,System.AsyncCallback,System.Object)"/>.</param>
+            <returns>The <see cref="T:System.Threading.Tasks.Task`1"/> wrapped by the <see cref="T:System.IAsyncResult"/>.</returns>
+            <exception cref="T:System.ArgumentNullException"><paramref name="asyncResult"/> is null.</exception>
+            <exception cref="T:System.ArgumentException">
+            <paramref name="asyncResult"/> was not produced by a call to <see cref="M:System.Threading.Tasks.TaskToAsyncResult.Begin(System.Threading.Tasks.Task,System.AsyncCallback,System.Object)"/>,
+            or the <see cref="T:System.Threading.Tasks.Task`1"/> provided to <see cref="M:System.Threading.Tasks.TaskToAsyncResult.Begin(System.Threading.Tasks.Task,System.AsyncCallback,System.Object)"/> was used a generic type parameter
+            that's different from the <typeparamref name="TResult"/> supplied to this call.
+            </exception>
+        </member>
+        <member name="T:System.Threading.Tasks.TaskToAsyncResult.TaskAsyncResult">
+            <summary>Provides a simple <see cref="T:System.IAsyncResult"/> that wraps a <see cref="T:System.Threading.Tasks.Task"/>.</summary>
+            <remarks>
+            We could use the Task as the IAsyncResult if the Task's AsyncState is the same as the object state,
+            but that's very rare, in particular in a situation where someone cares about allocation, and always
+            using TaskAsyncResult simplifies things and enables additional optimizations.
+            </remarks>
+        </member>
+        <member name="F:System.Threading.Tasks.TaskToAsyncResult.TaskAsyncResult._task">
+            <summary>The wrapped Task.</summary>
+        </member>
+        <member name="F:System.Threading.Tasks.TaskToAsyncResult.TaskAsyncResult._callback">
+            <summary>Callback to invoke when the wrapped task completes.</summary>
+        </member>
+        <member name="M:System.Threading.Tasks.TaskToAsyncResult.TaskAsyncResult.#ctor(System.Threading.Tasks.Task,System.Object,System.AsyncCallback)">
+            <summary>Initializes the IAsyncResult with the Task to wrap and the associated object state.</summary>
+            <param name="task">The Task to wrap.</param>
+            <param name="state">The new AsyncState value.</param>
+            <param name="callback">Callback to invoke when the wrapped task completes.</param>
+        </member>
+        <member name="P:System.Threading.Tasks.TaskToAsyncResult.TaskAsyncResult.AsyncState">
+            <inheritdoc/>
+        </member>
+        <member name="P:System.Threading.Tasks.TaskToAsyncResult.TaskAsyncResult.CompletedSynchronously">
+            <inheritdoc/>
+        </member>
+        <member name="P:System.Threading.Tasks.TaskToAsyncResult.TaskAsyncResult.IsCompleted">
+            <inheritdoc/>
+        </member>
+        <member name="P:System.Threading.Tasks.TaskToAsyncResult.TaskAsyncResult.AsyncWaitHandle">
+            <inheritdoc/>
+        </member>
+        <member name="M:PolyfillExtensions.WaitAsync``1(System.Threading.Tasks.Task{``0},System.Threading.CancellationToken)">
+            <summary>
+            Gets a <see cref="T:System.Threading.Tasks.Task`1"/> that will complete when the <paramref name="task"/> completes or when the specified <paramref name="cancellationToken"/> has cancellation requested.
+            </summary>
+            <typeparam name="TResult">The type of the task result.</typeparam>
+            <param name="task">The task to wait on for completion.</param>
+            <param name="cancellationToken">The <see cref="T:System.Threading.CancellationToken"/> to monitor for a cancellation request.</param>
+            <returns>The <see cref="T:System.Threading.Tasks.Task`1"/> representing the asynchronous wait.</returns>
+        </member>
+        <member name="M:BitOperations.RotateLeft(System.UInt32,System.Int32)">
+            <summary>
+            Rotates the specified value left by the specified number of bits.
+            Similar in behavior to the x86 instruction ROL.
+            </summary>
+            <param name="value">The value to rotate.</param>
+            <param name="offset">The number of bits to rotate by.
+            Any value outside the range [0..31] is treated as congruent mod 32.</param>
+            <returns>The rotated value.</returns>
+        </member>
+        <member name="M:BitOperations.RotateLeft(System.UInt64,System.Int32)">
+            <summary>
+            Rotates the specified value left by the specified number of bits.
+            Similar in behavior to the x86 instruction ROL.
+            </summary>
+            <param name="value">The value to rotate.</param>
+            <param name="offset">The number of bits to rotate by.
+            Any value outside the range [0..63] is treated as congruent mod 64.</param>
+            <returns>The rotated value.</returns>
+        </member>
+    </members>
+</doc>

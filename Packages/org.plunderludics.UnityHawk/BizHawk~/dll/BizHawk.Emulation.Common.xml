@@ -1,0 +1,2686 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>BizHawk.Emulation.Common</name>
+    </assembly>
+    <members>
+        <member name="T:System.Diagnostics.CodeAnalysis.DynamicDependencyAttribute">
+            <summary>
+            States a dependency that one member has on another.
+            </summary>
+            <remarks>
+            This can be used to inform tooling of a dependency that is otherwise not evident purely from
+            metadata and IL, for example a member relied on via reflection.
+            </remarks>
+        </member>
+        <member name="M:System.Diagnostics.CodeAnalysis.DynamicDependencyAttribute.#ctor(System.String)">
+            <summary>
+            Initializes a new instance of the <see cref="T:System.Diagnostics.CodeAnalysis.DynamicDependencyAttribute"/> class
+            with the specified signature of a member on the same type as the consumer.
+            </summary>
+            <param name="memberSignature">The signature of the member depended on.</param>
+        </member>
+        <member name="M:System.Diagnostics.CodeAnalysis.DynamicDependencyAttribute.#ctor(System.String,System.Type)">
+            <summary>
+            Initializes a new instance of the <see cref="T:System.Diagnostics.CodeAnalysis.DynamicDependencyAttribute"/> class
+            with the specified signature of a member on a <see cref="T:System.Type"/>.
+            </summary>
+            <param name="memberSignature">The signature of the member depended on.</param>
+            <param name="type">The <see cref="T:System.Type"/> containing <paramref name="memberSignature"/>.</param>
+        </member>
+        <member name="M:System.Diagnostics.CodeAnalysis.DynamicDependencyAttribute.#ctor(System.String,System.String,System.String)">
+            <summary>
+            Initializes a new instance of the <see cref="T:System.Diagnostics.CodeAnalysis.DynamicDependencyAttribute"/> class
+            with the specified signature of a member on a type in an assembly.
+            </summary>
+            <param name="memberSignature">The signature of the member depended on.</param>
+            <param name="typeName">The full name of the type containing the specified member.</param>
+            <param name="assemblyName">The assembly name of the type containing the specified member.</param>
+        </member>
+        <member name="M:System.Diagnostics.CodeAnalysis.DynamicDependencyAttribute.#ctor(System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes,System.Type)">
+            <summary>
+            Initializes a new instance of the <see cref="T:System.Diagnostics.CodeAnalysis.DynamicDependencyAttribute"/> class
+            with the specified types of members on a <see cref="T:System.Type"/>.
+            </summary>
+            <param name="memberTypes">The types of members depended on.</param>
+            <param name="type">The <see cref="T:System.Type"/> containing the specified members.</param>
+        </member>
+        <member name="M:System.Diagnostics.CodeAnalysis.DynamicDependencyAttribute.#ctor(System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes,System.String,System.String)">
+            <summary>
+            Initializes a new instance of the <see cref="T:System.Diagnostics.CodeAnalysis.DynamicDependencyAttribute"/> class
+            with the specified types of members on a type in an assembly.
+            </summary>
+            <param name="memberTypes">The types of members depended on.</param>
+            <param name="typeName">The full name of the type containing the specified members.</param>
+            <param name="assemblyName">The assembly name of the type containing the specified members.</param>
+        </member>
+        <member name="P:System.Diagnostics.CodeAnalysis.DynamicDependencyAttribute.MemberSignature">
+            <summary>
+            Gets the signature of the member depended on.
+            </summary>
+            <remarks>
+            Either <see cref="P:System.Diagnostics.CodeAnalysis.DynamicDependencyAttribute.MemberSignature"/> must be a valid string or <see cref="P:System.Diagnostics.CodeAnalysis.DynamicDependencyAttribute.MemberTypes"/>
+            must not equal <see cref="F:System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.None"/>, but not both.
+            </remarks>
+        </member>
+        <member name="P:System.Diagnostics.CodeAnalysis.DynamicDependencyAttribute.MemberTypes">
+            <summary>
+            Gets the <see cref="T:System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes"/> which specifies the type
+            of members depended on.
+            </summary>
+            <remarks>
+            Either <see cref="P:System.Diagnostics.CodeAnalysis.DynamicDependencyAttribute.MemberSignature"/> must be a valid string or <see cref="P:System.Diagnostics.CodeAnalysis.DynamicDependencyAttribute.MemberTypes"/>
+            must not equal <see cref="F:System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.None"/>, but not both.
+            </remarks>
+        </member>
+        <member name="P:System.Diagnostics.CodeAnalysis.DynamicDependencyAttribute.Type">
+            <summary>
+            Gets the <see cref="T:System.Type"/> containing the specified member.
+            </summary>
+            <remarks>
+            If neither <see cref="P:System.Diagnostics.CodeAnalysis.DynamicDependencyAttribute.Type"/> nor <see cref="P:System.Diagnostics.CodeAnalysis.DynamicDependencyAttribute.TypeName"/> are specified,
+            the type of the consumer is assumed.
+            </remarks>
+        </member>
+        <member name="P:System.Diagnostics.CodeAnalysis.DynamicDependencyAttribute.TypeName">
+            <summary>
+            Gets the full name of the type containing the specified member.
+            </summary>
+            <remarks>
+            If neither <see cref="P:System.Diagnostics.CodeAnalysis.DynamicDependencyAttribute.Type"/> nor <see cref="P:System.Diagnostics.CodeAnalysis.DynamicDependencyAttribute.TypeName"/> are specified,
+            the type of the consumer is assumed.
+            </remarks>
+        </member>
+        <member name="P:System.Diagnostics.CodeAnalysis.DynamicDependencyAttribute.AssemblyName">
+            <summary>
+            Gets the assembly name of the specified type.
+            </summary>
+            <remarks>
+            <see cref="P:System.Diagnostics.CodeAnalysis.DynamicDependencyAttribute.AssemblyName"/> is only valid when <see cref="P:System.Diagnostics.CodeAnalysis.DynamicDependencyAttribute.TypeName"/> is specified.
+            </remarks>
+        </member>
+        <member name="P:System.Diagnostics.CodeAnalysis.DynamicDependencyAttribute.Condition">
+            <summary>
+            Gets or sets the condition in which the dependency is applicable, e.g. "DEBUG".
+            </summary>
+        </member>
+        <member name="T:System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes">
+             <summary>
+             Specifies the types of members that are dynamically accessed.
+            
+             This enumeration has a <see cref="T:System.FlagsAttribute"/> attribute that allows a
+             bitwise combination of its member values.
+             </summary>
+        </member>
+        <member name="F:System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.None">
+            <summary>
+            Specifies no members.
+            </summary>
+        </member>
+        <member name="F:System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.PublicParameterlessConstructor">
+            <summary>
+            Specifies the default, parameterless public constructor.
+            </summary>
+        </member>
+        <member name="F:System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.PublicConstructors">
+            <summary>
+            Specifies all public constructors.
+            </summary>
+        </member>
+        <member name="F:System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.NonPublicConstructors">
+            <summary>
+            Specifies all non-public constructors.
+            </summary>
+        </member>
+        <member name="F:System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.PublicMethods">
+            <summary>
+            Specifies all public methods.
+            </summary>
+        </member>
+        <member name="F:System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.NonPublicMethods">
+            <summary>
+            Specifies all non-public methods.
+            </summary>
+        </member>
+        <member name="F:System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.PublicFields">
+            <summary>
+            Specifies all public fields.
+            </summary>
+        </member>
+        <member name="F:System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.NonPublicFields">
+            <summary>
+            Specifies all non-public fields.
+            </summary>
+        </member>
+        <member name="F:System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.PublicNestedTypes">
+            <summary>
+            Specifies all public nested types.
+            </summary>
+        </member>
+        <member name="F:System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.NonPublicNestedTypes">
+            <summary>
+            Specifies all non-public nested types.
+            </summary>
+        </member>
+        <member name="F:System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.PublicProperties">
+            <summary>
+            Specifies all public properties.
+            </summary>
+        </member>
+        <member name="F:System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.NonPublicProperties">
+            <summary>
+            Specifies all non-public properties.
+            </summary>
+        </member>
+        <member name="F:System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.PublicEvents">
+            <summary>
+            Specifies all public events.
+            </summary>
+        </member>
+        <member name="F:System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.NonPublicEvents">
+            <summary>
+            Specifies all non-public events.
+            </summary>
+        </member>
+        <member name="F:System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.Interfaces">
+            <summary>
+            Specifies all interfaces implemented by the type.
+            </summary>
+        </member>
+        <member name="F:System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.All">
+            <summary>
+            Specifies all members.
+            </summary>
+        </member>
+        <member name="T:System.Diagnostics.CodeAnalysis.DynamicallyAccessedMembersAttribute">
+             <summary>
+             Indicates that certain members on a specified <see cref="T:System.Type"/> are accessed dynamically,
+             for example through <see cref="N:System.Reflection"/>.
+             </summary>
+             <remarks>
+             This allows tools to understand which members are being accessed during the execution
+             of a program.
+            
+             This attribute is valid on members whose type is <see cref="T:System.Type"/> or <see cref="T:System.String"/>.
+            
+             When this attribute is applied to a location of type <see cref="T:System.String"/>, the assumption is
+             that the string represents a fully qualified type name.
+            
+             When this attribute is applied to a class, interface, or struct, the members specified
+             can be accessed dynamically on <see cref="T:System.Type"/> instances returned from calling
+             <see cref="M:System.Object.GetType"/> on instances of that class, interface, or struct.
+            
+             If the attribute is applied to a method it's treated as a special case and it implies
+             the attribute should be applied to the "this" parameter of the method. As such the attribute
+             should only be used on instance methods of types assignable to System.Type (or string, but no methods
+             will use it there).
+             </remarks>
+        </member>
+        <member name="M:System.Diagnostics.CodeAnalysis.DynamicallyAccessedMembersAttribute.#ctor(System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes)">
+            <summary>
+            Initializes a new instance of the <see cref="T:System.Diagnostics.CodeAnalysis.DynamicallyAccessedMembersAttribute"/> class
+            with the specified member types.
+            </summary>
+            <param name="memberTypes">The types of members dynamically accessed.</param>
+        </member>
+        <member name="P:System.Diagnostics.CodeAnalysis.DynamicallyAccessedMembersAttribute.MemberTypes">
+            <summary>
+            Gets the <see cref="T:System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes"/> which specifies the type
+            of members dynamically accessed.
+            </summary>
+        </member>
+        <member name="T:System.Diagnostics.CodeAnalysis.RequiresAssemblyFilesAttribute">
+            <summary>
+            Indicates that the specified member requires assembly files to be on disk.
+            </summary>
+        </member>
+        <member name="M:System.Diagnostics.CodeAnalysis.RequiresAssemblyFilesAttribute.#ctor">
+            <summary>
+            Initializes a new instance of the <see cref="!:global::System.RequiresAssemblyFilesAttribute"/> class.
+            </summary>
+        </member>
+        <member name="M:System.Diagnostics.CodeAnalysis.RequiresAssemblyFilesAttribute.#ctor(System.String)">
+            <summary>
+            Initializes a new instance of the <see cref="!:global::System.RequiresAssemblyFilesAttribute"/> class.
+            </summary>
+            <param name="message">
+            A message that contains information about the need for assembly files to be on disk.
+            </param>
+        </member>
+        <member name="P:System.Diagnostics.CodeAnalysis.RequiresAssemblyFilesAttribute.Message">
+            <summary>
+            Gets an optional message that contains information about the need for
+            assembly files to be on disk.
+            </summary>
+        </member>
+        <member name="P:System.Diagnostics.CodeAnalysis.RequiresAssemblyFilesAttribute.Url">
+            <summary>
+            Gets or sets an optional URL that contains more information about the member,
+            why it requires assembly files to be on disk, and what options a consumer has
+            to deal with it.
+            </summary>
+        </member>
+        <member name="T:System.Diagnostics.CodeAnalysis.RequiresDynamicCodeAttribute">
+            <summary>
+            Indicates that the specified method requires the ability to generate new code at runtime,
+            for example through <see cref="N:System.Reflection"/>.
+            </summary>
+            <remarks>
+            This allows tools to understand which methods are unsafe to call when compiling ahead of time.
+            </remarks>
+        </member>
+        <member name="M:System.Diagnostics.CodeAnalysis.RequiresDynamicCodeAttribute.#ctor(System.String)">
+            <summary>
+            Initializes a new instance of the <see cref="T:System.Diagnostics.CodeAnalysis.RequiresDynamicCodeAttribute"/> class
+            with the specified message.
+            </summary>
+            <param name="message">
+            A message that contains information about the usage of dynamic code.
+            </param>
+        </member>
+        <member name="P:System.Diagnostics.CodeAnalysis.RequiresDynamicCodeAttribute.Message">
+            <summary>
+            Gets a message that contains information about the usage of dynamic code.
+            </summary>
+        </member>
+        <member name="P:System.Diagnostics.CodeAnalysis.RequiresDynamicCodeAttribute.Url">
+            <summary>
+            Gets or sets an optional URL that contains more information about the method,
+            why it requires dynamic code, and what options a consumer has to deal with it.
+            </summary>
+        </member>
+        <member name="T:System.Diagnostics.CodeAnalysis.RequiresUnreferencedCodeAttribute">
+            <summary>
+            Indicates that the specified method requires dynamic access to code that is not referenced
+            statically, for example through <see cref="N:System.Reflection"/>.
+            </summary>
+            <remarks>
+            This allows tools to understand which methods are unsafe to call when removing unreferenced
+            code from an application.
+            </remarks>
+        </member>
+        <member name="M:System.Diagnostics.CodeAnalysis.RequiresUnreferencedCodeAttribute.#ctor(System.String)">
+            <summary>
+            Initializes a new instance of the <see cref="T:System.Diagnostics.CodeAnalysis.RequiresUnreferencedCodeAttribute"/> class
+            with the specified message.
+            </summary>
+            <param name="message">
+            A message that contains information about the usage of unreferenced code.
+            </param>
+        </member>
+        <member name="P:System.Diagnostics.CodeAnalysis.RequiresUnreferencedCodeAttribute.Message">
+            <summary>
+            Gets a message that contains information about the usage of unreferenced code.
+            </summary>
+        </member>
+        <member name="P:System.Diagnostics.CodeAnalysis.RequiresUnreferencedCodeAttribute.Url">
+            <summary>
+            Gets or sets an optional URL that contains more information about the method,
+            why it requires unreferenced code, and what options a consumer has to deal with it.
+            </summary>
+        </member>
+        <member name="T:System.Diagnostics.CodeAnalysis.UnconditionalSuppressMessageAttribute">
+            <summary>
+            Suppresses reporting of a specific rule violation, allowing multiple suppressions on a
+            single code artifact.
+            </summary>
+            <remarks>
+            <see cref="T:System.Diagnostics.CodeAnalysis.UnconditionalSuppressMessageAttribute"/> is different than
+            <see cref="T:System.Diagnostics.CodeAnalysis.SuppressMessageAttribute"/> in that it doesn't have a
+            <see cref="T:System.Diagnostics.ConditionalAttribute"/>. So it is always preserved in the compiled assembly.
+            </remarks>
+        </member>
+        <member name="M:System.Diagnostics.CodeAnalysis.UnconditionalSuppressMessageAttribute.#ctor(System.String,System.String)">
+            <summary>
+            Initializes a new instance of the <see cref="T:System.Diagnostics.CodeAnalysis.UnconditionalSuppressMessageAttribute"/>
+            class, specifying the category of the tool and the identifier for an analysis rule.
+            </summary>
+            <param name="category">The category for the attribute.</param>
+            <param name="checkId">The identifier of the analysis rule the attribute applies to.</param>
+        </member>
+        <member name="P:System.Diagnostics.CodeAnalysis.UnconditionalSuppressMessageAttribute.Category">
+            <summary>
+            Gets the category identifying the classification of the attribute.
+            </summary>
+            <remarks>
+            The <see cref="P:System.Diagnostics.CodeAnalysis.UnconditionalSuppressMessageAttribute.Category"/> property describes the tool or tool analysis category
+            for which a message suppression attribute applies.
+            </remarks>
+        </member>
+        <member name="P:System.Diagnostics.CodeAnalysis.UnconditionalSuppressMessageAttribute.CheckId">
+            <summary>
+            Gets the identifier of the analysis tool rule to be suppressed.
+            </summary>
+            <remarks>
+            Concatenated together, the <see cref="P:System.Diagnostics.CodeAnalysis.UnconditionalSuppressMessageAttribute.Category"/> and <see cref="P:System.Diagnostics.CodeAnalysis.UnconditionalSuppressMessageAttribute.CheckId"/>
+            properties form a unique check identifier.
+            </remarks>
+        </member>
+        <member name="P:System.Diagnostics.CodeAnalysis.UnconditionalSuppressMessageAttribute.Scope">
+            <summary>
+            Gets or sets the scope of the code that is relevant for the attribute.
+            </summary>
+            <remarks>
+            The Scope property is an optional argument that specifies the metadata scope for which
+            the attribute is relevant.
+            </remarks>
+        </member>
+        <member name="P:System.Diagnostics.CodeAnalysis.UnconditionalSuppressMessageAttribute.Target">
+            <summary>
+            Gets or sets a fully qualified path that represents the target of the attribute.
+            </summary>
+            <remarks>
+            The <see cref="P:System.Diagnostics.CodeAnalysis.UnconditionalSuppressMessageAttribute.Target"/> property is an optional argument identifying the analysis target
+            of the attribute. An example value is "System.IO.Stream.ctor():System.Void".
+            Because it is fully qualified, it can be long, particularly for targets such as parameters.
+            The analysis tool user interface should be capable of automatically formatting the parameter.
+            </remarks>
+        </member>
+        <member name="P:System.Diagnostics.CodeAnalysis.UnconditionalSuppressMessageAttribute.MessageId">
+            <summary>
+            Gets or sets an optional argument expanding on exclusion criteria.
+            </summary>
+            <remarks>
+            The <see cref="P:System.Diagnostics.CodeAnalysis.UnconditionalSuppressMessageAttribute.MessageId"/> property is an optional argument that specifies additional
+            exclusion where the literal metadata target is not sufficiently precise. For example,
+            the <see cref="T:System.Diagnostics.CodeAnalysis.UnconditionalSuppressMessageAttribute"/> cannot be applied within a method,
+            and it may be desirable to suppress a violation against a statement in the method that will
+            give a rule violation, but not against all statements in the method.
+            </remarks>
+        </member>
+        <member name="P:System.Diagnostics.CodeAnalysis.UnconditionalSuppressMessageAttribute.Justification">
+            <summary>
+            Gets or sets the justification for suppressing the code analysis message.
+            </summary>
+        </member>
+        <member name="T:System.Diagnostics.StackTraceHiddenAttribute">
+            <summary>
+            Types and Methods attributed with StackTraceHidden will be omitted from the stack trace text shown in StackTrace.ToString()
+            and Exception.StackTrace
+            </summary>
+        </member>
+        <member name="M:System.Diagnostics.StackTraceHiddenAttribute.#ctor">
+            <summary>
+            Initializes a new instance of the <see cref="T:System.Diagnostics.StackTraceHiddenAttribute"/> class.
+            </summary>
+        </member>
+        <member name="T:System.Collections.Generic.PriorityQueue`2">
+            <summary>
+             Represents a min priority queue.
+            </summary>
+            <typeparam name="TElement">Specifies the type of elements in the queue.</typeparam>
+            <typeparam name="TPriority">Specifies the type of priority associated with enqueued elements.</typeparam>
+            <remarks>
+             Implements an array-backed quaternary min-heap. Each element is enqueued with an associated priority
+             that determines the dequeue order: elements with the lowest priority get dequeued first.
+            </remarks>
+        </member>
+        <member name="F:System.Collections.Generic.PriorityQueue`2._nodes">
+            <summary>
+            Represents an implicit heap-ordered complete d-ary tree, stored as an array.
+            </summary>
+        </member>
+        <member name="F:System.Collections.Generic.PriorityQueue`2._comparer">
+            <summary>
+            Custom comparer used to order the heap.
+            </summary>
+        </member>
+        <member name="F:System.Collections.Generic.PriorityQueue`2._unorderedItems">
+            <summary>
+            Lazily-initialized collection used to expose the contents of the queue.
+            </summary>
+        </member>
+        <member name="F:System.Collections.Generic.PriorityQueue`2._size">
+            <summary>
+            The number of nodes in the heap.
+            </summary>
+        </member>
+        <member name="F:System.Collections.Generic.PriorityQueue`2._version">
+            <summary>
+            Version updated on mutation to help validate enumerators operate on a consistent state.
+            </summary>
+        </member>
+        <member name="F:System.Collections.Generic.PriorityQueue`2.Arity">
+            <summary>
+            Specifies the arity of the d-ary heap, which here is quaternary.
+            It is assumed that this value is a power of 2.
+            </summary>
+        </member>
+        <member name="F:System.Collections.Generic.PriorityQueue`2.Log2Arity">
+            <summary>
+            The binary logarithm of <see cref="F:System.Collections.Generic.PriorityQueue`2.Arity" />.
+            </summary>
+        </member>
+        <member name="M:System.Collections.Generic.PriorityQueue`2.#ctor">
+            <summary>
+             Initializes a new instance of the <see cref="T:System.Collections.Generic.PriorityQueue`2"/> class.
+            </summary>
+        </member>
+        <member name="M:System.Collections.Generic.PriorityQueue`2.#ctor(System.Int32)">
+            <summary>
+             Initializes a new instance of the <see cref="T:System.Collections.Generic.PriorityQueue`2"/> class
+             with the specified initial capacity.
+            </summary>
+            <param name="initialCapacity">Initial capacity to allocate in the underlying heap array.</param>
+            <exception cref="T:System.ArgumentOutOfRangeException">
+             The specified <paramref name="initialCapacity"/> was negative.
+            </exception>
+        </member>
+        <member name="M:System.Collections.Generic.PriorityQueue`2.#ctor(System.Collections.Generic.IComparer{`1})">
+            <summary>
+             Initializes a new instance of the <see cref="T:System.Collections.Generic.PriorityQueue`2"/> class
+             with the specified custom priority comparer.
+            </summary>
+            <param name="comparer">
+             Custom comparer dictating the ordering of elements.
+             Uses <see cref="P:System.Collections.Generic.Comparer`1.Default" /> if the argument is <see langword="null"/>.
+            </param>
+        </member>
+        <member name="M:System.Collections.Generic.PriorityQueue`2.#ctor(System.Int32,System.Collections.Generic.IComparer{`1})">
+            <summary>
+             Initializes a new instance of the <see cref="T:System.Collections.Generic.PriorityQueue`2"/> class
+             with the specified initial capacity and custom priority comparer.
+            </summary>
+            <param name="initialCapacity">Initial capacity to allocate in the underlying heap array.</param>
+            <param name="comparer">
+             Custom comparer dictating the ordering of elements.
+             Uses <see cref="P:System.Collections.Generic.Comparer`1.Default" /> if the argument is <see langword="null"/>.
+            </param>
+            <exception cref="T:System.ArgumentOutOfRangeException">
+             The specified <paramref name="initialCapacity"/> was negative.
+            </exception>
+        </member>
+        <member name="M:System.Collections.Generic.PriorityQueue`2.#ctor(System.Collections.Generic.IEnumerable{System.ValueTuple{`0,`1}})">
+            <summary>
+             Initializes a new instance of the <see cref="T:System.Collections.Generic.PriorityQueue`2"/> class
+             that is populated with the specified elements and priorities.
+            </summary>
+            <param name="items">The pairs of elements and priorities with which to populate the queue.</param>
+            <exception cref="T:System.ArgumentNullException">
+             The specified <paramref name="items"/> argument was <see langword="null"/>.
+            </exception>
+            <remarks>
+             Constructs the heap using a heapify operation,
+             which is generally faster than enqueuing individual elements sequentially.
+            </remarks>
+        </member>
+        <member name="M:System.Collections.Generic.PriorityQueue`2.#ctor(System.Collections.Generic.IEnumerable{System.ValueTuple{`0,`1}},System.Collections.Generic.IComparer{`1})">
+            <summary>
+             Initializes a new instance of the <see cref="T:System.Collections.Generic.PriorityQueue`2"/> class
+             that is populated with the specified elements and priorities,
+             and with the specified custom priority comparer.
+            </summary>
+            <param name="items">The pairs of elements and priorities with which to populate the queue.</param>
+            <param name="comparer">
+             Custom comparer dictating the ordering of elements.
+             Uses <see cref="P:System.Collections.Generic.Comparer`1.Default" /> if the argument is <see langword="null"/>.
+            </param>
+            <exception cref="T:System.ArgumentNullException">
+             The specified <paramref name="items"/> argument was <see langword="null"/>.
+            </exception>
+            <remarks>
+             Constructs the heap using a heapify operation,
+             which is generally faster than enqueuing individual elements sequentially.
+            </remarks>
+        </member>
+        <member name="P:System.Collections.Generic.PriorityQueue`2.Count">
+            <summary>
+             Gets the number of elements contained in the <see cref="T:System.Collections.Generic.PriorityQueue`2"/>.
+            </summary>
+        </member>
+        <member name="P:System.Collections.Generic.PriorityQueue`2.Comparer">
+            <summary>
+             Gets the priority comparer used by the <see cref="T:System.Collections.Generic.PriorityQueue`2"/>.
+            </summary>
+        </member>
+        <member name="P:System.Collections.Generic.PriorityQueue`2.UnorderedItems">
+            <summary>
+             Gets a collection that enumerates the elements of the queue in an unordered manner.
+            </summary>
+            <remarks>
+             The enumeration does not order items by priority, since that would require N * log(N) time and N space.
+             Items are instead enumerated following the internal array heap layout.
+            </remarks>
+        </member>
+        <member name="M:System.Collections.Generic.PriorityQueue`2.Enqueue(`0,`1)">
+            <summary>
+             Adds the specified element with associated priority to the <see cref="T:System.Collections.Generic.PriorityQueue`2"/>.
+            </summary>
+            <param name="element">The element to add to the <see cref="T:System.Collections.Generic.PriorityQueue`2"/>.</param>
+            <param name="priority">The priority with which to associate the new element.</param>
+        </member>
+        <member name="M:System.Collections.Generic.PriorityQueue`2.Peek">
+            <summary>
+             Returns the minimal element from the <see cref="T:System.Collections.Generic.PriorityQueue`2"/> without removing it.
+            </summary>
+            <exception cref="T:System.InvalidOperationException">The <see cref="T:System.Collections.Generic.PriorityQueue`2"/> is empty.</exception>
+            <returns>The minimal element of the <see cref="T:System.Collections.Generic.PriorityQueue`2"/>.</returns>
+        </member>
+        <member name="M:System.Collections.Generic.PriorityQueue`2.Dequeue">
+            <summary>
+             Removes and returns the minimal element from the <see cref="T:System.Collections.Generic.PriorityQueue`2"/>.
+            </summary>
+            <exception cref="T:System.InvalidOperationException">The queue is empty.</exception>
+            <returns>The minimal element of the <see cref="T:System.Collections.Generic.PriorityQueue`2"/>.</returns>
+        </member>
+        <member name="M:System.Collections.Generic.PriorityQueue`2.DequeueEnqueue(`0,`1)">
+            <summary>
+             Removes the minimal element and then immediately adds the specified element with associated priority to the <see cref="T:System.Collections.Generic.PriorityQueue`2"/>,
+            </summary>
+            <param name="element">The element to add to the <see cref="T:System.Collections.Generic.PriorityQueue`2"/>.</param>
+            <param name="priority">The priority with which to associate the new element.</param>
+            <exception cref="T:System.InvalidOperationException">The queue is empty.</exception>
+            <returns>The minimal element removed before performing the enqueue operation.</returns>
+            <remarks>
+             Implements an extract-then-insert heap operation that is generally more efficient
+             than sequencing Dequeue and Enqueue operations: in the worst case scenario only one
+             shift-down operation is required.
+            </remarks>
+        </member>
+        <member name="M:System.Collections.Generic.PriorityQueue`2.TryDequeue(`0@,`1@)">
+            <summary>
+             Removes the minimal element from the <see cref="T:System.Collections.Generic.PriorityQueue`2"/>,
+             and copies it to the <paramref name="element"/> parameter,
+             and its associated priority to the <paramref name="priority"/> parameter.
+            </summary>
+            <param name="element">The removed element.</param>
+            <param name="priority">The priority associated with the removed element.</param>
+            <returns>
+             <see langword="true"/> if the element is successfully removed;
+             <see langword="false"/> if the <see cref="T:System.Collections.Generic.PriorityQueue`2"/> is empty.
+            </returns>
+        </member>
+        <member name="M:System.Collections.Generic.PriorityQueue`2.TryPeek(`0@,`1@)">
+            <summary>
+             Returns a value that indicates whether there is a minimal element in the <see cref="T:System.Collections.Generic.PriorityQueue`2"/>,
+             and if one is present, copies it to the <paramref name="element"/> parameter,
+             and its associated priority to the <paramref name="priority"/> parameter.
+             The element is not removed from the <see cref="T:System.Collections.Generic.PriorityQueue`2"/>.
+            </summary>
+            <param name="element">The minimal element in the queue.</param>
+            <param name="priority">The priority associated with the minimal element.</param>
+            <returns>
+             <see langword="true"/> if there is a minimal element;
+             <see langword="false"/> if the <see cref="T:System.Collections.Generic.PriorityQueue`2"/> is empty.
+            </returns>
+        </member>
+        <member name="M:System.Collections.Generic.PriorityQueue`2.EnqueueDequeue(`0,`1)">
+            <summary>
+             Adds the specified element with associated priority to the <see cref="T:System.Collections.Generic.PriorityQueue`2"/>,
+             and immediately removes the minimal element, returning the result.
+            </summary>
+            <param name="element">The element to add to the <see cref="T:System.Collections.Generic.PriorityQueue`2"/>.</param>
+            <param name="priority">The priority with which to associate the new element.</param>
+            <returns>The minimal element removed after the enqueue operation.</returns>
+            <remarks>
+             Implements an insert-then-extract heap operation that is generally more efficient
+             than sequencing Enqueue and Dequeue operations: in the worst case scenario only one
+             shift-down operation is required.
+            </remarks>
+        </member>
+        <member name="M:System.Collections.Generic.PriorityQueue`2.EnqueueRange(System.Collections.Generic.IEnumerable{System.ValueTuple{`0,`1}})">
+            <summary>
+             Enqueues a sequence of element/priority pairs to the <see cref="T:System.Collections.Generic.PriorityQueue`2"/>.
+            </summary>
+            <param name="items">The pairs of elements and priorities to add to the queue.</param>
+            <exception cref="T:System.ArgumentNullException">
+             The specified <paramref name="items"/> argument was <see langword="null"/>.
+            </exception>
+        </member>
+        <member name="M:System.Collections.Generic.PriorityQueue`2.EnqueueRange(System.Collections.Generic.IEnumerable{`0},`1)">
+            <summary>
+             Enqueues a sequence of elements pairs to the <see cref="T:System.Collections.Generic.PriorityQueue`2"/>,
+             all associated with the specified priority.
+            </summary>
+            <param name="elements">The elements to add to the queue.</param>
+            <param name="priority">The priority to associate with the new elements.</param>
+            <exception cref="T:System.ArgumentNullException">
+             The specified <paramref name="elements"/> argument was <see langword="null"/>.
+            </exception>
+        </member>
+        <member name="M:System.Collections.Generic.PriorityQueue`2.Clear">
+            <summary>
+             Removes all items from the <see cref="T:System.Collections.Generic.PriorityQueue`2"/>.
+            </summary>
+        </member>
+        <member name="M:System.Collections.Generic.PriorityQueue`2.EnsureCapacity(System.Int32)">
+            <summary>
+             Ensures that the <see cref="T:System.Collections.Generic.PriorityQueue`2"/> can hold up to
+             <paramref name="capacity"/> items without further expansion of its backing storage.
+            </summary>
+            <param name="capacity">The minimum capacity to be used.</param>
+            <exception cref="T:System.ArgumentOutOfRangeException">
+             The specified <paramref name="capacity"/> is negative.
+            </exception>
+            <returns>The current capacity of the <see cref="T:System.Collections.Generic.PriorityQueue`2"/>.</returns>
+        </member>
+        <member name="M:System.Collections.Generic.PriorityQueue`2.TrimExcess">
+            <summary>
+             Sets the capacity to the actual number of items in the <see cref="T:System.Collections.Generic.PriorityQueue`2"/>,
+             if that is less than 90 percent of current capacity.
+            </summary>
+            <remarks>
+             This method can be used to minimize a collection's memory overhead
+             if no new elements will be added to the collection.
+            </remarks>
+        </member>
+        <member name="M:System.Collections.Generic.PriorityQueue`2.Grow(System.Int32)">
+            <summary>
+            Grows the priority queue to match the specified min capacity.
+            </summary>
+        </member>
+        <member name="M:System.Collections.Generic.PriorityQueue`2.RemoveRootNode">
+            <summary>
+            Removes the node from the root of the heap
+            </summary>
+        </member>
+        <member name="M:System.Collections.Generic.PriorityQueue`2.GetParentIndex(System.Int32)">
+            <summary>
+            Gets the index of an element's parent.
+            </summary>
+        </member>
+        <member name="M:System.Collections.Generic.PriorityQueue`2.GetFirstChildIndex(System.Int32)">
+            <summary>
+            Gets the index of the first child of an element.
+            </summary>
+        </member>
+        <member name="M:System.Collections.Generic.PriorityQueue`2.Heapify">
+            <summary>
+            Converts an unordered list into a heap.
+            </summary>
+        </member>
+        <member name="M:System.Collections.Generic.PriorityQueue`2.MoveUpDefaultComparer(System.ValueTuple{`0,`1},System.Int32)">
+            <summary>
+            Moves a node up in the tree to restore heap order.
+            </summary>
+        </member>
+        <member name="M:System.Collections.Generic.PriorityQueue`2.MoveUpCustomComparer(System.ValueTuple{`0,`1},System.Int32)">
+            <summary>
+            Moves a node up in the tree to restore heap order.
+            </summary>
+        </member>
+        <member name="M:System.Collections.Generic.PriorityQueue`2.MoveDownDefaultComparer(System.ValueTuple{`0,`1},System.Int32)">
+            <summary>
+            Moves a node down in the tree to restore heap order.
+            </summary>
+        </member>
+        <member name="M:System.Collections.Generic.PriorityQueue`2.MoveDownCustomComparer(System.ValueTuple{`0,`1},System.Int32)">
+            <summary>
+            Moves a node down in the tree to restore heap order.
+            </summary>
+        </member>
+        <member name="M:System.Collections.Generic.PriorityQueue`2.InitializeComparer(System.Collections.Generic.IComparer{`1})">
+            <summary>
+            Initializes the custom comparer to be used internally by the heap.
+            </summary>
+        </member>
+        <member name="T:System.Collections.Generic.PriorityQueue`2.UnorderedItemsCollection">
+            <summary>
+             Enumerates the contents of a <see cref="T:System.Collections.Generic.PriorityQueue`2"/>, without any ordering guarantees.
+            </summary>
+        </member>
+        <member name="T:System.Collections.Generic.PriorityQueue`2.UnorderedItemsCollection.Enumerator">
+            <summary>
+             Enumerates the element and priority pairs of a <see cref="T:System.Collections.Generic.PriorityQueue`2"/>,
+             without any ordering guarantees.
+            </summary>
+        </member>
+        <member name="M:System.Collections.Generic.PriorityQueue`2.UnorderedItemsCollection.Enumerator.Dispose">
+            <summary>
+            Releases all resources used by the <see cref="T:System.Collections.Generic.PriorityQueue`2.UnorderedItemsCollection.Enumerator"/>.
+            </summary>
+        </member>
+        <member name="M:System.Collections.Generic.PriorityQueue`2.UnorderedItemsCollection.Enumerator.MoveNext">
+            <summary>
+            Advances the enumerator to the next element of the <see cref="P:System.Collections.Generic.PriorityQueue`2.UnorderedItems"/>.
+            </summary>
+            <returns><see langword="true"/> if the enumerator was successfully advanced to the next element; <see langword="false"/> if the enumerator has passed the end of the collection.</returns>
+        </member>
+        <member name="P:System.Collections.Generic.PriorityQueue`2.UnorderedItemsCollection.Enumerator.Current">
+            <summary>
+            Gets the element at the current position of the enumerator.
+            </summary>
+        </member>
+        <member name="M:System.Collections.Generic.PriorityQueue`2.UnorderedItemsCollection.GetEnumerator">
+            <summary>
+            Returns an enumerator that iterates through the <see cref="P:System.Collections.Generic.PriorityQueue`2.UnorderedItems"/>.
+            </summary>
+            <returns>An <see cref="T:System.Collections.Generic.PriorityQueue`2.UnorderedItemsCollection.Enumerator"/> for the <see cref="P:System.Collections.Generic.PriorityQueue`2.UnorderedItems"/>.</returns>
+        </member>
+        <member name="T:System.Collections.Generic.ReferenceEqualityComparer">
+            <summary>
+            An <see cref="T:System.Collections.Generic.IEqualityComparer`1"/> that uses reference equality (<see cref="M:System.Object.ReferenceEquals(System.Object,System.Object)"/>)
+            instead of value equality (<see cref="M:System.Object.Equals(System.Object)"/>) when comparing two object instances.
+            </summary>
+            <remarks>
+            The <see cref="T:System.Collections.Generic.ReferenceEqualityComparer"/> type cannot be instantiated. Instead, use the <see cref="P:System.Collections.Generic.ReferenceEqualityComparer.Instance"/> property
+            to access the singleton instance of this type.
+            </remarks>
+        </member>
+        <member name="P:System.Collections.Generic.ReferenceEqualityComparer.Instance">
+            <summary>
+            Gets the singleton <see cref="T:System.Collections.Generic.ReferenceEqualityComparer"/> instance.
+            </summary>
+        </member>
+        <member name="M:System.Collections.Generic.ReferenceEqualityComparer.Equals(System.Object,System.Object)">
+            <summary>
+            Determines whether two object references refer to the same object instance.
+            </summary>
+            <param name="x">The first object to compare.</param>
+            <param name="y">The second object to compare.</param>
+            <returns>
+            <see langword="true"/> if both <paramref name="x"/> and <paramref name="y"/> refer to the same object instance
+            or if both are <see langword="null"/>; otherwise, <see langword="false"/>.
+            </returns>
+            <remarks>
+            This API is a wrapper around <see cref="M:System.Object.ReferenceEquals(System.Object,System.Object)"/>.
+            It is not necessarily equivalent to calling <see cref="M:System.Object.Equals(System.Object,System.Object)"/>.
+            </remarks>
+        </member>
+        <member name="M:System.Collections.Generic.ReferenceEqualityComparer.GetHashCode(System.Object)">
+            <summary>
+            Returns a hash code for the specified object. The returned hash code is based on the object
+            identity, not on the contents of the object.
+            </summary>
+            <param name="obj">The object for which to retrieve the hash code.</param>
+            <returns>A hash code for the identity of <paramref name="obj"/>.</returns>
+            <remarks>
+            This API is a wrapper around <see cref="M:System.Runtime.CompilerServices.RuntimeHelpers.GetHashCode(System.Object)"/>.
+            It is not necessarily equivalent to calling <see cref="M:System.Object.GetHashCode"/>.
+            </remarks>
+        </member>
+        <member name="T:System.Runtime.CompilerServices.DisableRuntimeMarshallingAttribute">
+             <summary>
+             Disables the built-in runtime managed/unmanaged marshalling subsystem for
+             P/Invokes, Delegate types, and unmanaged function pointer invocations.
+             </summary>
+             <remarks>
+             The built-in marshalling subsystem has some behaviors that cannot be changed due to
+             backward-compatibility requirements. This attribute allows disabling the built-in
+             subsystem and instead uses the following rules for P/Invokes, Delegates,
+             and unmanaged function pointer invocations:
+            
+             - All value types that do not contain reference type fields recursively (<c>unmanaged</c> in C#) are blittable
+             - Value types that recursively have any fields that have <c>[StructLayout(LayoutKind.Auto)]</c> are disallowed from interop.
+             - All reference types are disallowed from usage in interop scenarios.
+             - SetLastError support in P/Invokes is disabled.
+             - varargs support is disabled.
+             - LCIDConversionAttribute support is disabled.
+             </remarks>
+        </member>
+        <member name="T:System.Runtime.InteropServices.SuppressGCTransitionAttribute">
+             <summary>
+             An attribute used to indicate a GC transition should be skipped when making an unmanaged function call.
+             </summary>
+             <example>
+             Example of a valid use case. The Win32 `GetTickCount()` function is a small performance related function
+             that reads some global memory and returns the value. In this case, the GC transition overhead is significantly
+             more than the memory read.
+             <code>
+             using System;
+             using System.Runtime.InteropServices;
+             class Program
+             {
+                 [DllImport("Kernel32")]
+                 [SuppressGCTransition]
+                 static extern int GetTickCount();
+                 static void Main()
+                 {
+                     Console.WriteLine($"{GetTickCount()}");
+                 }
+             }
+             </code>
+             </example>
+             <remarks>
+             This attribute is ignored if applied to a method without the <see cref="T:System.Runtime.InteropServices.DllImportAttribute"/>.
+            
+             Forgoing this transition can yield benefits when the cost of the transition is more than the execution time
+             of the unmanaged function. However, avoiding this transition removes some of the guarantees the runtime
+             provides through a normal P/Invoke. When exiting the managed runtime to enter an unmanaged function the
+             GC must transition from Cooperative mode into Preemptive mode. Full details on these modes can be found at
+             https://github.com/dotnet/runtime/blob/main/docs/coding-guidelines/clr-code-guide.md#2.1.8.
+             Suppressing the GC transition is an advanced scenario and should not be done without fully understanding
+             potential consequences.
+            
+             One of these consequences is an impact to Mixed-mode debugging (https://docs.microsoft.com/visualstudio/debugger/how-to-debug-in-mixed-mode).
+             During Mixed-mode debugging, it is not possible to step into or set breakpoints in a P/Invoke that
+             has been marked with this attribute. A workaround is to switch to native debugging and set a breakpoint in the native function.
+             In general, usage of this attribute is not recommended if debugging the P/Invoke is important, for example
+             stepping through the native code or diagnosing an exception thrown from the native code.
+            
+             The runtime may load the native library for method marked with this attribute in advance before the method is called for the first time.
+             Usage of this attribute is not recommended for platform neutral libraries with conditional platform specific code.
+            
+             The P/Invoke method that this attribute is applied to must have all of the following properties:
+               * Native function always executes for a trivial amount of time (less than 1 microsecond).
+               * Native function does not perform a blocking syscall (e.g. any type of I/O).
+               * Native function does not call back into the runtime (e.g. Reverse P/Invoke).
+               * Native function does not throw exceptions.
+               * Native function does not manipulate locks or other concurrency primitives.
+            
+             Consequences of invalid uses of this attribute:
+               * GC starvation.
+               * Immediate runtime termination.
+               * Data corruption.
+             </remarks>
+        </member>
+        <member name="T:System.Runtime.InteropServices.UnmanagedCallersOnlyAttribute">
+            <summary>
+            Any method marked with <see cref="T:System.Runtime.InteropServices.UnmanagedCallersOnlyAttribute" /> can be directly called from
+            native code. The function token can be loaded to a local variable using the <see href="https://docs.microsoft.com/dotnet/csharp/language-reference/operators/pointer-related-operators#address-of-operator-">address-of</see> operator
+            in C# and passed as a callback to a native method.
+            </summary>
+            <remarks>
+            Methods marked with this attribute have the following restrictions:
+              * Method must be marked "static".
+              * Must not be called from managed code.
+              * Must only have <see href="https://docs.microsoft.com/dotnet/framework/interop/blittable-and-non-blittable-types">blittable</see> arguments.
+            </remarks>
+        </member>
+        <member name="F:System.Runtime.InteropServices.UnmanagedCallersOnlyAttribute.CallConvs">
+            <summary>
+            Optional. If omitted, the runtime will use the default platform calling convention.
+            </summary>
+            <remarks>
+            Supplied types must be from the official "System.Runtime.CompilerServices" namespace and
+            be of the form "CallConvXXX".
+            </remarks>
+        </member>
+        <member name="F:System.Runtime.InteropServices.UnmanagedCallersOnlyAttribute.EntryPoint">
+            <summary>
+            Optional. If omitted, no named export is emitted during compilation.
+            </summary>
+        </member>
+        <member name="T:System.Runtime.Versioning.ObsoletedOSPlatformAttribute">
+            <summary>
+            Marks APIs that were obsoleted in a given operating system version.
+            </summary>
+            <remarks>
+            Primarily used by OS bindings to indicate APIs that should not be used anymore.
+            </remarks>
+        </member>
+        <member name="T:System.Runtime.Versioning.SupportedOSPlatformAttribute">
+             <summary>
+             Records the operating system (and minimum version) that supports an API. Multiple attributes can be
+             applied to indicate support on multiple operating systems.
+             </summary>
+             <remarks>
+             Callers can apply a <see cref="T:System.Runtime.Versioning.SupportedOSPlatformAttribute" />
+             or use guards to prevent calls to APIs on unsupported operating systems.
+            
+             A given platform should only be specified once.
+             </remarks>
+        </member>
+        <member name="T:System.Runtime.Versioning.SupportedOSPlatformGuardAttribute">
+             <summary>
+             Annotates a custom guard field, property or method with a supported platform name and optional version.
+             Multiple attributes can be applied to indicate guard for multiple supported platforms.
+             </summary>
+             <remarks>
+             Callers can apply a <see cref="T:System.Runtime.Versioning.SupportedOSPlatformGuardAttribute" /> to a field, property or method
+             and use that field, property or method in a conditional or assert statements in order to safely call platform specific APIs.
+            
+             The type of the field or property should be boolean, the method return type should be boolean in order to be used as platform guard.
+             </remarks>
+        </member>
+        <member name="T:System.Runtime.Versioning.TargetPlatformAttribute">
+            <summary>
+            Records the platform that the project targeted.
+            </summary>
+        </member>
+        <member name="T:System.Runtime.Versioning.UnsupportedOSPlatformAttribute">
+            <summary>
+            Marks APIs that were removed in a given operating system version.
+            </summary>
+            <remarks>
+            Primarily used by OS bindings to indicate APIs that are only available in
+            earlier versions.
+            </remarks>
+        </member>
+        <member name="T:System.Runtime.Versioning.UnsupportedOSPlatformGuardAttribute">
+             <summary>
+             Annotates the custom guard field, property or method with an unsupported platform name and optional version.
+             Multiple attributes can be applied to indicate guard for multiple unsupported platforms.
+             </summary>
+             <remarks>
+             Callers can apply a <see cref="T:System.Runtime.Versioning.UnsupportedOSPlatformGuardAttribute" /> to a field, property or method
+             and use that  field, property or method in a conditional or assert statements as a guard to safely call APIs unsupported on those platforms.
+            
+             The type of the field or property should be boolean, the method return type should be boolean in order to be used as platform guard.
+             </remarks>
+        </member>
+        <member name="T:System.Threading.Tasks.TaskToAsyncResult">
+            <summary>
+            Provides methods for using <see cref="T:System.Threading.Tasks.Task"/> to implement the Asynchronous Programming Model
+            pattern based on "Begin" and "End" methods.
+            </summary>
+        </member>
+        <member name="M:System.Threading.Tasks.TaskToAsyncResult.Begin(System.Threading.Tasks.Task,System.AsyncCallback,System.Object)">
+            <summary>Creates a new <see cref="T:System.IAsyncResult"/> from the specified <see cref="T:System.Threading.Tasks.Task"/>, optionally invoking <paramref name="callback"/> when the task has completed.</summary>
+            <param name="task">The <see cref="T:System.Threading.Tasks.Task"/> to be wrapped in an <see cref="T:System.IAsyncResult"/>.</param>
+            <param name="callback">The callback to be invoked upon <paramref name="task"/>'s completion. If <see langword="null"/>, no callback will be invoked.</param>
+            <param name="state">The state to be stored in the <see cref="T:System.IAsyncResult"/>.</param>
+            <returns>An <see cref="T:System.IAsyncResult"/> to represent the task's asynchronous operation. This instance will also be passed to <paramref name="callback"/> when it's invoked.</returns>
+            <exception cref="T:System.ArgumentNullException"><paramref name="task"/> is null.</exception>
+            <remarks>
+            In conjunction with the <see cref="M:System.Threading.Tasks.TaskToAsyncResult.End(System.IAsyncResult)"/> or <see cref="M:System.Threading.Tasks.TaskToAsyncResult.End``1(System.IAsyncResult)"/> methods, this method may be used
+            to implement the Begin/End pattern (also known as the Asynchronous Programming Model pattern, or APM). It is recommended to not expose this pattern
+            in new code; the methods on <see cref="T:System.Threading.Tasks.TaskToAsyncResult"/> are intended only to help implement such Begin/End methods when they must be exposed, for example
+            because a base class provides virtual methods for the pattern, or when they've already been exposed and must remain for compatibility.  These methods enable
+            implementing all of the core asynchronous logic via <see cref="T:System.Threading.Tasks.Task"/>s and then easily implementing Begin/End methods around that functionality.
+            </remarks>
+        </member>
+        <member name="M:System.Threading.Tasks.TaskToAsyncResult.End(System.IAsyncResult)">
+            <summary>Waits for the <see cref="T:System.Threading.Tasks.Task"/> wrapped by the <see cref="T:System.IAsyncResult"/> returned by <see cref="M:System.Threading.Tasks.TaskToAsyncResult.Begin(System.Threading.Tasks.Task,System.AsyncCallback,System.Object)"/> to complete.</summary>
+            <param name="asyncResult">The <see cref="T:System.IAsyncResult"/> for which to wait.</param>
+            <exception cref="T:System.ArgumentNullException"><paramref name="asyncResult"/> is null.</exception>
+            <exception cref="T:System.ArgumentException"><paramref name="asyncResult"/> was not produced by a call to <see cref="M:System.Threading.Tasks.TaskToAsyncResult.Begin(System.Threading.Tasks.Task,System.AsyncCallback,System.Object)"/>.</exception>
+            <remarks>This will propagate any exception stored in the wrapped <see cref="T:System.Threading.Tasks.Task"/>.</remarks>
+        </member>
+        <member name="M:System.Threading.Tasks.TaskToAsyncResult.End``1(System.IAsyncResult)">
+            <summary>Waits for the <see cref="T:System.Threading.Tasks.Task`1"/> wrapped by the <see cref="T:System.IAsyncResult"/> returned by <see cref="M:System.Threading.Tasks.TaskToAsyncResult.Begin(System.Threading.Tasks.Task,System.AsyncCallback,System.Object)"/> to complete.</summary>
+            <param name="asyncResult">The <see cref="T:System.IAsyncResult"/> for which to wait.</param>
+            <returns>The result of the <see cref="T:System.Threading.Tasks.Task`1"/> wrapped by the <see cref="T:System.IAsyncResult"/>.</returns>
+            <exception cref="T:System.ArgumentNullException"><paramref name="asyncResult"/> is null.</exception>
+            <exception cref="T:System.ArgumentException"><paramref name="asyncResult"/> was not produced by a call to <see cref="M:System.Threading.Tasks.TaskToAsyncResult.Begin(System.Threading.Tasks.Task,System.AsyncCallback,System.Object)"/>.</exception>
+            <remarks>This will propagate any exception stored in the wrapped <see cref="T:System.Threading.Tasks.Task`1"/>.</remarks>
+        </member>
+        <member name="M:System.Threading.Tasks.TaskToAsyncResult.Unwrap(System.IAsyncResult)">
+            <summary>Extracts the underlying <see cref="T:System.Threading.Tasks.Task"/> from an <see cref="T:System.IAsyncResult"/> created by <see cref="M:System.Threading.Tasks.TaskToAsyncResult.Begin(System.Threading.Tasks.Task,System.AsyncCallback,System.Object)"/>.</summary>
+            <param name="asyncResult">The <see cref="T:System.IAsyncResult"/> created by <see cref="M:System.Threading.Tasks.TaskToAsyncResult.Begin(System.Threading.Tasks.Task,System.AsyncCallback,System.Object)"/>.</param>
+            <returns>The <see cref="T:System.Threading.Tasks.Task"/> wrapped by the <see cref="T:System.IAsyncResult"/>.</returns>
+            <exception cref="T:System.ArgumentNullException"><paramref name="asyncResult"/> is null.</exception>
+            <exception cref="T:System.ArgumentException"><paramref name="asyncResult"/> was not produced by a call to <see cref="M:System.Threading.Tasks.TaskToAsyncResult.Begin(System.Threading.Tasks.Task,System.AsyncCallback,System.Object)"/>.</exception>
+        </member>
+        <member name="M:System.Threading.Tasks.TaskToAsyncResult.Unwrap``1(System.IAsyncResult)">
+            <summary>Extracts the underlying <see cref="T:System.Threading.Tasks.Task`1"/> from an <see cref="T:System.IAsyncResult"/> created by <see cref="M:System.Threading.Tasks.TaskToAsyncResult.Begin(System.Threading.Tasks.Task,System.AsyncCallback,System.Object)"/>.</summary>
+            <param name="asyncResult">The <see cref="T:System.IAsyncResult"/> created by <see cref="M:System.Threading.Tasks.TaskToAsyncResult.Begin(System.Threading.Tasks.Task,System.AsyncCallback,System.Object)"/>.</param>
+            <returns>The <see cref="T:System.Threading.Tasks.Task`1"/> wrapped by the <see cref="T:System.IAsyncResult"/>.</returns>
+            <exception cref="T:System.ArgumentNullException"><paramref name="asyncResult"/> is null.</exception>
+            <exception cref="T:System.ArgumentException">
+            <paramref name="asyncResult"/> was not produced by a call to <see cref="M:System.Threading.Tasks.TaskToAsyncResult.Begin(System.Threading.Tasks.Task,System.AsyncCallback,System.Object)"/>,
+            or the <see cref="T:System.Threading.Tasks.Task`1"/> provided to <see cref="M:System.Threading.Tasks.TaskToAsyncResult.Begin(System.Threading.Tasks.Task,System.AsyncCallback,System.Object)"/> was used a generic type parameter
+            that's different from the <typeparamref name="TResult"/> supplied to this call.
+            </exception>
+        </member>
+        <member name="T:System.Threading.Tasks.TaskToAsyncResult.TaskAsyncResult">
+            <summary>Provides a simple <see cref="T:System.IAsyncResult"/> that wraps a <see cref="T:System.Threading.Tasks.Task"/>.</summary>
+            <remarks>
+            We could use the Task as the IAsyncResult if the Task's AsyncState is the same as the object state,
+            but that's very rare, in particular in a situation where someone cares about allocation, and always
+            using TaskAsyncResult simplifies things and enables additional optimizations.
+            </remarks>
+        </member>
+        <member name="F:System.Threading.Tasks.TaskToAsyncResult.TaskAsyncResult._task">
+            <summary>The wrapped Task.</summary>
+        </member>
+        <member name="F:System.Threading.Tasks.TaskToAsyncResult.TaskAsyncResult._callback">
+            <summary>Callback to invoke when the wrapped task completes.</summary>
+        </member>
+        <member name="M:System.Threading.Tasks.TaskToAsyncResult.TaskAsyncResult.#ctor(System.Threading.Tasks.Task,System.Object,System.AsyncCallback)">
+            <summary>Initializes the IAsyncResult with the Task to wrap and the associated object state.</summary>
+            <param name="task">The Task to wrap.</param>
+            <param name="state">The new AsyncState value.</param>
+            <param name="callback">Callback to invoke when the wrapped task completes.</param>
+        </member>
+        <member name="P:System.Threading.Tasks.TaskToAsyncResult.TaskAsyncResult.AsyncState">
+            <inheritdoc/>
+        </member>
+        <member name="P:System.Threading.Tasks.TaskToAsyncResult.TaskAsyncResult.CompletedSynchronously">
+            <inheritdoc/>
+        </member>
+        <member name="P:System.Threading.Tasks.TaskToAsyncResult.TaskAsyncResult.IsCompleted">
+            <inheritdoc/>
+        </member>
+        <member name="P:System.Threading.Tasks.TaskToAsyncResult.TaskAsyncResult.AsyncWaitHandle">
+            <inheritdoc/>
+        </member>
+        <member name="T:BizHawk.Emulation.Common.AxisPairOrientation">
+            <summary>represents the direction of <c>(+, +)</c></summary>
+            <remarks>docs of individual controllers are being collected in comments of https://github.com/TASEmulators/BizHawk/issues/1200</remarks>
+        </member>
+        <member name="F:BizHawk.Emulation.Common.AxisSpec.Constraint">
+            <summary>
+            Gets the axis constraints that apply artificial constraints to float values
+            For instance, a N64 controller's analog range is actually larger than the amount allowed by the plastic that artificially constrains it to lower values
+            Axis constraints provide a way to technically allow the full range but have a user option to constrain down to typical values that a real control would have
+            </summary>
+        </member>
+        <member name="P:BizHawk.Emulation.Common.AxisSpec.MaxDigits">
+            <value>maximum decimal digits analog input can occupy with no-args ToString</value>
+            <remarks>does not include the extra char needed for a minus sign</remarks>
+        </member>
+        <member name="T:BizHawk.Emulation.Common.BasicServiceProvider">
+            <summary>
+            A generic implementation of IEmulatorService provider that provides
+            this functionality to any core.
+            The provider will scan an IEmulator and register all IEmulatorServices
+            that the core object itself implements.  In addition it provides
+            a Register() method to allow the core to pass in any additional services
+            </summary>
+            <seealso cref="T:BizHawk.Emulation.Common.IEmulatorServiceProvider"/>
+        </member>
+        <member name="M:BizHawk.Emulation.Common.BasicServiceProvider.Register``1(``0)">
+            <summary>the core can call this to register an additional service</summary>
+            <typeparam name="T">The <see cref="T:BizHawk.Emulation.Common.IEmulatorService"/> to register</typeparam>
+            <exception cref="T:System.ArgumentNullException"><paramref name="provider"/> is null</exception>
+        </member>
+        <member name="M:BizHawk.Emulation.Common.BasicServiceProvider.Unregister``1">
+            <summary>
+            the core can call this to unregister an existing service
+            this is particularly useful wrt the auto-registration of services
+            in case the core has some condition which renders a service unusable
+            </summary>
+            <typeparam name="T">The <see cref="T:BizHawk.Emulation.Common.IEmulatorService"/> to unregister</typeparam>
+        </member>
+        <member name="F:BizHawk.Emulation.Common.Bk2MnemonicLookup.PFX_RETROPAD">
+            <remarks>duplicated with <c>LibretroControllerDef</c></remarks>
+        </member>
+        <member name="T:BizHawk.Emulation.Common.CallbackBasedTraceBuffer">
+            <summary>
+            An implementation of <see cref="T:BizHawk.Emulation.Common.ITraceable"/> that is implementation using only methods
+            from <see cref="T:BizHawk.Emulation.Common.IDebuggable"/>, <see cref="T:BizHawk.Emulation.Common.IMemoryDomains"/>, and <see cref="T:BizHawk.Emulation.Common.IDisassemblable"/>
+            Useful for ported cores that have these hooks but no trace logging hook,
+            This allows for a traceable implementation without the need for additional API
+            Note that this technique will always be significantly slower than a direct implementation
+            </summary>
+        </member>
+        <member name="M:BizHawk.Emulation.Common.CallbackBasedTraceBuffer.#ctor(BizHawk.Emulation.Common.IDebuggable,BizHawk.Emulation.Common.IMemoryDomains,BizHawk.Emulation.Common.IDisassemblable,System.String)">
+            <exception cref="T:System.InvalidOperationException"><paramref name="debuggableCore"/> does not provide memory callback support or does not implement <see cref="M:BizHawk.Emulation.Common.IDebuggable.GetCpuFlagsAndRegisters"/></exception>
+        </member>
+        <member name="T:BizHawk.Emulation.Common.CodeDataLog">
+            <summary>
+            The base implementation of ICodeDataLog
+            </summary>
+            <seealso cref="T:BizHawk.Emulation.Common.ICodeDataLogger" />
+            <seealso cref="T:BizHawk.Emulation.Common.ICodeDataLog" />
+        </member>
+        <member name="M:BizHawk.Emulation.Common.CodeDataLog.Pin">
+            <summary>Pins the managed arrays. Not that we expect them to be allocated, but in case we do, seeing this here will remind us to check for the pin condition and abort</summary>
+            <exception cref="T:System.InvalidOperationException">if called more than once per instantiation</exception>
+        </member>
+        <member name="M:BizHawk.Emulation.Common.CodeDataLog.Unpin">
+            <summary>
+            Unpins the managed arrays, to be paired with calls to Pin()
+            </summary>
+        </member>
+        <member name="M:BizHawk.Emulation.Common.CodeDataLog.GetPin(System.String)">
+            <summary>
+            Retrieves the pointer to a managed array
+            </summary>
+        </member>
+        <member name="F:BizHawk.Emulation.Common.CodeDataLog._pins">
+            <summary>
+            Pinned managed arrays
+            </summary>
+        </member>
+        <member name="M:BizHawk.Emulation.Common.CodeDataLog.Has(System.String)">
+            <summary>
+            Whether the CDL is tracking a block with the given name
+            </summary>
+        </member>
+        <member name="P:BizHawk.Emulation.Common.CodeDataLog.Active">
+            <summary>
+            This is just a hook, if needed, to readily suspend logging, without having to rewire the core
+            </summary>
+        </member>
+        <member name="M:BizHawk.Emulation.Common.CodeDataLog.Check(BizHawk.Emulation.Common.ICodeDataLog)">
+            <summary>
+            Tests whether the other CodeDataLog is structurally identical
+            </summary>
+        </member>
+        <member name="M:BizHawk.Emulation.Common.CodeDataLog.LogicalOrFrom(BizHawk.Emulation.Common.ICodeDataLog)">
+            <exception cref="T:System.InvalidOperationException">
+            <paramref name="other"/> is not the same length as <see langword="this"/>, or
+            any value differs in size from the corresponding value in <paramref name="other"/>
+            </exception>
+        </member>
+        <member name="M:BizHawk.Emulation.Common.CodeDataLog.Load(System.IO.Stream)">
+            <exception cref="T:System.InvalidOperationException">contents of <paramref name="s"/> do not begin with valid file header</exception>
+        </member>
+        <member name="T:BizHawk.Emulation.Common.ControllerDefinition">
+            <summary>
+            Defines the schema for all the currently available controls for an IEmulator instance
+            </summary>
+            <seealso cref="T:BizHawk.Emulation.Common.IEmulator" />
+        </member>
+        <member name="P:BizHawk.Emulation.Common.ControllerDefinition.ControlsOrdered">
+            <summary>starts with console buttons, then each player's buttons individually</summary>
+        </member>
+        <member name="M:BizHawk.Emulation.Common.ControllerDefinition.BuildMnemonicsCache(System.String)">
+            <remarks>
+            TODO: this should probably be called in <see cref="M:BizHawk.Emulation.Common.ControllerDefinition.MakeImmutable"/>,
+            </remarks>
+        </member>
+        <member name="P:BizHawk.Emulation.Common.ControllerDefinition.BoolButtons">
+            <summary>
+            Gets or sets a list of all button types that have a boolean (on/off) value
+            </summary>
+        </member>
+        <member name="P:BizHawk.Emulation.Common.ControllerDefinition.HapticsChannels">
+            <summary>Contains names of virtual haptic feedback channels, e.g. <c>{ "P1 Mono" }</c>, <c>{ "P2 Left", "P2 Right" }</c>.</summary>
+        </member>
+        <member name="P:BizHawk.Emulation.Common.ControllerDefinition.CategoryLabels">
+            <summary>
+            Gets the category labels. These labels provide a means of categorizing controls in various controller display and config screens
+            </summary>
+        </member>
+        <member name="M:BizHawk.Emulation.Common.ControllerDefinition.GenOrderedControls">
+            <remarks>implementors should include empty lists for empty players, including "player 0", to match this base implementation</remarks>
+        </member>
+        <member name="M:BizHawk.Emulation.Common.ControllerDefinition.MakeImmutable">
+            <summary>permanently disables the ability to mutate this instance; returns this reference</summary>
+        </member>
+        <member name="T:BizHawk.Emulation.Common.InputCallbackSystem">
+            <summary>
+            This is a generic implementation of IInputCallbackSystem that can be used
+            by any core
+            </summary>
+            <seealso cref="T:BizHawk.Emulation.Common.IInputCallbackSystem" />
+        </member>
+        <member name="T:BizHawk.Emulation.Common.LinkedDebuggable">
+            <summary>
+            A generic linked implementation of IDebuggable that can be used by any link core
+            </summary>
+            <seealso cref="T:BizHawk.Emulation.Common.IDebuggable" />
+        </member>
+        <member name="T:BizHawk.Emulation.Common.LinkedDisassemblable">
+            <summary>
+            A generic linked implementation of IDisassemblable that can be used by any link core
+            </summary>
+            <seealso cref="T:BizHawk.Emulation.Common.IDisassemblable" />
+        </member>
+        <member name="T:BizHawk.Emulation.Common.LinkedMemoryDomains">
+            <summary>
+            A generic linked implementation of IMemoryDomains that can be used by any link core
+            </summary>
+            <seealso cref="T:BizHawk.Emulation.Common.IMemoryDomains" />
+        </member>
+        <member name="T:BizHawk.Emulation.Common.LinkedSaveRam">
+            <summary>
+            A generic linked implementation of ISaveRam that can be used by any link core
+            </summary>
+            <seealso cref="T:BizHawk.Emulation.Common.ISaveRam" />
+        </member>
+        <member name="T:BizHawk.Emulation.Common.MemoryBasedInputCallbackSystem">
+            <summary>
+            An implementation of <see cref="T:BizHawk.Emulation.Common.IInputCallbackSystem"/> that is implementation using only methods
+            from <see cref="T:BizHawk.Emulation.Common.IDebuggable"/>,
+            Useful for ported cores that have these hooks but no input callback hook,
+            This allows for an input callback implementation without the need for additional APIs
+            </summary>
+        </member>
+        <member name="T:BizHawk.Emulation.Common.MemoryCallbackSystem">
+            <summary>
+            This is a generic implementation of IMemoryCallbackSystem
+            that can be used by used by any core
+            </summary>
+            <seealso cref="T:BizHawk.Emulation.Common.IMemoryCallbackSystem" />
+        </member>
+        <member name="M:BizHawk.Emulation.Common.MemoryCallbackSystem.Add(BizHawk.Emulation.Common.IMemoryCallback)">
+            <exception cref="T:System.InvalidOperationException">scope of <paramref name="callback"/> isn't available</exception>
+        </member>
+        <member name="T:BizHawk.Emulation.Common.MemoryCallbackCollection">
+            <summary>
+            Specialized collection for memory callbacks with add/remove events and copy-on-write behavior during enumeration.
+            </summary>
+            <remarks>
+            Reentrancy from ItemAdded and ItemRemoved events is not allowed.
+            </remarks>
+        </member>
+        <member name="T:BizHawk.Emulation.Common.MemoryCallbackCollection.Enumerator">
+            <remarks>
+            This struct must not be copied.
+            </remarks>
+        </member>
+        <member name="T:BizHawk.Emulation.Common.MemoryDomain">
+            <summary>
+            A memory region and the functionality to read/write from it
+            as required by the IMemoryDomains service.
+            </summary>
+            <seealso cref="T:BizHawk.Emulation.Common.IMemoryDomains" />
+        </member>
+        <member name="M:BizHawk.Emulation.Common.MemoryDomain.Enter">
+            <summary>
+            only use this if you are expecting to do a lot of peeks/pokes
+            no-op if the domain has no monitor
+            </summary>
+        </member>
+        <member name="M:BizHawk.Emulation.Common.MemoryDomain.Exit">
+            <summary>
+            only use this if you are expecting to do a lot of peeks/pokes
+            no-op if the domain has no monitor
+            </summary>
+        </member>
+        <member name="T:BizHawk.Emulation.Common.MemoryDomainList">
+            <summary>
+            A generic implementation of IMemoryDomain that can be used by any core
+            </summary>
+            <seealso cref="T:BizHawk.Emulation.Common.IMemoryDomains" />
+        </member>
+        <member name="M:BizHawk.Emulation.Common.MemoryDomainList.MergeList(BizHawk.Emulation.Common.MemoryDomainList)">
+            <summary>
+            for core use only
+            </summary>
+        </member>
+        <member name="M:BizHawk.Emulation.Common.MemoryDomainList.TryMerge``1(BizHawk.Emulation.Common.MemoryDomain,BizHawk.Emulation.Common.MemoryDomain,System.Action{``0,``0})">
+            <summary>
+            big hacks
+            </summary>
+            <typeparam name="T">The memory domain type to merge</typeparam>
+        </member>
+        <member name="T:BizHawk.Emulation.Common.NullController">
+            <summary>
+            A empty implementation of IController that represents the lack of
+            a controller interface
+            </summary>
+            <seealso cref="T:BizHawk.Emulation.Common.IController" />
+        </member>
+        <member name="T:BizHawk.Emulation.Common.NullSound">
+            <summary>
+            A default and empty implementation of ISoundProvider
+            that simply outputs "silence"
+            </summary>
+            <seealso cref="T:BizHawk.Emulation.Common.ISoundProvider" />
+        </member>
+        <member name="M:BizHawk.Emulation.Common.NullSound.#ctor(System.Int32)">
+            <summary>
+            Initializes a new instance of the <see cref="T:BizHawk.Emulation.Common.NullSound"/> class
+            that provides an exact number of audio samples per call when in sync mode
+            </summary>
+        </member>
+        <member name="M:BizHawk.Emulation.Common.NullSound.#ctor(System.Int64,System.Int64)">
+            <summary>
+            Initializes a new instance of the <see cref="T:BizHawk.Emulation.Common.NullSound"/> class
+            that exactly matches a given frame rate when in sync mode
+            </summary>
+        </member>
+        <member name="M:BizHawk.Emulation.Common.NullSound.GetSamplesSync(System.Int16[]@,System.Int32@)">
+            <exception cref="T:System.InvalidOperationException"><see cref="P:BizHawk.Emulation.Common.NullSound.SyncMode"/> is not <see cref="F:BizHawk.Emulation.Common.SyncSoundMode.Sync"/> (call <see cref="M:BizHawk.Emulation.Common.NullSound.SetSyncMode(BizHawk.Emulation.Common.SyncSoundMode)"/>)</exception>
+        </member>
+        <member name="M:BizHawk.Emulation.Common.NullSound.GetSamplesAsync(System.Int16[])">
+            <exception cref="T:System.InvalidOperationException"><see cref="P:BizHawk.Emulation.Common.NullSound.SyncMode"/> is not <see cref="F:BizHawk.Emulation.Common.SyncSoundMode.Async"/> (call <see cref="M:BizHawk.Emulation.Common.NullSound.SetSyncMode(BizHawk.Emulation.Common.SyncSoundMode)"/>)</exception>
+        </member>
+        <member name="T:BizHawk.Emulation.Common.NullVideo">
+            <summary>
+            A default IVideoProvider that simply returns
+            a black screen at an arbitrary size
+            </summary>
+            <seealso cref="T:BizHawk.Emulation.Common.IVideoProvider" />
+        </member>
+        <member name="T:BizHawk.Emulation.Common.SimpleSyncSoundProvider">
+            <summary>
+            A simple sound provider that will operate in sync mode only, offering back whatever data was sent in PutSamples
+            </summary>
+        </member>
+        <member name="M:BizHawk.Emulation.Common.SimpleSyncSoundProvider.SetSyncMode(BizHawk.Emulation.Common.SyncSoundMode)">
+            <exception cref="T:System.ArgumentException"><paramref name="mode"/> is not <see cref="F:BizHawk.Emulation.Common.SyncSoundMode.Sync"/></exception>
+        </member>
+        <member name="M:BizHawk.Emulation.Common.SimpleSyncSoundProvider.PutSamples(System.Int16[],System.Int32)">
+            <summary>
+            Add samples to be output.  no queueing; must be drained every frame
+            </summary>
+        </member>
+        <member name="M:BizHawk.Emulation.Common.SimpleSyncSoundProvider.GetSamplesAsync(System.Int16[])">
+            <exception cref="T:System.NotImplementedException">always</exception>
+        </member>
+        <member name="T:BizHawk.Emulation.Common.StateSerializer">
+            <summary>
+            A generic implementation of <see cref="T:BizHawk.Emulation.Common.IStatable" /> that also
+            implements <see cref="T:BizHawk.Emulation.Common.ITextStatable" /> using the <see cref="T:BizHawk.Common.Serializer" /> class
+            </summary>
+        </member>
+        <member name="M:BizHawk.Emulation.Common.StateSerializer.#ctor(System.Action{BizHawk.Common.Serializer})">
+            <summary>
+            Instantiates a new instance of the <see cref="T:BizHawk.Emulation.Common.StateSerializer" /> class
+            </summary>
+            <param name="syncState">The callback that will be called on save and load methods </param>
+        </member>
+        <member name="P:BizHawk.Emulation.Common.StateSerializer.LoadStateCallback">
+            <summary>
+            If provided, will be called after a loadstate call
+            </summary>
+        </member>
+        <member name="T:BizHawk.Emulation.Common.TraceBuffer">
+            <summary>
+            A generic implementation of ITraceable that can be used by any core
+            </summary>
+            <seealso cref="T:BizHawk.Emulation.Common.ITraceable" />
+        </member>
+        <member name="M:BizHawk.Emulation.Common.ControllerDefinitionMerger.GetMerged(System.String,System.Collections.Generic.IEnumerable{BizHawk.Emulation.Common.ControllerDefinition},System.Collections.Generic.List{BizHawk.Emulation.Common.ControlDefUnMerger}@)">
+            <summary>
+            merge some controller definitions for different ports, and such.  i promise to fully document this tomorrow
+            </summary>
+        </member>
+        <member name="P:BizHawk.Emulation.Common.ControlDefUnMerger.DummyController.Definition">
+            <exception cref="T:System.NotImplementedException">always</exception>
+        </member>
+        <member name="T:BizHawk.Emulation.Common.CoreComm">
+            <summary>
+            This object facilitates communications between client and core
+            The primary use is to provide a client => core communication, such as providing client-side callbacks for a core to use
+            Any communications that can be described as purely a Core -> Client system, should be provided as an <see cref="T:BizHawk.Emulation.Common.IEmulatorService"/> instead
+            It is important that by design this class stay immutable
+            </summary>
+        </member>
+        <member name="P:BizHawk.Emulation.Common.CoreComm.ShowMessage">
+            <summary>
+            Gets a message to show. Reasonably annoying (dialog box), shouldn't be used most of the time
+            </summary>
+        </member>
+        <member name="P:BizHawk.Emulation.Common.CoreComm.Notify">
+            <summary>
+            Gets a message to show for optional duration in seconds. Less annoying (OSD message). Should be used for ignorable helpful messages
+            </summary>
+        </member>
+        <member name="P:BizHawk.Emulation.Common.CoreComm.CorePreferences">
+            <summary>
+            Yeah, I put more stuff in corecomm. If you don't like it, change the settings/syncsettings stuff to support multiple "settings sets" to act like ini file sections kind of, so that we can hand a generic settings object to cores instead of strictly ones defined by the cores
+            </summary>
+        </member>
+        <member name="P:BizHawk.Emulation.Common.CoreComm.OpenGLProvider">
+            <summary>
+            Interface to provide OpenGL resources to the core
+            </summary>
+        </member>
+        <member name="F:BizHawk.Emulation.Common.Database._acquire">
+            <summary>
+            blocks until the DB is done loading
+            </summary>
+        </member>
+        <member name="M:BizHawk.Emulation.Common.Database.FormatHash(System.String)">
+            <summary>
+            Removes hash type if present and enforces an uppercase hash
+            </summary>
+            <param name="hash">The hash to format, this is typically prefixed with a type (e.g. sha1:)</param>
+            <returns>formatted hash</returns>
+        </member>
+        <member name="M:BizHawk.Emulation.Common.Database.SaveDatabaseEntry(BizHawk.Emulation.Common.CompactGameInfo,System.String)">
+            <remarks>expensive, as it creates a new <see cref="T:System.Collections.Frozen.FrozenDictionary`2"/></remarks>
+        </member>
+        <member name="F:BizHawk.Emulation.Common.FirmwareOptionStatus.Bad">
+            <summary>Nonlegitimate files that are notable enough to be worth detecting, even if mainly to categorize as a BAD option</summary>
+        </member>
+        <member name="F:BizHawk.Emulation.Common.FirmwareOptionStatus.Unacceptable">
+            <summary>A good file, but it doesn't work with our core</summary>
+        </member>
+        <member name="F:BizHawk.Emulation.Common.FirmwareOptionStatus.Acceptable">
+            <summary>Works with our core, but not preferred for TASing</summary>
+        </member>
+        <member name="F:BizHawk.Emulation.Common.FirmwareOptionStatus.Ideal">
+            <summary>Preferred to get checkmarks, and for TASing</summary>
+        </member>
+        <member name="T:BizHawk.Emulation.Common.FirmwarePatchData">
+            <summary>
+            Represents a binary patch, to be applied to a byte array. Patches must be contiguous; multiple instances can be used to for non-contiguous patches.
+            Patches usually contain data which needs to be XOR'd with a base file, but with <see cref="F:BizHawk.Emulation.Common.FirmwarePatchData.Overwrite"/> set to <see langword="true"/>, this struct can represent data which should replace part of a base file.
+            </summary>
+            <remarks>
+            TODO no mechanism to change length, would that be useful? --yoshi<br/>
+            upon further reflection, I'm heading towards what is effectively a worse .bps, so maybe just use that --a later yoshi
+            </remarks>
+        </member>
+        <member name="F:BizHawk.Emulation.Common.FirmwarePatchData.Offset">
+            <summary>position in base file where patch should start</summary>
+            <remarks>in bytes (octets)</remarks>
+        </member>
+        <member name="F:BizHawk.Emulation.Common.FirmwarePatchData.Overwrite">
+            <summary>base file should be overwritten with patch iff <see langword="true"/>, XOR'd otherwise</summary>
+        </member>
+        <member name="M:BizHawk.Emulation.Common.FirmwarePatchData.ApplyToMutating(System.Byte[])">
+            <summary>applies this patch to <paramref name="base"/> in-place, and returns the same reference</summary>
+        </member>
+        <member name="F:BizHawk.Emulation.Common.FirmwarePatchOption.BaseHash">
+            <summary>hash of base file patch should be applied to</summary>
+        </member>
+        <member name="F:BizHawk.Emulation.Common.FirmwarePatchOption.TargetHash">
+            <summary>hash of file produced by patching</summary>
+        </member>
+        <member name="P:BizHawk.Emulation.Common.IGameInfo.Hash">
+            <value>either CRC32, MD5, or SHA1, hex-encoded, unprefixed</value>
+        </member>
+        <member name="M:BizHawk.Emulation.Common.GameInfo.GetBool(System.String,System.Boolean)">
+            <summary>
+            /// Gets a boolean value from the database
+            </summary>
+            <param name="parameter">The option to look up</param>
+            <param name="defaultVal">The value to return if the option is invalid or doesn't exist</param>
+            <returns> The boolean value from the database if present, otherwise the given default value</returns>
+        </member>
+        <member name="M:BizHawk.Emulation.Common.GameInfo.GetInt(System.String,System.Int32)">
+            <summary>
+            /// Gets an integer value from the database
+            </summary>
+            <param name="parameter">The option to look up</param>
+            <param name="defaultVal">The value to return if the option is invalid or doesn't exist</param>
+            <returns> The integer value from the database if present, otherwise the given default value</returns>
+        </member>
+        <member name="T:BizHawk.Emulation.Common.DskIdentifier">
+            <summary>
+            A slightly convoluted way of determining the required System based on a *.dsk file
+            This is here because (for probably good reason) there does not appear to be a route
+            to BizHawk.Emulation.Cores from BizHawk.Emulation.Common
+            </summary>
+        </member>
+        <member name="P:BizHawk.Emulation.Common.DskIdentifier.IdentifiedSystem">
+            <summary>
+            Default fallthrough to AppleII - the AppleII *.dsk format seems to be very simple with no ident strings
+            </summary>
+        </member>
+        <member name="T:BizHawk.Emulation.Common.UnsupportedGameException">
+            <summary>
+            indicates that this core does not support the game, but it may be valid
+            </summary>
+        </member>
+        <member name="T:BizHawk.Emulation.Common.DisplayType">
+            <summary>
+            DisplayType, used in <see cref="T:BizHawk.Emulation.Common.IEmulator"/>
+            </summary>
+        </member>
+        <member name="T:BizHawk.Emulation.Common.StepType">
+            <summary>
+            The type/increment of stepping in the Step method of <see cref="T:BizHawk.Emulation.Common.IDebuggable"/>
+            </summary>
+        </member>
+        <member name="T:BizHawk.Emulation.Common.RomStatus">
+            <summary>
+            In the game database, the status of the rom found in the database
+            </summary>
+        </member>
+        <member name="F:BizHawk.Emulation.Common.EmulatorExtensions.SystemIDDisplayNames">
+            <remarks>need to think about e.g. Genesis / Mega Drive using one sysID but having a different display name depending on the BIOS region --yoshi</remarks>
+        </member>
+        <member name="M:BizHawk.Emulation.Common.EmulatorExtensions.AsVideoProviderOrDefault(BizHawk.Emulation.Common.IEmulator)">
+            <summary>
+            Returns the core's VideoProvider, or a suitable dummy provider
+            </summary>
+        </member>
+        <member name="M:BizHawk.Emulation.Common.EmulatorExtensions.AsSoundProviderOrDefault(BizHawk.Emulation.Common.IEmulator)">
+            <summary>
+            returns the core's SoundProvider, or a suitable dummy provider
+            </summary>
+        </member>
+        <member name="M:BizHawk.Emulation.Common.EmulatorExtensions.ToBoolButtonNameList(BizHawk.Emulation.Common.IController,System.Nullable{System.Int32})">
+            <summary>
+            Gets a list of boolean button names. If a controller number is specified, only returns button names
+            (without the "P" prefix) that match that controller number. If a controller number is NOT specified,
+            then all button names are returned.
+            <br/>For example, consider <c>controller.Definition is { BoolButtons = [ "P1 A", "P1 B", "P2 B", "P2 C" ] }</c>.
+            Then:<list type="bullet">
+            <item><description><c>controller.ToBoolButtonNameList(1)</c> --> <c>[ "A", "B" ]</c></description></item>
+            <item><description><c>controller.ToBoolButtonNameList(2)</c> --> <c>[ "B", "C" ]</c></description></item>
+            <item><description><c>controller.ToBoolButtonNameList(null)</c> --> <c>[ "P1 A", "P1 B", "P2 B", "P2 C" ]</c></description></item>
+            </list>
+            </summary>
+        </member>
+        <member name="M:BizHawk.Emulation.Common.EmulatorExtensions.ToAxisControlNameList(BizHawk.Emulation.Common.IController,System.Nullable{System.Int32})">
+            <summary>as <see cref="M:BizHawk.Emulation.Common.EmulatorExtensions.ToBoolButtonNameList(BizHawk.Emulation.Common.IController,System.Nullable{System.Int32})"/>, but with axis names</summary>
+        </member>
+        <member name="M:BizHawk.Emulation.Common.EmulatorExtensions.AddAxis(BizHawk.Emulation.Common.ControllerDefinition,System.String,BizHawk.Common.Range{System.Int32},System.Int32,System.Boolean,BizHawk.Emulation.Common.AxisConstraint)">
+            <summary>
+            Adds an axis to the receiver <see cref="T:BizHawk.Emulation.Common.ControllerDefinition"/>, and returns it.
+            The new axis will appear after any that were previously defined.
+            </summary>
+            <param name="constraint">pass only for one axis in a pair, by convention the X axis</param>
+            <returns>identical reference to <paramref name="def"/>; the object is mutated</returns>
+        </member>
+        <member name="M:BizHawk.Emulation.Common.EmulatorExtensions.AddXYPair(BizHawk.Emulation.Common.ControllerDefinition,System.String,BizHawk.Emulation.Common.AxisPairOrientation,BizHawk.Common.Range{System.Int32},System.Int32,BizHawk.Common.Range{System.Int32},System.Int32,BizHawk.Emulation.Common.AxisConstraint)">
+            <summary>
+            Adds an X/Y pair of axes to the receiver <see cref="T:BizHawk.Emulation.Common.ControllerDefinition"/>, and returns it.
+            The new axes will appear after any that were previously defined.
+            </summary>
+            <param name="nameFormat">format string e.g. <c>"P1 Left {0}"</c> (will be used to interpolate <c>"X"</c> and <c>"Y"</c>)</param>
+            <returns>identical reference to <paramref name="def"/>; the object is mutated</returns>
+        </member>
+        <member name="M:BizHawk.Emulation.Common.EmulatorExtensions.AddXYPair(BizHawk.Emulation.Common.ControllerDefinition,System.String,BizHawk.Emulation.Common.AxisPairOrientation,BizHawk.Common.Range{System.Int32},System.Int32,BizHawk.Emulation.Common.AxisConstraint)">
+            <summary>
+            Adds an X/Y pair of axes to the receiver <see cref="T:BizHawk.Emulation.Common.ControllerDefinition"/>, and returns it.
+            The new axes will appear after any that were previously defined.
+            </summary>
+            <param name="nameFormat">format string e.g. <c>"P1 Left {0}"</c> (will be used to interpolate <c>"X"</c> and <c>"Y"</c>)</param>
+            <returns>identical reference to <paramref name="def"/>; the object is mutated</returns>
+        </member>
+        <member name="M:BizHawk.Emulation.Common.EmulatorExtensions.AddXYZTriple(BizHawk.Emulation.Common.ControllerDefinition,System.String,BizHawk.Common.Range{System.Int32},System.Int32)">
+            <summary>
+            Adds an X/Y/Z triple of axes to the receiver <see cref="T:BizHawk.Emulation.Common.ControllerDefinition"/>, and returns it.
+            The new axes will appear after any that were previously defined.
+            </summary>
+            <param name="nameFormat">format string e.g. <c>"P1 Tilt {0}"</c> (will be used to interpolate <c>"X"</c>, <c>"Y"</c>, and <c>"Z"</c>)</param>
+            <returns>identical reference to <paramref name="def"/>; the object is mutated</returns>
+        </member>
+        <member name="M:BizHawk.Emulation.Common.EmulatorExtensions.Put(BizHawk.Emulation.Common.ITraceable,BizHawk.Emulation.Common.TraceInfo)">
+            <remarks>TODO no-op instead of NRE when not "enabled"?</remarks>
+        </member>
+        <member name="T:BizHawk.Emulation.Common.SatellaviewFileTypeDetector.SatellaviewHeader">
+            <remarks>
+            https://wiki.superfamicom.org/bs-x-satellaview-header
+            https://satellaview.fandom.com/wiki/Satellaview_ROM_header
+            </remarks>
+        </member>
+        <member name="M:BizHawk.Emulation.Common.SatellaviewFileTypeDetector.IsSatellaviewRom(System.ReadOnlySpan{System.Byte},System.Collections.Generic.IReadOnlyList{System.String}@)">
+            <remarks>not to be confused with a "slotted cart" i.e. base game, which we treat as either firmware or a normal SNES rom</remarks>
+        </member>
+        <member name="P:BizHawk.Emulation.Common.IController.Definition">
+            <summary>
+            Gets a definition of the controller schema, including all currently available buttons and their types
+            </summary>
+        </member>
+        <member name="M:BizHawk.Emulation.Common.IController.GetHapticsSnapshot">
+            <seealso cref="M:BizHawk.Emulation.Common.IController.SetHapticChannelStrength(System.String,System.Int32)"/>
+        </member>
+        <member name="M:BizHawk.Emulation.Common.IController.IsPressed(System.String)">
+            <summary>
+            Returns the current state of a boolean control
+            </summary>
+        </member>
+        <member name="M:BizHawk.Emulation.Common.IController.AxisValue(System.String)">
+            <summary>
+            Returns the state of an axis control
+            </summary>
+        </member>
+        <member name="M:BizHawk.Emulation.Common.IController.SetHapticChannelStrength(System.String,System.Int32)">
+            <param name="name">haptic channel name e.g. "P1 Mono", "P2 Left"</param>
+            <param name="strength">0..<see cref="F:System.Int32.MaxValue"/></param>
+        </member>
+        <member name="T:BizHawk.Emulation.Common.ICoreFileProvider">
+            <summary>
+            Defines the means by which firmware, bios and other necessary files are provided to a core that needs them
+            </summary>
+        </member>
+        <member name="M:BizHawk.Emulation.Common.ICoreFileProvider.GetRetroSaveRAMDirectory(BizHawk.Emulation.Common.IGameInfo)">
+            <summary>
+            produces a path that contains saveram... because libretro cores need it
+            </summary>
+        </member>
+        <member name="M:BizHawk.Emulation.Common.ICoreFileProvider.GetRetroSystemPath(BizHawk.Emulation.Common.IGameInfo)">
+            <summary>
+            produces a path for use as a libretro system path (different for each core)
+            </summary>
+        </member>
+        <member name="M:BizHawk.Emulation.Common.ICoreFileProvider.GetUserPath(System.String,System.Boolean)">
+            <summary>
+            produces a 'user' path for a given system id
+            can produce an empty temp folder, suitable for movies
+            </summary>
+        </member>
+        <member name="M:BizHawk.Emulation.Common.ICoreFileProvider.GetFirmware(BizHawk.Emulation.Common.FirmwareID,System.String)">
+            <param name="msg">warning message to show on failure</param>
+            <returns><see langword="null"/> iff failed</returns>
+        </member>
+        <member name="M:BizHawk.Emulation.Common.ICoreFileProvider.GetFirmwareOrThrow(BizHawk.Emulation.Common.FirmwareID,System.String)">
+            <param name="msg">exception message to show on failure</param>
+            <exception cref="T:BizHawk.Emulation.Common.MissingFirmwareException">if not found</exception>
+        </member>
+        <member name="M:BizHawk.Emulation.Common.ICoreFileProvider.GetFirmwareWithGameInfoOrThrow(BizHawk.Emulation.Common.FirmwareID,System.String)">
+            <param name="msg">exception message to show on failure</param>
+            <exception cref="T:BizHawk.Emulation.Common.MissingFirmwareException">if not found</exception>
+            <remarks>only used in PCEHawk</remarks>
+        </member>
+        <member name="T:BizHawk.Emulation.Common.IEmulator">
+            <summary>
+            This service defines a core as a core. It is the primary service
+            and the absolute minimum requirement to have a functional core in BizHawk
+            a client can not operate without this minimum requirement
+            </summary>
+        </member>
+        <member name="P:BizHawk.Emulation.Common.IEmulator.ServiceProvider">
+            <summary>
+            Gets the service provider.
+            This is the intended mechanism to get services from a core
+            Retrieves an IEmulatorService from the core,
+            if the core does not have the type specified, it will return null
+            </summary>
+        </member>
+        <member name="P:BizHawk.Emulation.Common.IEmulator.ControllerDefinition">
+            <summary>
+            Gets the definition that defines all the possible inputs and types that the core can receive
+            By design this should not change during the lifetime of the instance of the core
+            To change the definition, a new instance should be created
+            </summary>
+        </member>
+        <member name="M:BizHawk.Emulation.Common.IEmulator.FrameAdvance(BizHawk.Emulation.Common.IController,System.Boolean,System.Boolean)">
+            <summary>
+            Runs the emulator core for 1 frame
+            note that (some?) cores expect you to call SoundProvider.GetSamples() after each FrameAdvance()
+            please do this, even when <paramref name="renderSound"/> = false
+            </summary>
+            <param name="controller">
+            The <see cref="T:BizHawk.Emulation.Common.IController"/> instance that the core will use for input.
+            The <see cref="T:BizHawk.Emulation.Common.IController"/> provided by the client must provide the buttons specified by the core through the <see cref="P:BizHawk.Emulation.Common.IEmulator.ControllerDefinition"/> property
+            </param>
+            <param name="render">Whether or not to render video, cores will pass false here in cases such as frame skipping</param>
+            <param name="renderSound">Whether or not to render audio, cores will pass here false here in cases such as fast forwarding where bypassing sound may improve speed</param>
+        </member>
+        <member name="P:BizHawk.Emulation.Common.IEmulator.Frame">
+            <summary>
+            Gets the current frame count
+            Frame must be incremented after emulation in the core
+            </summary>
+        </member>
+        <member name="P:BizHawk.Emulation.Common.IEmulator.SystemId">
+            <summary>
+            Gets the unique Id of the platform currently being emulated, for instance "NES"
+            </summary>
+        </member>
+        <member name="P:BizHawk.Emulation.Common.IEmulator.DeterministicEmulation">
+            <summary>
+            Gets a value indicating whether the core is in deterministic mode.
+            This flag is a contract with the client.
+            If true, the core agrees to behave in a completely deterministic manner,
+            Features like movie recording depend on this.
+            It is the client's responsibility to manage this flag.
+            If a core wants to implement non-deterministic features (like speed hacks, frame-skipping), it must be done only when this flag is false
+            if you want to set this, look in the emulator's constructor or Load() method
+            </summary>
+        </member>
+        <member name="M:BizHawk.Emulation.Common.IEmulator.ResetCounters">
+            <summary>
+            Resets the Frame and Lag counters, and any other similar counters a core might implement
+            </summary>
+        </member>
+        <member name="T:BizHawk.Emulation.Common.IEmulatorService">
+            <summary>
+            This interface specifies that an interface or implementation is a emulator core service, such as <see cref="T:BizHawk.Emulation.Common.IDebuggable"/>,
+            but is an optional part of the core functionality
+            Clients should gracefully handle an IEmulator that has a missing or partial implementation of one of these services
+            </summary>
+        </member>
+        <member name="T:BizHawk.Emulation.Common.ISpecializedEmulatorService">
+            <summary>
+            This represents a service that would not apply to every core,
+            instead it is a specialized service specific to a core or group of cores
+            This service is merely intended to define semantics and expectations of a service
+            Services of this type are not assumed to be "missing" from cores that fail to implement them
+            </summary>
+        </member>
+        <member name="T:BizHawk.Emulation.Common.IEmulatorServiceProvider">
+            <summary>
+            This interface defines the mechanism by which clients can retrieve <see cref="T:BizHawk.Emulation.Common.IEmulatorService"/>
+            from an IEmulator implementation
+            An implementation should collect all available IEmulatorService instances.
+            This interface defines only the client interaction.  This interface does not specify the means
+            by which a service provider will be populated with available services.  However, an implementation
+            by design must provide this mechanism
+            </summary>
+            <seealso cref="T:BizHawk.Emulation.Common.IEmulator" />
+        </member>
+        <member name="M:BizHawk.Emulation.Common.IEmulatorServiceProvider.HasService``1">
+            <summary>
+            Returns whether or not T is available
+            </summary>
+            <typeparam name="T">The <see cref="T:BizHawk.Emulation.Common.IEmulatorService"/> to check</typeparam>
+        </member>
+        <member name="M:BizHawk.Emulation.Common.IEmulatorServiceProvider.HasService(System.Type)">
+            <summary>
+            Returns whether or not t is available
+            </summary>
+        </member>
+        <member name="M:BizHawk.Emulation.Common.IEmulatorServiceProvider.GetService``1">
+            <summary>
+            Returns an instance of T if T is available
+            Else returns null
+            </summary>
+            <typeparam name="T">The requested <see cref="T:BizHawk.Emulation.Common.IEmulatorService"/></typeparam>
+        </member>
+        <member name="M:BizHawk.Emulation.Common.IEmulatorServiceProvider.GetService(System.Type)">
+            <summary>
+            Returns an instance of t if t is available
+            Else returns null
+            </summary>
+        </member>
+        <member name="P:BizHawk.Emulation.Common.IEmulatorServiceProvider.AvailableServices">
+            <summary>
+            Gets a list of all currently registered services available to be retrieved
+            </summary>
+        </member>
+        <member name="T:BizHawk.Emulation.Common.IInputCallbackSystem">
+            <summary>
+            This is a property of <see cref="T:BizHawk.Emulation.Common.IInputPollable"/>, and defines the means by which a client
+            gets and sets input callbacks in the core.  An input callback should fire any time input is
+            polled by the core
+            </summary>
+        </member>
+        <member name="M:BizHawk.Emulation.Common.IInputCallbackSystem.Call">
+            <summary>
+            Will iterate and call every callback
+            </summary>
+        </member>
+        <member name="M:BizHawk.Emulation.Common.IInputCallbackSystem.RemoveAll(System.Collections.Generic.IEnumerable{System.Action})">
+            <summary>
+            Will remove the given list of callbacks
+            </summary>
+        </member>
+        <member name="T:BizHawk.Emulation.Common.MemoryCallbackDelegate">
+            <param name="value">For reads/execs, the value read/executed; for writes, the value to be written. Cores may pass the default <c>0</c> if write/exec is partially implemented.</param>
+            <returns>
+            NULL if we should leave the value sent by the core as it is; the value to override with otherwise.
+            </returns>
+        </member>
+        <member name="T:BizHawk.Emulation.Common.IMemoryCallbackSystem">
+            <summary>
+            This is a property of <see cref="T:BizHawk.Emulation.Common.IDebuggable"/>, and defines the means by which a client
+            gets and sets memory callbacks in the core.  A memory callback should fire any time memory is
+            read/written/executed by the core, and depends on the type specified by the callback
+            </summary>
+        </member>
+        <member name="M:BizHawk.Emulation.Common.IMemoryCallbackSystem.Add(BizHawk.Emulation.Common.IMemoryCallback)">
+            <summary>
+            Adds a callback for the given type to the given address
+            If no address is specified the callback will be hooked to all addresses
+            Note: an execute callback can not be added without an address, else an InvalidOperationException will occur
+            </summary>
+            <exception cref="T:System.InvalidOperationException">Thrown when the <see cref="P:BizHawk.Emulation.Common.IMemoryCallback.Scope"/> property of the <see cref="T:BizHawk.Emulation.Common.IMemoryCallback"/> is not in the <see cref="P:BizHawk.Emulation.Common.IMemoryCallbackSystem.AvailableScopes"/></exception>
+        </member>
+        <member name="M:BizHawk.Emulation.Common.IMemoryCallbackSystem.CallMemoryCallbacks(System.UInt32,System.UInt32,System.UInt32,System.String)">
+            <summary>
+            Executes all matching callbacks for the given address and domain
+            </summary>
+            <param name="addr">The address to check for callbacks</param>
+            <param name="value">For reads/execs, the value read/executed; for writes, the value to be written. Cores may pass the default <c>0</c> if write/exec is partially implemented.</param>
+            <param name="flags">The callback flags relevant to this access</param>
+            <param name="scope">The scope that the address pertains to. Must be a value in <see cref="P:BizHawk.Emulation.Common.IMemoryCallbackSystem.AvailableScopes"/></param>
+            <returns>
+            The value to send back to the core. Will be the original untouched if MemoryCallbackDelegate returned NULL, the new value to override with otherwise.
+            </returns>
+        </member>
+        <member name="M:BizHawk.Emulation.Common.IMemoryCallbackSystem.Remove(BizHawk.Emulation.Common.MemoryCallbackDelegate)">
+            <summary>
+            Removes the given callback from the list
+            </summary>
+        </member>
+        <member name="M:BizHawk.Emulation.Common.IMemoryCallbackSystem.RemoveAll(System.Collections.Generic.IEnumerable{BizHawk.Emulation.Common.MemoryCallbackDelegate})">
+            <summary>
+            Removes the given callbacks from the list
+            </summary>
+        </member>
+        <member name="M:BizHawk.Emulation.Common.IMemoryCallbackSystem.Clear">
+            <summary>
+            Removes all read,write, and execute callbacks
+            </summary>
+        </member>
+        <member name="P:BizHawk.Emulation.Common.IMemoryCallbackSystem.AvailableScopes">
+            <summary>
+            A list of available "scopes" (memory domains, cpus, etc) that a the <see cref="P:BizHawk.Emulation.Common.IMemoryCallback.Scope"/> property of the <see cref="T:BizHawk.Emulation.Common.IMemoryCallback"/> can have
+            Passing a <see cref="T:BizHawk.Emulation.Common.IMemoryCallback"/> into the <see cref="M:BizHawk.Emulation.Common.IMemoryCallbackSystem.Add(BizHawk.Emulation.Common.IMemoryCallback)"/> method that is not in this list will result in an <see cref="T:System.InvalidOperationException"/>
+            </summary>
+        </member>
+        <member name="T:BizHawk.Emulation.Common.IMemoryCallback">
+            <summary>
+            This service defines a memory callback used by an IMemoryCallbackSystem implementation
+            </summary>
+            <seealso cref="T:BizHawk.Emulation.Common.IMemoryCallbackSystem"/>
+            <seealso cref="T:BizHawk.Emulation.Common.MemoryCallbackDelegate"/>
+        </member>
+        <member name="P:BizHawk.Emulation.Common.IMemoryCallback.Callback">
+            <seealso cref="T:BizHawk.Emulation.Common.MemoryCallbackDelegate"/>
+        </member>
+        <member name="T:BizHawk.Emulation.Common.IOpenGLProvider">
+            <summary>
+            Defines an interface for cores to obtain OpenGL contexts and functions
+            </summary>
+        </member>
+        <member name="M:BizHawk.Emulation.Common.IOpenGLProvider.SupportsGLVersion(System.Int32,System.Int32)">
+            <summary>
+            Checks if specified OpenGL version is supported
+            The current context will be preserved
+            </summary>
+        </member>
+        <member name="M:BizHawk.Emulation.Common.IOpenGLProvider.RequestGLContext(System.Int32,System.Int32,System.Boolean)">
+            <summary>
+            Requests an OpenGL context with specified major / minor version
+            The core profile can be requested (otherwise, the compatibility profile will be used)
+            The requested OpenGL context will be shared with the current context
+            Note: creating a context implicitly makes that created context current
+            </summary>
+        </member>
+        <member name="M:BizHawk.Emulation.Common.IOpenGLProvider.ReleaseGLContext(System.Object)">
+            <summary>
+            Frees this OpenGL context
+            </summary>
+        </member>
+        <member name="M:BizHawk.Emulation.Common.IOpenGLProvider.ActivateGLContext(System.Object)">
+            <summary>
+            Sets this OpenGL context to current
+            </summary>
+        </member>
+        <member name="M:BizHawk.Emulation.Common.IOpenGLProvider.DeactivateGLContext">
+            <summary>
+            Deactivates the current OpenGL context
+            No context will be current after this call
+            </summary>
+        </member>
+        <member name="M:BizHawk.Emulation.Common.IOpenGLProvider.GetGLProcAddress(System.String)">
+            <summary>
+            Gets an OpenGL function pointer
+            The user must make a context active before using this
+            </summary>
+        </member>
+        <member name="T:BizHawk.Emulation.Common.IBoardInfo">
+            <summary>
+            An <see cref="T:BizHawk.Emulation.Common.IEmulatorService"/> that returns cart/mapper/board information about the Game hardware itself, if available
+            Currently the board name is the only property but this could be expanded to support more detailed information
+            </summary>
+            <seealso cref="T:BizHawk.Emulation.Common.IEmulator"/>
+        </member>
+        <member name="P:BizHawk.Emulation.Common.IBoardInfo.BoardName">
+            <summary>
+            Gets the identifying information about a "mapper", cart, board or similar capability.
+            </summary>
+        </member>
+        <member name="T:BizHawk.Emulation.Common.ICodeDataLogger">
+            <summary>
+            This service manages the communication from the core to the Code/Data logging tool,
+            If available then the Code/Data logging tool will be exposed in the client
+            </summary>
+        </member>
+        <member name="M:BizHawk.Emulation.Common.ICodeDataLogger.SetCDL(BizHawk.Emulation.Common.ICodeDataLog)">
+            <summary>
+            Sets the CodeDataLog as current (and logging) on the core
+            </summary>
+        </member>
+        <member name="M:BizHawk.Emulation.Common.ICodeDataLogger.NewCDL(BizHawk.Emulation.Common.ICodeDataLog)">
+            <summary>
+            Fills a new CodeDataLog with memory domain information suitable for the core
+            </summary>
+        </member>
+        <member name="M:BizHawk.Emulation.Common.ICodeDataLogger.DisassembleCDL(System.IO.Stream,BizHawk.Emulation.Common.ICodeDataLog)">
+            <summary>
+            Disassembles the CodeDataLog to an output Stream. Can't be done without a core because there's no code to disassemble otherwise!
+            This could be extended later to produce richer multi-file disassembly
+            </summary>
+        </member>
+        <member name="T:BizHawk.Emulation.Common.ICodeDataLog">
+            <summary>
+            Defines a code/data log to be used with the code/data logger
+            </summary>
+            <seealso cref="T:BizHawk.Emulation.Common.ICodeDataLogger" />
+        </member>
+        <member name="M:BizHawk.Emulation.Common.ICodeDataLog.Pin">
+            <summary>
+            Pins the managed arrays. Not that we expect them to be allocated, but in case we do, seeing this here will remind us to check for the pin condition and abort
+            </summary>
+        </member>
+        <member name="M:BizHawk.Emulation.Common.ICodeDataLog.Unpin">
+            <summary>
+            Unpins the managed arrays, to be paired with calls to Pin()
+            </summary>
+        </member>
+        <member name="M:BizHawk.Emulation.Common.ICodeDataLog.GetPin(System.String)">
+            <summary>
+            Retrieves the pointer to a managed array
+            </summary>
+        </member>
+        <member name="M:BizHawk.Emulation.Common.ICodeDataLog.Has(System.String)">
+            <summary>
+            Whether the CDL is tracking a block with the given name
+            </summary>
+        </member>
+        <member name="P:BizHawk.Emulation.Common.ICodeDataLog.Active">
+            <summary>
+            Gets or sets a value indicating whether the status is active.
+            This is just a hook, if needed, to readily suspend logging, without having to rewire the core
+            </summary>
+        </member>
+        <member name="M:BizHawk.Emulation.Common.ICodeDataLog.Check(BizHawk.Emulation.Common.ICodeDataLog)">
+            <summary>
+            Tests whether the other CodeDataLog is structurally identical
+            </summary>
+        </member>
+        <member name="T:BizHawk.Emulation.Common.ICreateGameDBEntries">
+            <summary>
+            This service provides a means for the current core to generate a
+            game database entry and return the result
+            If available, the client will expose functionality for the user to add the current rom
+            to the user game database if it is currently unknown.  This UI should expose a feature
+            that allow them to set to override the unknown status and set it to something they feel
+            is more accurate. The intent of the feature is to easily allow users
+            to mark unknown ROMs themselves (in their local database for their personal use)
+            </summary>
+        </member>
+        <member name="P:BizHawk.Emulation.Common.ICycleTiming.CycleCount">
+            <summary>
+            Total elapsed emulation time relative to <see cref="P:BizHawk.Emulation.Common.ICycleTiming.ClockRate"/>
+            </summary>
+        </member>
+        <member name="P:BizHawk.Emulation.Common.ICycleTiming.ClockRate">
+            <summary>
+            Clock Rate in hz for <see cref="P:BizHawk.Emulation.Common.ICycleTiming.CycleCount"/>
+            </summary>
+        </member>
+        <member name="T:BizHawk.Emulation.Common.IDebuggable">
+            <summary>
+            This service manages debugging capabilities from the core to the client.  Tools such as the debugger make use of this, as well as LUA scripting
+            This service specifically manages getting/setting CPU registers, managing breakpoints, and stepping through CPU instructions
+            Providing a disassembly is managed by another service, these are aspects outside of the disassembler that are essential to debugging tools
+            Tools like the debugger will gracefully degrade based on the availability of each component of this service,
+            it is expected that any of these features will throw a NotImplementedException if not implemented, and the client will manage accordingly
+            </summary>
+        </member>
+        <member name="M:BizHawk.Emulation.Common.IDebuggable.GetCpuFlagsAndRegisters">
+            <summary>
+            Returns a list of CPU registers and their current state
+            </summary>
+        </member>
+        <member name="M:BizHawk.Emulation.Common.IDebuggable.SetCpuRegister(System.String,System.Int32)">
+            <summary>
+            Sets a given CPU register to the given value
+            </summary>
+        </member>
+        <member name="P:BizHawk.Emulation.Common.IDebuggable.MemoryCallbacks">
+            <summary>
+            Gets a memory callback implementation that manages memory callback functionality
+            </summary>
+        </member>
+        <member name="M:BizHawk.Emulation.Common.IDebuggable.CanStep(BizHawk.Emulation.Common.StepType)">
+            <summary>
+            Informs the calling code whether or not the given step type is implemented,
+            if false, a NotImplementedException will be thrown if Step is called with the given value
+            </summary>
+        </member>
+        <member name="M:BizHawk.Emulation.Common.IDebuggable.Step(BizHawk.Emulation.Common.StepType)">
+            <summary>
+            Advances the core based on the given Step type
+            </summary>
+        </member>
+        <member name="P:BizHawk.Emulation.Common.IDebuggable.TotalExecutedCycles">
+            <summary>
+            Gets the total number of CPU cycles since the beginning of the core's lifecycle
+            Note that the CPU in this case is the "main" CPU, for some cores that may be somewhat subjective
+            </summary>
+        </member>
+        <member name="M:BizHawk.Emulation.Common.RegisterValue.#ctor(System.UInt64,System.Byte)">
+            <exception cref="T:System.ArgumentOutOfRangeException"><paramref name="bitSize"/> not in 1..64</exception>
+        </member>
+        <member name="T:BizHawk.Emulation.Common.IDisassemblable">
+            <summary>
+            This service provides the means to generate disassembly by the core for a given CPU and memory domain
+            Tools such the debugger use this, but also LUA scripting, and tools like trace logging and code data logging can make use of this tool
+            If unavailable the debugger tool will still be available but disable the disassembly window but still be available if the <see cref="T:BizHawk.Emulation.Common.IDebuggable"/> service is available
+            </summary>
+        </member>
+        <member name="P:BizHawk.Emulation.Common.IDisassemblable.Cpu">
+            <summary>
+            Gets or sets the CPUS that will be used to disassemble
+            Only values returned from <see cref="P:BizHawk.Emulation.Common.IDisassemblable.AvailableCpus"/> will be supported when Set
+            </summary>
+        </member>
+        <member name="P:BizHawk.Emulation.Common.IDisassemblable.PCRegisterName">
+            <summary>
+            Gets the name of the Program Counter Register for the current CPU
+            </summary>
+        </member>
+        <member name="P:BizHawk.Emulation.Common.IDisassemblable.AvailableCpus">
+            <summary>
+            Gets a list of CPUs that can be used when setting the CPU property
+            </summary>
+        </member>
+        <member name="M:BizHawk.Emulation.Common.IDisassemblable.Disassemble(BizHawk.Emulation.Common.MemoryDomain,System.UInt32,System.Int32@)">
+            <summary>
+            Returns a disassembly starting at address lasting for length, using the given domain
+            </summary>
+        </member>
+        <member name="T:BizHawk.Emulation.Common.VerifiedDisassembler">
+            <summary>
+            does sanity checking on CPU parameters
+            </summary>
+        </member>
+        <member name="P:BizHawk.Emulation.Common.VerifiedDisassembler.Cpu">
+            <exception cref="T:System.ArgumentException">(from setter) <paramref name="value"/> isn't the name of an available CPU</exception>
+        </member>
+        <member name="T:BizHawk.Emulation.Common.IDriveLight">
+            <summary>
+            Specifies an interface for returning the state of a LED drive light such as on Disk and CD Drives,
+            If available the client will display a light that turns on and off based on the drive light status
+            </summary>
+        </member>
+        <member name="P:BizHawk.Emulation.Common.IDriveLight.DriveLightEnabled">
+            <summary>
+            Gets a value indicating whether there is currently a Drive light available
+            </summary>
+        </member>
+        <member name="P:BizHawk.Emulation.Common.IDriveLight.DriveLightOn">
+            <summary>
+            Gets a value indicating whether the light is currently lit
+            </summary>
+        </member>
+        <member name="P:BizHawk.Emulation.Common.IDriveLight.DriveLightIconDescription">
+            <value>description of the drive light icon (used in MainForm for the tooltip of the status bar icon)</value>
+        </member>
+        <member name="T:BizHawk.Emulation.Common.IGLTextureProvider">
+            <summary>
+            This service is an extension of IVideoProvider, providing the ability to pass an OpenGL texture to the client
+            If available and the client is using OpenGL for display, this texture will be used
+            If unavailable or the client is not using OpenGL for display, the client will fall back to the base <see cref="T:BizHawk.Emulation.Common.IVideoProvider"/>
+            </summary>
+        </member>
+        <member name="M:BizHawk.Emulation.Common.IGLTextureProvider.GetGLTexture">
+            <summary>
+            Returns an OpenGL texture of the current video content
+            </summary>
+        </member>
+        <member name="T:BizHawk.Emulation.Common.IInputPollable">
+            <summary>
+            This service specifies the interaction of the client and the core in terms of the state of input polling
+            A lag frame is a frame in which input was not polled
+            Input callbacks fire whenever input is polled
+            This service is used for the lag counter on the front end, if available.  In addition,
+            LUA script makes use of input callbacks as well as reporting lag status
+            Setters for both the count and lag flag are used by tools who offer custom notions of lag
+            Additionally, movie support could in theory make use of input callbacks
+            </summary>
+        </member>
+        <member name="P:BizHawk.Emulation.Common.IInputPollable.LagCount">
+            <summary>
+            Gets or sets the current lag count.
+            </summary>
+        </member>
+        <member name="P:BizHawk.Emulation.Common.IInputPollable.IsLagFrame">
+            <summary>
+            Gets or sets a value indicating whether or not current frame is a lag frame.
+            All cores should define it the same, a lag frame is a frame in which input was not polled.
+            </summary>
+        </member>
+        <member name="T:BizHawk.Emulation.Common.ILinkable">
+            <summary>
+            This service is use by link cable capable cores to manage the status of the link cable
+            If available, the client will display the link cable status
+            </summary>
+        </member>
+        <member name="P:BizHawk.Emulation.Common.ILinkable.LinkConnected">
+            <summary>
+            Gets a value indicating whether or not the link cable is currently connected
+            </summary>
+        </member>
+        <member name="T:BizHawk.Emulation.Common.IMemoryDomains">
+            <summary>
+            This service manages the ability for a client to read/write to memory regions of the core,
+            It is a list of all available memory domains
+            A memory domain is a byte array that represents the memory of a distinct part of the emulated system.
+            All cores should implement a SystemBus that represents the standard CPU bus range used for cheats for that system,
+            In order to have a cheat system available for the core
+            All domains should implement both peek and poke.  However,
+            if a domain does not implement poke, it should throw NotImplementedException rather than silently fail
+            If this service is available the client will expose many RAM related tools such as the Hex Editor, RAM Search/Watch, and Cheats
+            In addition, this is an essential service for effective LUA scripting, and many other tools
+            </summary>
+        </member>
+        <member name="P:BizHawk.Emulation.Common.IMemoryDomains.MainMemory">
+            <remarks>implementation note: must also be in the collection</remarks>
+        </member>
+        <member name="P:BizHawk.Emulation.Common.IMemoryDomains.SystemBus">
+            <remarks>
+            if <see cref="P:BizHawk.Emulation.Common.IMemoryDomains.HasSystemBus"/> is <see langword="false"/>, the getter behaviour is undefined
+            (it may return <see cref="P:BizHawk.Emulation.Common.IMemoryDomains.MainMemory"/> or another domain)<br/>
+            implementation note: must also be in the collection
+            </remarks>
+        </member>
+        <member name="T:BizHawk.Emulation.Common.IRegionable">
+            <summary>
+            This service provides the means for a core to specify region information to the client, such NTSC versus PAL
+            If provided the client will use this to asses FPS and also use it to calculate movie times
+            </summary>
+        </member>
+        <member name="T:BizHawk.Emulation.Common.IRomInfo">
+            <summary>
+            Provides detailed information about the Rom such as hashes,
+            and decisions made such as which board configuration was used.
+            </summary>
+        </member>
+        <member name="P:BizHawk.Emulation.Common.IRomInfo.RomDetails">
+            <summary>
+            All necessary information about the Rom.
+            Expected to be formatted for user consumption
+            </summary>
+        </member>
+        <member name="T:BizHawk.Emulation.Common.ISaveRam">
+            <summary>
+            This service provides the system by which a client can request SaveRAM data to be stored by the client
+            SaveRam encompasses things like battery backed ram, memory cards, and data saved to disk drives
+            If available, save files will be automatically loaded when loading a ROM,
+            In addition the client will provide features like SRAM-anchored movies, and ways to clear SaveRam
+            </summary>
+        </member>
+        <member name="M:BizHawk.Emulation.Common.ISaveRam.CloneSaveRam(System.Boolean)">
+            <summary>
+            Returns a copy of the SaveRAM. Editing it won't do you any good unless you later call StoreSaveRam()
+            This IS allowed to return null.
+            Unfortunately, the core may think differently of a nonexisting (null) saveram vs a 0 size saveram.
+            Frontend users of the ISaveRam should treat null as nonexisting (and thus not even write the file, so that the "does not exist" condition can be roundtripped and not confused with an empty file)
+            </summary>
+            <param name="clearDirty">Whether the saveram should be considered in a clean state after this call for purposes of <see cref="P:BizHawk.Emulation.Common.ISaveRam.SaveRamModified"/></param>
+        </member>
+        <member name="M:BizHawk.Emulation.Common.ISaveRam.StoreSaveRam(System.Byte[])">
+            <summary>
+            store new SaveRAM to the emu core. the data should be the same size as the return from ReadSaveRam()
+            </summary>
+        </member>
+        <member name="P:BizHawk.Emulation.Common.ISaveRam.SaveRamModified">
+            <summary>
+            Gets a value indicating whether or not SaveRAM has been modified since the last call to either <see cref="M:BizHawk.Emulation.Common.ISaveRam.StoreSaveRam(System.Byte[])"/> or <see cref="M:BizHawk.Emulation.Common.ISaveRam.CloneSaveRam(System.Boolean)"/> (when passing true).
+            Cores may choose to always return true or return true for any non-default saveram.
+            This value should be considered a hint more than an absolute truth.
+            </summary>
+        </member>
+        <member name="T:BizHawk.Emulation.Common.ISettable`2">
+            <summary>
+            This service provides mechanism for the client to set sync and non-sync related settings to the core
+            Settings are settings that can change during the lifetime of the core and do not affect potential movie sync
+            Sync Settings do not change during the lifetime of the core and affect movie sync
+            If available, Sync settings are stored in movie files and automatically applied when the movie is loaded
+            If this service is available the client can provide UI for the user to manage these settings
+            </summary>
+            <typeparam name="TSettings">The Type of the object that represent regular settings (settings that can be changed during the lifespan of a core instance</typeparam>
+            <typeparam name="TSync">The Type of the object that represents sync settings (settings that can not change during the lifespan of the core and are required for movie sync</typeparam>
+        </member>
+        <member name="M:BizHawk.Emulation.Common.ISettable`2.GetSettings">
+            <summary>
+            get the current core settings, excepting movie settings.  should be a clone of the active in-core object.
+            VERY IMPORTANT: changes to the object returned by this function SHOULD NOT have any effect on emulation
+            (unless the object is later passed to PutSettings)
+            </summary>
+            <returns>a JSON serializable object</returns>
+        </member>
+        <member name="M:BizHawk.Emulation.Common.ISettable`2.GetSyncSettings">
+            <summary>
+            get the current core settings that affect movie sync.  these go in movie 2.0 files, so don't make the JSON too extravagant, please
+            should be a clone of the active in-core object.
+            VERY IMPORTANT: changes to the object returned by this function MUST NOT have any effect on emulation
+            (unless the object is later passed to PutSyncSettings)
+            </summary>
+            <returns>a JSON serializable object</returns>
+        </member>
+        <member name="M:BizHawk.Emulation.Common.ISettable`2.PutSettings(`0)">
+            <summary>
+            change the core settings, excepting movie settings
+            </summary>
+            <param name="o">an object of the same type as the return for GetSettings</param>
+            <returns>true if a core reboot will be required to make the changes effective</returns>
+        </member>
+        <member name="M:BizHawk.Emulation.Common.ISettable`2.PutSyncSettings(`1)">
+            <summary>
+            changes the movie-sync relevant settings.  THIS SHOULD NEVER BE CALLED WHILE RECORDING
+            if it is called while recording, the core need not guarantee continued determinism
+            </summary>
+            <param name="o">an object of the same type as the return for GetSyncSettings</param>
+            <returns>true if a core reboot will be required to make the changes effective</returns>
+        </member>
+        <member name="T:BizHawk.Emulation.Common.CoreSettingsAttribute">
+            <summary>
+            Place this attribute for TSettings and TSync classes which use System.ComponentModel.DefaultValue
+            Classes with this attribute will have a BizHawk.Common.SettingsUtil.SetDefaultValues(T) function generated
+            </summary>
+        </member>
+        <member name="M:BizHawk.Emulation.Common.ISettingsAdapter.GetSettings">
+            <exception cref="T:System.InvalidOperationException">does not have non-sync settings</exception>
+        </member>
+        <member name="M:BizHawk.Emulation.Common.ISettingsAdapter.GetSyncSettings">
+            <exception cref="T:System.InvalidOperationException">does not have sync settings</exception>
+        </member>
+        <member name="T:BizHawk.Emulation.Common.SettingsAdapter">
+            <summary>
+            serves as a shim between strongly typed ISettable and consumers
+            </summary>
+        </member>
+        <member name="T:BizHawk.Emulation.Common.ISoundProvider">
+            <summary>
+            This service provides the ability to output sound from the client,
+            If available the client will provide sound output
+            If unavailable the client will fallback to a default sound implementation
+            that generates empty samples (silence)
+            </summary>
+        </member>
+        <member name="P:BizHawk.Emulation.Common.ISoundProvider.CanProvideAsync">
+            <summary>
+            Gets a value indicating whether a core can provide Async sound
+            </summary>
+        </member>
+        <member name="M:BizHawk.Emulation.Common.ISoundProvider.SetSyncMode(BizHawk.Emulation.Common.SyncSoundMode)">
+            <summary>
+            Sets sync or async sound mode,
+            Sync should be the default mode if not set
+            All implementations must provide sync
+            If a core can not provide async sound and the mode is set to sync,
+            an NotSupportedException should be thrown
+            </summary>
+            <exception cref="T:System.NotSupportedException"></exception>
+        </member>
+        <member name="P:BizHawk.Emulation.Common.ISoundProvider.SyncMode">
+            <summary>
+            Gets which mode the sound provider is currently in
+            </summary>
+        </member>
+        <member name="M:BizHawk.Emulation.Common.ISoundProvider.GetSamplesSync(System.Int16[]@,System.Int32@)">
+            <summary>
+            Provides samples in sync mode
+            If the core is not in sync mode, this should throw an InvalidOperationException
+            </summary>
+            <exception cref="T:System.InvalidOperationException"></exception>
+        </member>
+        <member name="M:BizHawk.Emulation.Common.ISoundProvider.GetSamplesAsync(System.Int16[])">
+            <summary>
+            Provides samples in async mode
+            If the core is not in async mode, this should throw an InvalidOperationException
+            </summary>
+            <exception cref="T:System.InvalidOperationException"></exception>
+        </member>
+        <member name="M:BizHawk.Emulation.Common.ISoundProvider.DiscardSamples">
+            <summary>
+            Discards stuff, is there anything more to say here?
+            </summary>
+        </member>
+        <member name="T:BizHawk.Emulation.Common.IStatable">
+            <summary>
+            This service manages the logic of sending and receiving savestates from the core
+            If this service is available, client apps will expose features for making savestates and that utilize savestates (such as rewind))
+            If unavailable these options will not be exposed
+            Additionally many tools depend on savestates such as TAStudio, these will only be available if this service is implemented
+            </summary>
+        </member>
+        <member name="T:BizHawk.Emulation.Common.ITextStatable">
+            <summary>
+            Allows a core to opt into text savestates.
+            If a core does not implement this interface, a default implementation
+            will be used that doesn't yield anything useful in the states, just binary as text
+            </summary>
+        </member>
+        <member name="M:BizHawk.Emulation.Common.StatableExtensions.LoadStateBinary(BizHawk.Emulation.Common.IStatable,System.Byte[])">
+            <summary>
+            Loads a state directly from a byte array
+            </summary>
+        </member>
+        <member name="M:BizHawk.Emulation.Common.StatableExtensions.CloneSavestate(BizHawk.Emulation.Common.IStatable)">
+            <summary>
+            Creates a byte array copy of the core's current state
+            This creates a new buffer, and should not be used in performance sensitive situations
+            </summary>
+        </member>
+        <member name="T:BizHawk.Emulation.Common.ITraceable">
+            <summary>
+            This service allows the core to dump a CPU trace to the client
+            If available the Trace Logger tool will be available on the client
+            </summary>
+        </member>
+        <member name="P:BizHawk.Emulation.Common.ITraceable.Header">
+            <summary>
+            Gets the header that would be used by a trace logger
+            </summary>
+        </member>
+        <member name="P:BizHawk.Emulation.Common.ITraceable.Sink">
+            <summary>
+            Sets the sink
+            that's right, we can only have one sink.
+            a sink can route to two other sinks if it has to, though
+            </summary>
+        </member>
+        <member name="T:BizHawk.Emulation.Common.IVideoLogicalOffsets">
+            <summary>
+            Provides an interface to convey the effective X, Y coordinates that represent
+            the start of the viewable screen area. Used by cores that provide options to clip the edges
+            of the screen (that might likely have junk, such as NES)
+            </summary>
+        </member>
+        <member name="T:BizHawk.Emulation.Common.IVideoProvider">
+            <summary>
+            This service provides the ability to pass video output to the client
+            If available the client will display video output to the user,
+            If unavailable the client will fall back to a default video implementation, presumably
+            a black screen of some arbitrary size
+            </summary>
+        </member>
+        <member name="M:BizHawk.Emulation.Common.IVideoProvider.GetVideoBuffer">
+            <summary>
+            Returns a frame buffer of the current video content
+            This might be a reference to a stored frame buffer
+            Only <see cref="P:BizHawk.Emulation.Common.IVideoProvider.BufferWidth"/> * <see cref="P:BizHawk.Emulation.Common.IVideoProvider.BufferHeight"/> pixels valid
+            (The buffer might be larger than such, so don't rely on <see cref="P:System.Array.Length"/>
+            </summary>
+        </member>
+        <member name="P:BizHawk.Emulation.Common.IVideoProvider.VirtualWidth">
+            <summary>
+            Gets a value that together with <see cref="P:BizHawk.Emulation.Common.IVideoProvider.VirtualHeight"/>, describes a metric on the screen
+            they should define the smallest size that the buffer can be placed inside such that:
+            1. no actual pixel data is lost
+            2. aspect ratio is accurate
+            </summary>
+        </member>
+        <member name="P:BizHawk.Emulation.Common.IVideoProvider.VirtualHeight">
+            <summary>
+            Gets a value that together with <see cref="P:BizHawk.Emulation.Common.IVideoProvider.VirtualWidth"/>, describes a metric on the screen
+            they should define the smallest size that the buffer can be placed inside such that:
+            1. no actual pixel data is lost
+            2. aspect ratio is accurate
+            </summary>
+        </member>
+        <member name="P:BizHawk.Emulation.Common.IVideoProvider.BufferWidth">
+            <summary>
+            Gets the width of the frame buffer
+            </summary>
+        </member>
+        <member name="P:BizHawk.Emulation.Common.IVideoProvider.BufferHeight">
+            <summary>
+            Gets the height of the frame buffer
+            </summary>
+        </member>
+        <member name="P:BizHawk.Emulation.Common.IVideoProvider.VsyncNumerator">
+            <summary>
+            Gets the vsync Numerator. Combined with the <see cref="P:BizHawk.Emulation.Common.IVideoProvider.VsyncDenominator"/> can be used to calculate a precise vsync rate.
+            </summary>
+        </member>
+        <member name="P:BizHawk.Emulation.Common.IVideoProvider.VsyncDenominator">
+            <summary>
+            Gets the vsync Denominator. Combined with the <see cref="P:BizHawk.Emulation.Common.IVideoProvider.VsyncNumerator"/> can be used to calculate a precise vsync rate.
+            </summary>
+        </member>
+        <member name="P:BizHawk.Emulation.Common.IVideoProvider.BackgroundColor">
+            <summary>
+            Gets the default color when no other color is applied
+            Often cores will set this to something other than black
+            to show that the core is in fact loaded and frames are rendering
+            which is less obvious if it is the same as the default video output
+            </summary>
+        </member>
+        <member name="M:BizHawk.Emulation.Common.VideoProviderExtensions.PopulateFromBuffer(BizHawk.Emulation.Common.IVideoProvider,System.Int32[])">
+            <summary>
+            Sets the frame buffer to the given frame buffer
+            Note: This sets the value returned by <see cref="M:BizHawk.Emulation.Common.IVideoProvider.GetVideoBuffer" />
+            which relies on the core to send a reference to the frame buffer instead of a copy,
+            in order to work
+            </summary>
+        </member>
+        <member name="M:BizHawk.Emulation.Common.VideoProviderExtensions.GetVideoBufferCopy(BizHawk.Emulation.Common.IVideoProvider)">
+            <summary>
+            Obtains a copy of the video buffer
+            <see cref="M:BizHawk.Emulation.Common.IVideoProvider.GetVideoBuffer" /> may return a reference
+            and might be much larger than the reported <see cref="P:BizHawk.Emulation.Common.IVideoProvider.BufferWidth"/> * <see cref="P:BizHawk.Emulation.Common.IVideoProvider.BufferHeight"/> (to account for differing frame sizes)
+            so this should be used to get an explicit copy
+            </summary>
+        </member>
+        <member name="T:BizHawk.Emulation.Common.IpfIdentifier">
+            <summary>
+            Even though we don't currently support IPF files, it makes sense for the future that we can identify them
+            (or more precisely, the core that we need to pass them too if an entry is not present in the gamedb)
+            The IPF INFO record does contain a platform entry that assists in this.
+            </summary>
+        </member>
+        <member name="P:BizHawk.Emulation.Common.IpfIdentifier.IdentifiedSystem">
+            <summary>
+            Default fallthrough to Amiga
+            </summary>
+        </member>
+        <member name="M:BizHawk.Emulation.Common.IpfIdentifier.GetBEInt32(System.ReadOnlySpan{System.Byte},System.Int32)">
+            <summary>
+            Returns an int32 from a byte array based on offset (in BIG ENDIAN format)
+            </summary>
+        </member>
+        <member name="T:BizHawk.Emulation.Common.N3DSHasher">
+            <summary>
+            Performs hashing against 3DS roms
+            3DS roms can't just have full file hashing done
+            As 3DS roms may be >= 2GiB, too large for a .NET array
+            As such, we need to perform a quick hash to identify them
+            For this purpose, we re-use RetroAchievement's hashing formula
+            Reference code: https://github.com/RetroAchievements/rcheevos/blob/8d8ef920e253f1286464771e81ce4cf7f4358eee/src/rhash/hash.c#L1573-L2184
+            </summary>
+        </member>
+        <member name="M:BizHawk.Emulation.Common.N3DSHasher.#ctor(System.Byte[],System.Byte[])">
+            <summary>
+            Performs hashing against 3DS roms
+            3DS roms can't just have full file hashing done
+            As 3DS roms may be >= 2GiB, too large for a .NET array
+            As such, we need to perform a quick hash to identify them
+            For this purpose, we re-use RetroAchievement's hashing formula
+            Reference code: https://github.com/RetroAchievements/rcheevos/blob/8d8ef920e253f1286464771e81ce4cf7f4358eee/src/rhash/hash.c#L1573-L2184
+            </summary>
+        </member>
+        <member name="T:BizHawk.Emulation.Common.N64RomByteswapper">
+            <summary>Uses a simple magic number to detect N64 rom format, then byteswaps the ROM to ensure a consistent endianness/order</summary>
+            <remarks>http://n64dev.org/romformats.html</remarks>
+        </member>
+        <member name="F:BizHawk.Emulation.Common.N64RomByteswapper.MAGIC_BYTES_NATIVE">
+            <remarks>not actually magic, just always the same in commercial carts? https://n64brew.dev/wiki/ROM_Header works all the same</remarks>
+        </member>
+        <member name="M:BizHawk.Emulation.Common.N64RomByteswapper.ToN64LittleEndian(System.Span{System.Byte})">
+            <summary>ensures <paramref name="rom"/> is in the rare little-endian (<c>.n64</c>) format, mutating it in-place if necessary</summary>
+            <returns><see langword="true"/> iff <paramref name="rom"/> was one of the 3 valid formats</returns>
+        </member>
+        <member name="M:BizHawk.Emulation.Common.N64RomByteswapper.ToV64ByteSwapped(System.Span{System.Byte})">
+            <summary>ensures <paramref name="rom"/> is in the byte-swapped (<c>.v64</c>) format, mutating it in-place if necessary</summary>
+            <returns><see langword="true"/> iff <paramref name="rom"/> was one of the 3 valid formats</returns>
+        </member>
+        <member name="M:BizHawk.Emulation.Common.N64RomByteswapper.ToZ64Native(System.Span{System.Byte})">
+            <summary>ensures <paramref name="rom"/> is in the native (<c>.z64</c>) format, mutating it in-place if necessary</summary>
+            <returns><see langword="true"/> iff <paramref name="rom"/> was one of the 3 valid formats</returns>
+        </member>
+        <member name="T:BizHawk.Emulation.Common.SaveController">
+            <summary>
+            Can freeze a copy of a controller input set and serialize\deserialize it
+            </summary>
+        </member>
+        <member name="P:BizHawk.Emulation.Common.SaveController.Definition">
+            <summary>
+            Gets the current definition.
+            Invalid until CopyFrom has been called
+            </summary>
+        </member>
+        <member name="M:BizHawk.Emulation.Common.SaveController.DeSerialize(System.IO.BinaryReader)">
+            <summary>
+            No checking to see if the deserialized controls match any definition
+            </summary>
+        </member>
+        <member name="M:BizHawk.Emulation.Common.SaveController.CopyFrom(BizHawk.Emulation.Common.IController)">
+            <summary>replace this controller's definition with that of <paramref name="source"/></summary>
+            <exception cref="T:System.Exception">definition of <paramref name="source"/> has a button and an analog control with the same name</exception>
+        </member>
+        <member name="T:BizHawk.Emulation.Common.FeatureNotImplementedAttribute">
+            <summary>Indicates that a method (or property getter/setter) inherited from a <see cref="T:BizHawk.Emulation.Common.IEmulatorService"/> has yet to be implemented.</summary>
+            <remarks>
+            By convention, calling a method with this attribute should throw a <see cref="T:System.NotImplementedException"/>.
+            If this attribute is not present on an implementation, it is assumed that the method is implemented and working.
+            </remarks>
+        </member>
+        <member name="T:BizHawk.Emulation.Common.ServiceNotApplicableAttribute">
+            <summary>Indicates that a class intentionally does not inherit from the specified <see cref="T:BizHawk.Emulation.Common.IEmulatorService">IEmulatorServices</see>, and will never do so.</summary>
+            <remarks>
+            <see cref="T:BizHawk.Emulation.Common.ISpecializedEmulatorService">ISpecializedEmulatorServices</see> that a core doesn't implement should not be listed, as the semantic of only being applicable to some cores is already clear.<br/>
+            Any <see cref="T:BizHawk.Emulation.Common.IEmulatorService"/> which isn't specified and is also not implemented is assumed to be a work-in-progress.
+            These should be implemented as soon as possible, simply throwing a <see cref="T:System.NotImplementedException"/> on call, and should be annotated with <see cref="T:BizHawk.Emulation.Common.FeatureNotImplementedAttribute"/>.
+            </remarks>
+        </member>
+        <member name="T:BizHawk.Emulation.Common.ServiceInjector">
+            <summary>
+            injects services into other classes
+            </summary>
+        </member>
+        <member name="M:BizHawk.Emulation.Common.ServiceInjector.UpdateServices(BizHawk.Emulation.Common.IEmulatorServiceProvider,System.Object,System.Boolean)">
+            <summary>
+            Feeds the target its required services.
+            </summary>
+            <param name="mayCache">
+            <see langword="true"/> if the properties of <paramref name="target"/> may be written to cache,
+            i.e. if it's known to come from a first-party assembly and not an ext. tool.<br/>
+            Cache will still be read from regardless.
+            </param>
+            <returns>false if update failed</returns>
+            <remarks>don't think having a genericised overload would be helpful, but TODO pass in type to save <c>target.GetType()</c> call</remarks>
+        </member>
+        <member name="M:BizHawk.Emulation.Common.ServiceInjector.IsAvailable(BizHawk.Emulation.Common.IEmulatorServiceProvider,System.Type)">
+            <summary>
+            Determines whether a target is available, considering its dependencies
+            and the services provided by the emulator core.
+            </summary>
+        </member>
+        <member name="T:BizHawk.Emulation.Common.BlipBuffer">
+            <summary>
+            wrapper around blargg's unmanaged blip_buf
+            </summary>
+        </member>
+        <member name="M:BizHawk.Emulation.Common.BlipBuffer.BlipBufDll.blip_new(System.Int32)">
+            Creates new buffer that can hold at most sample_count samples. Sets rates
+            			so that there are blip_max_ratio clocks per sample. Returns pointer to new
+            			buffer, or NULL if insufficient memory. 
+        </member>
+        <member name="M:BizHawk.Emulation.Common.BlipBuffer.BlipBufDll.blip_set_rates(System.IntPtr,System.Double,System.Double)">
+            Sets approximate input clock rate and output sample rate. For every
+            			clock_rate input clocks, approximately sample_rate samples are generated. 
+        </member>
+        <member name="F:BizHawk.Emulation.Common.BlipBuffer.BlipBufDll.BlipMaxRatio">
+            Maximum clock_rate/sample_rate ratio. For a given sample_rate,
+            			clock_rate must not be greater than sample_rate*blip_max_ratio. 
+        </member>
+        <member name="M:BizHawk.Emulation.Common.BlipBuffer.BlipBufDll.blip_clear(System.IntPtr)">
+            Clears entire buffer. Afterwards, blip_samples_avail() == 0. 
+        </member>
+        <member name="M:BizHawk.Emulation.Common.BlipBuffer.BlipBufDll.blip_add_delta(System.IntPtr,System.UInt32,System.Int32)">
+            Adds positive/negative delta into buffer at specified clock time. 
+        </member>
+        <member name="M:BizHawk.Emulation.Common.BlipBuffer.BlipBufDll.blip_add_delta_fast(System.IntPtr,System.UInt32,System.Int32)">
+            Same as blip_add_delta(), but uses faster, lower-quality synthesis. 
+        </member>
+        <member name="M:BizHawk.Emulation.Common.BlipBuffer.BlipBufDll.blip_clocks_needed(System.IntPtr,System.Int32)">
+            Length of time frame, in clocks, needed to make sample_count additional
+            			samples available. 
+        </member>
+        <member name="F:BizHawk.Emulation.Common.BlipBuffer.BlipBufDll.BlipMaxFrame">
+            Maximum number of samples that can be generated from one time frame. 
+        </member>
+        <member name="M:BizHawk.Emulation.Common.BlipBuffer.BlipBufDll.blip_end_frame(System.IntPtr,System.UInt32)">
+            Makes input clocks before clock_duration available for reading as output
+            			samples. Also begins new time frame at clock_duration, so that clock time 0 in
+            			the new time frame specifies the same clock as clock_duration in the old time
+            			frame specified. Deltas can have been added slightly past clock_duration (up to
+            			however many clocks there are in two output samples). 
+        </member>
+        <member name="M:BizHawk.Emulation.Common.BlipBuffer.BlipBufDll.blip_samples_avail(System.IntPtr)">
+            Number of buffered samples available for reading. 
+        </member>
+        <member name="M:BizHawk.Emulation.Common.BlipBuffer.BlipBufDll.blip_read_samples(System.IntPtr,System.Int16[],System.Int32,System.Int32)">
+            Reads and removes at most 'count' samples and writes them to 'out'. If
+            			'stereo' is true, writes output to every other element of 'out', allowing easy
+            			interleaving of two buffers into a stereo sample stream. Outputs 16-bit signed
+            			samples. Returns number of samples actually read.  
+        </member>
+        <member name="M:BizHawk.Emulation.Common.BlipBuffer.BlipBufDll.blip_delete(System.IntPtr)">
+            Frees buffer. No effect if NULL is passed. 
+        </member>
+        <member name="M:BizHawk.Emulation.Common.BlipBuffer.#ctor(System.Int32)">
+            <exception cref="T:System.Exception">unmanaged call failed</exception>
+        </member>
+        <member name="M:BizHawk.Emulation.Common.BlipBuffer.ReadSamples(System.Int16[],System.Int32,System.Boolean)">
+            <exception cref="T:System.ArgumentException"><paramref name="output"/> can't hold <paramref name="count"/> samples (or twice that if <paramref name="stereo"/> is <see langword="true"/>)</exception>
+        </member>
+        <member name="M:BizHawk.Emulation.Common.BlipBuffer.ReadSamplesLeft(System.Int16[],System.Int32)">
+            <exception cref="T:System.ArgumentException"><paramref name="output"/> can't hold 2 * <paramref name="count"/> samples</exception>
+        </member>
+        <member name="M:BizHawk.Emulation.Common.BlipBuffer.ReadSamplesRight(System.Int16[],System.Int32)">
+            <exception cref="T:System.ArgumentException"><paramref name="output"/> can't hold 2 * <paramref name="count"/> samples</exception>
+        </member>
+        <member name="T:BizHawk.Emulation.Common.DCFilter">
+            <summary>
+            implements a DC block filter on top of an ISoundProvider.  rather simple.
+            </summary>
+        </member>
+        <member name="M:BizHawk.Emulation.Common.DCFilter.#ctor(BizHawk.Emulation.Common.ISoundProvider,System.Int32)">
+            <exception cref="T:System.ArgumentNullException"><paramref name="input"/> is null</exception>
+            <exception cref="T:System.ArgumentOutOfRangeException"><paramref name="filterWidth"/> is not in 8..65536</exception>
+        </member>
+        <member name="M:BizHawk.Emulation.Common.DCFilter.PushThroughSamples(System.Int16[],System.Int32)">
+            <summary>
+            pass a set of samples through the filter.  should only be used in detached mode
+            </summary>
+            <param name="samples">sample buffer to modify</param>
+            <param name="length">number of samples (not pairs).  stereo</param>
+        </member>
+        <member name="T:BizHawk.Emulation.Common.SDLResampler">
+            <summary>
+            Wrapper against SDL's resampler
+            </summary>
+        </member>
+        <member name="M:BizHawk.Emulation.Common.SDLResampler.#ctor(System.Int32,System.Int32,System.Action{System.Int16[],System.Int32},BizHawk.Emulation.Common.ISoundProvider)">
+            <param name="src_rate">sampling rate in by hz</param>
+            <param name="dst_rate">sampling rate out by hz</param>
+            <param name="drainer">function which accepts output as produced. if null, act as an <see cref="T:BizHawk.Emulation.Common.ISoundProvider"/></param>
+            <param name="input">source to take input from when output is requested. if null, no auto-fetching</param>
+            <exception cref="T:System.ArgumentException"><paramref name="drainer"/> and <paramref name="input"/> are both non-null</exception>
+            <exception cref="T:System.Exception">unmanaged call failed</exception>
+        </member>
+        <member name="M:BizHawk.Emulation.Common.SDLResampler.ChangeRate(System.Int32,System.Int32)">
+            <summary>change sampling rate on the fly</summary>
+            <param name="src_rate">sampling rate in by hz</param>
+            <param name="dst_rate">sampling rate out by hz</param>
+            <exception cref="T:System.Exception">unmanaged call failed</exception>
+        </member>
+        <member name="M:BizHawk.Emulation.Common.SDLResampler.EnqueueSamples(System.Int16[],System.Int32)">
+            <summary>
+            add multiple samples to the queue
+            </summary>
+            <param name="userbuf">interleaved stereo samples</param>
+            <param name="nsamp">number of sample pairs</param>
+            <exception cref="T:System.ArgumentException"><paramref name="userbuf"/> has fewer than 2*<paramref name="nsamp"/> samples</exception>
+            <exception cref="T:System.Exception">unmanaged call failed</exception>
+        </member>
+        <member name="M:BizHawk.Emulation.Common.SDLResampler.Flush">
+            <summary>flush as many input samples as possible, generating output samples right now</summary>
+            <exception cref="T:System.Exception">unmanaged call failed or returned unexpected result</exception>
+        </member>
+        <member name="M:BizHawk.Emulation.Common.SDLResampler.GetSamplesAsync(System.Int16[])">
+            <exception cref="T:System.InvalidOperationException">always</exception>
+        </member>
+        <member name="M:BizHawk.Emulation.Common.SDLResampler.SetSyncMode(BizHawk.Emulation.Common.SyncSoundMode)">
+            <exception cref="T:System.NotSupportedException"><paramref name="mode"/> is <see cref="F:BizHawk.Emulation.Common.SyncSoundMode.Async"/></exception>
+        </member>
+        <member name="M:BizHawk.Emulation.Common.TextState`1.Load(System.IntPtr,System.Int32,System.String)">
+            <exception cref="T:System.InvalidOperationException"><paramref name="length"/> does not match the length of the data saved as <paramref name="name"/></exception>
+        </member>
+        <member name="M:BizHawk.Emulation.Common.TextState`1.ExitSection(System.String)">
+            <exception cref="T:System.InvalidOperationException"><paramref name="name"/> doesn't match the section being closed</exception>
+        </member>
+        <member name="T:BizHawk.Emulation.Common.U8ArrayAsNormalJSONListResolver">
+            <remarks>seems unnecessary, but suggested by <see href="https://www.newtonsoft.com/json/help/html/Performance.htm#JsonConverters">official docs</see> so sure why not</remarks>
+        </member>
+        <member name="T:BizHawk.Emulation.Common.U8ArrayAsNormalJSONListConverter">
+            <remarks>based on <see href="https://stackoverflow.com/a/15228384">this SO answer</see></remarks>
+        </member>
+        <member name="P:BizHawk.Emulation.Common.PadSchema.DisplayName">
+            <summary>The name of the pad itself, presumably will be displayed by the given pad time if supplied</summary>
+        </member>
+        <member name="T:BizHawk.Emulation.Common.ButtonSchema">
+            <summary>A single on/off button</summary>
+        </member>
+        <member name="T:BizHawk.Emulation.Common.SingleAxisSchema">
+            <summary>A single analog control (e.g. pressure sensitive button)</summary>
+        </member>
+        <member name="T:BizHawk.Emulation.Common.AnalogSchema">
+            <summary>An analog stick (X, Y) pair</summary>
+        </member>
+        <member name="T:BizHawk.Emulation.Common.TargetedPairSchema">
+            <summary>An (X, Y) pair intended to be a screen coordinate (for zappers, mouse, stylus, etc.)</summary>
+        </member>
+        <member name="M:BizHawk.Emulation.Common.TargetedPairSchema.#ctor(System.Int32,System.Int32,System.String)">
+            <remarks>Using this ctor, the valid ranges for the X and Y axes are taken to be <c>(0..TargetSize.Width)</c> and <c>(0..TargetSize.Height)</c>.</remarks>
+        </member>
+        <member name="M:BizHawk.Emulation.Common.TargetedPairSchema.#ctor(System.Int32,System.Int32,System.String,System.Int32,System.Int32)">
+            <remarks>Using this ctor, the valid ranges for the X and Y axes are taken to be <c>(0..maxX)</c> and <c>(0..maxY)</c>.</remarks>
+        </member>
+        <member name="T:BizHawk.Emulation.Common.VSystemID">
+            <summary>
+            You probably want <see cref="T:BizHawk.Emulation.Common.VSystemID.Raw"/>.
+            It's laid out this way to match a local branch of mine where this is a struct. --yoshi
+            </summary>
+        </member>
+        <member name="M:BizHawk.Emulation.Common.VSystemID.Validate(System.String)">
+            <returns><paramref name="sysID"/> iff it's in <see cref="T:BizHawk.Emulation.Common.VSystemID.Raw">the valid list</see>, else <see langword="null"/></returns>
+        </member>
+        <member name="M:BizHawk.Emulation.Common.ReflectionCache.EmbeddedResourceStream(System.String)">
+            <exception cref="T:System.ArgumentException">not found</exception>
+        </member>
+        <member name="M:PolyfillExtensions.WaitAsync``1(System.Threading.Tasks.Task{``0},System.Threading.CancellationToken)">
+            <summary>
+            Gets a <see cref="T:System.Threading.Tasks.Task`1"/> that will complete when the <paramref name="task"/> completes or when the specified <paramref name="cancellationToken"/> has cancellation requested.
+            </summary>
+            <typeparam name="TResult">The type of the task result.</typeparam>
+            <param name="task">The task to wait on for completion.</param>
+            <param name="cancellationToken">The <see cref="T:System.Threading.CancellationToken"/> to monitor for a cancellation request.</param>
+            <returns>The <see cref="T:System.Threading.Tasks.Task`1"/> representing the asynchronous wait.</returns>
+        </member>
+    </members>
+</doc>
