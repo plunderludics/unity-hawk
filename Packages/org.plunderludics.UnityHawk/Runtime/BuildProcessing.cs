@@ -236,7 +236,7 @@ public class BuildProcessing : IPreprocessBuildWithReport, IProcessSceneWithRepo
 
         var bizhawkDependencies = new HashSet<BizhawkAsset>();
         foreach (var component in components) {
-            if (includeInactive
+            if (!includeInactive
             && component is MonoBehaviour mb
             && !mb.enabled) {
                 continue;
