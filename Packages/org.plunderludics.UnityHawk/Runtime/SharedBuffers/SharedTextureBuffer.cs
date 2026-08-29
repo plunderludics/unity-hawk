@@ -18,11 +18,10 @@ internal class SharedTextureBuffer : ISharedBuffer {
         _index = 0;
         _name = name;
         _logger = logger;
-        UpdateSize();
     }
 
     public void Open() {
-        _buffer = new (_trueName);
+        _buffer = new ($"{_name}-{_index}");
     }
 
     public bool IsOpen() {
@@ -32,6 +31,7 @@ internal class SharedTextureBuffer : ISharedBuffer {
     public void Close() {
         _buffer.Close();
         _buffer = null;
+        _index++; // increment index for next buffer
     }
 
     public int Width => _buffer[_buffer.Length - 1 - TextureBufferLayout.WidthIndexFromEnd];
@@ -47,14 +47,12 @@ internal class SharedTextureBuffer : ISharedBuffer {
         // string filePath = $"texture-dump.txt";
         // _logger.Log($"Writing texture buffer {_trueName} to file {filePath}");
         // System.IO.File.WriteAllLines(filePath, _buffer.Select(value => $"{value}"));
-    
+
         _buffer.CopyTo(other, startIndex: 0);
     }
 
     // This needs to be called after LoadRom since the texture buffer size changes.
     public void UpdateSize() {
-        _trueName = $"{_name}-{_index}";
-        _index++; // increment index for new buffer
         if (_buffer != null) {
             Close();
         }

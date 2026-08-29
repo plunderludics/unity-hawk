@@ -59,26 +59,23 @@ internal class RomImporter : BizHawkAssetImporter<Rom>
         string ext = System.IO.Path.GetExtension(path).ToLowerInvariant();
         if (Disc.IsValidExtension(ext)) {
             // Treat as disc
+            var disc = DiscExtensions.CreateAnyType(path, str => Debug.LogError(str));
+            if (disc == null) {
+                Debug.LogError($"Failed to load disc image {path}");
+            	rom.Hash = null;
+            } else {
+            	var discType = new DiscIdentifier(disc).DetectDiscType();
+            	var discHasher = new DiscHasher(disc);
+            	var discHash = discType == DiscType.SonyPSX
+            		? discHasher.Calculate_PSX_BizIDHash()
+            		: discHasher.OldHash();
 
-            // Below doesn't work for weird dll reasons so give up
-            rom.Hash = null;
-            // var disc = DiscExtensions.CreateAnyType(path, str => Debug.LogError(str));
-            // if (disc == null) {
-            //     Debug.LogError($"Failed to load disc image {path}");
-            // 	rom.Hash = null;
-            // } else {
-            // 	var discType = new DiscIdentifier(disc).DetectDiscType();
-            // 	var discHasher = new DiscHasher(disc);
-            // 	var discHash = discType == DiscType.SonyPSX
-            // 		? discHasher.Calculate_PSX_BizIDHash()
-            // 		: discHasher.OldHash();
-                
-            // 	rom.Hash = discHash;
+            	rom.Hash = discHash;
+            }
         } else {
             // Treat as regular ROM
             // Assume SHA1 for now - actual implementation tries multiple hashes so it's complicated
             byte[] romData = System.IO.File.ReadAllBytes(path);
-
             rom.Hash = SHA1.Create().ComputeHash(romData).BytesToHexString();
         }
     }

@@ -44,8 +44,20 @@ public class BasicInputProvider : InputProvider {
     List<InputEvent> eventsThisFrame;
 
     Logger _logger;
+    
+    protected virtual void OnValidate() {
+        if (useDefaultControls) useControlsObject = true;
+        if (useControlsObject && controlsObject != null) {
+            controls = new(controlsObject.Controls); // Keep mapping synced so that we get pre-populated controls if we untick 'use controls object'
+        }
 
-    void OnEnable() {
+        EnableInputActions();
+        if (!emulator) {
+            emulator = GetComponent<Emulator>();
+        }
+    }
+
+    protected virtual void OnEnable() {
         eventsThisFrame = new();
     
         if (!emulator) {
@@ -55,8 +67,10 @@ public class BasicInputProvider : InputProvider {
                 _logger = new Logger(this);
                 return;
             }
-            _logger = emulator.Logger;
         }
+        
+        _logger = emulator.Logger;
+        
         emulator.OnRunning += OnNewRom;
         if (emulator.IsRunning) {
             // Already running, set controls now
@@ -64,7 +78,27 @@ public class BasicInputProvider : InputProvider {
         }
     }
 
-    // Runs when emulator starts or changes rom
+    // Poll for events in Update / FixedUpdate rather than in InputForFrame directly,
+    // to avoid issues in the new inputsystem when UpdateMode is set to FixedUpdate
+    protected virtual void Update() {
+#if ENABLE_INPUT_SYSTEM
+        if (InputSystem.settings.updateMode != InputSettings.UpdateMode.ProcessEventsInFixedUpdate) {
+            Poll();
+        }
+#else
+        Poll();
+#endif
+    }
+
+    protected virtual void FixedUpdate() {
+#if ENABLE_INPUT_SYSTEM
+        if (InputSystem.settings.updateMode == InputSettings.UpdateMode.ProcessEventsInFixedUpdate) {
+            Poll();
+        }
+#endif
+    }
+
+    /// Runs when emulator starts or changes rom
     void OnNewRom() {
         if (!useDefaultControls) return;
 
@@ -76,35 +110,6 @@ public class BasicInputProvider : InputProvider {
 
         EnableInputActions();
         _logger.Log($"New rom: Setting controls to {controls} for system {systemId}");
-    }
-
-    // Poll for events in Update / FixedUpdate rather than in InputForFrame directly,
-    // to avoid issues in the new inputsystem when UpdateMode is set to FixedUpdate
-    void Update() {
-#if ENABLE_INPUT_SYSTEM
-        if (InputSystem.settings.updateMode != InputSettings.UpdateMode.ProcessEventsInFixedUpdate) {
-            Poll();
-        }
-#else
-        Poll();
-#endif
-    }
-
-    void FixedUpdate() {
-#if ENABLE_INPUT_SYSTEM
-        if (InputSystem.settings.updateMode == InputSettings.UpdateMode.ProcessEventsInFixedUpdate) {
-            Poll();
-        }
-#endif
-    }
-
-    void OnValidate() {
-        if (useDefaultControls) useControlsObject = true;
-        if (useControlsObject && controlsObject != null) {
-            controls = new(controlsObject.Controls); // Keep mapping synced so that we get pre-populated controls if we untick 'use controls object'
-        }
-
-        EnableInputActions();
     }
 
     void EnableInputActions() {

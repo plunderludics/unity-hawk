@@ -13,7 +13,7 @@ using System.Runtime.CompilerServices;
 namespace UnityHawk {
 
 // TODO: make a bunch of these paths configurable in some config file
-internal static class Paths {
+public static class Paths {
     ///// exe
     private static readonly string packageName = "org.plunderludics.UnityHawk";
     public static readonly string BizhawkDirRelative = Path.Combine(packageName, "BizHawk~");

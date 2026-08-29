@@ -195,25 +195,31 @@ public class BuildProcessing : IPreprocessBuildWithReport, IProcessSceneWithRepo
             if (inExt is ".ccd") {
                 _logger.LogWarning("Attempting to read .ccd file as a cuesheet - may break");
             }
-            var cueSheet = new CueSheet(inPath);
-            // Copy all the .bin (or whatever) files that are referenced
-            var cueFileParentDir = Path.GetDirectoryName(inPath);
-            foreach (var t in cueSheet.Tracks) {
-                var binFileRelativePath = t.DataFile.Filename; // Assume bin filepath is relative to cue file
 
-                // referenced file pathname is relative to the directory of the cue file
-                var binSourcePath = Path.Combine(cueFileParentDir, binFileRelativePath);
+            try {
+                var cueSheet = new CueSheet(inPath);
+                // Copy all the .bin (or whatever) files that are referenced
+                var cueFileParentDir = Path.GetDirectoryName(inPath);
+                foreach (var t in cueSheet.Tracks) {
+                    var binFileRelativePath = t.DataFile.Filename; // Assume bin filepath is relative to cue file
 
-                // Check referenced source file actually exists
-                if (!File.Exists(binSourcePath)) {
-                    throw new Exception($"[unity-hawk] Could not find file {binFileRelativePath} referenced in .cue file {inPath}");
+                    // referenced file pathname is relative to the directory of the cue file
+                    var binSourcePath = Path.Combine(cueFileParentDir, binFileRelativePath);
+
+                    // Check referenced source file actually exists
+                    if (!File.Exists(binSourcePath)) {
+                        throw new Exception($"[unity-hawk] Could not find file {binFileRelativePath} referenced in .cue file {inPath}");
+                    }
+
+                    var binFileTargetPath = Path.Combine(outDir, binFileRelativePath);
+                    _logger.LogVerbose($"Copy .cue file dependency from: {binSourcePath} to {binFileTargetPath}");
+                    // Create target subdirectory in case it doesn't exist
+                    Directory.CreateDirectory(Path.GetDirectoryName(binFileTargetPath)!);
+                    File.Copy(binSourcePath, binFileTargetPath, overwrite: true);
                 }
+            } catch(Exception e) {
+                _logger.LogError($"error while partis cue sheet for {asset.name}: {e}");
 
-                var binFileTargetPath = Path.Combine(outDir, binFileRelativePath);
-                _logger.LogVerbose($"Copy .cue file dependency from: {binSourcePath} to {binFileTargetPath}");
-                // Create target subdirectory in case it doesn't exist
-                Directory.CreateDirectory(Path.GetDirectoryName(binFileTargetPath)!);
-                File.Copy(binSourcePath, binFileTargetPath, overwrite: true);
             }
         }
     }
@@ -265,7 +271,7 @@ public class BuildProcessing : IPreprocessBuildWithReport, IProcessSceneWithRepo
         var allBuildSettings = UnityEngine.Object.FindObjectsByType<BuildSettings>(FindObjectsInactive.Exclude, FindObjectsSortMode.None)
                                                  .Where(bs => bs.enabled)
                                                  .ToList();
-                                                
+
         if (allBuildSettings.Count == 0) {
             // Kind of hacky, but create a new GameObject with a BuildSettings component - it doesn't get saved to the scene
             var gameObject = new GameObject("BuildSettings");

@@ -5,7 +5,7 @@ using System;
 using UnityEngine;
 
 using System.Linq;
-
+using UnityEngine.Events;
 
 namespace UnityHawk {
 public partial class Emulator {
@@ -53,7 +53,7 @@ public partial class Emulator {
             OnSetSpeedPercent();
         }
     }
-    
+
     /// the emulator log level (for unity-side logs)
     public Logger.LogLevel LogLevel {
         get => logLevel;
@@ -107,7 +107,7 @@ public partial class Emulator {
     /// Will be a slight delay since this gets deferred to main thread Update
     /// </remarks>
     public Action OnRunning;
- 
+
     /// <summary>
     /// possible values for the emulator status
     /// </summary>
@@ -139,17 +139,25 @@ public partial class Emulator {
     public Status CurrentStatus {
         get => _status;
         private set {
-            if (_status != value) {
-                _logger.LogVerbose($"Emulator status changed from {_status} to {value}", this);
+            var changed = _status != value;
+            var oldValue = _status;
+            _status = value;
+
+            if (changed) {
+                _logger.LogVerbose($"Emulator status changed from {oldValue} to {value}", this);
                 var raise = value switch {
                     Status.Started => OnStarted,
                     Status.Running => OnRunning,
                     _ => null,
                 };
 
-                _deferredForMainThread += () => raise?.Invoke();
+                _deferredForMainThread += () => {
+                    var cachedValue = _status;
+                    _status = value;
+                    raise?.Invoke();
+                    _status = cachedValue;
+                };
             }
-            _status = value;
         }
     }
 
@@ -291,6 +299,11 @@ public partial class Emulator {
             return;
         }
 
+        saveStateFile = sample;
+        if (romFile.Hash != sample.RomInfo.Hash) {
+            _logger.LogWarning($"Savestate rominfo {sample.RomInfo.Name} doesnt match loaded rom {romFile}");
+        }
+
         LoadState(path);
     }
 
@@ -311,7 +324,7 @@ public partial class Emulator {
         path = Paths.GetFullPath(path);
 
         if (string.IsNullOrEmpty(path)) {
-            _logger.LogWarning("[emulator] attempting to load rom with invalid path, ignoring...", this);
+            _logger.LogWarning("attempting to load rom with invalid path, ignoring...", this);
             return;
         }
 
@@ -321,8 +334,10 @@ public partial class Emulator {
 
         // TODO: set emulator romFile?
         _apiCommandBuffer.CallMethod(ApiCommands.LoadRom, path);
-        // Need to update texture buffer size in case platform has changed:
-        _sharedTextureBuffer.UpdateSize();
+
+        // Need to reset texture buffer size in case platform has changed:
+        _sharedTextureBuffer.Close();
+        AttemptOpenBuffer(_sharedTextureBuffer);
 
         // Not running until all shared buffers are set up and OnRomLoaded has been received
         _romLoaded = false;
@@ -335,6 +350,7 @@ public partial class Emulator {
     /// <param name="rom"></param>
     public void LoadRom(Rom rom) {
         ThrowIfNotRunning();
+        romFile = rom;
         LoadRom(Paths.GetAssetPath(rom));
     }
 

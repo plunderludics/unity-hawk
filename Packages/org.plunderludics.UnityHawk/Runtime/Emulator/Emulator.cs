@@ -62,7 +62,7 @@ public partial class Emulator : MonoBehaviour {
     ///// props
     /// the bizhawk emulator process
     Process _emuhawk;
-    
+
     /// the current emulator status
     Status _status;
 
@@ -79,7 +79,7 @@ public partial class Emulator : MonoBehaviour {
     bool IsEmuHawkProcessAlive {
         get {
             if (_emuhawk == null) return false;
-            
+
             // Weird api, sometimes process is disposed which can't be checked other than via try-catch
             try {
                 return !_emuhawk.HasExited;
@@ -231,13 +231,14 @@ public partial class Emulator : MonoBehaviour {
         if (!IsRunning && saveStateFile?.Screenshot != null) {
             InitTextures(saveStateFile.Screenshot.width, saveStateFile.Screenshot.height);
         }
-        
+
         if (gameObject.activeInHierarchy && enabled) {
             // GameObject and Emulator are active, so check if we need to start the bizhawk process
 
             if (CurrentStatus != Status.Inactive) {
                 if (!Equals(_currentBizhawkArgs, MakeBizhawkArgs())) {
                     // Bizhawk params have changed since bizhawk process was started, needs restart
+                    _logger.Log("restarting emulator because of new args");
                     Restart();
                 }
 
@@ -304,11 +305,11 @@ public partial class Emulator : MonoBehaviour {
     }
 
     ////// Core methods
- 
+
     Thread _initThread;
     CancellationTokenSource _initThreadCancellationTokenSource;
 
-    void Initialize() {
+    public void Initialize() {
         _logger.LogVerbose("Emulator: Initialize");
 
         // Don't allow re-initializing if already initialized
@@ -338,7 +339,7 @@ public partial class Emulator : MonoBehaviour {
             renderTexture = null;
         }
 
-        if (Application.isPlaying) {    
+        if (Application.isPlaying) {
             // default to BasicInputProvider (uses preset default keymapping)
             if (!inputProvider) {
                 if (!(inputProvider = GetComponent<InputProvider>())) {
@@ -547,7 +548,7 @@ public partial class Emulator : MonoBehaviour {
 
         // Args for UnityHawk external tool are passed via the --userdata arg
         // Userdata gets saved into savestate files, so we need to pass empty strings
-        // for any unused args to override any saved values 
+        // for any unused args to override any saved values
         Dictionary<string, string> userData = new() {
             [Args.TextureBuffer] = "",
             [Args.CallMethodRpc] = "",
@@ -644,6 +645,7 @@ public partial class Emulator : MonoBehaviour {
             process.BeginOutputReadLine();
             process.BeginErrorReadLine();
         }
+
 
         if (cancellationToken.IsCancellationRequested) {
             // Startup cancelled, kill the process
@@ -781,7 +783,7 @@ public partial class Emulator : MonoBehaviour {
         }
 
         _currentFrame = _sharedTextureBuffer.Frame;
-        
+
         if (width <= 0 || height <= 0) {
             // Width and height are 0 for a few frames after the emulator starts up
             // - presumably the texture buffer is open but bizhawk hasn't sent any data yet
