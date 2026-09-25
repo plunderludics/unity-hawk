@@ -55,8 +55,8 @@ public class BasicInputProvider : InputProvider {
                 _logger = new Logger(this);
                 return;
             }
-            _logger = emulator.Logger;
         }
+        _logger = emulator.Logger;
         emulator.OnRunning += OnNewRom;
         if (emulator.IsRunning) {
             // Already running, set controls now
