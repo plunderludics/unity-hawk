@@ -20,7 +20,10 @@ namespace UnityHawk {
 //  - copy the BizHawk directory (which contains gamedb, etc) into the build
 //  - ensure any file dependencies (roms, savestates, etc) from Emulator components are copied into StreamingAssets in the build
 
-// OnProcessScene (called only when scene changes) collects file dependencies per scene for later copying in OnPostprocessBuild.
+// OnProcessScene collects file dependencies per scene in the BuildPlayer scene
+// list; OnPostprocessBuild copies those into the player. Do not consult
+// EditorBuildSettings — explicit BuildPlayer scene lists (e.g. SimpleBuild)
+// can differ, and opening unrelated Build Settings scenes is wrong.
 
 public class BuildProcessing : IPreprocessBuildWithReport, IProcessSceneWithReport, IPostprocessBuildWithReport {
     // (Not really sure what the lifecycle of the BuildProcessing instance is, but it seems like making these two variables
@@ -54,6 +57,9 @@ public class BuildProcessing : IPreprocessBuildWithReport, IProcessSceneWithRepo
         if (Directory.Exists(bizhawkAssetsDir)) {
             Directory.Delete(bizhawkAssetsDir, recursive: true);
         }
+
+        _filesForScene.Clear();
+        _lastProcessedScenePath = null;
     }
 
     ///// IProcessSceneWithReport
@@ -121,29 +127,27 @@ public class BuildProcessing : IPreprocessBuildWithReport, IProcessSceneWithRepo
 
         int nFilesCopied = 0;
 
-        var scenePaths = EditorBuildSettings.scenes.Where(s => s.enabled).Select(s => s.path).ToList();
-        if (scenePaths.Count == 0) {
-            // Kinda hacky, but it seems like when there are no scenes in build settings,
-            // Unity falls back to the currently active scene,
-            // Which i /think/ should be the last processed scene
-            // TODO: Is there a more robust way to handle this?
-            if (_lastProcessedScenePath == null) {
-                throw new Exception($"[unity-hawk] no scenes in build settings and no last processed scene");
-            }
+        // Only scenes collected via OnProcessScene for this BuildPlayer call.
+        var scenePaths = _filesForScene.Keys.ToList();
+        if (scenePaths.Count == 0 && _lastProcessedScenePath != null) {
             scenePaths.Add(_lastProcessedScenePath);
-            _logger.Log($"no scenes in build settings, fallback to last processed scene ({_lastProcessedScenePath})");
-        }
-        foreach (var scenePath in scenePaths) {
-            if (!_filesForScene.ContainsKey(scenePath)) {
-                // I think this happens when code gets recompiled but there are no changes to the scene
-                // I guess to avoid this we could store the bizhawk asset references somewhere in the scene itself (in BuildSettings component I guess)
-                // - but just re-collecting the dependencies here seems fine
-                _logger.LogWarning($"scene {scenePath} is in build but has not been processed. Attempting to re-collect dependencies...");
-                Scene scene = EditorSceneManager.OpenScene(scenePath);
+            _logger.Log($"no OnProcessScene collections, fallback to last processed scene ({_lastProcessedScenePath})");
+            if (!_filesForScene.ContainsKey(_lastProcessedScenePath)) {
+                Scene scene = EditorSceneManager.OpenScene(_lastProcessedScenePath);
                 CollectSceneFiles(scene);
             }
+        }
 
-            var sceneFiles = _filesForScene[scenePath];
+        if (scenePaths.Count == 0) {
+            _logger.LogWarning("no scenes were processed via OnProcessScene — nothing to copy");
+            return 0;
+        }
+
+        foreach (var scenePath in scenePaths) {
+            if (!_filesForScene.TryGetValue(scenePath, out var sceneFiles)) {
+                continue;
+            }
+
             _logger.LogVerbose($"for scene {scenePath}: copying {sceneFiles.Count} files to {bizhawkAssetsPath}");
             foreach (var file in sceneFiles) {
                 if (!file) {
