@@ -1,25 +1,20 @@
-// The idea is this is for write-only commands to bizhawk where we don't need any return value
-// These get processed at the beginning of each frame by bizhawk
-// ApiRpcBuffer is for read/write commands where we need a return value
-// But that runs in a separate thread on the bizhawk side, might cause timing/threading issues so seems preferable to use a simple queue when possible
-
-using UnityEngine;
 using SharedMemory;
 using Plunderludics.UnityHawk.Shared;
 
-namespace UnityHawk {
+namespace UnityHawk.Host {
 
-internal class ApiCommandBuffer : ISharedBuffer {
+public class ApiCommandBuffer : ISharedBuffer {
     string _name;
     CircularBuffer _buffer;
-    Logger _logger;
-    public ApiCommandBuffer(string name, Logger logger) {
+    IHostLog _logger;
+
+    public ApiCommandBuffer(string name, IHostLog logger) {
         _name = name;
-        _logger = logger;
+        _logger = logger ?? NullHostLog.Instance;
     }
 
     public void Open() {
-        _buffer = new (_name);
+        _buffer = new CircularBuffer(_name);
     }
 
     public bool IsOpen() {
@@ -30,6 +25,7 @@ internal class ApiCommandBuffer : ISharedBuffer {
         _buffer.Close();
         _buffer = null;
     }
+
     public void CallMethod(string methodName, string arg) {
         if (!IsOpen()) {
             _logger.LogWarning($"Could not call api method {methodName} since api buffer is not open");
@@ -48,4 +44,5 @@ internal class ApiCommandBuffer : ISharedBuffer {
         }
     }
 }
+
 }

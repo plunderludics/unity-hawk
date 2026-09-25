@@ -71,6 +71,9 @@
 ExportedObj/
 .consulo/
 *.csproj
+!Packages/org.plunderludics.UnityHawk/Host~/*.csproj
+Packages/org.plunderludics.UnityHawk/Host~/bin/
+Packages/org.plunderludics.UnityHawk/Host~/obj/
 *.unityproj
 *.sln
 *.suo

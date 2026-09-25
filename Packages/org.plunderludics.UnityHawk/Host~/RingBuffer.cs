@@ -1,26 +1,23 @@
-// Fixed-capacity circular buffer implementation used by SharedAudioBuffer & AudioResampler
-// Thread-safe for single producer and single consumer
+// Fixed-capacity circular buffer used by shared audio and the resampler.
+// Thread-safe for a single producer and a single consumer.
 
 using System.Threading;
 
-namespace UnityHawk {
-internal class RingBuffer<T>
-{
-    private readonly T[] _buffer;
-    private int _head;
-    private int _tail;
-    private readonly int _capacity;
+namespace UnityHawk.Host {
 
-    public RingBuffer(int capacity)
-    {
+public class RingBuffer<T> {
+    readonly T[] _buffer;
+    int _head;
+    int _tail;
+    readonly int _capacity;
+
+    public RingBuffer(int capacity) {
         _buffer = new T[capacity];
         _capacity = capacity;
     }
 
-    public int Count
-    {
-        get
-        {
+    public int Count {
+        get {
             int count = _head - _tail;
             if (count < 0)
                 count += _capacity;
@@ -35,7 +32,6 @@ internal class RingBuffer<T>
             int nextHead = (_head + 1) % _capacity;
 
             if (nextHead == Volatile.Read(ref _tail)) {
-                // Buffer full, drop oldest
                 _tail = (_tail + 1) % _capacity;
             }
 
@@ -44,10 +40,9 @@ internal class RingBuffer<T>
         }
     }
 
-    public int Read(T[] dest, int offset, int length){
+    public int Read(T[] dest, int offset, int length) {
         int read = 0;
-        for (int i = 0; i < length && Count > 0; i++)
-        {
+        for (int i = 0; i < length && Count > 0; i++) {
             dest[offset + i] = _buffer[_tail];
             _tail = (_tail + 1) % _capacity;
             read++;
@@ -55,4 +50,5 @@ internal class RingBuffer<T>
         return read;
     }
 }
+
 }

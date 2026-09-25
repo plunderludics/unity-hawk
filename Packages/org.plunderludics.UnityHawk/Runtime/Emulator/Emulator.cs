@@ -10,6 +10,7 @@ using UnityEngine;
 using Unity.Profiling;
 using UnityEngine.Assertions;
 using System.Threading;
+using UnityHawk.Host;
 using EditorBrowsable = System.ComponentModel.EditorBrowsableAttribute;
 using EditorBrowsableState = System.ComponentModel.EditorBrowsableState;
 
@@ -458,168 +459,57 @@ public partial class Emulator : MonoBehaviour {
 
         StartBizhawkTimer.Begin();
 
-        // get a random number to identify the buffers
-        var guid = new System.Random().Next();
-
         _currentBizhawkArgs = MakeBizhawkArgs();
 
         _systemId = null;
         _romLoaded = false;
 
-        // If using referenced assets then first map those assets to filenames
-        // (Bizhawk requires a path to a real file on disk)
-
-        // Start EmuHawk.exe w args
-        var exePath = Path.GetFullPath(Paths.emuhawkExePath);
-        var process = new Process();
-        process.StartInfo.UseShellExecute = false;
-        var args = process.StartInfo.ArgumentList;
-        if (IsTargetMac) {
-#pragma warning disable CS0162 // (Unreachable code)
-            // Doesn't really work yet, need to make some more changes in the bizhawk executable
-            process.StartInfo.EnvironmentVariables["LD_LIBRARY_PATH"] = Paths.dllDir;
-            process.StartInfo.EnvironmentVariables["MONO_PATH"] = Paths.dllDir;
-            process.StartInfo.FileName = "/Library/Frameworks/Mono.framework/Versions/Current/Commands/mono";
-            if (ShowBizhawkGui) {
-                _logger.LogWarning("'Show Bizhawk Gui' is not supported on Mac'");
-            }
-            args.Add(exePath);
-#pragma warning restore CS0162
-        } else {
-            // Windows
-            process.StartInfo.FileName = exePath;
-            process.StartInfo.UseShellExecute = false;
-        }
-
-        // add rom path
         Assert.IsTrue(romPath != null, "romPath must not be null");
-        args.Add(romPath);
         string workingDir = Path.GetDirectoryName(romPath);
-
-        var bizConfig = ConfigService.Load(configPath);
-
-        // create a temporary file for this config
-        string tempConfigPath = Path.GetFullPath($"{Path.GetTempPath()}/unityhawk-config-{guid}.ini");
-
-        bizConfig.SoundVolume = Volume;
-        bizConfig.StartPaused = IsPaused;
-        bizConfig.SoundEnabled = !IsMuted;
-        bizConfig.SpeedPercent = SpeedPercent;
-        ConfigService.Save(tempConfigPath, bizConfig);
-
-        args.Add($"--config={tempConfigPath}");
-
-        // add save state path
-        if (saveStatePath != null) {
-            args.Add($"--load-state={saveStatePath}");
-        }
-
-        // add ram watch file
-        if (ramWatchPath != null) {
-            args.Add($"--ram-watch-file={ramWatchPath}");
-        }
-
-        // add lua script file
-        if (luaScriptPath != null) {
-            args.Add($"--lua={luaScriptPath}");
-        }
-
-        // Save savestates with extension .savestate instead of .State, this is because Unity treats .State as some other kind of asset
-        args.Add($"--savestate-extension={SavestateExtension}");
-
-        // set savestates output dir
-        // (default to application directory when not provided)
         var saveStatesOutputPath = GetOrCreateDirectory(config.SavestatesOutputPath) ?? workingDir;
-        args.Add($"--savestates={saveStatesOutputPath}");
-
-        // add firmware
-        args.Add($"--firmware={Path.Combine(Application.streamingAssetsPath, config.FirmwarePath)}");
-
-        // set ramwatch output dir
         var ramWatchOutputDirPath = GetOrCreateDirectory(config.RamWatchOutputPath) ?? workingDir;
-        args.Add($"--save-ram-watch={ramWatchOutputDirPath}");
 
-        if (!ShowBizhawkGui) {
-            args.Add("--headless");
-            process.StartInfo.CreateNoWindow = true;
-            process.StartInfo.WindowStyle = ProcessWindowStyle.Hidden;
-        }
+        var session = EmuHawkSession.Create(new EmuHawkLaunch {
+            ExePath = Path.GetFullPath(Paths.emuhawkExePath),
+            UseMono = IsTargetMac,
+            MonoPath = "/Library/Frameworks/Mono.framework/Versions/Current/Commands/mono",
+            DllDir = Paths.dllDir,
+            RomPath = romPath,
+            ConfigPath = configPath,
+            SaveStatePath = saveStatePath,
+            RamWatchPath = ramWatchPath,
+            LuaScriptPath = luaScriptPath,
+            FirmwarePath = Path.Combine(Application.streamingAssetsPath, config.FirmwarePath),
+            SavestatesDir = saveStatesOutputPath,
+            RamWatchDir = ramWatchOutputDirPath,
+            ExternalToolsDir = Path.GetFullPath(Paths.externalToolsDir),
+            SavestateExtension = SavestateExtension,
+            Volume = Volume,
+            StartPaused = IsPaused,
+            SoundEnabled = !IsMuted,
+            SpeedPercent = SpeedPercent,
+            ShowGui = ShowBizhawkGui,
+            ShareAudio = shareAudio,
+            ApplicationIsPlaying = applicationIsPlaying,
+            PassInputFromHost = passInputFromUnity,
+            RunInEditMode = runInEditMode,
+            AcceptBackgroundInput = acceptBackgroundInput,
+            MuteInEditMode = muteBizhawkInEditMode,
+            SuppressPopups = suppressBizhawkPopups,
+            RpcCallback = ProcessRpcCallback,
+        }, new HostLog(_logger));
 
-        // Args for UnityHawk external tool are passed via the --userdata arg
-        // Userdata gets saved into savestate files, so we need to pass empty strings
-        // for any unused args to override any saved values 
-        Dictionary<string, string> userData = new() {
-            [Args.TextureBuffer] = "",
-            [Args.CallMethodRpc] = "",
-            [Args.ApiCommandBuffer] = "",
-            [Args.AudioRpc] = "",
-            [Args.InputBuffer] = ""
-        };
-
-        // add buffers
-        // create & register sharedTextureBuffer
-        var sharedTextureBufferName = $"texture-{guid}";
-        userData[Args.TextureBuffer] = sharedTextureBufferName;
-        _sharedTextureBuffer = new SharedTextureBuffer(sharedTextureBufferName, _logger);
-
-        // create & register callbacks rpc (used for lua callbacks and also the Watch memory api)
-        var callMethodRpcBufferName = $"call-method-{guid}";
-        userData[Args.CallMethodRpc] = callMethodRpcBufferName;
-        _callMethodRpcBuffer = new CallMethodRpcBuffer(callMethodRpcBufferName, ProcessRpcCallback, _logger);
-
-        // create & register api call buffers
-        var apiCommandBufferName = $"api-command-{guid}";
-        userData[Args.ApiCommandBuffer] = apiCommandBufferName;
-        _apiCommandBuffer = new ApiCommandBuffer(apiCommandBufferName, _logger);
-
-        // var apiCallRpcBufferName = $"api-call-rpc-{guid}";
-        // userData[Args.ApiCallRpc] = apiCallRpcBufferName;
-        // _apiCallRpcBuffer = new ApiCallRpcBuffer(apiCallRpcBufferName);
-
-        // create & register audio buffer
+        _sharedTextureBuffer = session.Texture;
+        _callMethodRpcBuffer = session.CallMethod;
+        _apiCommandBuffer = session.Api;
+        _sharedAudioBuffer = session.Audio;
+        _sharedInputBuffer = session.Input;
         if (shareAudio) {
-            var sharedAudioBufferName = $"audio-{guid}";
-            userData[Args.AudioRpc] = sharedAudioBufferName;
-            _sharedAudioBuffer = new SharedAudioBuffer(sharedAudioBufferName, _logger);
-
-            // Set source buffer directly instead of having to copy samples
             audioResampler.SetSourceBuffer(_sharedAudioBuffer.SampleQueue);
         }
 
-        if (muteBizhawkInEditMode && !applicationIsPlaying) {
-            args.Add("--mute=true");
-        }
-
-        // create & register input buffers
-        if (applicationIsPlaying) {
-            if (passInputFromUnity) {
-                var sharedInputBufferName = $"input-{guid}";
-                // args.Add($"--read-input-from-shared-buffer={sharedKeyInputBufferName}");
-                userData[Args.InputBuffer] = sharedInputBufferName;
-                _sharedInputBuffer = new SharedInputBuffer(sharedInputBufferName, _logger);
-                args.Add($"--accept-background-input=false");
-            } else {
-                // Always accept background input in play mode if not getting input from unity (otherwise would be no input at all)
-                args.Add($"--accept-background-input=true");
-            }
-        } else if (runInEditMode) {
-            args.Add($"--accept-background-input={(acceptBackgroundInput ? "true" : "false")}");
-        }
-
-        if (suppressBizhawkPopups) {
-            args.Add("--suppress-popups"); // Don't pop up windows for messages/exceptions (they will still appear in the logs)
-        }
-
-        string userDataArgs = string.Join(";", userData.Select(kvp => $"{kvp.Key}:{kvp.Value}"));
-        args.Add($"--userdata={userDataArgs}");
-
-        args.Add("--open-ext-tool-dll=UnityHawk"); // Open unityhawk external tool
-        args.Add($"--ext-tools-dir={Path.GetFullPath(Paths.externalToolsDir)}"); // Has to be set since not running from the bizhawk directory
-
-        // Setup logger
-        // Redirect bizhawk output + error into a log file
+        var process = session.Process;
         if (logFilePath != null) {
-            // (Use FileShare.ReadWrite to avoid annoying multi-threading bug that I don't really understand)
             var fileStream = new FileStream(logFilePath, FileMode.Create, FileAccess.Write, FileShare.ReadWrite);
             _bizHawkLogWriter = new(fileStream);
 
@@ -629,16 +519,12 @@ public partial class Emulator : MonoBehaviour {
             process.ErrorDataReceived += (sender, e) => LogBizHawk(sender, e, true);
         }
 
-        _logger.Log("Starting EmuHawk process");
-        _logger.Log($"{exePath} {string.Join(' ', args)}");
-
         if (cancellationToken.IsCancellationRequested) {
-            // Startup cancelled, don't start the process
             _logger.LogVerbose("Startup thread cancelled, not starting bizhawk process");
             return;
         }
 
-        process.Start();
+        session.Start();
 
         if (writeBizhawkLogs) {
             process.BeginOutputReadLine();
@@ -646,7 +532,6 @@ public partial class Emulator : MonoBehaviour {
         }
 
         if (cancellationToken.IsCancellationRequested) {
-            // Startup cancelled, kill the process
             _logger.LogVerbose("Startup thread cancelled, killing bizhawk process");
             process.Kill();
             return;

@@ -1,0 +1,36 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>netstandard2.1</TargetFramework>
+    <LangVersion>9.0</LangVersion>
+    <Nullable>disable</Nullable>
+    <AssemblyName>UnityHawk.Host</AssemblyName>
+    <RootNamespace>UnityHawk.Host</RootNamespace>
+    <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
+    <OutputPath>..\Plugins\</OutputPath>
+    <GenerateDependencyFile>false</GenerateDependencyFile>
+    <DebugType>embedded</DebugType>
+    <CopyLocalLockFileAssemblies>false</CopyLocalLockFileAssemblies>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="SharedMemory">
+      <HintPath>..\Plugins\SharedMemory.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+    <Reference Include="Plunderludics.UnityHawk.Shared">
+      <HintPath>..\Plugins\Plunderludics.UnityHawk.Shared.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+    <Reference Include="Newtonsoft.Json">
+      <HintPath>..\BizHawk~\dll\Newtonsoft.Json.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+    <Reference Include="BizHawk.Client.Common">
+      <HintPath>..\Plugins\BizHawk.Client.Common.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+    <Reference Include="BizHawk.Common">
+      <HintPath>..\Plugins\BizHawk.Common.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+  </ItemGroup>
+</Project>
