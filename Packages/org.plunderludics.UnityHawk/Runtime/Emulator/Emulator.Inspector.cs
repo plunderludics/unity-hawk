@@ -68,7 +68,7 @@ public partial class Emulator {
 
     [ShowIf(nameof(captureEmulatorAudio))]
     [SerializeField]
-    AudioResampler audioResampler;
+    UnityAudioResampler audioResampler;
 
     ///// Additional Files
     [Header("Additional Files")]

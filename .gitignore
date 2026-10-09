@@ -71,6 +71,9 @@
 ExportedObj/
 .consulo/
 *.csproj
+!Packages/org.plunderludics.UnityHawk/Runtime/Bridge/*.csproj
+Packages/org.plunderludics.UnityHawk/Runtime/Bridge/bin/
+Packages/org.plunderludics.UnityHawk/Runtime/Bridge/obj/
 *.unityproj
 *.sln
 *.suo

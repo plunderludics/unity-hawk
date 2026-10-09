@@ -15,7 +15,7 @@ namespace CueSharp
     /// <summary>
     /// A CueSheet class used to create, open, edit, and save cuesheets.
     /// </summary>
-    internal class CueSheet
+    public class CueSheet
     {
         #region Private Variables
         string[] cueLines;
@@ -823,7 +823,7 @@ namespace CueSharp
     /// <item>CDI/2352 - CDI Mode2 Data</item>
     /// </list>
     /// </summary>
-    internal enum DataType
+    public enum DataType
     {
         AUDIO , CDG , MODE1_2048 , MODE1_2352 , MODE2_2336 , MODE2_2352 , CDI_2336 , CDI_2352 
     }
@@ -833,7 +833,7 @@ namespace CueSharp
     /// Syntax:
     ///  INDEX [number] [mm:ss:ff]
     /// </summary>
-    internal struct Index
+    public struct Index
     {
         //0-99
         int m_number;
@@ -956,7 +956,7 @@ namespace CueSharp
     /// <summary>
     /// This command is used to specify a data/audio file that will be written to the recorder.
     /// </summary>
-    internal struct AudioFile
+    public struct AudioFile
     {
         private string m_Filename;
         private FileType m_Filetype;
@@ -1017,7 +1017,7 @@ namespace CueSharp
     /// <summary>
     /// Track that contains either data or audio. It can contain Indices and comment information.
     /// </summary>
-    internal struct Track
+    public struct Track
     {
         #region Private Variables
         private string[] m_Comments;
