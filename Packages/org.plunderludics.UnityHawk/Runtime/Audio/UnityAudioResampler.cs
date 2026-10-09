@@ -1,7 +1,7 @@
 using System;
 using UnityEngine;
 using TriInspector;
-using UnityHawk.Host;
+using Plunderludics.BizHawk.Bridge;
 
 namespace UnityHawk {
 
@@ -29,7 +29,7 @@ internal class UnityAudioResampler {
             MovingAverageN = movingAverageN,
             ExcessPressureFactor = excessPressureFactor,
         };
-        _resampler.Init(defaultResampleRatio, new HostLog(logger));
+        _resampler.Init(defaultResampleRatio, new BridgeLog(logger));
     }
 
     public void SetSourceBuffer(RingBuffer<short> sourceBuffer) {

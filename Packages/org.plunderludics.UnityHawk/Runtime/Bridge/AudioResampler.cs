@@ -1,7 +1,7 @@
 using System;
 using System.Collections.Generic;
 
-namespace UnityHawk.Host {
+namespace Plunderludics.BizHawk.Bridge {
 
 public class AudioResampler {
     public int IdealBufferSize = 512;
@@ -16,7 +16,7 @@ public class AudioResampler {
     int _inputSampleDeficit;
     int _samplesConsumedLastFrame;
     int _sourceBufferCount;
-    IHostLog _logger;
+    IBridgeLog _logger;
 
     const int ChannelCount = 2;
     const int ConsecutiveEmptyFramesToStopAudio = 5;
@@ -26,8 +26,8 @@ public class AudioResampler {
     public int SourceBufferCount => _sourceBufferCount;
     public float ResampleRatio => (float)_resampleRatio;
 
-    public void Init(double defaultResampleRatio, IHostLog logger) {
-        _logger = logger ?? NullHostLog.Instance;
+    public void Init(double defaultResampleRatio, IBridgeLog logger) {
+        _logger = logger ?? NullBridgeLog.Instance;
         _defaultResampleRatio = defaultResampleRatio;
         _sourceBuffer = null;
         _samplesProvidedHistory = new List<int>();

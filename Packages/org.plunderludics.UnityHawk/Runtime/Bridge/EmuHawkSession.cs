@@ -5,7 +5,7 @@ using System.IO;
 using System.Linq;
 using Plunderludics.UnityHawk.Shared;
 
-namespace UnityHawk.Host {
+namespace Plunderludics.BizHawk.Bridge {
 
 public sealed class EmuHawkLaunch {
     public string ExePath;
@@ -48,10 +48,10 @@ public sealed class EmuHawkSession {
 
     EmuHawkSession() {}
 
-    public static EmuHawkSession Create(EmuHawkLaunch launch, IHostLog log) {
+    public static EmuHawkSession Create(EmuHawkLaunch launch, IBridgeLog log) {
         if (launch == null) throw new ArgumentNullException(nameof(launch));
         if (string.IsNullOrEmpty(launch.RomPath)) throw new ArgumentException("RomPath is required", nameof(launch));
-        log = log ?? NullHostLog.Instance;
+        log = log ?? NullBridgeLog.Instance;
 
         var session = new EmuHawkSession();
         session.SessionId = new Random().Next();

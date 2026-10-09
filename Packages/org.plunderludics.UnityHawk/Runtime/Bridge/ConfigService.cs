@@ -4,7 +4,7 @@ using Newtonsoft.Json.Serialization;
 using BizHawkConfig = BizHawk.Client.Common.Config;
 using BizHawkConfigService = BizHawk.Client.Common.ConfigService;
 
-namespace UnityHawk.Host {
+namespace Plunderludics.BizHawk.Bridge {
 
 public static class ConfigService {
     public static BizHawkConfig Load(string path) {

@@ -1,6 +1,6 @@
 using Plunderludics.UnityHawk.Shared;
 
-namespace UnityHawk.Host {
+namespace Plunderludics.BizHawk.Bridge {
 
 public static class InputConvert {
     public static InputEvent ToBizHawk(string name, int value, int controller, bool isAnalog) {

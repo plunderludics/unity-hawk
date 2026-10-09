@@ -10,7 +10,7 @@ using UnityEngine;
 using Unity.Profiling;
 using UnityEngine.Assertions;
 using System.Threading;
-using UnityHawk.Host;
+using Plunderludics.BizHawk.Bridge;
 using EditorBrowsable = System.ComponentModel.EditorBrowsableAttribute;
 using EditorBrowsableState = System.ComponentModel.EditorBrowsableState;
 
@@ -497,7 +497,7 @@ public partial class Emulator : MonoBehaviour {
             MuteInEditMode = muteBizhawkInEditMode,
             SuppressPopups = suppressBizhawkPopups,
             RpcCallback = ProcessRpcCallback,
-        }, new HostLog(_logger));
+        }, new BridgeLog(_logger));
 
         _sharedTextureBuffer = session.Texture;
         _callMethodRpcBuffer = session.CallMethod;

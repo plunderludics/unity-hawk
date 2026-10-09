@@ -3,7 +3,7 @@
 
 using System.Threading;
 
-namespace UnityHawk.Host {
+namespace Plunderludics.BizHawk.Bridge {
 
 public class RingBuffer<T> {
     readonly T[] _buffer;

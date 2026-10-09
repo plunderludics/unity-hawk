@@ -1,9 +1,9 @@
 namespace UnityHawk {
 
-sealed class HostLog : Host.IHostLog {
+sealed class BridgeLog : Plunderludics.BizHawk.Bridge.IBridgeLog {
     readonly Logger _logger;
 
-    public HostLog(Logger logger) {
+    public BridgeLog(Logger logger) {
         _logger = logger;
     }
 

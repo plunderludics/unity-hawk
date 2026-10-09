@@ -1,21 +1,21 @@
 using System;
 using SharedMemory;
 
-namespace UnityHawk.Host {
+namespace Plunderludics.BizHawk.Bridge {
 
 public class SharedAudioBuffer : ISharedBuffer {
     string _name;
     RpcBuffer _rpc;
     RingBuffer<short> _localBuffer;
-    IHostLog _logger;
+    IBridgeLog _logger;
 
     const int MaxBufferSize = 44100;
 
     public RingBuffer<short> SampleQueue => _localBuffer;
 
-    public SharedAudioBuffer(string name, IHostLog logger) {
+    public SharedAudioBuffer(string name, IBridgeLog logger) {
         _name = name;
-        _logger = logger ?? NullHostLog.Instance;
+        _logger = logger ?? NullBridgeLog.Instance;
         _localBuffer = new RingBuffer<short>(MaxBufferSize);
     }
 

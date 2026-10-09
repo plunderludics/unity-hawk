@@ -1,18 +1,18 @@
 using SharedMemory;
 using Plunderludics.UnityHawk.Shared;
 
-namespace UnityHawk.Host {
+namespace Plunderludics.BizHawk.Bridge {
 
 public class ApiCallRpcBuffer : ISharedBuffer {
     string _name;
     RpcBuffer _apiCallRpc;
-    IHostLog _logger;
+    IBridgeLog _logger;
 
     const int TimeoutMs = 1000;
 
-    public ApiCallRpcBuffer(string bufferName, IHostLog logger) {
+    public ApiCallRpcBuffer(string bufferName, IBridgeLog logger) {
         _name = bufferName;
-        _logger = logger ?? NullHostLog.Instance;
+        _logger = logger ?? NullBridgeLog.Instance;
     }
 
     public void Open() {

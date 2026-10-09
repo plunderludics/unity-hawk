@@ -2,7 +2,7 @@ using System;
 using SharedMemory;
 using Plunderludics.UnityHawk.Shared;
 
-namespace UnityHawk.Host {
+namespace Plunderludics.BizHawk.Bridge {
 
 public class CallMethodRpcBuffer : ISharedBuffer {
     string _name;
@@ -10,12 +10,12 @@ public class CallMethodRpcBuffer : ISharedBuffer {
 
     public delegate void Callback(string methodName, string argString, out string output);
     Callback _callback;
-    IHostLog _logger;
+    IBridgeLog _logger;
 
-    public CallMethodRpcBuffer(string name, Callback callRegisteredMethod, IHostLog logger) {
+    public CallMethodRpcBuffer(string name, Callback callRegisteredMethod, IBridgeLog logger) {
         _name = name;
         _callback = callRegisteredMethod;
-        _logger = logger ?? NullHostLog.Instance;
+        _logger = logger ?? NullBridgeLog.Instance;
     }
 
     public void Open() {

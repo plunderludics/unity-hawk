@@ -1,4 +1,4 @@
-namespace UnityHawk.Host {
+namespace Plunderludics.BizHawk.Bridge {
 
 public interface ISharedBuffer {
     void Open();

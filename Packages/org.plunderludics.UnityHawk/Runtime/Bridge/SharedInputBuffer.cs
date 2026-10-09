@@ -1,16 +1,16 @@
 using SharedMemory;
 using Plunderludics.UnityHawk.Shared;
 
-namespace UnityHawk.Host {
+namespace Plunderludics.BizHawk.Bridge {
 
 public class SharedInputBuffer : ISharedBuffer {
     string _name;
-    IHostLog _logger;
+    IBridgeLog _logger;
     CircularBuffer _buffer;
 
-    public SharedInputBuffer(string name, IHostLog logger) {
+    public SharedInputBuffer(string name, IBridgeLog logger) {
         _name = name;
-        _logger = logger ?? NullHostLog.Instance;
+        _logger = logger ?? NullBridgeLog.Instance;
     }
 
     public void Open() {

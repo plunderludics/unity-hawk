@@ -1,21 +1,21 @@
 using SharedMemory;
 using Plunderludics.UnityHawk.Shared;
 
-namespace UnityHawk.Host {
+namespace Plunderludics.BizHawk.Bridge {
 
 public class SharedTextureBuffer : ISharedBuffer {
     string _name;
     string _trueName;
     int _index;
     SharedArray<int> _buffer;
-    IHostLog _logger;
+    IBridgeLog _logger;
 
     public int Length => _buffer.Length;
 
-    public SharedTextureBuffer(string name, IHostLog logger) {
+    public SharedTextureBuffer(string name, IBridgeLog logger) {
         _index = 0;
         _name = name;
-        _logger = logger ?? NullHostLog.Instance;
+        _logger = logger ?? NullBridgeLog.Instance;
         UpdateSize();
     }
 
